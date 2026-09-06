@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mathe_trainer/domain/lesson.dart';
 import 'package:mathe_trainer/domain/scoring.dart';
 
 void main() {
@@ -63,5 +64,73 @@ void main() {
     expect(formatDuration(59900), '59,9 s');
     expect(formatDuration(65000), '1:05 min');
     expect(formatPerTask(4321), '4,3 s');
+  });
+
+  group('lightning bolts', () {
+    test('three at the target, then one fewer per step', () {
+      const target = 6000;
+      // On the line counts as inside it - a target you cannot actually hit
+      // is not a target.
+      expect(boltsFor(target, 6000), 3);
+      expect(boltsFor(target, 5999), 3);
+      expect(boltsFor(target, 6001), 2);
+      expect(boltsFor(target, target * twoBoltFactor), 2);
+      expect(boltsFor(target, target * twoBoltFactor + 1), 1);
+      expect(boltsFor(target, target * oneBoltFactor), 1);
+      expect(boltsFor(target, target * oneBoltFactor + 1), 0);
+    });
+
+    test('an untimed lesson gives none, however fast the run', () {
+      expect(boltsFor(0, 1), 0);
+      expect(boltsFor(0, 0), 0);
+    });
+
+    test('the next bolt names the time it takes', () {
+      const target = 6000;
+      expect(nextBoltTargetMs(target, 0), target * oneBoltFactor);
+      expect(nextBoltTargetMs(target, 1), target * twoBoltFactor);
+      expect(nextBoltTargetMs(target, 2), 6000);
+      // All three in: there is nothing left to ask for.
+      expect(nextBoltTargetMs(target, 3), isNull);
+      expect(nextBoltTargetMs(0, 0), isNull);
+    });
+
+    test('every timed lesson has a target, and the first steps have none', () {
+      for (final lesson in lessonCatalog) {
+        expect(
+          lesson.targetMsPerTask > 0,
+          lesson.scored,
+          reason: lesson.id,
+        );
+      }
+    });
+
+    test('the targets grow with the difficulty of the lesson', () {
+      int target(String id) => lessonById(id).targetMsPerTask;
+
+      // Bigger numbers, more time.
+      expect(target('add_20_plain'), lessThan(target('add_100_plain')));
+      expect(target('add_100_plain'), lessThan(target('add_1000_plain')));
+      // Crossing the ten costs a moment, and so does working backwards.
+      expect(target('add_100_carry'), greaterThan(target('add_100_plain')));
+      expect(target('add_100_gap'), greaterThan(target('add_100_carry')));
+      // Pairs learnt by heart are the fastest thing in the app.
+      expect(target('partners_of_ten'), lessThan(target('add_10')));
+      // The rows that are learnt first are expected to come back faster.
+      expect(target('times_2'), lessThan(target('times_7')));
+      expect(target('times_10'), lessThan(target('times_7')));
+      expect(target('times_all'), greaterThan(target('times_7')));
+      // Two answers take longer than one.
+      expect(target('div_remainder'), greaterThan(target('div_plain')));
+      // Several taps per task: nothing else is slower.
+      expect(
+        target('money_compose'),
+        greaterThan(target('money_add')),
+      );
+      // Every target is a round tenth of a second, because children read it.
+      for (final lesson in lessonCatalog) {
+        expect(lesson.targetMsPerTask % 100, 0, reason: lesson.id);
+      }
+    });
   });
 }

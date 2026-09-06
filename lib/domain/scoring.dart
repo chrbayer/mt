@@ -49,6 +49,44 @@ int starsFor(int wrongAttempts, int taskCount) {
   return 1;
 }
 
+/// Most lightning bolts a single run can earn.
+const int maxBolts = 3;
+
+/// How much slower than the lesson's target still earns two bolts, and one.
+///
+/// Kept here next to the star thresholds because the statistics repository
+/// expresses the same rule in SQL - two copies of "what counts as three
+/// bolts" would drift apart.
+const double twoBoltFactor = 1.5;
+const double oneBoltFactor = 2.2;
+
+/// Zero to three bolts for a run, from its scored time per task.
+///
+/// Stars are for care and never fall below one; bolts are for speed and do
+/// start at zero. An empty row of bolts is not a rebuke, it is the thing
+/// that is still to be had - and without a floor, "one bolt" would mean
+/// nothing at all.
+///
+/// [targetMs] is the lesson's own three-bolt time; zero means the lesson is
+/// not timed, and then there are no bolts to give.
+int boltsFor(int targetMs, double scoreMsPerTask) {
+  if (targetMs <= 0) return 0;
+  if (scoreMsPerTask <= targetMs) return maxBolts;
+  if (scoreMsPerTask <= targetMs * twoBoltFactor) return 2;
+  if (scoreMsPerTask <= targetMs * oneBoltFactor) return 1;
+  return 0;
+}
+
+/// The time per task the next bolt needs, or null once all three are in.
+double? nextBoltTargetMs(int targetMs, int bolts) {
+  if (targetMs <= 0 || bolts >= maxBolts) return null;
+  return switch (bolts) {
+    2 => targetMs.toDouble(),
+    1 => targetMs * twoBoltFactor,
+    _ => targetMs * oneBoltFactor,
+  };
+}
+
 /// `m:ss` for a minute or more, otherwise `s,d s` - short and readable for
 /// children.
 String formatDuration(int milliseconds) {

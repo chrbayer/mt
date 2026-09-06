@@ -140,6 +140,11 @@ final starTotalsProvider = StreamProvider<Map<int, int>>(
   (ref) => ref.watch(statsRepositoryProvider).watchStarTotals(),
 );
 
+/// Bolts per child, counting each lesson's best run once.
+final boltTotalsProvider = StreamProvider<Map<int, int>>(
+  (ref) => ref.watch(statsRepositoryProvider).watchBoltTotals(),
+);
+
 /// Days practised in a row, per child.
 final streaksProvider = StreamProvider<Map<int, int>>(
   (ref) => ref.watch(statsRepositoryProvider).watchStreaks(),

@@ -186,11 +186,25 @@ class _LessonTable extends StatelessWidget {
                       ],
                     ),
                   ),
+                  // Two rows of three, stacked: side by side they need 160 px
+                  // of a 10" tablet's width, and the times next to them lose
+                  // more than the icons gain.
                   SizedBox(
                     width: 92,
-                    child: Align(
-                      alignment: Alignment.centerRight,
-                      child: StarRow(earned: stat.bestStars, size: 20),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        StarRow(earned: stat.bestStars, size: 20),
+                        if (lesson.targetMsPerTask > 0)
+                          BoltRow(
+                            earned: boltsFor(
+                              lesson.targetMsPerTask,
+                              stat.bestScoreMs,
+                            ),
+                            size: 20,
+                          ),
+                      ],
                     ),
                   ),
                   _Value(

@@ -713,6 +713,81 @@ void main() {
       }
     });
 
+    test('the SQL bolts agree with the Dart ones', () async {
+      final mia =
+          await users.createUser(name: 'Mia', avatar: '🦊', colorIndex: 0);
+      // One lesson per group that is timed, so the generated CASE is
+      // exercised with genuinely different targets.
+      final lessons = [
+        lessonById('add_100_carry'),
+        lessonById('times_7'),
+        lessonById('div_remainder'),
+        lessonById('money_compose'),
+        lessonById('partners_of_ten'),
+      ];
+      for (final lesson in lessons) {
+        // Around the three-bolt line, well past it, and hopeless.
+        for (final factor in [0.5, 1.0, 1.4, 2.0, 3.0]) {
+          final ms = (lesson.targetMsPerTask * factor).round();
+          await recordRun(
+            sessions,
+            userId: mia,
+            lessonId: lesson.id,
+            msPerTask: ms,
+          );
+        }
+      }
+
+      // The best (fastest) run of each lesson is what the totals count.
+      var expectedTotal = 0;
+      for (final lesson in lessons) {
+        final best = (lesson.targetMsPerTask * 0.5).round().toDouble();
+        expectedTotal += boltsFor(lesson.targetMsPerTask, best);
+      }
+      expect((await stats.watchBoltTotals().first)[mia], expectedTotal);
+    });
+
+    test('bolts are earned per run, and the fastest one counts', () async {
+      final mia =
+          await users.createUser(name: 'Mia', avatar: '🦊', colorIndex: 0);
+      final lesson = lessonById('add_100_carry');
+      final target = lesson.targetMsPerTask;
+
+      // Far too slow for any bolt at all.
+      await recordRun(sessions,
+          userId: mia, lessonId: lesson.id, msPerTask: target * 3);
+      expect((await stats.watchBoltTotals().first)[mia], 0);
+
+      // Just inside the one-bolt line.
+      await recordRun(sessions,
+          userId: mia,
+          lessonId: lesson.id,
+          msPerTask: (target * oneBoltFactor).round());
+      expect((await stats.watchBoltTotals().first)[mia], 1);
+
+      // Bang on the target: all three, and a later slow run cannot take
+      // them away again.
+      await recordRun(sessions,
+          userId: mia, lessonId: lesson.id, msPerTask: target);
+      await recordRun(sessions,
+          userId: mia, lessonId: lesson.id, msPerTask: target * 5);
+      expect((await stats.watchBoltTotals().first)[mia], maxBolts);
+    });
+
+    test('a lesson that is not timed has no bolts to give', () async {
+      final mia =
+          await users.createUser(name: 'Mia', avatar: '🦊', colorIndex: 0);
+      // As fast as anyone could ever be - and still no bolts, because
+      // counting apples is not a race.
+      await recordRun(sessions,
+          userId: mia, lessonId: 'count_pictures', msPerTask: 100);
+
+      expect(lessonById('count_pictures').targetMsPerTask, 0);
+      expect((await stats.watchBoltTotals().first)[mia] ?? 0, 0);
+      // The stars are untouched by any of this.
+      expect((await stats.watchStarTotals().first)[mia], maxStars);
+    });
+
     test('an unscored lesson earns its stars for being finished', () async {
       final mia =
           await users.createUser(name: 'Mia', avatar: '🦊', colorIndex: 0);

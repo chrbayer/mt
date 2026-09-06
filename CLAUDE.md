@@ -324,6 +324,32 @@ lohnender, dieselbe leichte Lektion zu wiederholen, als eine neue anzufangen.
 Botschaft. `StarTotal` trägt selbst einen gefüllten Stern — Tests, die
 Kachel-Sterne zählen, müssen deshalb auf `StarRow` einschränken.
 
+## Blitze
+
+Zwei Achsen, absichtlich getrennt: **Sterne für Sorgfalt** (Fehlerquote),
+**Blitze fürs Tempo** (Punktzeit pro Aufgabe). Deshalb dürfen Blitze **null**
+werden, Sterne nie — ohne Untergrenze hieße „ein Blitz" gar nichts, und
+umgekehrt soll niemand fürs saubere Rechnen mit leeren Sternen bestraft
+werden.
+
+Die Zielzeit steht **nicht** 54-mal von Hand im Katalog, sondern kommt aus
+`LessonSpec.targetMsPerTask`: Grundwert je Gruppe, Faktoren für Aufgabenform,
+Zehnerübergang, gemischte Rechenart und Einmaleins-Reihe. 54 erfundene
+Zahlentripel könnte niemand untereinander konsistent halten; eine Regel mit
+sechs Faktoren schon. `scored == false` heißt Ziel 0 und damit keine Blitze —
+in den Ersten Schritten wird nicht gemessen.
+
+Die Schwellen (`twoBoltFactor`, `oneBoltFactor`, `maxBolts`) liegen wie die
+Sternschwellen in `domain/scoring.dart`, und `_bolts` in
+`stats_repository.dart` interpoliert sie ins SQL. Die Zieltabelle `_boltTarget`
+wird genauso **aus dem Katalog erzeugt** wie `_unscored` — nicht abgeschrieben.
+Ein Test lässt SQL- und Dart-Fassung gegeneinander laufen.
+
+Auf einer Kachel erscheinen Blitze erst, wenn die Lektion geübt wurde. Sechs
+Symbole nebeneinander verdrängen sonst „noch nicht geübt", und drei graue
+Blitze sagen nichts, was die drei grauen Sterne nicht schon sagen. In der
+Statistiktabelle stehen die beiden Reihen aus demselben Grund untereinander.
+
 ## Sicherung
 
 Export und Import gehen über JSON, nicht über eine Kopie der Datenbankdatei —

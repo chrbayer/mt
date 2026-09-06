@@ -320,6 +320,18 @@ class _LessonTile extends StatelessWidget {
                     faded: stat == null,
                     size: 24,
                   ),
+                  // Bolts only where time is measured, and only once there
+                  // is a time: on an untouched lesson three grey bolts say
+                  // nothing the three grey stars have not already said, and
+                  // six icons crowd out "noch nicht geübt".
+                  if (stat != null && lesson.targetMsPerTask > 0) ...[
+                    const SizedBox(width: 4),
+                    BoltRow(
+                      earned:
+                          boltsFor(lesson.targetMsPerTask, stat!.bestScoreMs),
+                      size: 24,
+                    ),
+                  ],
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(

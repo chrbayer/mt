@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../domain/lesson.dart';
+import '../../domain/scoring.dart';
 import '../../providers.dart';
 import '../../theme/app_theme.dart';
+import '../common/star_row.dart';
 import '../leaderboard/leaderboard_screen.dart';
 import '../practice/practice_screen.dart';
 import 'lesson_example.dart';
@@ -100,6 +102,27 @@ class _StartLessonSheetState extends ConsumerState<StartLessonSheet> {
                 widget.lesson.description,
                 style:
                     const TextStyle(fontSize: 19, color: AppColors.textMuted),
+              ),
+            ),
+          // The target, before the run rather than after it: a child who
+          // knows what three bolts take can go for them.
+          if (widget.lesson.targetMsPerTask > 0)
+            Padding(
+              padding: const EdgeInsets.only(top: 14),
+              child: Row(
+                children: [
+                  const BoltRow(earned: maxBolts, size: 26),
+                  const SizedBox(width: 10),
+                  Text(
+                    'ab ${formatPerTask(
+                      widget.lesson.targetMsPerTask.toDouble(),
+                    )} pro Aufgabe',
+                    style: const TextStyle(
+                      fontSize: 19,
+                      color: AppColors.textMuted,
+                    ),
+                  ),
+                ],
               ),
             ),
           const SizedBox(height: 26),

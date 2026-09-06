@@ -37,6 +37,10 @@ class ResultScreen extends ConsumerWidget {
     final scoredTotal = penalizedTimeMs(totalMs, wrongAttempts);
     final perTask = scoreMsPerTask(totalMs, wrongAttempts, taskCount);
     final penalty = scoredTotal - totalMs;
+    // Two axes, deliberately: stars say how carefully this run went, bolts
+    // how fast. A child who is careful but slow still gets three stars.
+    final bolts = boltsFor(lesson.targetMsPerTask, perTask);
+    final nextBolt = nextBoltTargetMs(lesson.targetMsPerTask, bolts);
     final user = ref.watch(activeUserProvider);
     final streak = user == null
         ? 0
@@ -100,7 +104,33 @@ class ResultScreen extends ConsumerWidget {
                 ],
               ),
               const SizedBox(height: 20),
-              Center(child: StarRow(earned: stars, size: 76)),
+              Center(
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    StarRow(earned: stars, size: 76),
+                    if (lesson.targetMsPerTask > 0) ...[
+                      const SizedBox(width: 28),
+                      BoltRow(earned: bolts, size: 76),
+                    ],
+                  ],
+                ),
+              ),
+              // The bolt that is still missing, and what it would take. A
+              // target nobody can name is not a target.
+              if (nextBolt != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 6),
+                  child: Text(
+                    '${bolts + 1}. Blitz ab ${formatPerTask(nextBolt)} '
+                    'pro Aufgabe',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      color: AppColors.textMuted,
+                    ),
+                  ),
+                ),
               const SizedBox(height: 10),
               if (user != null)
                 Center(
@@ -115,6 +145,20 @@ class ResultScreen extends ConsumerWidget {
                             stars,
                         size: 22,
                       ),
+                      if (lesson.targetMsPerTask > 0) ...[
+                        const SizedBox(width: 6),
+                        BoltRow(
+                          earned: boltsFor(
+                            lesson.targetMsPerTask,
+                            ref
+                                    .watch(lessonStatsProvider(user.id))
+                                    .value?[lesson.id]
+                                    ?.bestScoreMs ??
+                                perTask,
+                          ),
+                          size: 22,
+                        ),
+                      ],
                       const SizedBox(width: 8),
                       const Text(
                         'für diese Lektion',

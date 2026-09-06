@@ -214,6 +214,28 @@ class StatsRepository {
         ELSE 1
       END''';
 
+  /// The three-bolt time of every timed lesson, as a SQL lookup. Generated
+  /// from the catalogue for the same reason as [_unscored]: SQL cannot read
+  /// it, and a second hand-written copy of 54 targets would drift.
+  static final String _boltTarget = '''
+      CASE s.lesson_id
+        ${lessonCatalog.where((l) => l.targetMsPerTask > 0).map((l) => "WHEN '${l.id}' THEN ${l.targetMsPerTask}").join('\n        ')}
+        ELSE 0
+      END''';
+
+  /// The same rule as [boltsFor], expressed in SQL.
+  ///
+  /// Unlike the stars this may be zero: speed is the thing still to be had,
+  /// and a lesson that is not timed has no bolts to give at all.
+  static final String _bolts = '''
+      CASE
+        WHEN ($_boltTarget) = 0 THEN 0
+        WHEN $_score <= ($_boltTarget) THEN $maxBolts
+        WHEN $_score <= ($_boltTarget) * $twoBoltFactor THEN 2
+        WHEN $_score <= ($_boltTarget) * $oneBoltFactor THEN 1
+        ELSE 0
+      END''';
+
   /// Per-lesson summary for one child. Streams so screens refresh themselves
   /// after a run.
   Stream<Map<String, LessonStat>> watchLessonStats(int userId) {
@@ -538,6 +560,30 @@ class StatsRepository {
         .map((rows) => {
               for (final row in rows)
                 row.read<int>('user_id'): row.read<int>('stars'),
+            });
+  }
+
+  /// Bolts per child, counted the same way the stars are: the best run of
+  /// every lesson, once.
+  Stream<Map<int, int>> watchBoltTotals() {
+    return _db
+        .customSelect(
+          '''
+          SELECT best.user_id AS user_id, SUM(best.bolts) AS bolts
+          FROM (
+            SELECT s.user_id AS user_id, MAX($_bolts) AS bolts
+            FROM sessions s
+            WHERE s.completed = 1
+            GROUP BY s.user_id, s.lesson_id
+          ) AS best
+          GROUP BY best.user_id
+          ''',
+          readsFrom: {_db.sessions},
+        )
+        .watch()
+        .map((rows) => {
+              for (final row in rows)
+                row.read<int>('user_id'): row.read<int>('bolts'),
             });
   }
 

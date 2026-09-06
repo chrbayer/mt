@@ -111,6 +111,15 @@ antreten. Die App läuft vollständig offline, ohne Konten und ohne Netzwerk.
   als eine neue anzufangen. Die Sterne tauchen außerdem im Ergebnis, in der
   persönlichen Statistik, in der Übersicht über alle Kinder und im
   Übungsverlauf auf.
+* **Blitze**: die zweite Achse neben den Sternen. Sterne stehen für Sorgfalt,
+  Blitze fürs Tempo — wer sich Zeit lässt und fehlerfrei bleibt, bekommt drei
+  Sterne und keinen Blitz. Jede Lektion hat ihre **eigene Zielzeit pro
+  Aufgabe**, denn 6 Sekunden bedeuten bei `47 + 38` etwas anderes als bei
+  `646 + ? = 949`. Ab dieser Zeit gibt es drei Blitze, beim Anderthalbfachen
+  zwei, beim 2,2-fachen einen, darüber keinen. Der Startdialog nennt die
+  Zielzeit **vor** dem Durchgang, der Ergebnisbildschirm sagt danach, was der
+  nächste Blitz kosten würde. Die Ersten Schritte haben keine — dort wird
+  nicht gemessen.
 * **Serie**: Tage in Folge, auf dem Ergebnisbildschirm und in der Übersicht.
 * **Sicherung**: der ganze Datenbestand als JSON-Datei, über die Teilen-Funktion
   aus der App heraus, und genauso wieder einspielbar.
@@ -156,7 +165,7 @@ lib/
     lesson.dart          Lektionskatalog als Konstanten mit stabilen IDs
     task.dart            Aufgabe und Ergebnis einer Aufgabe
     task_generator.dart  deterministische Erzeugung aus einem Seed
-    scoring.dart         Punktzeit, Sterne, Zeitformatierung
+    scoring.dart         Punktzeit, Sterne, Blitze, Zeitformatierung
   data/
     db/          Drift-Schema (users, sessions, attempts, app_settings)
     repositories/ Zugriff und SQL-Aggregate für die Statistik

@@ -43,6 +43,11 @@ abstract final class AppColors {
   /// vanishing: it is what tells a child there is something left to do.
   static const star = Color(0xFFE0A800);
   static const starEmpty = Color(0xFFD8D4C6);
+
+  /// Lightning bolts stand for speed, stars for care. A different colour so
+  /// the two rows are told apart at a glance, even side by side.
+  static const bolt = Color(0xFF2D8FD5);
+  static const boltEmpty = Color(0xFFCFD8DE);
 }
 
 /// Emoji a child can pick as an avatar. Emoji instead of images keeps the app

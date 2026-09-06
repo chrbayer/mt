@@ -192,6 +192,67 @@ class LessonSpec {
     this.showCounts = false,
   });
 
+  /// Time per task that earns all three lightning bolts, in milliseconds.
+  /// Zero for a lesson that is not timed at all.
+  ///
+  /// Derived rather than written down 54 times: what makes a lesson slow is
+  /// the size of its numbers, whether the answer has to be worked backwards,
+  /// and how many taps it takes. Writing a triple of seconds under every
+  /// lesson by hand would be 54 invented numbers that nobody could keep
+  /// consistent with each other.
+  ///
+  /// The measured value is the penalised time per task, so these targets
+  /// already include what a mistake costs.
+  int get targetMsPerTask {
+    if (!scored) return 0;
+
+    final base = switch (group) {
+      // Not timed; handled by the guard above, listed for completeness.
+      LessonGroup.firstSteps => 0,
+      LessonGroup.upTo10 => 3000,
+      LessonGroup.upTo20 => 4000,
+      LessonGroup.upTo100 => 6000,
+      LessonGroup.upTo1000 => 9000,
+      // A row of the times table is learnt by heart, so it is quick once it
+      // sits - quicker than adding two-digit numbers.
+      LessonGroup.timesTables => 4000,
+      LessonGroup.timesAndDivision => 7000,
+      // Reading a dial or a price tag takes longer than reading two numbers.
+      LessonGroup.everyday => 8000,
+    };
+
+    final byForm = switch (form) {
+      // Working backwards from the result takes longer than working forwards.
+      TaskForm.gap => 1.3,
+      // Two answers, and the second one has to be worked out separately.
+      TaskForm.remainder => 1.4,
+      // Eleven pairs learnt by heart - these should come out fast.
+      TaskForm.partner => 0.7,
+      TaskForm.money || TaskForm.change => 1.2,
+      TaskForm.clockPhrase => 1.3,
+      // Several taps per task, not one: laying out an amount is slower than
+      // any other answer in the app.
+      TaskForm.moneyCompose => 2.0,
+      _ => 1.0,
+    };
+
+    final byCarry = carry == CarryMode.required ? 1.15 : 1.0;
+    final byOp = op == ArithmeticOp.mixed ? 1.1 : 1.0;
+
+    // The rows the catalogue puts first are the ones that sit first: doubling,
+    // fives and tens come back faster than the seven times table ever does.
+    final byTable = switch (timesTable) {
+      2 || 5 || 10 => 0.85,
+      // All rows at once: every task starts by working out which row it is.
+      null when group == LessonGroup.timesTables => 1.1,
+      _ => 1.0,
+    };
+
+    // To a tenth of a second: the targets are shown to children, and
+    // "6,9 s" is a number to aim at while "6,873 s" is noise.
+    return ((base * byForm * byCarry * byOp * byTable) / 100).round() * 100;
+  }
+
   @override
   String toString() => 'LessonSpec($id)';
 }

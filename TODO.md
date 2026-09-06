@@ -5,6 +5,8 @@
 #2 erledigt (1.13.0) — Ergänzungen zum Thema Uhrzeit: Füge noch bei den Uhreiten etwas hinzu für 24h; Mit Tastaturerweiterung: halb, viertel vor, viertel nach, 10 nach, zwanzig nach, 5 vor halb, 5 nach, usw.
 Ergänzungen zim Thema Geld: Wie stelle ich eine vorgebene Summe aus Geldscheinen/Münzen zusammen? Etwas kostet betrag X, ich gebe einen (glatten Betrag Y), wie viel bekomme ich zurück?
 
-#3 Zeitbeschränkungen: Am Stück mit Mindestpause, pro Profil im Elternbereich einstellbar und ein und ausschaltbar
+#3 Zeitbeschränkungen: Am Stück mit Mindestpause, zusätzlich pro Tag, pro Profil im Elternbereich einstellbar und ein und ausschaltbar
 
-#4 Zeiten pro Lektion (> Erste Schritte): Zeiten je Uebung fuer 1 bis 3 Blitze
+#4 erledigt (1.14.0) — Zeiten pro Lektion (> Erste Schritte): Zeiten je Uebung fuer 1 bis 3 Blitze
+
+#5 Sterne erst ab min. 10

@@ -267,6 +267,7 @@ class _SummaryCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final streak = ref.watch(streaksProvider).value?[summary.userId] ?? 0;
     final stars = ref.watch(starTotalsProvider).value?[summary.userId] ?? 0;
+    final bolts = ref.watch(boltTotalsProvider).value?[summary.userId] ?? 0;
     final color = AppColors.profileColor(summary.colorIndex);
     final played = summary.runs > 0;
 
@@ -316,13 +317,11 @@ class _SummaryCard extends ConsumerWidget {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
+                  // The icons say what they are. Spelling either out as well
+                  // does not fit a card that sits beside two others.
                   StarTotal(earned: stars, size: 23),
-                  const SizedBox(width: 8),
-                  const Text(
-                    'Sterne',
-                    style:
-                        TextStyle(fontSize: 17, color: AppColors.textMuted),
-                  ),
+                  const SizedBox(width: 18),
+                  StarTotal(earned: bolts, size: 23, bolts: true),
                 ],
               ),
             ),
