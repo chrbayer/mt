@@ -123,10 +123,16 @@ class TaskDisplay extends StatelessWidget {
                   showCount: showCounts,
                 ),
               ),
+              // Bold rather than discreet: this line carries the whole
+              // message "these are two heaps". In divider grey on the pale
+              // background it was barely visible.
               Container(
-                width: 3,
-                margin: const EdgeInsets.symmetric(horizontal: 28),
-                color: AppColors.divider,
+                width: 8,
+                margin: const EdgeInsets.symmetric(horizontal: 36),
+                decoration: BoxDecoration(
+                  color: AppColors.textMuted,
+                  borderRadius: BorderRadius.circular(4),
+                ),
               ),
               Center(
                 child: PictureGroup(
