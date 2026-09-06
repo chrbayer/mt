@@ -136,6 +136,18 @@ class PracticeController extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Sweeps the whole pile away at once.
+  ///
+  /// Taking six coins off one at a time to start over is six taps of the same
+  /// key, and a child who has lost count wants to start over, not to undo.
+  void clearPieces() {
+    if (!_acceptsInput || _pieces.isEmpty) return;
+    if (_feedback == AnswerFeedback.wrong) _feedback = AnswerFeedback.none;
+    _pieces.clear();
+    _input = '';
+    notifyListeners();
+  }
+
   void backspace() {
     if (!_acceptsInput) return;
     if (_feedback == AnswerFeedback.wrong) _feedback = AnswerFeedback.none;

@@ -116,6 +116,11 @@ class BigKeypad extends StatelessWidget {
 /// three feel like the same keyboard.
 class KeypadKey extends StatelessWidget {
   final VoidCallback onTap;
+
+  /// Optional second action on a long press. Used by the money pad, where
+  /// holding the backspace key sweeps the whole pile away.
+  final VoidCallback? onLongPress;
+
   final Widget child;
   final bool enabled;
   final Color background;
@@ -125,6 +130,7 @@ class KeypadKey extends StatelessWidget {
     required this.onTap,
     required this.child,
     required this.enabled,
+    this.onLongPress,
     this.background = AppColors.surface,
   });
 
@@ -143,6 +149,7 @@ class KeypadKey extends StatelessWidget {
           elevation: 0,
           child: InkWell(
             onTap: enabled ? onTap : null,
+            onLongPress: enabled ? onLongPress : null,
             borderRadius: BorderRadius.circular(20),
             child: Container(
               alignment: Alignment.center,

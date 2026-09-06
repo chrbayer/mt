@@ -203,6 +203,7 @@ class _PracticeScreenState extends ConsumerState<PracticeScreen>
         haptics: haptics,
         onChoice: (index) => controller.pressPiece(moneyPieces[index]),
         onBackspace: controller.backspace,
+        onClear: controller.clearPieces,
         onSubmit: _submit,
       );
     }

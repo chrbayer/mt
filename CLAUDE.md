@@ -385,6 +385,21 @@ lohnender, dieselbe leichte Lektion zu wiederholen, als eine neue anzufangen.
 Botschaft. `StarTotal` trägt selbst einen gefüllten Stern — Tests, die
 Kachel-Sterne zählen, müssen deshalb auf `StarRow` einschränken.
 
+## Was die App von sich aus sagt
+
+`ShortRunHint` und `RemainingTimeHint` in `features/common/run_hints.dart`
+stehen dort, wo sie eine Entscheidung ändern: unter der Auswahl im
+Startdialog, nicht in einem Hilfetext. Beide Regeln waren vorher richtig und
+stumm — drei leere Sterne nach fünf fehlerfreien Aufgaben, und eine Sperre,
+die nach dem Durchgang aus dem Nichts kam.
+
+Die Restzeit nennt immer die **knappere** der beiden Grenzen: eine Strecke mit
+zwanzig freien Minuten nützt nichts, wenn der Tag noch fünf hat.
+
+Auf dem Ergebnisbildschirm nimmt der Hinweis den Platz des Abstands darunter,
+statt ihn zu ergänzen — die Spalte dort kann nicht wachsen, und ein
+Layouttest fängt es sofort ab.
+
 ## Blitze
 
 Zwei Achsen, absichtlich getrennt: **Sterne für Sorgfalt** (Fehlerquote),

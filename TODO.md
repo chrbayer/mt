@@ -39,18 +39,18 @@ darf.
 
 ## Bedienbarkeit
 
-#9 Fünf Aufgaben sind wählbar, bringen aber weder Sterne noch Blitze noch
+#9 erledigt (2.1.6) — Fünf Aufgaben sind wählbar, bringen aber weder Sterne noch Blitze noch
 einen Bestenlisteneintrag — und nichts sagt es. Die Zehnergrenze steht nur in
 der Bestenliste und in der Übersicht über alle Kinder, nicht im Startdialog
 und nicht im Ergebnis. Ein Kind wählt die erste Kachel, rechnet fünf Aufgaben
 fehlerfrei und bekommt drei leere Sterne ohne Erklärung.
 
-#10 Keine Vorwarnung vor der Zeitgrenze. Nirgends steht, wie viel Übungszeit
+#10 erledigt (2.1.6) — Keine Vorwarnung vor der Zeitgrenze. Nirgends steht, wie viel Übungszeit
 heute noch bleibt; die Sperre kommt unangekündigt nach einem Durchgang. Ein
 "noch 5 Minuten" vor dem Start des letzten Durchgangs wäre freundlicher — und
 ein Kind könnte sich die Runde einteilen.
 
-#11 Der Münzhaufen lässt sich nur Stück für Stück abräumen. Wer sich bei
+#11 erledigt (2.1.6) — Der Münzhaufen lässt sich nur Stück für Stück abräumen. Wer sich bei
 "Betrag zusammenlegen" vertut, tippt sechsmal die Rücktaste. Ein langer Druck
 oder eine eigene Taste zum Leeren würde reichen.
 

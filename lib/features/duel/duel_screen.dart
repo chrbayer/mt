@@ -7,6 +7,7 @@ import '../../data/db/app_database.dart';
 import '../../data/repositories/user_repository.dart';
 import '../../domain/lesson.dart';
 import '../../domain/practice_limit.dart';
+import '../common/run_hints.dart';
 import '../../domain/scoring.dart';
 import '../../providers.dart';
 import '../../theme/app_theme.dart';
@@ -162,6 +163,12 @@ class _DuelSetupScreenState extends ConsumerState<DuelSetupScreen> {
                               ],
                             ],
                           ),
+                  ),
+                  const SizedBox(height: 8),
+                  ShortRunHint(
+                    taskCount: _taskCount,
+                    scored: _lessonId == null ||
+                        lessonById(_lessonId!).scored,
                   ),
                   const SizedBox(height: 12),
                   SizedBox(

@@ -75,6 +75,9 @@ class PracticeAllowance {
   /// Minutes practised today, across all stretches.
   final int practisedTodayMinutes;
 
+  /// The daily cap in force, or zero when there is none.
+  final int dailyLimitMinutes;
+
   const PracticeAllowance({
     required this.allowed,
     required this.practisedMinutes,
@@ -82,7 +85,24 @@ class PracticeAllowance {
     this.breakUntil,
     this.dayIsDone = false,
     this.practisedTodayMinutes = 0,
+    this.dailyLimitMinutes = 0,
   });
+
+  /// Minutes of practice left before the next break, or null when nothing
+  /// caps this child.
+  ///
+  /// Whichever runs out first: a stretch may have twenty minutes left while
+  /// the day has five. Naming the more generous of the two would be a
+  /// promise that breaks five minutes later.
+  int? get remainingMinutes {
+    final left = <int>[
+      if (limitMinutes > 0) limitMinutes - practisedMinutes,
+      if (dailyLimitMinutes > 0) dailyLimitMinutes - practisedTodayMinutes,
+    ];
+    if (left.isEmpty) return null;
+    final least = left.reduce((a, b) => a < b ? a : b);
+    return least < 0 ? 0 : least;
+  }
 
   /// No cap set, so nothing to work out.
   static const unlimited = PracticeAllowance(
@@ -123,6 +143,7 @@ PracticeAllowance practiceAllowance({
       practisedMinutes: practisedMs ~/ 60000,
       practisedTodayMinutes: todayMinutes,
       limitMinutes: limitMinutes,
+      dailyLimitMinutes: dailyLimitMinutes,
     );
   }
 
@@ -132,6 +153,7 @@ PracticeAllowance practiceAllowance({
       practisedMinutes: practisedMs ~/ 60000,
       practisedTodayMinutes: todayMinutes,
       limitMinutes: 0,
+      dailyLimitMinutes: dailyLimitMinutes,
     );
   }
 
@@ -142,6 +164,7 @@ PracticeAllowance practiceAllowance({
       practisedMinutes: practisedMinutes,
       practisedTodayMinutes: todayMinutes,
       limitMinutes: limitMinutes,
+      dailyLimitMinutes: dailyLimitMinutes,
     );
   }
 
@@ -153,6 +176,7 @@ PracticeAllowance practiceAllowance({
       practisedMinutes: 0,
       practisedTodayMinutes: todayMinutes,
       limitMinutes: limitMinutes,
+      dailyLimitMinutes: dailyLimitMinutes,
     );
   }
 
@@ -163,6 +187,7 @@ PracticeAllowance practiceAllowance({
       practisedMinutes: practisedMinutes,
       practisedTodayMinutes: todayMinutes,
       limitMinutes: limitMinutes,
+      dailyLimitMinutes: dailyLimitMinutes,
     );
   }
 
@@ -171,6 +196,7 @@ PracticeAllowance practiceAllowance({
     practisedMinutes: practisedMinutes,
     practisedTodayMinutes: todayMinutes,
     limitMinutes: limitMinutes,
+    dailyLimitMinutes: dailyLimitMinutes,
   );
 }
 

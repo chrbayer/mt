@@ -190,4 +190,67 @@ void main() {
       expect(off.dailyMinutes, 120, reason: 'the day is still capped');
     });
   });
+
+  group('what is left', () {
+    test('without a cap there is nothing to count down', () {
+      expect(
+        practiceAllowance(
+          limitMinutes: 0,
+          breakMinutes: 15,
+          practisedMs: 0,
+          lastFinishedAt: null,
+          now: now,
+        ).remainingMinutes,
+        isNull,
+      );
+    });
+
+    test('the stretch counts down as it is used up', () {
+      final allowance = practiceAllowance(
+        limitMinutes: 20,
+        breakMinutes: 15,
+        practisedMs: 13 * 60000,
+        lastFinishedAt: now.subtract(const Duration(minutes: 1)),
+        now: now,
+      );
+      expect(allowance.remainingMinutes, 7);
+    });
+
+    test('whichever runs out first is the one named', () {
+      // Eighteen minutes of stretch left, but only four of the day.
+      final allowance = practiceAllowance(
+        limitMinutes: 20,
+        breakMinutes: 15,
+        practisedMs: 2 * 60000,
+        lastFinishedAt: now.subtract(const Duration(minutes: 1)),
+        now: now,
+        dailyLimitMinutes: 120,
+        practisedTodayMs: 116 * 60000,
+      );
+      expect(allowance.remainingMinutes, 4);
+    });
+
+    test('a taken break gives the whole stretch back', () {
+      final allowance = practiceAllowance(
+        limitMinutes: 20,
+        breakMinutes: 15,
+        practisedMs: 40 * 60000,
+        lastFinishedAt: now.subtract(const Duration(minutes: 15)),
+        now: now,
+      );
+      expect(allowance.allowed, isTrue);
+      expect(allowance.remainingMinutes, 20);
+    });
+
+    test('it never goes below zero', () {
+      final allowance = practiceAllowance(
+        limitMinutes: 20,
+        breakMinutes: 15,
+        practisedMs: 90 * 60000,
+        lastFinishedAt: now.subtract(const Duration(minutes: 1)),
+        now: now,
+      );
+      expect(allowance.remainingMinutes, 0);
+    });
+  });
 }

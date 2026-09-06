@@ -7,6 +7,7 @@ import '../../domain/scoring.dart';
 import '../../providers.dart';
 import '../../theme/app_theme.dart';
 import '../common/star_row.dart';
+import '../common/run_hints.dart';
 import '../leaderboard/leaderboard_screen.dart';
 import '../lessons/pause_notice.dart';
 import '../practice/practice_screen.dart';
@@ -179,7 +180,22 @@ class ResultScreen extends ConsumerWidget {
                     ],
                   ),
                 ),
-              const SizedBox(height: 16),
+              // The extra line takes the space the gap below would have had:
+              // this column has no room to grow, and the explanation is
+              // worth more than the air.
+              if (taskCount < minTasksForAward && lesson.scored) ...[
+                const SizedBox(height: 10),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 40),
+                  child: ShortRunHint(
+                    taskCount: taskCount,
+                    scored: lesson.scored,
+                    fontSize: 17,
+                  ),
+                ),
+                const SizedBox(height: 6),
+              ] else
+                const SizedBox(height: 16),
               Row(
                 children: [
                   _Metric(label: 'Aufgaben', value: '$taskCount'),

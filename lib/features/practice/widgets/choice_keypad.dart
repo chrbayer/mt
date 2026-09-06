@@ -23,6 +23,10 @@ class ChoiceKeypad extends StatelessWidget {
   /// word pad has nothing to delete, because tapping again replaces.
   final VoidCallback? onBackspace;
 
+  /// Held down, the same key clears everything. Only the money pad has one:
+  /// undoing six coins one by one is six taps of the same key.
+  final VoidCallback? onClear;
+
   final VoidCallback onSubmit;
   final bool enabled;
   final bool haptics;
@@ -36,6 +40,7 @@ class ChoiceKeypad extends StatelessWidget {
     required this.onSubmit,
     this.selected,
     this.onBackspace,
+    this.onClear,
     this.enabled = true,
     this.haptics = true,
   });
@@ -80,6 +85,8 @@ class ChoiceKeypad extends StatelessWidget {
         KeypadKey(
           key: const Key('backspace'),
           onTap: () => _tap(onBackspace!),
+          onLongPress:
+              onClear == null ? null : () => _tap(onClear!, strong: true),
           enabled: enabled,
           background: AppColors.background,
           child: const Icon(

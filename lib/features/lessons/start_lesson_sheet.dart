@@ -5,6 +5,8 @@ import '../../domain/lesson.dart';
 import '../../domain/scoring.dart';
 import '../../providers.dart';
 import '../../theme/app_theme.dart';
+import '../../domain/practice_limit.dart';
+import '../common/run_hints.dart';
 import '../common/star_row.dart';
 import 'pause_notice.dart';
 import '../leaderboard/leaderboard_screen.dart';
@@ -149,6 +151,24 @@ class _StartLessonSheetState extends ConsumerState<StartLessonSheet> {
                 ),
             ],
           ),
+          // Both hints sit under the choice they are about: how long the run
+          // is, and how much time is left for it.
+          if (count != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 14),
+              child: ShortRunHint(
+                taskCount: count,
+                scored: widget.lesson.scored,
+              ),
+            ),
+          if (gate.pause == null && widget.lesson.scored)
+            Padding(
+              padding: const EdgeInsets.only(top: 10),
+              child: RemainingTimeHint(
+                allowance: ref.watch(practiceAllowanceProvider).value ??
+                    PracticeAllowance.unlimited,
+              ),
+            ),
           const SizedBox(height: 30),
           // Stacked, not side by side: a bottom sheet is only ~640 dp wide,
           // and two labelled buttons in a row clip the second one.

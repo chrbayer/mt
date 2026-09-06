@@ -101,7 +101,8 @@ antreten. Die App läuft vollständig offline, ohne Konten und ohne Netzwerk.
   „halb 2".
 * **Betrag zusammenlegen**: ein Betrag soll aus Münzen und Scheinen gelegt
   werden. Die Tastatur zeigt die neun Stücke von 5 ct bis 20 €; getippte
-  Stücke erscheinen als Häufchen, die Rücktaste nimmt das letzte wieder weg.
+  Stücke erscheinen als Häufchen, die Rücktaste nimmt das letzte wieder weg —
+  lang gedrückt räumt sie den ganzen Haufen ab.
   Es gibt viele richtige Wege — am Ende muss der Betrag genau stimmen.
 * **Rückgeld**: etwas kostet einen krummen Betrag, bezahlt wird mit einem
   glatten Schein oder Stück, gesucht ist das Wechselgeld.
@@ -119,7 +120,9 @@ antreten. Die App läuft vollständig offline, ohne Konten und ohne Netzwerk.
   sonst etwas Neues, sonst etwas lange nicht Geübtes.
 * **Sterne**: jede Lektionskachel trägt ihre drei Sterne — gefüllt, so viele
   wie im besten Durchgang erreicht, sonst leer. Gewertet wird erst **ab 10
-  Aufgaben**: fünf schnelle Aufgaben sind ein Aufwärmen, kein Ergebnis. Für
+  Aufgaben**: fünf schnelle Aufgaben sind ein Aufwärmen, kein Ergebnis. Das
+  steht dort, wo es zählt — im Startdialog unter der Auswahl, im Duell und
+  noch einmal im Ergebnis, wenn die Sterne deshalb leer geblieben sind. Für
   die **Ersten Schritte gilt das nicht** — dort ist das Durchhalten die
   Leistung, und fünf Aufgaben sind eine völlig richtige Länge. Drei leere Sterne heißen „noch
   nicht geübt", ohne dass es dastehen muss. Oben läuft der Gesamtstand mit
@@ -150,6 +153,10 @@ antreten. Die App läuft vollständig offline, ohne Konten und ohne Netzwerk.
     hin oder her. Ist die Zeit aufgebraucht, hilft keine Pause mehr; es heißt
     dann „Für heute reicht es!" statt einer Uhrzeit, die die App nicht halten
     könnte.
+
+  Vor dem Start steht, wie viel Zeit noch bleibt („Noch 7 Minuten, dann ist
+  Pause"), und unter fünf Minuten deutlicher — mit vier Minuten Restzeit
+  fängt man keinen Durchgang über 50 Aufgaben an.
 
   Ein **laufender Durchgang wird nie abgebrochen** — gesperrt ist nur der
   nächste Start. Während der Pause darf ein Kind weiter Lektionen und

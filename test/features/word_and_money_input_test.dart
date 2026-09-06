@@ -166,6 +166,39 @@ void main() {
       expect(display.input, '100');
     });
 
+    testWidgets('holding the backspace key sweeps the whole pile away',
+        (tester) async {
+      await pump(tester, 'money_compose');
+
+      for (final index in [4, 3, 0, 2]) {
+        await tapKey(tester, Key('choice-$index'));
+      }
+      expect(
+        tester.widget<TaskDisplay>(find.byType(TaskDisplay)).pieces,
+        hasLength(4),
+      );
+
+      await tester.longPress(find.byKey(const Key('backspace')));
+      await tester.pump();
+
+      final display = tester.widget<TaskDisplay>(find.byType(TaskDisplay));
+      expect(display.pieces, isEmpty);
+      expect(display.input, isEmpty);
+    });
+
+    testWidgets('a short tap still takes off one piece only', (tester) async {
+      await pump(tester, 'money_compose');
+
+      await tapKey(tester, const Key('choice-4'));
+      await tapKey(tester, const Key('choice-3'));
+      await tapKey(tester, const Key('backspace'));
+
+      expect(
+        tester.widget<TaskDisplay>(find.byType(TaskDisplay)).pieces,
+        [100],
+      );
+    });
+
     testWidgets('an amount laid out correctly is accepted', (tester) async {
       await pump(tester, 'money_compose', taskCount: 1);
 
