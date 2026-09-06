@@ -174,11 +174,13 @@ class BackupRepository {
                 defaultTaskCount: Value(user['defaultTaskCount'] as int?),
                 // An older backup knows of no cap, and no cap is the
                 // default - a restore must not invent one.
+                // Null means "as for everyone". A backup written before the
+                // limits existed has no key at all and lands there, which is
+                // exactly right - it never made a decision about them.
                 practiceLimitMinutes:
-                    Value(user['practiceLimitMinutes'] as int? ?? 0),
-                breakMinutes: Value(user['breakMinutes'] as int? ?? 15),
-                dailyLimitMinutes:
-                    Value(user['dailyLimitMinutes'] as int? ?? 0),
+                    Value(user['practiceLimitMinutes'] as int?),
+                breakMinutes: Value(user['breakMinutes'] as int?),
+                dailyLimitMinutes: Value(user['dailyLimitMinutes'] as int?),
               ),
             );
       }

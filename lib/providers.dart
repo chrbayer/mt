@@ -167,8 +167,21 @@ final practiceAllowanceForProvider =
       .value
       ?.where((u) => u.id == userId)
       .firstOrNull;
-  if (user == null ||
-      (user.practiceLimitMinutes <= 0 && user.dailyLimitMinutes <= 0)) {
+  // Deliberately nullable: until the app-wide limits have been read there is
+  // no telling whether this child is capped, and guessing "no" would open a
+  // door that is about to close again.
+  final preferences = ref.watch(preferencesProvider).value;
+  if (user == null || preferences == null) {
+    return Stream.value(PracticeAllowance.unlimited);
+  }
+
+  final limits = resolvePracticeLimits(
+    global: preferences.limits,
+    stretchMinutes: user.practiceLimitMinutes,
+    breakMinutes: user.breakMinutes,
+    dailyMinutes: user.dailyLimitMinutes,
+  );
+  if (limits.stretchMinutes <= 0 && limits.dailyMinutes <= 0) {
     return Stream.value(PracticeAllowance.unlimited);
   }
 
@@ -176,7 +189,7 @@ final practiceAllowanceForProvider =
   final today = now();
   final stretches = ref.watch(statsRepositoryProvider).watchPracticeStretch(
         userId: user.id,
-        breakMinutes: user.breakMinutes,
+        breakMinutes: limits.breakMinutes,
         dayStartMs:
             DateTime(today.year, today.month, today.day).millisecondsSinceEpoch,
       );
@@ -193,12 +206,12 @@ final practiceAllowanceForProvider =
 
   return stretches.map((stretch) {
     final allowance = practiceAllowance(
-      limitMinutes: user.practiceLimitMinutes,
-      breakMinutes: user.breakMinutes,
+      limitMinutes: limits.stretchMinutes,
+      breakMinutes: limits.breakMinutes,
       practisedMs: stretch.practisedMs,
       lastFinishedAt: stretch.lastFinishedAt,
       now: now(),
-      dailyLimitMinutes: user.dailyLimitMinutes,
+      dailyLimitMinutes: limits.dailyMinutes,
       practisedTodayMs: stretch.todayMs,
     );
 

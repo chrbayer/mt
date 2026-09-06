@@ -115,6 +115,47 @@ class LessonExample extends StatelessWidget {
         ],
       );
     }
+    // Both comparison lessons draw two real heaps with their numbers, the
+    // same as the practice screen. Written out as text they lost the numbers
+    // and, worse, the row and the cloud looked identical.
+    if (task.form == TaskForm.compare) {
+      return IntrinsicHeight(
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Center(
+              child: PictureGroup(
+                count: task.a,
+                picture: task.picture,
+                arrangement: lesson.arrangement,
+                seed: task.a * 31 + task.b,
+                size: fontSize,
+                showCount: lesson.showCounts,
+              ),
+            ),
+            Container(
+              width: fontSize * 0.12,
+              margin: EdgeInsets.symmetric(horizontal: fontSize * 0.45),
+              decoration: BoxDecoration(
+                color: AppColors.textMuted,
+                borderRadius: BorderRadius.circular(fontSize * 0.06),
+              ),
+            ),
+            Center(
+              child: PictureGroup(
+                count: task.b,
+                picture: task.picture,
+                arrangement: lesson.arrangement,
+                seed: task.b * 31 + task.a,
+                size: fontSize,
+                showCount: lesson.showCounts,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
     if (task.form == TaskForm.dice) {
       return Row(
         mainAxisSize: MainAxisSize.min,

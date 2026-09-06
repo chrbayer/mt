@@ -7,6 +7,7 @@ import '../../domain/lesson.dart';
 import '../../domain/practice_limit.dart';
 import '../../providers.dart';
 import '../../theme/app_theme.dart';
+import '../common/minutes_choice.dart';
 import '../common/task_count_choice.dart';
 import '../lessons/lesson_example.dart';
 
@@ -37,13 +38,16 @@ class _ProfileSettingsDialogState
   late final Set<LessonGroup> _visible = widget.user.visibleGroups.toSet();
   late bool _review = widget.user.reviewHardTasks;
   late int? _taskCount = widget.user.defaultTaskCount;
-  late int _limitMinutes = widget.user.practiceLimitMinutes;
-  late int _breakMinutes = widget.user.breakMinutes;
-  late int _dailyMinutes = widget.user.dailyLimitMinutes;
+  late int? _limitMinutes = widget.user.practiceLimitMinutes;
+  late int? _breakMinutes = widget.user.breakMinutes;
+  late int? _dailyMinutes = widget.user.dailyLimitMinutes;
 
   @override
   Widget build(BuildContext context) {
     final color = AppColors.profileColor(widget.user.colorIndex);
+    // Null while the app-wide limits are still being read; the inherit chips
+    // then say "wie für alle" without a number rather than a guessed one.
+    final global = ref.watch(preferencesProvider).value?.limits;
 
     return Dialog(
       insetPadding: const EdgeInsets.all(32),
@@ -106,45 +110,28 @@ class _ProfileSettingsDialogState
                 style: TextStyle(fontSize: 17, color: AppColors.textMuted),
               ),
               const SizedBox(height: 10),
-              Wrap(
-                spacing: 10,
-                runSpacing: 10,
-                children: [
-                  for (final minutes in practiceLimitOptions)
-                    ChoiceChip(
-                      selected: _limitMinutes == minutes,
-                      onSelected: (_) =>
-                          setState(() => _limitMinutes = minutes),
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 14, vertical: 10),
-                      label: Text(
-                        minutes == 0 ? 'ohne Grenze' : '$minutes min',
-                        style: const TextStyle(fontSize: 18),
-                      ),
-                    ),
-                ],
+              MinutesChoice(
+                value: _limitMinutes,
+                options: practiceLimitOptions,
+                inherited: global?.stretchMinutes,
+                allowInherit: true,
+                onChanged: (minutes) =>
+                    setState(() => _limitMinutes = minutes),
               ),
               // Only worth asking once there is a limit for it to end.
-              if (_limitMinutes > 0) ...[
+              if ((_limitMinutes ?? global?.stretchMinutes ?? 0) > 0) ...[
                 const SizedBox(height: 16),
                 Text('Wie lange dauert die Pause?',
                     style: Theme.of(context).textTheme.titleMedium),
                 const SizedBox(height: 10),
-                Wrap(
-                  spacing: 10,
-                  runSpacing: 10,
-                  children: [
-                    for (final minutes in breakMinuteOptions)
-                      ChoiceChip(
-                        selected: _breakMinutes == minutes,
-                        onSelected: (_) =>
-                            setState(() => _breakMinutes = minutes),
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 14, vertical: 10),
-                        label: Text('$minutes min',
-                            style: const TextStyle(fontSize: 18)),
-                      ),
-                  ],
+                MinutesChoice(
+                  value: _breakMinutes,
+                  options: breakMinuteOptions,
+                  inherited: global?.breakMinutes,
+                  allowInherit: true,
+                  zeroLabel: null,
+                  onChanged: (minutes) =>
+                      setState(() => _breakMinutes = minutes),
                 ),
               ],
               const SizedBox(height: 20),
@@ -158,23 +145,13 @@ class _ProfileSettingsDialogState
                 style: TextStyle(fontSize: 17, color: AppColors.textMuted),
               ),
               const SizedBox(height: 10),
-              Wrap(
-                spacing: 10,
-                runSpacing: 10,
-                children: [
-                  for (final minutes in dailyLimitOptions)
-                    ChoiceChip(
-                      selected: _dailyMinutes == minutes,
-                      onSelected: (_) =>
-                          setState(() => _dailyMinutes = minutes),
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 14, vertical: 10),
-                      label: Text(
-                        minutes == 0 ? 'ohne Grenze' : '$minutes min',
-                        style: const TextStyle(fontSize: 18),
-                      ),
-                    ),
-                ],
+              MinutesChoice(
+                value: _dailyMinutes,
+                options: dailyLimitOptions,
+                inherited: global?.dailyMinutes,
+                allowInherit: true,
+                onChanged: (minutes) =>
+                    setState(() => _dailyMinutes = minutes),
               ),
               const Divider(height: 32),
               Text('Bereiche', style: Theme.of(context).textTheme.titleLarge),

@@ -134,8 +134,11 @@ antreten. Die App läuft vollständig offline, ohne Konten und ohne Netzwerk.
   Zielzeit **vor** dem Durchgang, der Ergebnisbildschirm sagt danach, was der
   nächste Blitz kosten würde. Die Ersten Schritte haben keine — dort wird
   nicht gemessen.
-* **Übungszeit**: zwei Grenzen, beide pro Profil im Elternbereich einstellbar
-  und beide standardmäßig **aus**.
+* **Übungszeit**: zwei Grenzen, standardmäßig **20 Minuten am Stück** und
+  **2 Stunden am Tag**. Beide gelten erst einmal für alle und lassen sich im
+  Elternbereich ändern; für ein einzelnes Kind steht daneben eine eigene
+  Vorgabe, die die allgemeine ersetzt. „Ohne Grenze" ist dabei eine
+  Entscheidung und etwas anderes als „wie für alle".
   * **Am Stück**: nach der eingestellten Zeit gibt es eine Pause. Erst wenn
     sie vollständig eingehalten wurde, fängt die Zählung wieder bei null an.
     Der Hinweis nennt die Uhrzeit, zu der es weitergeht, und verschwindet von

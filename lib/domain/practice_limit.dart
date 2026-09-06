@@ -10,6 +10,51 @@ const practiceLimitOptions = [0, 10, 15, 20, 30, 45, 60];
 /// Daily totals a parent can pick, in minutes. Zero switches the cap off.
 const dailyLimitOptions = [0, 15, 30, 45, 60, 90, 120];
 
+/// What holds when nobody has decided otherwise.
+///
+/// Deliberately not "no limit": two hours of maths in a day and twenty
+/// minutes without getting up are already generous, and a parent who never
+/// opens the settings should still get a sensible bedtime for the tablet.
+const defaultStretchMinutes = 20;
+const defaultBreakMinutes = 15;
+const defaultDailyMinutes = 120;
+
+/// The three time limits, as they apply to one child.
+class PracticeLimits {
+  /// Longest stretch without a break. Zero means no stretch limit.
+  final int stretchMinutes;
+
+  /// How long the break has to be, and what separates two stretches.
+  final int breakMinutes;
+
+  /// Total for one day. Zero means no daily limit.
+  final int dailyMinutes;
+
+  const PracticeLimits({
+    this.stretchMinutes = defaultStretchMinutes,
+    this.breakMinutes = defaultBreakMinutes,
+    this.dailyMinutes = defaultDailyMinutes,
+  });
+}
+
+/// A child's own limits where they have any, the app-wide ones where not.
+///
+/// Two levels, like the run length has three: null means "wie für alle",
+/// while a stored **zero** is a decision - "this child has no limit". The two
+/// have to stay apart, which is why the columns are nullable rather than
+/// using zero for both.
+PracticeLimits resolvePracticeLimits({
+  required PracticeLimits global,
+  int? stretchMinutes,
+  int? breakMinutes,
+  int? dailyMinutes,
+}) =>
+    PracticeLimits(
+      stretchMinutes: stretchMinutes ?? global.stretchMinutes,
+      breakMinutes: breakMinutes ?? global.breakMinutes,
+      dailyMinutes: dailyMinutes ?? global.dailyMinutes,
+    );
+
 /// Whether practice may start right now, and if not, until when.
 class PracticeAllowance {
   final bool allowed;

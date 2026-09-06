@@ -36,20 +36,20 @@ class Users extends Table {
   IntColumn get defaultTaskCount => integer().nullable()();
 
   /// Longest stretch of practice this child may do before a break, in
-  /// minutes. Zero switches the limit off, which is the default: a limit
-  /// that nobody asked for would be an unpleasant surprise.
-  IntColumn get practiceLimitMinutes =>
-      integer().withDefault(const Constant(0))();
+  /// minutes. Null takes the app-wide setting; zero is a decision - this
+  /// child has no stretch limit.
+  IntColumn get practiceLimitMinutes => integer().nullable()();
 
   /// How long the break has to be before a new stretch may start. Also what
-  /// separates one stretch from the next when the time is added up.
-  IntColumn get breakMinutes => integer().withDefault(const Constant(15))();
+  /// separates one stretch from the next when the time is added up. Null
+  /// takes the app-wide setting.
+  IntColumn get breakMinutes => integer().nullable()();
 
-  /// Total practice this child may do in one day, in minutes. Zero switches
-  /// it off. Independent of the stretch cap: enough breaks would otherwise
-  /// add up to an afternoon.
-  IntColumn get dailyLimitMinutes =>
-      integer().withDefault(const Constant(0))();
+  /// Total practice this child may do in one day, in minutes. Null takes the
+  /// app-wide setting, zero means this child has no daily limit. Independent
+  /// of the stretch cap: enough breaks would otherwise add up to an
+  /// afternoon.
+  IntColumn get dailyLimitMinutes => integer().nullable()();
 }
 
 /// What one child last chose for one lesson.
@@ -120,7 +120,7 @@ class AppDatabase extends _$AppDatabase {
       : super(executor ?? driftDatabase(name: 'mathe_trainer'));
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 6;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -139,6 +139,25 @@ class AppDatabase extends _$AppDatabase {
             await m.addColumn(users, users.practiceLimitMinutes);
             await m.addColumn(users, users.breakMinutes);
             await m.addColumn(users, users.dailyLimitMinutes);
+          }
+          // v6 lets the caps be set once for everyone, so a profile may now
+          // say "as for everyone" (null) as well as "none" (zero).
+          if (from < 6) {
+            await m.alterTable(TableMigration(users));
+            // A profile still carrying what v5 handed it never had a decision
+            // made about it, so it follows the app-wide setting from now on.
+            // Anything a parent actually chose stays as chosen.
+            await m.database.customStatement(
+              'UPDATE users SET practice_limit_minutes = NULL '
+              'WHERE practice_limit_minutes = 0',
+            );
+            await m.database.customStatement(
+              'UPDATE users SET break_minutes = NULL WHERE break_minutes = 15',
+            );
+            await m.database.customStatement(
+              'UPDATE users SET daily_limit_minutes = NULL '
+              'WHERE daily_limit_minutes = 0',
+            );
           }
         },
         beforeOpen: (details) async {

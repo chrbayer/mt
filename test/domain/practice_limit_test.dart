@@ -148,4 +148,46 @@ void main() {
     expect(breakMinuteOptions, isNot(contains(0)));
     expect(dailyLimitOptions.first, 0);
   });
+
+  group('two levels', () {
+    test('the defaults are two hours a day and twenty minutes at a stretch',
+        () {
+      const global = PracticeLimits();
+      expect(global.stretchMinutes, 20);
+      expect(global.dailyMinutes, 120);
+      expect(global.breakMinutes, 15);
+      // Both are among the offered values, so a parent can see which one is
+      // in force rather than facing an unselected row.
+      expect(practiceLimitOptions, contains(global.stretchMinutes));
+      expect(dailyLimitOptions, contains(global.dailyMinutes));
+      expect(breakMinuteOptions, contains(global.breakMinutes));
+    });
+
+    test('null takes the app-wide value, a number overrides it', () {
+      const global =
+          PracticeLimits(stretchMinutes: 20, breakMinutes: 15, dailyMinutes: 120);
+
+      final inherited = resolvePracticeLimits(global: global);
+      expect(inherited.stretchMinutes, 20);
+      expect(inherited.dailyMinutes, 120);
+
+      final own = resolvePracticeLimits(
+        global: global,
+        stretchMinutes: 45,
+        dailyMinutes: 60,
+      );
+      expect(own.stretchMinutes, 45);
+      expect(own.dailyMinutes, 60);
+      expect(own.breakMinutes, 15, reason: 'not set, so inherited');
+    });
+
+    test('zero is a decision, not an absent one', () {
+      // The whole reason the columns are nullable: "no limit for this child"
+      // and "whatever everyone else has" must not collapse into one value.
+      const global = PracticeLimits(stretchMinutes: 20, dailyMinutes: 120);
+      final off = resolvePracticeLimits(global: global, stretchMinutes: 0);
+      expect(off.stretchMinutes, 0);
+      expect(off.dailyMinutes, 120, reason: 'the day is still capped');
+    });
+  });
 }

@@ -5,6 +5,7 @@ import 'package:drift/drift.dart';
 
 import 'package:crypto/crypto.dart';
 
+import '../../domain/practice_limit.dart';
 import '../../domain/task_count.dart';
 import '../db/app_database.dart';
 
@@ -18,21 +19,27 @@ class AppPreferences {
   /// Task count preselected when a lesson is opened.
   final int defaultTaskCount;
 
+  /// The time limits that hold for every child without their own.
+  final PracticeLimits limits;
+
   const AppPreferences({
     this.showClock = false,
     this.haptics = true,
     this.defaultTaskCount = fallbackTaskCount,
+    this.limits = const PracticeLimits(),
   });
 
   AppPreferences copyWith({
     bool? showClock,
     bool? haptics,
     int? defaultTaskCount,
+    PracticeLimits? limits,
   }) =>
       AppPreferences(
         showClock: showClock ?? this.showClock,
         haptics: haptics ?? this.haptics,
         defaultTaskCount: defaultTaskCount ?? this.defaultTaskCount,
+        limits: limits ?? this.limits,
       );
 }
 
@@ -44,6 +51,9 @@ class SettingsRepository {
   static const _showClock = 'show_clock';
   static const _haptics = 'haptics';
   static const _defaultTaskCount = 'default_task_count';
+  static const _stretchMinutes = 'practice_limit_minutes';
+  static const _breakMinutes = 'break_minutes';
+  static const _dailyMinutes = 'daily_limit_minutes';
   static const _pinSalt = 'admin_pin_salt';
   static const _pinHash = 'admin_pin_hash';
 
@@ -65,6 +75,14 @@ class SettingsRepository {
       haptics: map[_haptics] == null ? defaults.haptics : map[_haptics] == '1',
       defaultTaskCount:
           int.tryParse(map[_defaultTaskCount] ?? '') ?? defaults.defaultTaskCount,
+      limits: PracticeLimits(
+        stretchMinutes: int.tryParse(map[_stretchMinutes] ?? '') ??
+            defaults.limits.stretchMinutes,
+        breakMinutes: int.tryParse(map[_breakMinutes] ?? '') ??
+            defaults.limits.breakMinutes,
+        dailyMinutes: int.tryParse(map[_dailyMinutes] ?? '') ??
+            defaults.limits.dailyMinutes,
+      ),
     );
   }
 
@@ -74,6 +92,13 @@ class SettingsRepository {
 
   Future<void> setDefaultTaskCount(int value) =>
       _put(_defaultTaskCount, '$value');
+
+  /// The time limits for every child who has none of their own.
+  Future<void> setPracticeLimits(PracticeLimits limits) async {
+    await _put(_stretchMinutes, '${limits.stretchMinutes}');
+    await _put(_breakMinutes, '${limits.breakMinutes}');
+    await _put(_dailyMinutes, '${limits.dailyMinutes}');
+  }
 
   /// What this child last chose for this lesson, if anything.
   Stream<int?> watchLessonTaskCount(int userId, String lessonId) =>

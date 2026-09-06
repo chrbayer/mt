@@ -182,6 +182,13 @@ void main() {
             'ALTER TABLE users DROP COLUMN break_minutes');
         await before.customStatement(
             'ALTER TABLE users DROP COLUMN daily_limit_minutes');
+      } else if (version < 6) {
+        // v5 had no "as for everyone": every profile carried the values it
+        // was created with.
+        await before.customStatement(
+          'UPDATE users SET practice_limit_minutes = 0, break_minutes = 15, '
+          'daily_limit_minutes = 0',
+        );
       }
       if (version < 4) {
         await before.customStatement('DROP TABLE lesson_preferences');
@@ -201,7 +208,7 @@ void main() {
       return file;
     }
 
-    for (final from in [1, 2, 3, 4]) {
+    for (final from in [1, 2, 3, 4, 5]) {
       test('a database from schema v$from keeps its data', () async {
         final file = await databaseAtVersion(from);
 
@@ -217,11 +224,11 @@ void main() {
         expect(user.visibleGroups, LessonGroup.values);
         expect(user.reviewHardTasks, isTrue);
         expect(user.defaultTaskCount, isNull);
-        // No practice cap unless a parent asks for one - a migration must
-        // not lock a child out of an app that worked yesterday.
-        expect(user.practiceLimitMinutes, 0);
-        expect(user.breakMinutes, 15);
-        expect(user.dailyLimitMinutes, 0);
+        // Nobody ever decided about the time limits for this profile, so it
+        // follows the app-wide setting - that is what null means here.
+        expect(user.practiceLimitMinutes, isNull);
+        expect(user.breakMinutes, isNull);
+        expect(user.dailyLimitMinutes, isNull);
         expect(await after.select(after.lessonPreferences).get(), isEmpty);
         expect(await after.select(after.sessions).get(), hasLength(1));
         expect(await after.select(after.attempts).get(), hasLength(10));

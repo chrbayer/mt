@@ -416,6 +416,25 @@ Generator: nur so bricht ihn das Abmelden wirklich ab. Er ruft
 Mitternacht ist, hat sich der Tag geändert und die Abfrage muss neu gestellt
 werden.
 
+## Zwei Ebenen für die Übungszeit
+
+Wie bei der Aufgabenzahl, nur mit zwei Ebenen statt dreien: `users` speichert
+die drei Zeiten **nullable**, `app_settings` die Vorgabe für alle,
+`resolvePracticeLimits` setzt sie zusammen.
+
+Nullable und nicht 0, weil **null und 0 verschiedene Dinge sind**: „wie für
+alle" und „dieses Kind hat keine Grenze". Wären beide 0, könnte ein Elternteil
+eine Grenze für ein Kind nicht gezielt abschalten, ohne sie für alle
+abzuschalten.
+
+Die Vorgaben sind bewusst **nicht** „keine Grenze": 20 Minuten am Stück und
+zwei Stunden am Tag. Wer die Einstellungen nie öffnet, bekommt trotzdem eine
+vernünftige Feierabendzeit fürs Tablet.
+
+Die Migration auf v6 setzt genau die Werte auf NULL, die v5 selbst vergeben
+hat (0 / 15 / 0). Was ein Elternteil tatsächlich gewählt hat, bleibt stehen —
+alles andere hätte eine bewusste Entscheidung stillschweigend überschrieben.
+
 ## Mindestlänge für eine Wertung
 
 `minTasksForAward` (10) gilt für **Bestenliste, Sterne und Blitze**

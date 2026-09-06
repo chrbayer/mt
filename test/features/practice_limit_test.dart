@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mathe_trainer/data/db/app_database.dart';
 import 'package:mathe_trainer/domain/lesson.dart';
+import 'package:mathe_trainer/domain/practice_limit.dart';
 import 'package:mathe_trainer/domain/task.dart';
 import 'package:mathe_trainer/features/lessons/lesson_home_screen.dart';
 import 'package:mathe_trainer/features/lessons/pause_notice.dart';
@@ -36,6 +37,16 @@ void main() {
     final id = await users.createUser(name: 'Mia', avatar: '🦊', colorIndex: 0);
     mia = (await users.findUser(id))!;
     container.read(activeUserProvider.notifier).select(mia);
+    // Most tests here are about one child's own limits, so the app-wide ones
+    // start switched off - otherwise every profile would already be capped
+    // by the defaults.
+    await container
+        .read(settingsRepositoryProvider)
+        .setPracticeLimits(const PracticeLimits(
+          stretchMinutes: 0,
+          breakMinutes: 15,
+          dailyMinutes: 0,
+        ));
   });
 
   tearDown(() async {
@@ -78,10 +89,26 @@ void main() {
     );
   }
 
-  Future<void> setLimit({
-    int limit = 0,
+  /// The app-wide limits. Most tests here are about one child's own, so they
+  /// switch these off first - otherwise every profile would already be
+  /// capped by the defaults.
+  Future<void> setGlobalLimits({
+    int stretch = 0,
     int pause = 15,
     int daily = 0,
+  }) =>
+      container.read(settingsRepositoryProvider).setPracticeLimits(
+            PracticeLimits(
+              stretchMinutes: stretch,
+              breakMinutes: pause,
+              dailyMinutes: daily,
+            ),
+          );
+
+  Future<void> setLimit({
+    int? limit = 0,
+    int? pause = 15,
+    int? daily = 0,
   }) async {
     await container.read(userRepositoryProvider).setPracticeLimit(
           mia.id,
@@ -248,5 +275,55 @@ void main() {
       find.widgetWithText(FilledButton, "Los geht's"),
     );
     expect(start.onPressed, isNotNull);
+  });
+
+  group('the app-wide limits', () {
+    testWidgets('hold for a child without their own', (tester) async {
+      await setGlobalLimits(stretch: 20, pause: 15, daily: 120);
+      await practise(minutes: 25, endedMinutesAgo: 1);
+      await pump(tester, const LessonHomeScreen());
+
+      expect(find.byType(PauseNotice), findsOneWidget);
+      expect(find.textContaining('25 Minuten am Stück'), findsOneWidget);
+      await waitOut(tester, const Duration(minutes: 14));
+      expect(find.byType(PauseNotice), findsNothing);
+    });
+
+    testWidgets('are overridden by a child who has their own', (tester) async {
+      await setGlobalLimits(stretch: 20, pause: 15, daily: 120);
+      // This child may go on for an hour.
+      await setLimit(limit: 60, pause: 15, daily: null);
+      await practise(minutes: 25, endedMinutesAgo: 1);
+      await pump(tester, const LessonHomeScreen());
+
+      expect(find.byType(PauseNotice), findsNothing);
+    });
+
+    testWidgets('can be switched off for one child while everyone else keeps '
+        'them', (tester) async {
+      await setGlobalLimits(stretch: 20, pause: 15, daily: 120);
+      // Zero is a decision, not "unset": this child has no stretch limit.
+      await setLimit(limit: 0, pause: null, daily: null);
+      await practise(minutes: 45, endedMinutesAgo: 1);
+      await pump(tester, const LessonHomeScreen());
+
+      expect(find.byType(PauseNotice), findsNothing,
+          reason: 'the stretch cap is off for this child');
+    });
+
+    testWidgets('still cap the day when only the stretch is lifted',
+        (tester) async {
+      await setGlobalLimits(stretch: 20, pause: 15, daily: 120);
+      await setLimit(limit: 0, pause: null, daily: null);
+      // Over two hours today, in stretches that each stayed short.
+      await practise(minutes: 70, endedMinutesAgo: 200);
+      await practise(minutes: 60, endedMinutesAgo: 60);
+      await pump(tester, const LessonHomeScreen());
+
+      expect(find.textContaining('Für heute reicht es!'), findsOneWidget,
+          reason: 'the daily limit is still inherited');
+      // The alarm waits for midnight; let it come so no timer is left.
+      await waitOut(tester, const Duration(hours: 9));
+    });
   });
 }
