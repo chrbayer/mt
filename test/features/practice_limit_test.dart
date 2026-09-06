@@ -10,6 +10,9 @@ import 'package:mathe_trainer/domain/task.dart';
 import 'package:mathe_trainer/features/lessons/lesson_home_screen.dart';
 import 'package:mathe_trainer/features/lessons/pause_notice.dart';
 import 'package:mathe_trainer/features/lessons/start_lesson_sheet.dart';
+import 'package:mathe_trainer/features/practice/practice_screen.dart';
+import 'package:mathe_trainer/features/practice/widgets/task_display.dart';
+import 'package:mathe_trainer/features/result/result_screen.dart';
 import 'package:mathe_trainer/providers.dart';
 import 'package:mathe_trainer/theme/app_theme.dart';
 
@@ -324,6 +327,87 @@ void main() {
           reason: 'the daily limit is still inherited');
       // The alarm waits for midnight; let it come so no timer is left.
       await waitOut(tester, const Duration(hours: 9));
+    });
+  });
+
+  group('a run already under way', () {
+    testWidgets('is never interrupted, even when the time runs out mid-run',
+        (tester) async {
+      // A real run is dated by the app's own clock, so the test clock has to
+      // agree with it - otherwise the run it plays lands hours away from the
+      // stretch this test builds.
+      clock = DateTime.now();
+      await setLimit(limit: 20, pause: 15);
+      // Nineteen minutes done: still under the cap, so the run may start.
+      await practise(minutes: 19, endedMinutesAgo: 1);
+
+      await pump(
+        tester,
+        PracticeScreen(lesson: lessonById('add_100_carry'), taskCount: 3),
+      );
+      expect(find.byType(TaskDisplay), findsOneWidget);
+
+      // The cap is reached while the child is working: another run is
+      // recorded in the background, pushing the stretch over twenty minutes.
+      await practise(minutes: 10, endedMinutesAgo: 0);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+
+      // No overlay, no notice, no dead keypad - the run carries on.
+      expect(find.byType(PauseNotice), findsNothing);
+      expect(find.byType(TaskDisplay), findsOneWidget);
+
+      // And it can be answered through to the end and is stored.
+      for (var i = 0; i < 3; i++) {
+        final task =
+            tester.widget<TaskDisplay>(find.byType(TaskDisplay)).task;
+        for (final digit in '${task.expected}'.split('')) {
+          await tester.tap(find.byKey(Key('digit-$digit')));
+          await tester.pump();
+        }
+        await tester.tap(find.byKey(const Key('submit')));
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 500));
+      }
+      await tester.pumpAndSettle();
+
+      expect(find.text('Geschafft, Mia!'), findsOneWidget);
+      final stored = await db.select(db.sessions).get();
+      expect(stored.where((s) => s.taskCount == 3 && s.completed), hasLength(1),
+          reason: 'the run finished and was counted');
+
+      // Only now does the break bite: "Nochmal" is dead. The stretch is
+      // re-read from the database, so give that a frame.
+      await tester.pump(const Duration(milliseconds: 100));
+      await tester.pumpAndSettle();
+      expect(find.byType(PauseNotice), findsOneWidget);
+      final again = tester.widget<FilledButton>(
+        find.widgetWithText(FilledButton, 'Nochmal'),
+      );
+      expect(again.onPressed, isNull);
+      // Comfortably past the break, so no alarm is left waiting.
+      await waitOut(tester, const Duration(minutes: 16));
+    });
+
+    testWidgets('"Nochmal" works again once the break is over', (tester) async {
+      await setLimit(limit: 20, pause: 15);
+      await practise(minutes: 25, endedMinutesAgo: 20);
+      await pump(
+        tester,
+        ResultScreen(
+          lesson: lessonById('add_100_carry'),
+          sessionId: null,
+          taskCount: 10,
+          totalMs: 60000,
+          wrongAttempts: 0,
+        ),
+      );
+
+      expect(find.byType(PauseNotice), findsNothing);
+      final again = tester.widget<FilledButton>(
+        find.widgetWithText(FilledButton, 'Nochmal'),
+      );
+      expect(again.onPressed, isNotNull);
     });
   });
 }

@@ -3,11 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/db/app_database.dart';
 import '../../domain/lesson.dart';
+import '../../domain/practice_limit.dart';
 import '../../domain/scoring.dart';
 import '../../providers.dart';
 import '../../theme/app_theme.dart';
 import '../common/star_row.dart';
 import '../leaderboard/leaderboard_screen.dart';
+import '../lessons/pause_notice.dart';
 import '../practice/practice_screen.dart';
 
 /// Shown after a completed run: what was achieved, and whether it was faster
@@ -42,6 +44,8 @@ class ResultScreen extends ConsumerWidget {
     final bolts = boltsFor(lesson.targetMsPerTask, perTask, taskCount);
     final nextBolt = nextBoltTargetMs(lesson.targetMsPerTask, bolts);
     final user = ref.watch(activeUserProvider);
+    final allowance = ref.watch(practiceAllowanceProvider).value ??
+        PracticeAllowance.unlimited;
     final streak = user == null
         ? 0
         : ref.watch(streaksProvider).value?[user.id] ?? 0;
@@ -246,20 +250,30 @@ class ResultScreen extends ConsumerWidget {
                 )
               else
                 const Spacer(),
+              // The run just finished may well have been the one that used up
+              // the time. "Nochmal" starts a new one, so it has to ask the
+              // same question the start dialog asks.
+              if (!allowance.allowed)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: PauseNotice(allowance: allowance, compact: true),
+                ),
               Row(
                 children: [
                   Expanded(
                     child: FilledButton.icon(
                       icon: const Icon(Icons.refresh, size: 30),
                       label: const Text('Nochmal'),
-                      onPressed: () => Navigator.of(context).pushReplacement(
-                        MaterialPageRoute<void>(
-                          builder: (_) => PracticeScreen(
-                            lesson: lesson,
-                            taskCount: taskCount,
-                          ),
-                        ),
-                      ),
+                      onPressed: !allowance.allowed
+                          ? null
+                          : () => Navigator.of(context).pushReplacement(
+                                MaterialPageRoute<void>(
+                                  builder: (_) => PracticeScreen(
+                                    lesson: lesson,
+                                    taskCount: taskCount,
+                                  ),
+                                ),
+                              ),
                     ),
                   ),
                   if (lesson.scored) const SizedBox(width: 16),

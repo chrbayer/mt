@@ -581,6 +581,55 @@ void main() {
         }
       });
 
+      test('every spoken form comes up before any comes up twice', () {
+        // The eleven forms are the whole point of the lesson, so they are
+        // drilled as a pool rather than drawn freely. Free draws left about
+        // four of them untouched in a ten-task run while repeating another
+        // one up to six times.
+        final lesson = lessonById('clock_words');
+        for (var seed = 0; seed < 60; seed++) {
+          final phrases =
+              generateTasks(lesson: lesson, count: 22, seed: seed)
+                  .map((t) => t.expected)
+                  .toList();
+          // Two complete passes: each form exactly twice.
+          for (var i = 0; i < clockPhrases.length; i++) {
+            expect(phrases.where((p) => p == i), hasLength(2),
+                reason: 'seed $seed, ${clockPhrases[i]}');
+          }
+          // And within one pass, each exactly once.
+          expect(phrases.take(clockPhrases.length).toSet(),
+              hasLength(clockPhrases.length),
+              reason: 'seed $seed');
+          // Never the same form twice in a row, not even across the seam.
+          for (var i = 1; i < phrases.length; i++) {
+            expect(phrases[i], isNot(phrases[i - 1]), reason: 'seed $seed');
+          }
+        }
+      });
+
+      test('a short run of spoken times still spreads over the forms', () {
+        final lesson = lessonById('clock_words');
+        for (var seed = 0; seed < 60; seed++) {
+          final phrases = generateTasks(lesson: lesson, count: 10, seed: seed)
+              .map((t) => t.expected)
+              .toSet();
+          // Ten of the eleven: nothing repeats before everything was asked.
+          expect(phrases, hasLength(10), reason: 'seed $seed');
+        }
+      });
+
+      test('the hour still varies, form for form', () {
+        // Only the spoken forms are drilled; which hour they are asked about
+        // stays a free draw, or the lesson would be a recitation.
+        final hours = generateTasks(
+          lesson: lessonById('clock_words'),
+          count: 40,
+          seed: 3,
+        ).map((t) => t.a).toSet();
+        expect(hours.length, greaterThan(4));
+      });
+
       test('a 24-hour clock says which part of the day it is', () {
         final lesson = lessonById('clock_24');
         expect(lesson.clock24, isTrue);

@@ -84,6 +84,13 @@ Der Generator garantiert **keine** globale Eindeutigkeit: bis 20 gibt es
 schlicht keine 50 verschiedenen Aufgaben mit Zehnerübergang. Garantiert ist,
 dass sich eine Rechnung innerhalb von acht Aufgaben nicht wiederholt.
 
+`TaskForm.clockPhrase` läuft ebenfalls als **Vorrat** statt als Stichprobe:
+`_generateClockPhraseTasks` arbeitet die elf Sprechweisen in gemischten
+Blöcken ab. Frei gezogen fehlten in zehn Aufgaben im Schnitt vier der elf,
+während eine bis zu sechsmal drankam — und die elf Formen sind der ganze
+Inhalt der Lektion. Die **Stunde** bleibt zufällig; sie wird nur neu gezogen,
+wenn dieselbe Uhrzeit sonst innerhalb des Abstandsfensters wiederkäme.
+
 Lektionen mit `fixedSum` (verliebte Zahlen) laufen an dieser Stichprobenlogik
 vorbei: ihr Vorrat sind elf feste Paare, deshalb erzeugt
 `_generateFixedSumTasks` gemischte Durchläufe des kompletten Vorrats. Jedes
@@ -394,11 +401,14 @@ aufhört, hat trotzdem am Tablet gesessen.
 **eingehaltene Pause setzt das Stück auf null zurück**, egal wie lang es war —
 sonst wäre die Grenze nach dem ersten langen Nachmittag für immer erreicht.
 
-Gesperrt wird nur der **Start**, nie ein laufender Durchgang. Mitten in einer
+Gesperrt wird nur der **Start**, nie ein laufender Durchgang. `PracticeScreen`
+schaut die Erlaubnis **nirgends** an — das ist die Zusicherung, und ein Test
+spielt einen Durchgang zu Ende, während die Zeit mitten darin abläuft. Mitten in einer
 Aufgabe hinausgeworfen zu werden verlöre die Runde und brächte dem Kind bei,
-dass der App nicht zu trauen ist. Die Prüfung sitzt deshalb im Startdialog —
-der einen Tür, durch die jeder Durchgang geht — und zusätzlich im Duell, das
-sonst der Weg um die Grenze herum wäre.
+dass der App nicht zu trauen ist. Geprüft wird an **jeder** Stelle, die einen Durchgang startet: im Startdialog,
+bei „Nochmal" auf dem Ergebnisbildschirm und im Duell. „Nochmal" führt direkt
+zu `PracticeScreen` und ging anfangs an der Prüfung vorbei — wer eine Runde
+genau bei Zeitablauf beendete, konnte damit endlos weitermachen.
 
 Die **Tagesgrenze** zählt unabhängig davon alle Durchgänge des Tages. Sie hat
 Vorrang vor der Stückgrenze: wenn der Tag aufgebraucht ist, hilft keine Pause,

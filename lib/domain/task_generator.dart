@@ -75,6 +75,9 @@ List<Task> generateTasks({
   if (lesson.fixedSum != null) {
     return _generateFixedSumTasks(lesson, count, random);
   }
+  if (lesson.form == TaskForm.clockPhrase) {
+    return _generateClockPhraseTasks(count, random);
+  }
 
   final operations = _operationSequence(lesson, count, random);
 
@@ -189,6 +192,55 @@ List<Task> _generateFixedSumTasks(LessonSpec lesson, int count, Random random) {
   return List.unmodifiable(tasks.sublist(0, count));
 }
 
+/// Drill for "Uhrzeit sagen": the pool is the eleven spoken forms, so they
+/// are worked through in shuffled blocks rather than drawn independently.
+///
+/// Free draws left about four of the eleven untouched in a ten-task run while
+/// repeating another one up to six times - and the eleven forms are the
+/// entire point of the lesson. The hour stays random: it is the same skill
+/// whichever hour it is asked about, and drilling 11 x 12 combinations would
+/// take an afternoon.
+List<Task> _generateClockPhraseTasks(int count, Random random) {
+  final tasks = <Task>[];
+  final recent = <String>[];
+  var lastPhrase = -1;
+
+  while (tasks.length < count) {
+    final block = [for (var i = 0; i < clockPhrases.length; i++) i]
+      ..shuffle(random);
+    // Avoid the same form twice across the seam between two blocks.
+    if (block.first == lastPhrase && block.length > 1) {
+      final other = 1 + random.nextInt(block.length - 1);
+      final first = block[0];
+      block[0] = block[other];
+      block[other] = first;
+    }
+    for (final phrase in block) {
+      // The form is fixed by the drill, the hour is free - but not free to
+      // reproduce a time that was just on screen, so it is drawn again if it
+      // would. Eleven forms and twelve hours leave plenty of room.
+      Task task;
+      var attempts = 0;
+      do {
+        task = Task(
+          a: _between(random, 1, 12),
+          b: (phrase + 1) * 5,
+          op: Operation.add,
+          form: TaskForm.clockPhrase,
+        );
+        attempts++;
+      } while (recent.contains(task.key) && attempts < 20);
+
+      tasks.add(task);
+      recent.add(task.key);
+      if (recent.length > _repeatWindow) recent.removeAt(0);
+    }
+    lastPhrase = block.last;
+  }
+
+  return List.unmodifiable(tasks.sublist(0, count));
+}
+
 /// For a mixed lesson: a balanced, shuffled sequence of the two operations,
 /// so a run never degenerates into ten additions in a row.
 List<Operation> _operationSequence(
@@ -241,8 +293,6 @@ Task? _sample(LessonSpec lesson, Operation op, Random random) {
   switch (lesson.form) {
     case TaskForm.clock:
       return _sampleClock(lesson, random);
-    case TaskForm.clockPhrase:
-      return _sampleClockPhrase(random);
     case TaskForm.money:
       return _sampleMoney(lesson, op, random);
     case TaskForm.moneyCompose:
@@ -290,6 +340,9 @@ Task? _sample(LessonSpec lesson, Operation op, Random random) {
         op: Operation.add,
         form: TaskForm.quantityAdd,
       );
+    case TaskForm.clockPhrase:
+      // Never reached: the spoken times are drilled as a pool, above.
+      return null;
     case TaskForm.result:
     case TaskForm.gap:
     case TaskForm.partner:
@@ -319,15 +372,6 @@ Task _sampleClock(LessonSpec lesson, Random random) {
     form: TaskForm.clock,
   );
 }
-
-/// A time to say out loud. The full hour is left out - there is no spoken
-/// form for it on the pad, see [clockPhrases].
-Task _sampleClockPhrase(Random random) => Task(
-      a: _between(random, 1, 12),
-      b: _between(random, 1, 11) * 5,
-      op: Operation.add,
-      form: TaskForm.clockPhrase,
-    );
 
 /// An amount to lay out. Built by drawing a handful of coins and adding them
 /// up, so it can always be laid with few pieces - a random amount would too
