@@ -8,7 +8,6 @@ import '../admin/admin_screen.dart';
 import '../admin/pin_gate.dart';
 import '../duel/duel_screen.dart';
 import '../lessons/lesson_home_screen.dart';
-import '../settings/settings_screen.dart';
 import '../stats/global_stats_screen.dart';
 import 'profile_editor.dart';
 
@@ -61,14 +60,9 @@ class ProfileSelectScreen extends ConsumerWidget {
             label: const Text('Eltern', style: TextStyle(fontSize: 20)),
             onPressed: () => AdminScreen.open(context),
           ),
-          const SizedBox(width: 4),
-          IconButton(
-            tooltip: 'Einstellungen',
-            icon: const Icon(Icons.settings_outlined),
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute<void>(builder: (_) => const SettingsScreen()),
-            ),
-          ),
+          // No settings button here any more: what used to sit behind it is
+          // either a child's own business - and then it belongs inside their
+          // own screen - or a parent's, and then it belongs behind the PIN.
           const SizedBox(width: 12),
         ],
       ),

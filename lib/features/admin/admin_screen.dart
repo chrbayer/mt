@@ -11,8 +11,9 @@ import '../../data/repositories/user_repository.dart';
 import '../common/star_row.dart';
 import '../profiles/profile_editor.dart';
 import 'backup_actions.dart';
-import 'profile_settings_dialog.dart';
+import 'global_settings_tab.dart';
 import 'pin_gate.dart';
+import 'profile_settings_dialog.dart';
 
 /// The parent area behind the PIN: what was practised when and how well, plus
 /// the operations a child should not be able to trigger - renaming, deleting
@@ -32,7 +33,7 @@ class AdminScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return DefaultTabController(
-      length: 2,
+      length: 3,
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Elternbereich'),
@@ -41,11 +42,12 @@ class AdminScreen extends ConsumerWidget {
             tabs: [
               Tab(height: 58, text: 'Übungsverlauf'),
               Tab(height: 58, text: 'Verwaltung'),
+              Tab(height: 58, text: 'Einstellungen'),
             ],
           ),
         ),
         body: const TabBarView(
-          children: [_HistoryTab(), _ManagementTab()],
+          children: [_HistoryTab(), _ManagementTab(), GlobalSettingsTab()],
         ),
       ),
     );

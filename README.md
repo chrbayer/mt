@@ -55,8 +55,9 @@ antreten. Die App läuft vollständig offline, ohne Konten und ohne Netzwerk.
   App sowohl zum Abfragen als auch zum längeren Üben taugt. Es gilt jeweils das
   Genaueste: **was zuletzt bei dieser Lektion gewählt wurde**, sonst die
   **Vorgabe des Profils**, sonst der **Standard für alle** (10). Die Vorgabe
-  des Profils lässt sich in den Einstellungen einstellen, solange ein Kind
-  angemeldet ist, und im Elternbereich. Wer beim Start einer Lektion etwas
+  des Profils stellt das Kind in seinen eigenen Einstellungen ein oder ein
+  Elternteil im Elternbereich; die **Vorgabe für alle** steht nur dort.
+  Wer beim Start einer Lektion etwas
   anderes wählt, ändert damit nur diese eine Lektion — nicht die des
   Geschwisterkindes und nicht die aller anderen Lektionen.
 * **Eigene große Zifferntastatur**, Bestätigung mit dem grünen Haken. Richtig →
@@ -80,7 +81,10 @@ antreten. Die App läuft vollständig offline, ohne Konten und ohne Netzwerk.
 * **Elternbereich**, geschützt durch eine PIN: der vollständige Übungsverlauf
   (wann, welches Kind, welche Lektion, Zeit, Fehler, abgeschlossen oder
   abgebrochen), einzelne Durchgänge löschen, Profile anlegen, umbenennen und
-  löschen, Statistiken zurücksetzen, PIN ändern.
+  löschen, Statistiken zurücksetzen, PIN ändern — und die **Einstellungen für
+  alle**: Uhr während der Übung, Vibration und die Vorgabe für die Länge eines
+  Durchgangs. Ein Kind kann in seinen eigenen Einstellungen nur die Länge
+  seiner eigenen Durchgänge ändern.
 * **Uhrzeit und Geld**: eine gezeichnete Uhr zum Ablesen (volle und halbe
   Stunden, Viertelstunden, Fünf-Minuten-Schritte) sowie Beträge addieren und
   abziehen. Beide fragen zwei Zahlen ab — Stunden und Minuten, Euro und Cent —
@@ -159,7 +163,9 @@ antreten. Die App läuft vollständig offline, ohne Konten und ohne Netzwerk.
 Kinder melden sich mit einem Tipp auf ihre Kachel an und dürfen an ihrem Profil
 Bild und Farbe ändern. **Namen vergeben, Profile anlegen und löschen sowie
 Ergebnisse zurücksetzen** liegen im Elternbereich hinter der PIN — sonst löscht
-ein Geschwisterkind die Bestzeiten. Ein Profil anzulegen heißt, ihm einen Namen
+ein Geschwisterkind die Bestzeiten. Dasselbe gilt für alles, was **für alle**
+gilt: ein Kind, das die Uhr abschalten oder jeden Durchgang auf fünf Aufgaben
+stellen kann, hat den falschen Regler in der Hand. Ein Profil anzulegen heißt, ihm einen Namen
 zu geben, deshalb steckt auch das Anlegen hinter der PIN.
 
 Die PIN wird beim ersten Öffnen des Elternbereichs festgelegt; es gibt keinen
@@ -169,7 +175,7 @@ löschen — damit sind allerdings auch alle Ergebnisse weg.
 
 ## Zwei Entwurfsentscheidungen
 
-**Die Uhr ist standardmäßig unsichtbar** (in den Einstellungen zuschaltbar).
+**Die Uhr ist standardmäßig unsichtbar** (im Elternbereich zuschaltbar).
 Gemessen wird trotzdem immer — sichtbarer Zeitdruck macht Grundschüler eher
 langsamer.
 

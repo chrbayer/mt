@@ -197,6 +197,25 @@ dem Schließen ist der Kontext des Sheets ungültig, und ein zweites
 `Navigator.of(context)` läuft ins Leere, ohne zu meckern — genau so waren „Los
 geht's" und „Bestenliste" einmal komplett tot.
 
+## Wo eine Einstellung hingehört
+
+Zwei Orte, und die Grenze verläuft nach **Zuständigkeit**, nicht nach
+Bequemlichkeit: Was für die ganze App gilt — Uhr, Vibration, Vorgabe für alle —
+steht im Elternbereich hinter der PIN. Was nur das eigene Üben betrifft, steht
+in `SettingsScreen`, und der ist ausschließlich aus dem Lektionsbildschirm
+eines angemeldeten Kindes erreichbar.
+
+Genau deshalb muss dort **nicht mehr dabeistehen, für wen es gilt**: wer den
+Bildschirm sieht, ist angemeldet, und es ist seiner. Ein „Für Mia" daneben war
+die Folge davon, dass auf demselben Bildschirm auch die Vorgabe für alle stand.
+
+Auf dem Profilbildschirm gibt es kein Zahnrad mehr. Ohne angemeldetes Kind gibt
+es keine eigenen Einstellungen, und die für alle liegen zwei Knöpfe weiter im
+Elternbereich.
+
+`TaskCountExplanation` kennt beide Ebenen: „sonst diese hier" muss auf den
+richtigen Regler zeigen, und welcher das ist, hängt vom Bildschirm ab.
+
 ## Elternbereich
 
 Die PIN (`SettingsRepository.setAdminPin` / `checkAdminPin`) schützt vor einem

@@ -59,14 +59,24 @@ class TaskCountChoice extends StatelessWidget {
   }
 }
 
-/// Explains the three levels once, where a parent will read it.
+/// Explains the three levels, worded for the level it is shown at.
+///
+/// "Sonst diese hier" has to point at the right dial, and which dial that is
+/// depends on the screen - the app-wide default or one child's.
 class TaskCountExplanation extends StatelessWidget {
-  const TaskCountExplanation({super.key});
+  /// True where a single profile's default is being set.
+  final bool forProfile;
+
+  const TaskCountExplanation({super.key, this.forProfile = false});
 
   @override
-  Widget build(BuildContext context) => const Text(
-        'Es gilt jeweils das Genaueste: was zuletzt bei einer Lektion '
-        'gewählt wurde, sonst die Vorgabe des Profils, sonst diese hier.',
-        style: TextStyle(fontSize: 17, color: AppColors.textMuted),
+  Widget build(BuildContext context) => Text(
+        forProfile
+            ? 'Es gilt jeweils das Genaueste: was zuletzt bei einer Lektion '
+                'gewählt wurde, sonst diese hier, sonst die Vorgabe für alle.'
+            : 'Es gilt jeweils das Genaueste: was zuletzt bei einer Lektion '
+                'gewählt wurde, sonst die Vorgabe des Profils, sonst diese '
+                'hier.',
+        style: const TextStyle(fontSize: 17, color: AppColors.textMuted),
       );
 }

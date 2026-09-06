@@ -5,7 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mathe_trainer/data/db/app_database.dart';
 import 'package:mathe_trainer/domain/lesson.dart';
 import 'package:mathe_trainer/features/lessons/start_lesson_sheet.dart';
-import 'package:mathe_trainer/features/settings/settings_screen.dart';
+import 'package:mathe_trainer/features/admin/global_settings_tab.dart';
 import 'package:mathe_trainer/providers.dart';
 import 'package:mathe_trainer/theme/app_theme.dart';
 
@@ -63,11 +63,8 @@ void main() {
     return null;
   }
 
-  /// The settings screen uses Material chips, which carry the state directly.
-  ///
-  /// It shows two rows once a child is logged in - one for the profile, one
-  /// for everyone - and the profile row's "wie überall" chip is selected too.
-  /// Only numbered chips count here.
+  /// The settings screens use Material chips, which carry the state directly.
+  /// Only numbered chips count: the "wie überall" chip has no number.
   int? highlightedInSettings(WidgetTester tester) {
     for (final chip in tester.widgetList<ChoiceChip>(find.byType(ChoiceChip))) {
       if (!chip.selected) continue;
@@ -106,7 +103,7 @@ void main() {
   });
 
   testWidgets('the settings screen does the same', (tester) async {
-    await pump(tester, const SettingsScreen());
+    await pump(tester, const Scaffold(body: GlobalSettingsTab()));
 
     for (var i = 0; i < 6; i++) {
       await tester.pump(const Duration(milliseconds: 30));
@@ -119,7 +116,7 @@ void main() {
 
   testWidgets('the switches wait for their real values too', (tester) async {
     await container.read(settingsRepositoryProvider).setShowClock(true);
-    await pump(tester, const SettingsScreen());
+    await pump(tester, const Scaffold(body: GlobalSettingsTab()));
 
     // Before the values arrive the switches are inert rather than showing a
     // guessed position that a tap would then act on.

@@ -6,6 +6,7 @@ import 'package:mathe_trainer/data/db/app_database.dart';
 import 'package:mathe_trainer/domain/lesson.dart';
 import 'package:mathe_trainer/domain/task.dart';
 import 'package:mathe_trainer/features/admin/admin_screen.dart';
+import 'package:mathe_trainer/features/admin/global_settings_tab.dart';
 import 'package:mathe_trainer/features/leaderboard/leaderboard_screen.dart';
 import 'package:mathe_trainer/features/lessons/lesson_home_screen.dart';
 import 'package:mathe_trainer/features/practice/practice_screen.dart';
@@ -218,15 +219,28 @@ void main() {
 
     testWidgets('13-einstellungen-mit-profil passt auf ${size.key}',
         (tester) async {
-      // With a child logged in the screen carries two run-length rows.
+      // A child's own settings, reached from inside their own screen: the
+      // run length is theirs, and nothing here says whose it is.
       final users = container.read(userRepositoryProvider);
       container
           .read(activeUserProvider.notifier)
           .select((await users.findUser(mia.id))!);
       await pumpScreen(tester, const SettingsScreen(), size.value);
       expect(tester.takeException(), isNull);
-      expect(find.text('Für Mia'), findsOneWidget);
-      expect(find.text('Für alle'), findsOneWidget);
+      expect(find.text('Aufgaben pro Durchgang'), findsOneWidget);
+      expect(find.text('Für Mia'), findsNothing);
+      expect(find.text('Für alle'), findsNothing);
+      // What holds for everyone is behind the PIN now.
+      expect(find.byType(SwitchListTile), findsNothing);
+    });
+
+    testWidgets('14-elternbereich-einstellungen passt auf ${size.key}',
+        (tester) async {
+      await pumpScreen(
+          tester, const Scaffold(body: GlobalSettingsTab()), size.value);
+      expect(tester.takeException(), isNull);
+      expect(find.text('Uhr während der Übung zeigen'), findsOneWidget);
+      expect(find.text('Aufgaben pro Durchgang für alle'), findsOneWidget);
     });
 
     testWidgets('12-bereiche-dialog passt auf ${size.key}', (tester) async {

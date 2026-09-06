@@ -85,7 +85,7 @@ class _ProfileSettingsDialogState
               Text('Aufgaben pro Durchgang',
                   style: Theme.of(context).textTheme.titleLarge),
               const SizedBox(height: 4),
-              const TaskCountExplanation(),
+              const TaskCountExplanation(forProfile: true),
               const SizedBox(height: 10),
               TaskCountChoice(
                 value: _taskCount,
