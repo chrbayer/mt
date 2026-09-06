@@ -405,10 +405,23 @@ Gesperrt wird nur der **Start**, nie ein laufender Durchgang. `PracticeScreen`
 schaut die Erlaubnis **nirgends** an — das ist die Zusicherung, und ein Test
 spielt einen Durchgang zu Ende, während die Zeit mitten darin abläuft. Mitten in einer
 Aufgabe hinausgeworfen zu werden verlöre die Runde und brächte dem Kind bei,
-dass der App nicht zu trauen ist. Geprüft wird an **jeder** Stelle, die einen Durchgang startet: im Startdialog,
-bei „Nochmal" auf dem Ergebnisbildschirm und im Duell. „Nochmal" führt direkt
-zu `PracticeScreen` und ging anfangs an der Prüfung vorbei — wer eine Runde
-genau bei Zeitablauf beendete, konnte damit endlos weitermachen.
+dass der App nicht zu trauen ist. Die **verbindliche** Prüfung sitzt in `PracticeScreen._prepare()` — der einen
+Stelle, durch die jeder Durchgang muss, egal welcher Knopf dorthin geführt
+hat. Sie fragt **einmal**, bevor Aufgaben erzeugt werden; danach nie wieder.
+Vorher stand die Prüfung an den Knöpfen, und es waren vier: Startdialog,
+„Nochmal", die Empfehlungskachel und ihr „Los" — zwei davon gingen daran
+vorbei.
+
+Die Knöpfe fragen trotzdem, aber nur noch, um sich auszugrauen; alle über
+denselben `practiceGateProvider`. Der antwortet, **solange etwas lädt, mit
+„nein"**: weder Profil noch Grenzen zu kennen heißt nicht „keine Grenzen". Aus
+demselben Grund wartet `practiceAllowanceForProvider` mit `await` auf
+`usersProvider` und `preferencesProvider`, statt deren `AsyncValue` als „kein
+Profil, also unbegrenzt" zu lesen.
+
+`_prepare()` hält den Provider über das `await` hinweg mit `listenManual` fest.
+Ohne Zuhörer wird er beim Lesen sofort entsorgt und sein Future wird nie
+fertig — der Bildschirm hing dann still.
 
 Die **Tagesgrenze** zählt unabhängig davon alle Durchgänge des Tages. Sie hat
 Vorrang vor der Stückgrenze: wenn der Tag aufgebraucht ist, hilft keine Pause,

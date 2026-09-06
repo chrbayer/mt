@@ -161,18 +161,18 @@ final boltTotalsProvider = StreamProvider<Map<int, int>>(
 final clockProvider = Provider<DateTime Function()>((ref) => DateTime.now);
 
 final practiceAllowanceForProvider =
-    StreamProvider.family<PracticeAllowance, int>((ref, userId) {
-  final user = ref
-      .watch(usersProvider)
-      .value
-      ?.where((u) => u.id == userId)
-      .firstOrNull;
-  // Deliberately nullable: until the app-wide limits have been read there is
-  // no telling whether this child is capped, and guessing "no" would open a
-  // door that is about to close again.
-  final preferences = ref.watch(preferencesProvider).value;
-  if (user == null || preferences == null) {
-    return Stream.value(PracticeAllowance.unlimited);
+    StreamProvider.family<PracticeAllowance, int>((ref, userId) async* {
+  // Awaited, not read off an AsyncValue: while the profile or the app-wide
+  // limits are still loading there is no telling whether this child is
+  // capped, and answering "not capped" opens a door about to close. The
+  // screens wait; they do not guess.
+  final users = await ref.watch(usersProvider.future);
+  final preferences = await ref.watch(preferencesProvider.future);
+
+  final user = users.where((u) => u.id == userId).firstOrNull;
+  if (user == null) {
+    yield PracticeAllowance.unlimited;
+    return;
   }
 
   final limits = resolvePracticeLimits(
@@ -182,7 +182,8 @@ final practiceAllowanceForProvider =
     dailyMinutes: user.dailyLimitMinutes,
   );
   if (limits.stretchMinutes <= 0 && limits.dailyMinutes <= 0) {
-    return Stream.value(PracticeAllowance.unlimited);
+    yield PracticeAllowance.unlimited;
+    return;
   }
 
   final now = ref.watch(clockProvider);
@@ -198,13 +199,13 @@ final practiceAllowanceForProvider =
   // re-judging the old numbers: when the wake-up is midnight, the day itself
   // has changed and the query has to be asked again.
   //
-  // An explicit Timer, not an await inside a generator - only this one really
-  // stops once nobody is listening, and a pending alarm keeps both the app
-  // and every widget test awake.
+  // An explicit Timer, not an await inside the generator - only this one
+  // really stops once nobody is listening, and a pending alarm keeps both the
+  // app and every widget test awake.
   Timer? alarm;
   ref.onDispose(() => alarm?.cancel());
 
-  return stretches.map((stretch) {
+  yield* stretches.map((stretch) {
     final allowance = practiceAllowance(
       limitMinutes: limits.stretchMinutes,
       breakMinutes: limits.breakMinutes,
@@ -226,6 +227,27 @@ final practiceAllowanceForProvider =
     }
     return allowance;
   });
+});
+
+/// What a screen has to know before it offers to start a run: whether it may
+/// start, and, when not, what to say about it.
+///
+/// One implementation for all three doors into a run - start dialog,
+/// "Nochmal" and the recommendation - because three copies of the same
+/// question drift apart, and the third one already had.
+typedef PracticeGate = ({bool mayStart, PracticeAllowance? pause});
+
+/// While the limits are still being read the answer is **no**, and there is
+/// nothing to explain yet: the same rule as for the run length, where
+/// inventing a value made the choice jump. Here inventing "allowed" would
+/// open a door that is about to close.
+final practiceGateProvider = Provider<PracticeGate>((ref) {
+  final allowance = ref.watch(practiceAllowanceProvider).value;
+  if (allowance == null) return (mayStart: false, pause: null);
+  return (
+    mayStart: allowance.allowed,
+    pause: allowance.allowed ? null : allowance,
+  );
 });
 
 /// The same, for the child currently practising.

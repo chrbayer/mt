@@ -17,7 +17,7 @@ nach Dringlichkeit sortiert.
 
 ## Fehler
 
-#6 Die Empfehlungskachel umgeht die Zeitsperre. Sie tippt direkt in
+#6 erledigt (2.1.4) — Die Empfehlungskachel umgeht die Zeitsperre. Sie tippt direkt in
 PracticeScreen, wie es "Nochmal" bis 2.1.3 tat — in der Pause lässt sich
 darüber weiter üben. Alle drei Türen (Startdialog, Nochmal, Empfehlung) müssen
 dieselbe Prüfung machen; am besten eine gemeinsame Stelle statt drei Kopien.
@@ -25,14 +25,14 @@ Nebenbei startet die Kachel mit `?? fallbackTaskCount`, also mit 10 Aufgaben,
 solange die gespeicherte Länge noch lädt — genau das Erfinden eines Vorgabe-
 wertes, das CLAUDE.md verbietet.
 
-#7 Solange die Einstellungen laden, ist der Start erlaubt.
+#7 erledigt (2.1.4) — Solange die Einstellungen laden, ist der Start erlaubt.
 practiceAllowanceForProvider gibt bei `preferences == null` "unlimited"
 zurück, und die Bildschirme setzen `?? PracticeAllowance.unlimited` obendrauf.
 Der Kommentar an der Stelle sagt das Gegenteil. Ein Kind, das in der Pause
 schnell tippt, kommt im ersten Frame durch. Richtig wäre: solange unbekannt,
 ist der Start deaktiviert — dieselbe Regel wie bei der Aufgabenzahl.
 
-#8 Der Pausenhinweis rechnet die Restzeit mit DateTime.now(), die Entscheidung
+#8 erledigt (2.1.4) — Der Pausenhinweis rechnet die Restzeit mit DateTime.now(), die Entscheidung
 darüber mit clockProvider. Zwei Uhren für dieselbe Aussage; in der App
 identisch, aber die Zeitgrenze ist genau der Ort, an dem das auseinanderlaufen
 darf.

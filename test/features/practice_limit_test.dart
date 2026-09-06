@@ -410,4 +410,89 @@ void main() {
       expect(again.onPressed, isNotNull);
     });
   });
+
+  group('every door into a run asks the same question', () {
+    testWidgets('the practice screen refuses even when pushed directly',
+        (tester) async {
+      await setLimit(limit: 20, pause: 15);
+      await practise(minutes: 25, endedMinutesAgo: 1);
+
+      // Straight past every button - this is what the recommendation card
+      // did, and what any future fourth door would do.
+      await pump(
+        tester,
+        PracticeScreen(lesson: lessonById('add_100_carry'), taskCount: 10),
+      );
+      // The screen asks the cap before it generates anything.
+      await tester.pumpAndSettle();
+
+      expect(find.byType(PauseNotice), findsOneWidget);
+      expect(find.byType(TaskDisplay), findsNothing,
+          reason: 'no run is generated at all');
+      await waitOut(tester, const Duration(minutes: 16));
+    });
+
+    testWidgets('the recommendation card is dead during the break',
+        (tester) async {
+      await setLimit(limit: 20, pause: 15);
+      await practise(minutes: 25, endedMinutesAgo: 1);
+      await pump(tester, const LessonHomeScreen());
+
+      final card = tester.widget<InkWell>(
+        find.ancestor(
+          of: find.byIcon(Icons.lightbulb_outline),
+          matching: find.byType(InkWell),
+        ),
+      );
+      expect(card.onTap, isNull);
+      final go = tester.widget<FilledButton>(
+        find.widgetWithText(FilledButton, 'Los'),
+      );
+      expect(go.onPressed, isNull);
+      await waitOut(tester, const Duration(minutes: 16));
+    });
+
+    testWidgets('and works again once the break is over', (tester) async {
+      await setLimit(limit: 20, pause: 15);
+      await practise(minutes: 25, endedMinutesAgo: 20);
+      await pump(tester, const LessonHomeScreen());
+
+      final go = tester.widget<FilledButton>(
+        find.widgetWithText(FilledButton, 'Los'),
+      );
+      expect(go.onPressed, isNotNull);
+    });
+
+    test('while the limits are unknown, no run may start', () async {
+      final fresh = ProviderContainer(
+        overrides: [databaseProvider.overrideWithValue(db)],
+      );
+      addTearDown(fresh.dispose);
+      fresh.read(activeUserProvider.notifier).select(mia);
+      // Read before anything has had a chance to load: the honest answer is
+      // "not yet", and it must not be "yes" - that was the open door.
+      final gate = fresh.read(practiceGateProvider);
+      expect(gate.mayStart, isFalse);
+      expect(gate.pause, isNull, reason: 'nothing to explain yet either');
+
+      // And once everything is known the door opens again - the gate is
+      // shut while loading, not shut for good.
+      final sub =
+          fresh.listen(practiceAllowanceForProvider(mia.id), (_, _) {});
+      await fresh.read(practiceAllowanceForProvider(mia.id).future);
+      expect(fresh.read(practiceGateProvider).mayStart, isTrue);
+      sub.close();
+    });
+  });
+
+  testWidgets('the countdown runs against the app clock', (tester) async {
+    await setLimit(limit: 20, pause: 15);
+    // The break ends fourteen minutes after the test clock, which is hours
+    // away from the real one - so the wrong clock would show wildly.
+    await practise(minutes: 25, endedMinutesAgo: 1);
+    await pump(tester, const LessonHomeScreen());
+
+    expect(find.textContaining('noch 14 Minuten'), findsOneWidget);
+    await waitOut(tester, const Duration(minutes: 16));
+  });
 }

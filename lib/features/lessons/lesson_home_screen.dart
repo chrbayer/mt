@@ -6,7 +6,6 @@ import '../../data/repositories/user_repository.dart';
 import '../../domain/lesson.dart';
 import '../../domain/practice_limit.dart';
 import '../../domain/scoring.dart';
-import '../../domain/task_count.dart';
 import '../../providers.dart';
 import '../../theme/app_theme.dart';
 import '../common/star_row.dart';
@@ -164,12 +163,17 @@ class _RecommendationCard extends ConsumerWidget {
     final suggestion = recommendation;
     if (suggestion == null) return const SizedBox.shrink();
 
-    // The same three levels the start sheet resolves.
+    // The same three levels the start sheet resolves. Deliberately nullable:
+    // starting the run with an invented ten while the stored length is still
+    // being read would hand out the wrong length.
     final taskCount = ref
-            .watch(resolvedTaskCountProvider(
-                (userId: userId, lessonId: suggestion.lesson.id)))
-            .value ??
-        fallbackTaskCount;
+        .watch(resolvedTaskCountProvider(
+            (userId: userId, lessonId: suggestion.lesson.id)))
+        .value;
+    // The card is a third door into a run, so it asks the same question the
+    // other two ask.
+    final gate = ref.watch(practiceGateProvider);
+    final ready = gate.mayStart && taskCount != null;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 24),
@@ -178,14 +182,16 @@ class _RecommendationCard extends ConsumerWidget {
         borderRadius: BorderRadius.circular(20),
         child: InkWell(
           borderRadius: BorderRadius.circular(20),
-          onTap: () => Navigator.of(context).push(
-            MaterialPageRoute<void>(
-              builder: (_) => PracticeScreen(
-                lesson: suggestion.lesson,
-                taskCount: taskCount,
-              ),
-            ),
-          ),
+          onTap: !ready
+              ? null
+              : () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => PracticeScreen(
+                        lesson: suggestion.lesson,
+                        taskCount: taskCount,
+                      ),
+                    ),
+                  ),
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
             decoration: BoxDecoration(
@@ -227,14 +233,16 @@ class _RecommendationCard extends ConsumerWidget {
                 FilledButton.icon(
                   icon: const Icon(Icons.play_arrow_rounded, size: 30),
                   label: const Text('Los'),
-                  onPressed: () => Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                      builder: (_) => PracticeScreen(
-                        lesson: suggestion.lesson,
-                        taskCount: taskCount,
-                      ),
-                    ),
-                  ),
+                  onPressed: !ready
+                      ? null
+                      : () => Navigator.of(context).push(
+                            MaterialPageRoute<void>(
+                              builder: (_) => PracticeScreen(
+                                lesson: suggestion.lesson,
+                                taskCount: taskCount,
+                              ),
+                            ),
+                          ),
                 ),
               ],
             ),

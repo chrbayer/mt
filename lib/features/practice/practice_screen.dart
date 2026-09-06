@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../domain/lesson.dart';
+import '../../domain/practice_limit.dart';
 import '../../domain/scoring.dart';
 import '../../domain/task.dart';
 import '../../domain/task_generator.dart';
@@ -14,6 +15,7 @@ import '../../theme/app_theme.dart';
 import '../profiles/profile_badge.dart';
 import '../result/result_screen.dart';
 import 'practice_controller.dart';
+import '../lessons/pause_notice.dart';
 import 'widgets/big_keypad.dart';
 import 'widgets/choice_keypad.dart';
 import 'widgets/progress_dots.dart';
@@ -74,6 +76,10 @@ class _PracticeScreenState extends ConsumerState<PracticeScreen>
   int? _sessionId;
   bool _leaving = false;
 
+  /// Set when the practice cap was already reached as this screen opened.
+  /// Then no run is generated at all and the break is shown instead.
+  PracticeAllowance? _blocked;
+
   @override
   void initState() {
     super.initState();
@@ -90,6 +96,35 @@ class _PracticeScreenState extends ConsumerState<PracticeScreen>
 
   Future<void> _prepare() async {
     final user = ref.read(activeUserProvider);
+
+    // The one place every run goes through, whichever button led here. The
+    // buttons themselves are the polite half - they grey out - but a third
+    // door slipped past them once, so the guarantee lives here.
+    //
+    // Awaited rather than read: while the limits are still loading the answer
+    // is not yet "yes", and assuming it would open a door about to close.
+    //
+    // Asked exactly once. A run under way is never cut short - being thrown
+    // out mid-task would lose the round and teach a child that the app is not
+    // to be trusted.
+    if (user != null) {
+      final provider = practiceAllowanceForProvider(user.id);
+      // Held open across the await: without a listener the provider is
+      // disposed the moment it is read, and its future never completes.
+      final subscription = ref.listenManual(provider, (_, _) {});
+      final PracticeAllowance allowance;
+      try {
+        allowance = await ref.read(provider.future);
+      } finally {
+        subscription.close();
+      }
+      if (!mounted) return;
+      if (!allowance.allowed) {
+        setState(() => _blocked = allowance);
+        return;
+      }
+    }
+
     final review = user == null || widget.seed != null
         ? const <Task>[]
         : await ref.read(
@@ -292,6 +327,35 @@ class _PracticeScreenState extends ConsumerState<PracticeScreen>
 
   @override
   Widget build(BuildContext context) {
+    // Reached the cap before this run even began: no tasks were generated,
+    // and the break is all there is to say.
+    final blocked = _blocked;
+    if (blocked != null) {
+      return Scaffold(
+        appBar: AppBar(title: Text(widget.lesson.title)),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(40),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 720),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  PauseNotice(allowance: blocked),
+                  const SizedBox(height: 28),
+                  FilledButton.icon(
+                    icon: const Icon(Icons.grid_view_rounded, size: 30),
+                    label: const Text('Zurück zu den Lektionen'),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
     final controller = _controller;
     if (controller == null) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));

@@ -55,6 +55,9 @@ void main() {
         ),
       ),
     );
+    // Two frames: the run is only generated once the practice cap has
+    // answered, and the review pool after that.
+    await tester.pump();
     await tester.pump();
   }
 

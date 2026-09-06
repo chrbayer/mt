@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/db/app_database.dart';
 import '../../domain/lesson.dart';
-import '../../domain/practice_limit.dart';
 import '../../domain/scoring.dart';
 import '../../providers.dart';
 import '../../theme/app_theme.dart';
@@ -44,8 +43,7 @@ class ResultScreen extends ConsumerWidget {
     final bolts = boltsFor(lesson.targetMsPerTask, perTask, taskCount);
     final nextBolt = nextBoltTargetMs(lesson.targetMsPerTask, bolts);
     final user = ref.watch(activeUserProvider);
-    final allowance = ref.watch(practiceAllowanceProvider).value ??
-        PracticeAllowance.unlimited;
+    final gate = ref.watch(practiceGateProvider);
     final streak = user == null
         ? 0
         : ref.watch(streaksProvider).value?[user.id] ?? 0;
@@ -253,10 +251,10 @@ class ResultScreen extends ConsumerWidget {
               // The run just finished may well have been the one that used up
               // the time. "Nochmal" starts a new one, so it has to ask the
               // same question the start dialog asks.
-              if (!allowance.allowed)
+              if (gate.pause != null)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 12),
-                  child: PauseNotice(allowance: allowance, compact: true),
+                  child: PauseNotice(allowance: gate.pause!, compact: true),
                 ),
               Row(
                 children: [
@@ -264,7 +262,7 @@ class ResultScreen extends ConsumerWidget {
                     child: FilledButton.icon(
                       icon: const Icon(Icons.refresh, size: 30),
                       label: const Text('Nochmal'),
-                      onPressed: !allowance.allowed
+                      onPressed: !gate.mayStart
                           ? null
                           : () => Navigator.of(context).pushReplacement(
                                 MaterialPageRoute<void>(
