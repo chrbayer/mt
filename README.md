@@ -7,7 +7,7 @@ antreten. Die App läuft vollständig offline, ohne Konten und ohne Netzwerk.
 
 ## Was sie kann
 
-* **61 Lektionen** in acht Gruppen (Erste Schritte / Bis 10 / Bis 20 /
+* **62 Lektionen** in acht Gruppen (Erste Schritte / Bis 10 / Bis 20 /
   Bis 100 / Bis 1000 / Einmaleins / Mal und Geteilt / Uhrzeit und Geld).
   Ab 20 bietet jede Gruppe Plus und Minus mit und ohne Zehnerübergang, zwei
   Platzhalterformen (`34 + ? = 71`) und eine gemischte Lektion; jede Lektion
@@ -16,10 +16,14 @@ antreten. Die App läuft vollständig offline, ohne Konten und ohne Netzwerk.
   ablesen (alle sechs Seiten), zwei Häufchen vergleichen, die Zahlenreihe
   vorwärts und rückwärts, Bienchen zusammenzählen (bis 10), zwei Würfel
   zusammenzählen, und Rechnen bis 6 — als Plus, als Minus und gemischt.
-  Zählen und Bienchen gibt es je zweimal: **in einer Reihe** und **als Wolke**.
+  Zählen, Vergleichen und Bienchen gibt es je zweimal: **in einer Reihe** und
+  **als Wolke**.
   Eine Reihe zählt man mit dem Finger entlang; bei einer Wolke muss man sich
   merken, was schon gezählt ist. Das ist eine andere Fähigkeit und darum eine
   eigene Lektion, die Reihe zuerst.
+  Eine Zahl steht nur dort neben den Bildern, wo sie mit der Menge verknüpft
+  werden soll — beim Vergleichen und beim Zusammenrechnen. Wo das Zählen
+  selbst die Aufgabe ist, verrät keine Zahl das Ergebnis.
   Diese Lektionen werden **nicht gemessen und nicht gewertet**: keine Uhr,
   keine Bestenliste, und die Sterne gibt es fürs Durchhalten statt fürs Tempo.
   Wer fünf Äpfel zählt, soll nicht gegen ein Geschwisterkind antreten.

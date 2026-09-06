@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mathe_trainer/domain/lesson.dart';
 import 'package:mathe_trainer/features/practice/widgets/picture_group.dart';
@@ -6,6 +9,23 @@ import 'package:mathe_trainer/features/practice/widgets/picture_group.dart';
 /// The scatter has to hold still. Pictures that move while a child counts
 /// them would make the lesson impossible.
 void main() {
+  // Real glyph metrics: the test font is square, and the overflow this file
+  // guards against only happens with a font whose glyphs are taller than
+  // their point size - which every real one is.
+  setUpAll(() async {
+    for (final path in [
+      '/usr/share/fonts/google-noto-emoji-fonts/NotoEmoji-Regular.ttf',
+      '/usr/share/fonts/dejavu-sans-fonts/DejaVuSans.ttf',
+    ]) {
+      if (!File(path).existsSync()) continue;
+      final bytes = File(path).readAsBytesSync();
+      await (FontLoader('Roboto')
+            ..addFont(Future.value(ByteData.sublistView(bytes))))
+          .load();
+      break;
+    }
+  });
+
   Future<List<Offset>> positions(
     WidgetTester tester, {
     required int count,
@@ -97,6 +117,65 @@ void main() {
           );
         }
       }
+    }
+  });
+
+  testWidgets('nothing is cut off at the edge of a cloud', (tester) async {
+    // The bottom row used to poke out of the Stack, which clips - the last
+    // pictures were sliced off although the screen had room to spare.
+    for (var count = 1; count <= 5; count++) {
+      for (var seed = 0; seed < 20; seed++) {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: Center(
+                child: PictureGroup(
+                  count: count,
+                  picture: '🐝',
+                  arrangement: PictureArrangement.scattered,
+                  seed: seed,
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pump();
+
+        final group = tester.getRect(find.byType(PictureGroup));
+        for (final element in find.text('🐝').evaluate()) {
+          final box = element.renderObject! as RenderBox;
+          final rect = box.localToGlobal(Offset.zero) & box.size;
+          expect(group.contains(rect.topLeft), isTrue,
+              reason: '$count Bilder, seed $seed');
+          expect(
+            group.contains(rect.bottomRight - const Offset(0.01, 0.01)),
+            isTrue,
+            reason: '$count Bilder, seed $seed',
+          );
+        }
+      }
+    }
+  });
+
+  testWidgets('the count is shown only where it is asked for',
+      (tester) async {
+    for (final show in [false, true]) {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: PictureGroup(
+                count: 4,
+                picture: '🐝',
+                arrangement: PictureArrangement.row,
+                showCount: show,
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      expect(find.text('4'), show ? findsOneWidget : findsNothing);
     }
   });
 

@@ -231,6 +231,21 @@ Die Streuung kommt aus einem gesetzten Zufallsgenerator und hält damit über
 Neuaufbauten still. Bilder, die beim Zählen umherspringen, wären unbenutzbar;
 ein Test hält das fest.
 
+## Zahl neben der Menge
+
+`LessonSpec.showCounts` entscheidet, ob unter einem Häufchen (und unter einem
+Würfel) die Zahl steht. Die Regel ist inhaltlich, nicht kosmetisch: **eine
+Zahl gehört dorthin, wo sie mit der Menge verknüpft werden soll, und nicht
+dorthin, wo gezählt werden soll.** Beim Vergleichen und beim Zusammenrechnen
+hilft sie, beim Zählen verrät sie die Lösung. Ein Test im Katalog hält die
+Zuordnung je Lektion fest.
+
+Bei der Wolke werden die Zellen aus einem Glyphen-`extent` bemessen, nicht aus
+der Schriftgröße: ein Zeichen ist höher als sein Schriftgrad, und der `Stack`
+schnitt die letzte Reihe sonst ab, obwohl daneben noch Platz war. Der
+Regressionstest dazu lädt eine echte Schrift — mit der quadratischen Testschrift
+tritt der Überstand gar nicht auf und der Test wäre wertlos.
+
 ## Nicht gewertete Lektionen
 
 `LessonSpec.scored == false` heißt dreierlei: keine sichtbare Uhr, kein

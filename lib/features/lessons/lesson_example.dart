@@ -74,6 +74,7 @@ class LessonExample extends StatelessWidget {
         arrangement: lesson.arrangement,
         seed: task.a * 31 + task.b,
         size: fontSize,
+        showCount: lesson.showCounts,
       );
     }
     if (task.form == TaskForm.quantityAdd) {
@@ -86,6 +87,7 @@ class LessonExample extends StatelessWidget {
             arrangement: lesson.arrangement,
             seed: task.a * 31 + task.b,
             size: fontSize,
+            showCount: lesson.showCounts,
           ),
           Padding(
             padding: EdgeInsets.symmetric(horizontal: fontSize * 0.3),
@@ -104,6 +106,7 @@ class LessonExample extends StatelessWidget {
             arrangement: lesson.arrangement,
             seed: task.b * 31 + task.a,
             size: fontSize,
+            showCount: lesson.showCounts,
           ),
         ],
       );
@@ -112,7 +115,11 @@ class LessonExample extends StatelessWidget {
       return Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          DiceFace(pips: task.a, size: fontSize * 1.7, showNumber: false),
+          DiceFace(
+            pips: task.a,
+            size: fontSize * 1.7,
+            showNumber: lesson.showCounts,
+          ),
           if (task.b > 0) ...[
             Padding(
               padding: EdgeInsets.symmetric(horizontal: fontSize * 0.35),
@@ -125,7 +132,11 @@ class LessonExample extends StatelessWidget {
                 ),
               ),
             ),
-            DiceFace(pips: task.b, size: fontSize * 1.7, showNumber: false),
+            DiceFace(
+              pips: task.b,
+              size: fontSize * 1.7,
+              showNumber: lesson.showCounts,
+            ),
           ],
         ],
       );

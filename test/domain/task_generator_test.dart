@@ -580,7 +580,7 @@ void main() {
             .where((l) => l.group != LessonGroup.firstSteps)) {
           expect(lesson.scored, isTrue, reason: lesson.id);
         }
-        expect(unscoredLessonIds, hasLength(11));
+        expect(unscoredLessonIds, hasLength(12));
       });
 
       test('counting asks for the number of pictures', () {
@@ -854,9 +854,9 @@ void main() {
   });
 
   group('lesson catalog', () {
-    test('has 61 lessons in eight groups with unique ids', () {
-      expect(lessonCatalog, hasLength(61));
-      expect(lessonsInGroup(LessonGroup.firstSteps), hasLength(11));
+    test('has 62 lessons in eight groups with unique ids', () {
+      expect(lessonCatalog, hasLength(62));
+      expect(lessonsInGroup(LessonGroup.firstSteps), hasLength(12));
       expect(lessonsInGroup(LessonGroup.everyday), hasLength(5));
       // Nine rows of the times table plus a mixed one.
       expect(lessonsInGroup(LessonGroup.timesTables), hasLength(10));
@@ -868,7 +868,44 @@ void main() {
       expect(lessonsInGroup(LessonGroup.upTo100), hasLength(7));
       expect(lessonsInGroup(LessonGroup.upTo1000), hasLength(7));
       expect(lessonCatalog.first.id, 'count_pictures');
-      expect(lessonCatalog.map((l) => l.id).toSet(), hasLength(61));
+      expect(lessonCatalog.map((l) => l.id).toSet(), hasLength(62));
+    });
+
+    // The rule the numerals follow: a number belongs where an amount is meant
+    // to be tied to it, and not where the point of the exercise is to count.
+    test('numerals are shown next to an amount, never where counting is the '
+        'exercise', () {
+      for (final id in [
+        'compare_more',
+        'compare_more_cloud',
+        'bees_add',
+        'bees_add_cloud',
+        'dice_add',
+      ]) {
+        expect(lessonById(id).showCounts, isTrue, reason: id);
+      }
+      for (final id in [
+        'count_pictures',
+        'count_pictures_cloud',
+        'count_dice',
+      ]) {
+        expect(lessonById(id).showCounts, isFalse, reason: id);
+      }
+      // Nothing outside the first steps draws pictures at all, so a numeral
+      // there would have nothing to sit under.
+      for (final lesson in lessonCatalog
+          .where((l) => l.group != LessonGroup.firstSteps)) {
+        expect(lesson.showCounts, isFalse, reason: lesson.id);
+      }
+    });
+
+    test('the two comparison lessons differ only in their arrangement', () {
+      final row = lessonById('compare_more');
+      final cloud = lessonById('compare_more_cloud');
+      expect(row.arrangement, PictureArrangement.row);
+      expect(cloud.arrangement, PictureArrangement.scattered);
+      expect(cloud.form, row.form);
+      expect(cloud.scored, row.scored);
     });
 
     test('the times tables are ordered easiest first', () {

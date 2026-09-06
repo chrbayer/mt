@@ -144,6 +144,10 @@ void main() {
           lesson: lessonById('compare_more'),
           taskCount: 5,
         ),
+    '02c2-vergleichen-wolke': () => PracticeScreen(
+          lesson: lessonById('compare_more_cloud'),
+          taskCount: 5,
+        ),
     '02d-zahlenreihe': () => PracticeScreen(
           lesson: lessonById('count_next'),
           taskCount: 5,

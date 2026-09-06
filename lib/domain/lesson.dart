@@ -140,6 +140,13 @@ class LessonSpec {
   /// How a counting task arranges its pictures.
   final PictureArrangement arrangement;
 
+  /// Whether each group also shows how many it holds.
+  ///
+  /// A number belongs where an amount is meant to be tied to it - comparing
+  /// two heaps, adding two of them. Where the exercise *is* the counting, it
+  /// gives the answer away.
+  final bool showCounts;
+
   /// For clock lessons: the minutes hand only ever lands on multiples of
   /// this. Half hours first, then quarters, then five-minute steps.
   final int minuteStep;
@@ -166,6 +173,7 @@ class LessonSpec {
     this.minuteStep = 0,
     this.scored = true,
     this.arrangement = PictureArrangement.row,
+    this.showCounts = false,
   });
 
   @override
@@ -482,13 +490,26 @@ const _firstStepsLessons = [
   ),
   LessonSpec(
     id: 'compare_more',
-    title: 'Wo sind mehr?',
+    title: 'Wo sind mehr? (Reihe)',
     description: 'Zwei Häufchen vergleichen und die größere Anzahl eingeben.',
     group: LessonGroup.firstSteps,
     op: ArithmeticOp.add,
     carry: CarryMode.any,
     form: TaskForm.compare,
     scored: false,
+    showCounts: true,
+  ),
+  LessonSpec(
+    id: 'compare_more_cloud',
+    title: 'Wo sind mehr? (Wolke)',
+    description: 'Dasselbe, aber die Bilder liegen durcheinander.',
+    group: LessonGroup.firstSteps,
+    op: ArithmeticOp.add,
+    carry: CarryMode.any,
+    form: TaskForm.compare,
+    scored: false,
+    arrangement: PictureArrangement.scattered,
+    showCounts: true,
   ),
   LessonSpec(
     id: 'count_next',
@@ -510,6 +531,7 @@ const _firstStepsLessons = [
     carry: CarryMode.any,
     form: TaskForm.quantityAdd,
     scored: false,
+    showCounts: true,
   ),
   LessonSpec(
     id: 'bees_add_cloud',
@@ -521,6 +543,7 @@ const _firstStepsLessons = [
     form: TaskForm.quantityAdd,
     scored: false,
     arrangement: PictureArrangement.scattered,
+    showCounts: true,
   ),
   LessonSpec(
     id: 'dice_add',
@@ -532,6 +555,7 @@ const _firstStepsLessons = [
     carry: CarryMode.any,
     form: TaskForm.dice,
     scored: false,
+    showCounts: true,
   ),
   LessonSpec(
     id: 'add_to_six',

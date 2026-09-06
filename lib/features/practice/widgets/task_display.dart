@@ -24,6 +24,9 @@ class TaskDisplay extends StatelessWidget {
   /// it is handed in rather than read off the task.
   final PictureArrangement arrangement;
 
+  /// Whether each group carries its own number. Also a lesson property.
+  final bool showCounts;
+
   const TaskDisplay({
     super.key,
     required this.task,
@@ -32,6 +35,7 @@ class TaskDisplay extends StatelessWidget {
     this.secondInput = '',
     this.activeField = AnswerField.primary,
     this.arrangement = PictureArrangement.row,
+    this.showCounts = false,
   });
 
   @override
@@ -56,6 +60,7 @@ class TaskDisplay extends StatelessWidget {
           picture: task.picture,
           arrangement: arrangement,
           seed: task.a * 31 + task.b,
+          showCount: showCounts,
         ),
       TaskForm.dice => Row(
           mainAxisSize: MainAxisSize.min,
@@ -63,7 +68,7 @@ class TaskDisplay extends StatelessWidget {
           // than with the numerals printed underneath them.
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            DiceFace(pips: task.a),
+            DiceFace(pips: task.a, showNumber: showCounts),
             if (task.b > 0) ...[
               SizedBox(
                 height: DiceFace.defaultSize,
@@ -74,7 +79,7 @@ class TaskDisplay extends StatelessWidget {
                   ),
                 ),
               ),
-              DiceFace(pips: task.b),
+              DiceFace(pips: task.b, showNumber: showCounts),
             ],
           ],
         ),
@@ -86,6 +91,7 @@ class TaskDisplay extends StatelessWidget {
               picture: task.picture,
               arrangement: arrangement,
               seed: task.a * 31 + task.b,
+              showCount: showCounts,
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 28),
@@ -96,29 +102,43 @@ class TaskDisplay extends StatelessWidget {
               picture: task.picture,
               arrangement: arrangement,
               seed: task.b * 31 + task.a,
+              showCount: showCounts,
             ),
           ],
         ),
-      TaskForm.compare => Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            PictureGroup(
-              count: task.a,
-              picture: task.picture,
-              arrangement: arrangement,
-            ),
-            Container(
-              width: 3,
-              height: 150,
-              margin: const EdgeInsets.symmetric(horizontal: 28),
-              color: AppColors.divider,
-            ),
-            PictureGroup(
-              count: task.b,
-              picture: task.picture,
-              arrangement: arrangement,
-            ),
-          ],
+      // The divider is what makes two heaps read as two heaps, so it grows
+      // with them - a cloud is far taller than a row, and a stub of a line
+      // between two tall clouds separates nothing.
+      TaskForm.compare => IntrinsicHeight(
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Center(
+                child: PictureGroup(
+                  count: task.a,
+                  picture: task.picture,
+                  arrangement: arrangement,
+                  seed: task.a * 31 + task.b,
+                  showCount: showCounts,
+                ),
+              ),
+              Container(
+                width: 3,
+                margin: const EdgeInsets.symmetric(horizontal: 28),
+                color: AppColors.divider,
+              ),
+              Center(
+                child: PictureGroup(
+                  count: task.b,
+                  picture: task.picture,
+                  arrangement: arrangement,
+                  seed: task.b * 31 + task.a,
+                  showCount: showCounts,
+                ),
+              ),
+            ],
+          ),
         ),
       TaskForm.sequence => Row(
           mainAxisSize: MainAxisSize.min,

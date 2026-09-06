@@ -339,6 +339,7 @@ class _PracticeScreenState extends ConsumerState<PracticeScreen>
                                   activeField: controller.activeField,
                                   feedback: controller.feedback,
                                   arrangement: widget.lesson.arrangement,
+                                  showCounts: widget.lesson.showCounts,
                                 ),
                               ),
                             ),
