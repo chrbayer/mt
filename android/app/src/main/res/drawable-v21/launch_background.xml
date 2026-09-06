@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Cold-start screen: the app's own background colour plus the launcher mark,
+     so starting up does not flash white. Replaced by the Flutter UI as soon as
+     the first frame is drawn. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@color/launch_background" />
+    <item>
+        <bitmap
+            android:gravity="center"
+            android:src="@drawable/launch_image" />
+    </item>
+</layer-list>

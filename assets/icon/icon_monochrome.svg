@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Themed-icon layer for Android 13+. A single flat colour; the system
+     recolours it to match the user's wallpaper. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <g fill="#000000" transform="translate(512 512) scale(0.7) translate(-512 -508)">
+    <rect x="312" y="372" width="400" height="96" rx="48"/>
+    <rect x="464" y="220" width="96" height="400" rx="48"/>
+    <rect x="312" y="700" width="400" height="96" rx="48"/>
+  </g>
+</svg>

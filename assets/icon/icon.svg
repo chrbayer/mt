@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Master app icon, 1024x1024. The mark is a plus over a minus - exactly
+     what the app drills - and stays readable down to 48 dp. The warm minus
+     bar keeps it from looking like a generic calculator. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <rect width="1024" height="1024" rx="228" ry="228" fill="#2D6CDF"/>
+  <g fill="#FFFFFF">
+    <rect x="312" y="372" width="400" height="96" rx="48"/>
+    <rect x="464" y="220" width="96" height="400" rx="48"/>
+  </g>
+  <rect x="312" y="700" width="400" height="96" rx="48" fill="#FFC53D"/>
+</svg>

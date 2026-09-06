@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Both match lib/theme/app_theme.dart, so the cold start does not flash
+         a colour the app never uses. -->
+    <color name="ic_launcher_background">#2D6CDF</color>
+    <color name="launch_background">#F7F6F1</color>
+</resources>

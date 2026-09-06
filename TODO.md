@@ -1,0 +1,8 @@
+#0 Git verwenden
+
+#1 Wo sind mehr: auch für Reihe und Wolke. Fehler: - Wie viele (Wolke) Sybole in letzter Reihe werden abgeschnitten, obwohl auf dem Bildschirm noch viel Platz ist. -WIe viele punkte auf Würfel: Zahl nicht unter dem Würfel anzeigen. -Wo sind mehr Bienchen (2x), Bienchen zusammen rechnen (2x), Würfel zusammen rechnen: Hier Zahl anzeigen. Zahlen machen da Sinn, wo man sie mit den Mengen verknüpfen soll, aber nicht da, wo gezählt werden soll.
+
+#2 Ergänzungen zum Thema Uhrzeit: Füge noch bei den Uhreiten etwas hinzu für 24h; Mit Tastaturerweiterung: halb, viertel vor, viertel nach, 10 nach, zwanzig nach, 5 vor halb, 5 nach, usw.
+Ergänzungen zim Thema Geld: Wie stelle ich eine vorgebene Summe aus Geldscheinen/Münzen zusammen? Etwas kostet betrag X, ich gebe einen (glatten Betrag Y), wie viel bekomme ich zurück?
+
+#3 Zeiten pro Lektion (> Erste Schritte): Zeiten je Uebung fuer 1 bis 3 Blitze
