@@ -27,7 +27,7 @@ class LeaderboardScreen extends ConsumerWidget {
             ? const Center(
                 child: Text(
                   'Noch keine Ergebnisse.\nMindestens '
-                  '$minTasksForLeaderboard Aufgaben zählen für die Bestenliste.',
+                  '$minTasksForAward Aufgaben zählen für die Bestenliste.',
                   textAlign: TextAlign.center,
                   style: TextStyle(fontSize: 24, color: AppColors.textMuted),
                 ),

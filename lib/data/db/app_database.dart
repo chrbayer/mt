@@ -34,6 +34,22 @@ class Users extends Table {
   /// How many tasks a run starts with for this child. Null means "whatever is
   /// set for everyone".
   IntColumn get defaultTaskCount => integer().nullable()();
+
+  /// Longest stretch of practice this child may do before a break, in
+  /// minutes. Zero switches the limit off, which is the default: a limit
+  /// that nobody asked for would be an unpleasant surprise.
+  IntColumn get practiceLimitMinutes =>
+      integer().withDefault(const Constant(0))();
+
+  /// How long the break has to be before a new stretch may start. Also what
+  /// separates one stretch from the next when the time is added up.
+  IntColumn get breakMinutes => integer().withDefault(const Constant(15))();
+
+  /// Total practice this child may do in one day, in minutes. Zero switches
+  /// it off. Independent of the stretch cap: enough breaks would otherwise
+  /// add up to an afternoon.
+  IntColumn get dailyLimitMinutes =>
+      integer().withDefault(const Constant(0))();
 }
 
 /// What one child last chose for one lesson.
@@ -104,7 +120,7 @@ class AppDatabase extends _$AppDatabase {
       : super(executor ?? driftDatabase(name: 'mathe_trainer'));
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -117,6 +133,12 @@ class AppDatabase extends _$AppDatabase {
           if (from < 4) {
             await m.addColumn(users, users.defaultTaskCount);
             await m.createTable(lessonPreferences);
+          }
+          // v5 can cap how long a child practises in one stretch.
+          if (from < 5) {
+            await m.addColumn(users, users.practiceLimitMinutes);
+            await m.addColumn(users, users.breakMinutes);
+            await m.addColumn(users, users.dailyLimitMinutes);
           }
         },
         beforeOpen: (details) async {

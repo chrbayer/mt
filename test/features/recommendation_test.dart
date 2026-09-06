@@ -15,6 +15,7 @@ LessonStat stat({
       averageMs: 5000,
       errorRate: errorRate,
       bestStars: 3,
+      bestBolts: 3,
       lastPlayed: lastPlayed ?? DateTime(2026, 9, 6),
     );
 

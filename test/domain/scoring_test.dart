@@ -28,10 +28,10 @@ void main() {
   });
 
   test('stars range from one to three', () {
-    expect(starsFor(0, 10), 3);
-    expect(starsFor(2, 10), 2);
-    expect(starsFor(9, 10), 1);
-    expect(starsFor(100, 10), 1);
+    expect(starsFor(0, 10, scored: true), 3);
+    expect(starsFor(2, 10, scored: true), 2);
+    expect(starsFor(9, 10, scored: true), 1);
+    expect(starsFor(100, 10, scored: true), 1);
   });
 
   test('zero task counts do not divide by zero', () {
@@ -71,18 +71,18 @@ void main() {
       const target = 6000;
       // On the line counts as inside it - a target you cannot actually hit
       // is not a target.
-      expect(boltsFor(target, 6000), 3);
-      expect(boltsFor(target, 5999), 3);
-      expect(boltsFor(target, 6001), 2);
-      expect(boltsFor(target, target * twoBoltFactor), 2);
-      expect(boltsFor(target, target * twoBoltFactor + 1), 1);
-      expect(boltsFor(target, target * oneBoltFactor), 1);
-      expect(boltsFor(target, target * oneBoltFactor + 1), 0);
+      expect(boltsFor(target, 6000, 10), 3);
+      expect(boltsFor(target, 5999, 10), 3);
+      expect(boltsFor(target, 6001, 10), 2);
+      expect(boltsFor(target, target * twoBoltFactor, 10), 2);
+      expect(boltsFor(target, target * twoBoltFactor + 1, 10), 1);
+      expect(boltsFor(target, target * oneBoltFactor, 10), 1);
+      expect(boltsFor(target, target * oneBoltFactor + 1, 10), 0);
     });
 
     test('an untimed lesson gives none, however fast the run', () {
-      expect(boltsFor(0, 1), 0);
-      expect(boltsFor(0, 0), 0);
+      expect(boltsFor(0, 1, 10), 0);
+      expect(boltsFor(0, 0, 10), 0);
     });
 
     test('the next bolt names the time it takes', () {

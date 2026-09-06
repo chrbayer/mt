@@ -1,0 +1,252 @@
+import 'package:drift/drift.dart' hide isNull, isNotNull;
+import 'package:drift/native.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mathe_trainer/data/db/app_database.dart';
+import 'package:mathe_trainer/domain/lesson.dart';
+import 'package:mathe_trainer/domain/task.dart';
+import 'package:mathe_trainer/features/lessons/lesson_home_screen.dart';
+import 'package:mathe_trainer/features/lessons/pause_notice.dart';
+import 'package:mathe_trainer/features/lessons/start_lesson_sheet.dart';
+import 'package:mathe_trainer/providers.dart';
+import 'package:mathe_trainer/theme/app_theme.dart';
+
+/// The practice cap, driven through the real screens: a parent sets it, the
+/// child runs into it, and the break lets them back in.
+void main() {
+  late AppDatabase db;
+  late ProviderContainer container;
+  late User mia;
+
+  /// The app's clock, under the test's control: the cap is the one rule that
+  /// changes with time alone, so time has to be something the test can move.
+  late DateTime clock;
+
+  setUp(() async {
+    db = AppDatabase(NativeDatabase.memory());
+    clock = DateTime(2026, 9, 6, 15, 0);
+    container = ProviderContainer(
+      overrides: [
+        databaseProvider.overrideWithValue(db),
+        clockProvider.overrideWithValue(() => clock),
+      ],
+    );
+    final users = container.read(userRepositoryProvider);
+    final id = await users.createUser(name: 'Mia', avatar: '🦊', colorIndex: 0);
+    mia = (await users.findUser(id))!;
+    container.read(activeUserProvider.notifier).select(mia);
+  });
+
+  tearDown(() async {
+    container.dispose();
+    await db.close();
+  });
+
+  /// Practice that ended [endedMinutesAgo] ago and lasted [minutes].
+  Future<void> practise({
+    required int minutes,
+    required int endedMinutesAgo,
+  }) async {
+    final sessions = container.read(sessionRepositoryProvider);
+    final id = await sessions.startSession(
+      userId: mia.id,
+      lessonId: 'add_100_carry',
+      taskCount: 10,
+      seed: 1,
+    );
+    await sessions.finishSession(
+      sessionId: id,
+      completed: true,
+      results: [
+        for (var i = 0; i < 10; i++)
+          TaskResult(
+            task: Task(a: 47, b: 38, op: Operation.add, form: TaskForm.result),
+            elapsedMs: minutes * 60000 ~/ 10,
+            wrongAttempts: 0,
+          ),
+      ],
+    );
+    final ended = clock
+        .subtract(Duration(minutes: endedMinutesAgo))
+        .millisecondsSinceEpoch;
+    await (db.update(db.sessions)..where((s) => s.id.equals(id))).write(
+      SessionsCompanion(
+        startedAtMs: Value(ended - minutes * 60000),
+        finishedAtMs: Value(ended),
+      ),
+    );
+  }
+
+  Future<void> setLimit({
+    int limit = 0,
+    int pause = 15,
+    int daily = 0,
+  }) async {
+    await container.read(userRepositoryProvider).setPracticeLimit(
+          mia.id,
+          limitMinutes: limit,
+          breakMinutes: pause,
+          dailyLimitMinutes: daily,
+        );
+    // The screens read the cap off the active profile, which the home screen
+    // keeps in step with the database.
+    final fresh =
+        (await container.read(userRepositoryProvider).findUser(mia.id))!;
+    container.read(activeUserProvider.notifier).select(fresh);
+  }
+
+  /// Moves both clocks on: the app's, and the one the pending alarm sleeps
+  /// on. Leaves no timer behind, which the test harness insists on.
+  Future<void> waitOut(WidgetTester tester, Duration time) async {
+    clock = clock.add(time);
+    await tester.pump(time + const Duration(seconds: 2));
+  }
+
+  Future<void> pump(WidgetTester tester, Widget screen) async {
+    tester.view.physicalSize = const Size(2400, 1500);
+    tester.view.devicePixelRatio = 2.0;
+    addTearDown(tester.view.reset);
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: MaterialApp(theme: buildAppTheme(), home: screen),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+  }
+
+  testWidgets('without a cap nothing is said about pauses', (tester) async {
+    await practise(minutes: 90, endedMinutesAgo: 1);
+    await pump(tester, const LessonHomeScreen());
+
+    expect(find.byType(PauseNotice), findsNothing);
+  });
+
+  testWidgets('past the cap the catalogue says to take a break',
+      (tester) async {
+    await setLimit(limit: 20, pause: 15);
+    await practise(minutes: 25, endedMinutesAgo: 1);
+    await pump(tester, const LessonHomeScreen());
+
+    expect(find.byType(PauseNotice), findsOneWidget);
+    expect(find.textContaining('Pause!'), findsOneWidget);
+    expect(find.textContaining('25 Minuten am Stück'), findsOneWidget);
+
+    // Nobody taps anything: the break simply runs out.
+    await waitOut(tester, const Duration(minutes: 14));
+    expect(find.byType(PauseNotice), findsNothing);
+  });
+
+  testWidgets('below the cap practice carries on', (tester) async {
+    await setLimit(limit: 30, pause: 15);
+    await practise(minutes: 25, endedMinutesAgo: 1);
+    await pump(tester, const LessonHomeScreen());
+
+    expect(find.byType(PauseNotice), findsNothing);
+  });
+
+  testWidgets('a break that has been taken opens the app again',
+      (tester) async {
+    await setLimit(limit: 20, pause: 15);
+    // Half an hour of practice, but it finished twenty minutes ago.
+    await practise(minutes: 30, endedMinutesAgo: 20);
+    await pump(tester, const LessonHomeScreen());
+
+    expect(find.byType(PauseNotice), findsNothing);
+  });
+
+  testWidgets('the start button is dead during the break', (tester) async {
+    await setLimit(limit: 20, pause: 15);
+    await practise(minutes: 25, endedMinutesAgo: 1);
+    await pump(
+      tester,
+      Scaffold(
+        body: Builder(
+          builder: (context) => TextButton(
+            onPressed: () =>
+                StartLessonSheet.show(context, lessonById('add_100_carry')),
+            child: const Text('auf'),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('auf'));
+    await tester.pumpAndSettle();
+
+    // The sheet still opens - a child may look at the lesson and its
+    // ranking - but it cannot be started.
+    expect(find.byType(PauseNotice), findsOneWidget);
+    final start = tester.widget<FilledButton>(
+      find.widgetWithText(FilledButton, "Los geht's"),
+    );
+    expect(start.onPressed, isNull);
+
+    await waitOut(tester, const Duration(minutes: 14));
+    final afterBreak = tester.widget<FilledButton>(
+      find.widgetWithText(FilledButton, "Los geht's"),
+    );
+    expect(afterBreak.onPressed, isNotNull,
+        reason: 'the sheet unlocks itself when the break is over');
+  });
+
+  testWidgets('the daily total closes the day, and no clock is promised',
+      (tester) async {
+    await setLimit(daily: 30);
+    // Three quarters of an hour today, spread over two proper stretches -
+    // the breaks were taken, but the day is used up all the same.
+    await practise(minutes: 25, endedMinutesAgo: 200);
+    await practise(minutes: 20, endedMinutesAgo: 60);
+    await pump(tester, const LessonHomeScreen());
+
+    expect(find.byType(PauseNotice), findsOneWidget);
+    expect(find.textContaining('Für heute reicht es!'), findsOneWidget);
+    expect(find.textContaining('45 Minuten'), findsOneWidget);
+    expect(find.textContaining('Morgen geht es weiter'), findsOneWidget);
+    // Waiting out a break must not help here.
+    await waitOut(tester, const Duration(minutes: 30));
+    expect(find.byType(PauseNotice), findsOneWidget);
+
+    // Only the next day opens it again.
+    await waitOut(tester, const Duration(hours: 9));
+    expect(find.byType(PauseNotice), findsNothing);
+  });
+
+  testWidgets('yesterday does not count against today', (tester) async {
+    await setLimit(daily: 30);
+    // A full hour, but it was yesterday afternoon.
+    await practise(minutes: 60, endedMinutesAgo: 20 * 60);
+    await pump(tester, const LessonHomeScreen());
+
+    expect(find.byType(PauseNotice), findsNothing);
+  });
+
+  testWidgets('with the cap lifted the same run may start', (tester) async {
+    await setLimit(limit: 60, pause: 15);
+    await practise(minutes: 25, endedMinutesAgo: 1);
+    await pump(
+      tester,
+      Scaffold(
+        body: Builder(
+          builder: (context) => TextButton(
+            onPressed: () =>
+                StartLessonSheet.show(context, lessonById('add_100_carry')),
+            child: const Text('auf'),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('auf'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(PauseNotice), findsNothing);
+    final start = tester.widget<FilledButton>(
+      find.widgetWithText(FilledButton, "Los geht's"),
+    );
+    expect(start.onPressed, isNotNull);
+  });
+}

@@ -350,6 +350,55 @@ Symbole nebeneinander verdrängen sonst „noch nicht geübt", und drei graue
 Blitze sagen nichts, was die drei grauen Sterne nicht schon sagen. In der
 Statistiktabelle stehen die beiden Reihen aus demselben Grund untereinander.
 
+## Übungszeit am Stück
+
+Ein **Stück** ist alles seit der letzten echten Pause. `watchPracticeStretch`
+findet die Grenze in SQL mit `LAG` und einer laufenden Summe — sie in Dart zu
+suchen hieße, sämtliche Sitzungen herüberzuholen, also genau das, was dieses
+Repository vermeiden soll. Abgebrochene Durchgänge zählen mit: wer anfängt und
+aufhört, hat trotzdem am Tablet gesessen.
+
+`practiceAllowance` in `domain/practice_limit.dart` entscheidet daraus. Eine
+**eingehaltene Pause setzt das Stück auf null zurück**, egal wie lang es war —
+sonst wäre die Grenze nach dem ersten langen Nachmittag für immer erreicht.
+
+Gesperrt wird nur der **Start**, nie ein laufender Durchgang. Mitten in einer
+Aufgabe hinausgeworfen zu werden verlöre die Runde und brächte dem Kind bei,
+dass der App nicht zu trauen ist. Die Prüfung sitzt deshalb im Startdialog —
+der einen Tür, durch die jeder Durchgang geht — und zusätzlich im Duell, das
+sonst der Weg um die Grenze herum wäre.
+
+Die **Tagesgrenze** zählt unabhängig davon alle Durchgänge des Tages. Sie hat
+Vorrang vor der Stückgrenze: wenn der Tag aufgebraucht ist, hilft keine Pause,
+und eine Uhrzeit zu nennen wäre ein Versprechen, das die App nicht halten
+kann. Die Tagesgrenze selbst wird als `dayStartMs` in die Abfrage gereicht
+statt in SQL aus `now` gebildet — die App hat **eine** Uhr, und eine Regel,
+die um Mitternacht umspringt, muss zu jeder Tageszeit prüfbar sein.
+
+`clockProvider` liefert die Uhrzeit. Die Übungsgrenze ist die einzige Regel,
+die sich **ohne Zutun** ändert, und ohne steuerbare Uhr ließe sich weder
+prüfen, dass die Pause sperrt, noch dass sie sich von selbst wieder öffnet.
+Der Wecker aufs Pausenende ist ein echter `Timer`, kein `await` in einem
+Generator: nur so bricht ihn das Abmelden wirklich ab. Er ruft
+`ref.invalidateSelf()` statt bloß neu zu bewerten — wenn der Weckruf
+Mitternacht ist, hat sich der Tag geändert und die Abfrage muss neu gestellt
+werden.
+
+## Mindestlänge für eine Wertung
+
+`minTasksForAward` (10) gilt für **Bestenliste, Sterne und Blitze**
+gleichermaßen. Fünf schnelle Aufgaben sind ein Aufwärmen, und ohne Untergrenze
+wäre der kürzeste Durchgang der billigste Weg zu vollen Sternen.
+
+Die **Ersten Schritte sind ausgenommen**: `starsFor(..., scored: false)` gibt
+immer volle Sterne, und die SQL-Fassung prüft `IN ($_unscored)` vor der
+Mindestlänge. Dort ist das Durchhalten die Leistung, und fünf Aufgaben sind
+eine richtige Länge.
+
+`LessonStat.bestBolts` kommt aus SQL statt aus `bestScoreMs` im Widget: die
+schnellste Runde kann zu kurz zum Werten gewesen sein, und diese Regel soll an
+einer Stelle je Achse stehen.
+
 ## Sicherung
 
 Export und Import gehen über JSON, nicht über eine Kopie der Datenbankdatei —

@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/db/app_database.dart';
 import '../../data/repositories/user_repository.dart';
 import '../../domain/lesson.dart';
+import '../../domain/practice_limit.dart';
 import '../../domain/scoring.dart';
 import '../../providers.dart';
 import '../../theme/app_theme.dart';
@@ -69,18 +70,32 @@ class _DuelSetupScreenState extends ConsumerState<DuelSetupScreen> {
                     spacing: 12,
                     runSpacing: 12,
                     children: [
+                      // A child on a break stays on it. Otherwise the duel
+                      // would be the way around a cap a parent has set.
                       for (final user in users)
-                        ChoiceChip(
-                          selected: _players.contains(user.id),
-                          onSelected: (on) => setState(() =>
-                              on ? _players.add(user.id) : _players.remove(user.id)),
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 12),
-                          label: Text(
-                            '${user.avatar}  ${user.name}',
-                            style: const TextStyle(fontSize: 21),
-                          ),
-                        ),
+                        Builder(builder: (context) {
+                          final onBreak = !(ref
+                                  .watch(practiceAllowanceForProvider(user.id))
+                                  .value ??
+                              PracticeAllowance.unlimited)
+                              .allowed;
+                          return ChoiceChip(
+                            selected: _players.contains(user.id),
+                            onSelected: onBreak
+                                ? null
+                                : (on) => setState(() => on
+                                    ? _players.add(user.id)
+                                    : _players.remove(user.id)),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 12),
+                            label: Text(
+                              onBreak
+                                  ? '${user.avatar}  ${user.name} · Pause'
+                                  : '${user.avatar}  ${user.name}',
+                              style: const TextStyle(fontSize: 21),
+                            ),
+                          );
+                        }),
                     ],
                   ),
                   const SizedBox(height: 20),

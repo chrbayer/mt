@@ -115,7 +115,7 @@ void main() {
     expect(session.wrongAttempts, 1);
     expect(find.text('Geschafft, Mia!'), findsOneWidget);
     // Two stars: one mistake in ten tasks is a 10 % error rate.
-    expect(starsFor(session.wrongAttempts, session.taskCount), 2);
+    expect(starsFor(session.wrongAttempts, session.taskCount, scored: true), 2);
   });
 
   testWidgets('the active profile stays visible while practising',

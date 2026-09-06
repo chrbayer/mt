@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/repositories/stats_repository.dart';
 import '../../data/repositories/user_repository.dart';
 import '../../domain/lesson.dart';
+import '../../domain/practice_limit.dart';
 import '../../domain/scoring.dart';
 import '../../domain/task_count.dart';
 import '../../providers.dart';
@@ -14,6 +15,7 @@ import '../profiles/profile_badge.dart';
 import '../settings/settings_screen.dart';
 import '../stats/stats_screen.dart';
 import 'lesson_example.dart';
+import 'pause_notice.dart';
 import 'recommendation.dart';
 import 'start_lesson_sheet.dart';
 
@@ -32,6 +34,8 @@ class LessonHomeScreen extends ConsumerWidget {
     });
 
     final stats = ref.watch(lessonStatsProvider(user.id)).value ?? const {};
+    final allowance = ref.watch(practiceAllowanceProvider).value ??
+        PracticeAllowance.unlimited;
 
     return Scaffold(
       appBar: AppBar(
@@ -90,6 +94,14 @@ class LessonHomeScreen extends ConsumerWidget {
           : ListView(
               padding: const EdgeInsets.fromLTRB(32, 8, 32, 32),
               children: [
+                // Above the recommendation, so the break is the first thing
+                // read - suggesting a lesson that cannot be started would be
+                // a small cruelty.
+                if (!allowance.allowed)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: PauseNotice(allowance: allowance, compact: true),
+                  ),
                 _RecommendationCard(
                   recommendation: recommendLesson(
                     candidates: [
@@ -326,11 +338,7 @@ class _LessonTile extends StatelessWidget {
                   // six icons crowd out "noch nicht geübt".
                   if (stat != null && lesson.targetMsPerTask > 0) ...[
                     const SizedBox(width: 4),
-                    BoltRow(
-                      earned:
-                          boltsFor(lesson.targetMsPerTask, stat!.bestScoreMs),
-                      size: 24,
-                    ),
+                    BoltRow(earned: stat!.bestBolts, size: 24),
                   ],
                   const SizedBox(width: 10),
                   Expanded(

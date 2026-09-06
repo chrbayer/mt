@@ -103,6 +103,41 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
     type: DriftSqlType.int,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _practiceLimitMinutesMeta =
+      const VerificationMeta('practiceLimitMinutes');
+  @override
+  late final GeneratedColumn<int> practiceLimitMinutes = GeneratedColumn<int>(
+    'practice_limit_minutes',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _breakMinutesMeta = const VerificationMeta(
+    'breakMinutes',
+  );
+  @override
+  late final GeneratedColumn<int> breakMinutes = GeneratedColumn<int>(
+    'break_minutes',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(15),
+  );
+  static const VerificationMeta _dailyLimitMinutesMeta = const VerificationMeta(
+    'dailyLimitMinutes',
+  );
+  @override
+  late final GeneratedColumn<int> dailyLimitMinutes = GeneratedColumn<int>(
+    'daily_limit_minutes',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -113,6 +148,9 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
     hiddenGroups,
     reviewHardTasks,
     defaultTaskCount,
+    practiceLimitMinutes,
+    breakMinutes,
+    dailyLimitMinutes,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -191,6 +229,33 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
         ),
       );
     }
+    if (data.containsKey('practice_limit_minutes')) {
+      context.handle(
+        _practiceLimitMinutesMeta,
+        practiceLimitMinutes.isAcceptableOrUnknown(
+          data['practice_limit_minutes']!,
+          _practiceLimitMinutesMeta,
+        ),
+      );
+    }
+    if (data.containsKey('break_minutes')) {
+      context.handle(
+        _breakMinutesMeta,
+        breakMinutes.isAcceptableOrUnknown(
+          data['break_minutes']!,
+          _breakMinutesMeta,
+        ),
+      );
+    }
+    if (data.containsKey('daily_limit_minutes')) {
+      context.handle(
+        _dailyLimitMinutesMeta,
+        dailyLimitMinutes.isAcceptableOrUnknown(
+          data['daily_limit_minutes']!,
+          _dailyLimitMinutesMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -232,6 +297,18 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
         DriftSqlType.int,
         data['${effectivePrefix}default_task_count'],
       ),
+      practiceLimitMinutes: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}practice_limit_minutes'],
+      )!,
+      breakMinutes: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}break_minutes'],
+      )!,
+      dailyLimitMinutes: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}daily_limit_minutes'],
+      )!,
     );
   }
 
@@ -266,6 +343,20 @@ class User extends DataClass implements Insertable<User> {
   /// How many tasks a run starts with for this child. Null means "whatever is
   /// set for everyone".
   final int? defaultTaskCount;
+
+  /// Longest stretch of practice this child may do before a break, in
+  /// minutes. Zero switches the limit off, which is the default: a limit
+  /// that nobody asked for would be an unpleasant surprise.
+  final int practiceLimitMinutes;
+
+  /// How long the break has to be before a new stretch may start. Also what
+  /// separates one stretch from the next when the time is added up.
+  final int breakMinutes;
+
+  /// Total practice this child may do in one day, in minutes. Zero switches
+  /// it off. Independent of the stretch cap: enough breaks would otherwise
+  /// add up to an afternoon.
+  final int dailyLimitMinutes;
   const User({
     required this.id,
     required this.name,
@@ -275,6 +366,9 @@ class User extends DataClass implements Insertable<User> {
     required this.hiddenGroups,
     required this.reviewHardTasks,
     this.defaultTaskCount,
+    required this.practiceLimitMinutes,
+    required this.breakMinutes,
+    required this.dailyLimitMinutes,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -289,6 +383,9 @@ class User extends DataClass implements Insertable<User> {
     if (!nullToAbsent || defaultTaskCount != null) {
       map['default_task_count'] = Variable<int>(defaultTaskCount);
     }
+    map['practice_limit_minutes'] = Variable<int>(practiceLimitMinutes);
+    map['break_minutes'] = Variable<int>(breakMinutes);
+    map['daily_limit_minutes'] = Variable<int>(dailyLimitMinutes);
     return map;
   }
 
@@ -304,6 +401,9 @@ class User extends DataClass implements Insertable<User> {
       defaultTaskCount: defaultTaskCount == null && nullToAbsent
           ? const Value.absent()
           : Value(defaultTaskCount),
+      practiceLimitMinutes: Value(practiceLimitMinutes),
+      breakMinutes: Value(breakMinutes),
+      dailyLimitMinutes: Value(dailyLimitMinutes),
     );
   }
 
@@ -321,6 +421,11 @@ class User extends DataClass implements Insertable<User> {
       hiddenGroups: serializer.fromJson<String>(json['hiddenGroups']),
       reviewHardTasks: serializer.fromJson<bool>(json['reviewHardTasks']),
       defaultTaskCount: serializer.fromJson<int?>(json['defaultTaskCount']),
+      practiceLimitMinutes: serializer.fromJson<int>(
+        json['practiceLimitMinutes'],
+      ),
+      breakMinutes: serializer.fromJson<int>(json['breakMinutes']),
+      dailyLimitMinutes: serializer.fromJson<int>(json['dailyLimitMinutes']),
     );
   }
   @override
@@ -335,6 +440,9 @@ class User extends DataClass implements Insertable<User> {
       'hiddenGroups': serializer.toJson<String>(hiddenGroups),
       'reviewHardTasks': serializer.toJson<bool>(reviewHardTasks),
       'defaultTaskCount': serializer.toJson<int?>(defaultTaskCount),
+      'practiceLimitMinutes': serializer.toJson<int>(practiceLimitMinutes),
+      'breakMinutes': serializer.toJson<int>(breakMinutes),
+      'dailyLimitMinutes': serializer.toJson<int>(dailyLimitMinutes),
     };
   }
 
@@ -347,6 +455,9 @@ class User extends DataClass implements Insertable<User> {
     String? hiddenGroups,
     bool? reviewHardTasks,
     Value<int?> defaultTaskCount = const Value.absent(),
+    int? practiceLimitMinutes,
+    int? breakMinutes,
+    int? dailyLimitMinutes,
   }) => User(
     id: id ?? this.id,
     name: name ?? this.name,
@@ -358,6 +469,9 @@ class User extends DataClass implements Insertable<User> {
     defaultTaskCount: defaultTaskCount.present
         ? defaultTaskCount.value
         : this.defaultTaskCount,
+    practiceLimitMinutes: practiceLimitMinutes ?? this.practiceLimitMinutes,
+    breakMinutes: breakMinutes ?? this.breakMinutes,
+    dailyLimitMinutes: dailyLimitMinutes ?? this.dailyLimitMinutes,
   );
   User copyWithCompanion(UsersCompanion data) {
     return User(
@@ -379,6 +493,15 @@ class User extends DataClass implements Insertable<User> {
       defaultTaskCount: data.defaultTaskCount.present
           ? data.defaultTaskCount.value
           : this.defaultTaskCount,
+      practiceLimitMinutes: data.practiceLimitMinutes.present
+          ? data.practiceLimitMinutes.value
+          : this.practiceLimitMinutes,
+      breakMinutes: data.breakMinutes.present
+          ? data.breakMinutes.value
+          : this.breakMinutes,
+      dailyLimitMinutes: data.dailyLimitMinutes.present
+          ? data.dailyLimitMinutes.value
+          : this.dailyLimitMinutes,
     );
   }
 
@@ -392,7 +515,10 @@ class User extends DataClass implements Insertable<User> {
           ..write('createdAtMs: $createdAtMs, ')
           ..write('hiddenGroups: $hiddenGroups, ')
           ..write('reviewHardTasks: $reviewHardTasks, ')
-          ..write('defaultTaskCount: $defaultTaskCount')
+          ..write('defaultTaskCount: $defaultTaskCount, ')
+          ..write('practiceLimitMinutes: $practiceLimitMinutes, ')
+          ..write('breakMinutes: $breakMinutes, ')
+          ..write('dailyLimitMinutes: $dailyLimitMinutes')
           ..write(')'))
         .toString();
   }
@@ -407,6 +533,9 @@ class User extends DataClass implements Insertable<User> {
     hiddenGroups,
     reviewHardTasks,
     defaultTaskCount,
+    practiceLimitMinutes,
+    breakMinutes,
+    dailyLimitMinutes,
   );
   @override
   bool operator ==(Object other) =>
@@ -419,7 +548,10 @@ class User extends DataClass implements Insertable<User> {
           other.createdAtMs == this.createdAtMs &&
           other.hiddenGroups == this.hiddenGroups &&
           other.reviewHardTasks == this.reviewHardTasks &&
-          other.defaultTaskCount == this.defaultTaskCount);
+          other.defaultTaskCount == this.defaultTaskCount &&
+          other.practiceLimitMinutes == this.practiceLimitMinutes &&
+          other.breakMinutes == this.breakMinutes &&
+          other.dailyLimitMinutes == this.dailyLimitMinutes);
 }
 
 class UsersCompanion extends UpdateCompanion<User> {
@@ -431,6 +563,9 @@ class UsersCompanion extends UpdateCompanion<User> {
   final Value<String> hiddenGroups;
   final Value<bool> reviewHardTasks;
   final Value<int?> defaultTaskCount;
+  final Value<int> practiceLimitMinutes;
+  final Value<int> breakMinutes;
+  final Value<int> dailyLimitMinutes;
   const UsersCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
@@ -440,6 +575,9 @@ class UsersCompanion extends UpdateCompanion<User> {
     this.hiddenGroups = const Value.absent(),
     this.reviewHardTasks = const Value.absent(),
     this.defaultTaskCount = const Value.absent(),
+    this.practiceLimitMinutes = const Value.absent(),
+    this.breakMinutes = const Value.absent(),
+    this.dailyLimitMinutes = const Value.absent(),
   });
   UsersCompanion.insert({
     this.id = const Value.absent(),
@@ -450,6 +588,9 @@ class UsersCompanion extends UpdateCompanion<User> {
     this.hiddenGroups = const Value.absent(),
     this.reviewHardTasks = const Value.absent(),
     this.defaultTaskCount = const Value.absent(),
+    this.practiceLimitMinutes = const Value.absent(),
+    this.breakMinutes = const Value.absent(),
+    this.dailyLimitMinutes = const Value.absent(),
   }) : name = Value(name),
        avatar = Value(avatar),
        colorIndex = Value(colorIndex),
@@ -463,6 +604,9 @@ class UsersCompanion extends UpdateCompanion<User> {
     Expression<String>? hiddenGroups,
     Expression<bool>? reviewHardTasks,
     Expression<int>? defaultTaskCount,
+    Expression<int>? practiceLimitMinutes,
+    Expression<int>? breakMinutes,
+    Expression<int>? dailyLimitMinutes,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -473,6 +617,10 @@ class UsersCompanion extends UpdateCompanion<User> {
       if (hiddenGroups != null) 'hidden_groups': hiddenGroups,
       if (reviewHardTasks != null) 'review_hard_tasks': reviewHardTasks,
       if (defaultTaskCount != null) 'default_task_count': defaultTaskCount,
+      if (practiceLimitMinutes != null)
+        'practice_limit_minutes': practiceLimitMinutes,
+      if (breakMinutes != null) 'break_minutes': breakMinutes,
+      if (dailyLimitMinutes != null) 'daily_limit_minutes': dailyLimitMinutes,
     });
   }
 
@@ -485,6 +633,9 @@ class UsersCompanion extends UpdateCompanion<User> {
     Value<String>? hiddenGroups,
     Value<bool>? reviewHardTasks,
     Value<int?>? defaultTaskCount,
+    Value<int>? practiceLimitMinutes,
+    Value<int>? breakMinutes,
+    Value<int>? dailyLimitMinutes,
   }) {
     return UsersCompanion(
       id: id ?? this.id,
@@ -495,6 +646,9 @@ class UsersCompanion extends UpdateCompanion<User> {
       hiddenGroups: hiddenGroups ?? this.hiddenGroups,
       reviewHardTasks: reviewHardTasks ?? this.reviewHardTasks,
       defaultTaskCount: defaultTaskCount ?? this.defaultTaskCount,
+      practiceLimitMinutes: practiceLimitMinutes ?? this.practiceLimitMinutes,
+      breakMinutes: breakMinutes ?? this.breakMinutes,
+      dailyLimitMinutes: dailyLimitMinutes ?? this.dailyLimitMinutes,
     );
   }
 
@@ -525,6 +679,15 @@ class UsersCompanion extends UpdateCompanion<User> {
     if (defaultTaskCount.present) {
       map['default_task_count'] = Variable<int>(defaultTaskCount.value);
     }
+    if (practiceLimitMinutes.present) {
+      map['practice_limit_minutes'] = Variable<int>(practiceLimitMinutes.value);
+    }
+    if (breakMinutes.present) {
+      map['break_minutes'] = Variable<int>(breakMinutes.value);
+    }
+    if (dailyLimitMinutes.present) {
+      map['daily_limit_minutes'] = Variable<int>(dailyLimitMinutes.value);
+    }
     return map;
   }
 
@@ -538,7 +701,10 @@ class UsersCompanion extends UpdateCompanion<User> {
           ..write('createdAtMs: $createdAtMs, ')
           ..write('hiddenGroups: $hiddenGroups, ')
           ..write('reviewHardTasks: $reviewHardTasks, ')
-          ..write('defaultTaskCount: $defaultTaskCount')
+          ..write('defaultTaskCount: $defaultTaskCount, ')
+          ..write('practiceLimitMinutes: $practiceLimitMinutes, ')
+          ..write('breakMinutes: $breakMinutes, ')
+          ..write('dailyLimitMinutes: $dailyLimitMinutes')
           ..write(')'))
         .toString();
   }
@@ -2304,6 +2470,9 @@ typedef $$UsersTableCreateCompanionBuilder = UsersCompanion Function({
   Value<String> hiddenGroups,
   Value<bool> reviewHardTasks,
   Value<int?> defaultTaskCount,
+  Value<int> practiceLimitMinutes,
+  Value<int> breakMinutes,
+  Value<int> dailyLimitMinutes,
 });
 typedef $$UsersTableUpdateCompanionBuilder = UsersCompanion Function({
   Value<int> id,
@@ -2314,6 +2483,9 @@ typedef $$UsersTableUpdateCompanionBuilder = UsersCompanion Function({
   Value<String> hiddenGroups,
   Value<bool> reviewHardTasks,
   Value<int?> defaultTaskCount,
+  Value<int> practiceLimitMinutes,
+  Value<int> breakMinutes,
+  Value<int> dailyLimitMinutes,
 });
 
 final class $$UsersTableReferences
@@ -2406,6 +2578,21 @@ class $$UsersTableFilterComposer extends Composer<_$AppDatabase, $UsersTable> {
 
   ColumnFilters<int> get defaultTaskCount => $composableBuilder(
     column: $table.defaultTaskCount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get practiceLimitMinutes => $composableBuilder(
+    column: $table.practiceLimitMinutes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get breakMinutes => $composableBuilder(
+    column: $table.breakMinutes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get dailyLimitMinutes => $composableBuilder(
+    column: $table.dailyLimitMinutes,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2508,6 +2695,21 @@ class $$UsersTableOrderingComposer
     column: $table.defaultTaskCount,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<int> get practiceLimitMinutes => $composableBuilder(
+    column: $table.practiceLimitMinutes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get breakMinutes => $composableBuilder(
+    column: $table.breakMinutes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get dailyLimitMinutes => $composableBuilder(
+    column: $table.dailyLimitMinutes,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$UsersTableAnnotationComposer
@@ -2550,6 +2752,21 @@ class $$UsersTableAnnotationComposer
 
   GeneratedColumn<int> get defaultTaskCount => $composableBuilder(
     column: $table.defaultTaskCount,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get practiceLimitMinutes => $composableBuilder(
+    column: $table.practiceLimitMinutes,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get breakMinutes => $composableBuilder(
+    column: $table.breakMinutes,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get dailyLimitMinutes => $composableBuilder(
+    column: $table.dailyLimitMinutes,
     builder: (column) => column,
   );
 
@@ -2644,6 +2861,9 @@ class $$UsersTableTableManager
                 Value<String> hiddenGroups = const Value.absent(),
                 Value<bool> reviewHardTasks = const Value.absent(),
                 Value<int?> defaultTaskCount = const Value.absent(),
+                Value<int> practiceLimitMinutes = const Value.absent(),
+                Value<int> breakMinutes = const Value.absent(),
+                Value<int> dailyLimitMinutes = const Value.absent(),
               }) => UsersCompanion(
                 id: id,
                 name: name,
@@ -2653,6 +2873,9 @@ class $$UsersTableTableManager
                 hiddenGroups: hiddenGroups,
                 reviewHardTasks: reviewHardTasks,
                 defaultTaskCount: defaultTaskCount,
+                practiceLimitMinutes: practiceLimitMinutes,
+                breakMinutes: breakMinutes,
+                dailyLimitMinutes: dailyLimitMinutes,
               ),
           createCompanionCallback:
               ({
@@ -2664,6 +2887,9 @@ class $$UsersTableTableManager
                 Value<String> hiddenGroups = const Value.absent(),
                 Value<bool> reviewHardTasks = const Value.absent(),
                 Value<int?> defaultTaskCount = const Value.absent(),
+                Value<int> practiceLimitMinutes = const Value.absent(),
+                Value<int> breakMinutes = const Value.absent(),
+                Value<int> dailyLimitMinutes = const Value.absent(),
               }) => UsersCompanion.insert(
                 id: id,
                 name: name,
@@ -2673,6 +2899,9 @@ class $$UsersTableTableManager
                 hiddenGroups: hiddenGroups,
                 reviewHardTasks: reviewHardTasks,
                 defaultTaskCount: defaultTaskCount,
+                practiceLimitMinutes: practiceLimitMinutes,
+                breakMinutes: breakMinutes,
+                dailyLimitMinutes: dailyLimitMinutes,
               ),
           withReferenceMapper: (p0) => p0
               .map(

@@ -23,6 +23,11 @@ class LessonStat {
   /// wears, and what counts once towards the total.
   final int bestStars;
 
+  /// Most bolts earned in any single run. Computed here rather than from
+  /// [bestScoreMs] in the widget: the fastest run may have been too short to
+  /// be worth anything, and the rule for that lives in one place.
+  final int bestBolts;
+
   final DateTime lastPlayed;
 
   const LessonStat({
@@ -32,6 +37,7 @@ class LessonStat {
     required this.averageMs,
     required this.errorRate,
     required this.bestStars,
+    required this.bestBolts,
     required this.lastPlayed,
   });
 }
@@ -207,6 +213,7 @@ class StatsRepository {
   static final String _stars = '''
       CASE
         WHEN s.lesson_id IN ($_unscored) THEN $maxStars
+        WHEN s.task_count < $minTasksForAward THEN 0
         WHEN s.wrong_attempts * 1.0 / s.task_count <= $threeStarErrorRate
           THEN $maxStars
         WHEN s.wrong_attempts * 1.0 / s.task_count <= $twoStarErrorRate
@@ -230,6 +237,7 @@ class StatsRepository {
   static final String _bolts = '''
       CASE
         WHEN ($_boltTarget) = 0 THEN 0
+        WHEN s.task_count < $minTasksForAward THEN 0
         WHEN $_score <= ($_boltTarget) THEN $maxBolts
         WHEN $_score <= ($_boltTarget) * $twoBoltFactor THEN 2
         WHEN $_score <= ($_boltTarget) * $oneBoltFactor THEN 1
@@ -248,6 +256,7 @@ class StatsRepository {
                  AVG($_score)                      AS average_ms,
                  SUM(s.wrong_attempts) * 1.0 / SUM(s.task_count) AS error_rate,
                  MAX($_stars)                      AS best_stars,
+                 MAX($_bolts)                      AS best_bolts,
                  MAX(s.finished_at_ms)             AS last_played
           FROM sessions s
           WHERE s.user_id = ?1 AND s.completed = 1
@@ -266,6 +275,7 @@ class StatsRepository {
                   averageMs: row.read<double>('average_ms'),
                   errorRate: row.read<double>('error_rate'),
                   bestStars: row.read<int>('best_stars'),
+                  bestBolts: row.read<int>('best_bolts'),
                   lastPlayed: DateTime.fromMillisecondsSinceEpoch(
                     row.read<int>('last_played'),
                   ),
@@ -300,7 +310,7 @@ class StatsRepository {
           ''',
           variables: [
             Variable.withString(lessonId),
-            Variable.withInt(minTasksForLeaderboard),
+            Variable.withInt(minTasksForAward),
           ],
           readsFrom: {_db.sessions, _db.users},
         )
@@ -354,7 +364,7 @@ class StatsRepository {
           GROUP BY s.lesson_id, u.id
           ORDER BY last_played_ms DESC, s.lesson_id, score ASC
           ''',
-          variables: [Variable.withInt(minTasksForLeaderboard)],
+          variables: [Variable.withInt(minTasksForAward)],
           readsFrom: {_db.sessions, _db.users},
         )
         .watch()
@@ -585,6 +595,83 @@ class StatsRepository {
               for (final row in rows)
                 row.read<int>('user_id'): row.read<int>('bolts'),
             });
+  }
+
+  /// Practice in the current stretch: how many milliseconds, when it last
+  /// ended, and what the day since [dayStartMs] adds up to.
+  ///
+  /// The day boundary is handed in rather than taken from SQL's `now`: the
+  /// app has one clock, and a rule that changes at midnight has to be able to
+  /// be tested at any time of day.
+  ///
+  /// A stretch is everything since the last gap of at least [breakMinutes]
+  /// between one run ending and the next beginning. Walked out in SQL with a
+  /// window function rather than in Dart - the boundary is a running sum, and
+  /// pulling every session across to add them up would be the one thing this
+  /// repository exists to avoid.
+  ///
+  /// Abandoned runs count too. A child who starts, gets bored and stops has
+  /// still been sitting at the tablet.
+  Stream<({int practisedMs, DateTime? lastFinishedAt, int todayMs})>
+      watchPracticeStretch({
+    required int userId,
+    required int breakMinutes,
+    required int dayStartMs,
+  }) {
+    return _db
+        .customSelect(
+          '''
+          WITH ordered AS (
+            SELECT s.started_at_ms                     AS started,
+                   COALESCE(s.finished_at_ms, s.started_at_ms) AS ended,
+                   s.total_ms                          AS ms,
+                   LAG(COALESCE(s.finished_at_ms, s.started_at_ms))
+                     OVER (ORDER BY s.started_at_ms)   AS prev_end
+            FROM sessions s
+            WHERE s.user_id = ?1
+          ),
+          marked AS (
+            SELECT *,
+                   CASE WHEN prev_end IS NULL OR started - prev_end >= ?2
+                        THEN 1 ELSE 0 END AS starts_stretch
+            FROM ordered
+          ),
+          grouped AS (
+            SELECT *,
+                   SUM(starts_stretch) OVER (ORDER BY started) AS stretch
+            FROM marked
+          )
+          SELECT COALESCE(SUM(ms), 0) AS practised,
+                 MAX(ended)          AS last_end,
+                 (SELECT COALESCE(SUM(t.total_ms), 0)
+                    FROM sessions t
+                   WHERE t.user_id = ?1
+                     AND t.started_at_ms >= ?3) AS today
+          FROM grouped
+          WHERE stretch = (SELECT MAX(stretch) FROM grouped)
+          ''',
+          variables: [
+            Variable.withInt(userId),
+            Variable.withInt(breakMinutes * 60000),
+            Variable.withInt(dayStartMs),
+          ],
+          readsFrom: {_db.sessions},
+        )
+        .watch()
+        .map((rows) {
+          if (rows.isEmpty) {
+            return (practisedMs: 0, lastFinishedAt: null, todayMs: 0);
+          }
+          final row = rows.single;
+          final lastEnd = row.read<int?>('last_end');
+          return (
+            practisedMs: row.read<int>('practised'),
+            lastFinishedAt: lastEnd == null
+                ? null
+                : DateTime.fromMillisecondsSinceEpoch(lastEnd),
+            todayMs: row.read<int>('today'),
+          );
+        });
   }
 
   /// Days practised in a row, per child.

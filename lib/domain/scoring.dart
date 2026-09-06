@@ -5,8 +5,14 @@ library;
 /// could win a leaderboard by hammering the check button and guessing.
 const int wrongAttemptPenaltyMs = 3000;
 
-/// Minimum number of tasks a session must have to appear in a leaderboard.
-const int minTasksForLeaderboard = 10;
+/// Minimum number of tasks a run must have to be worth anything: no stars,
+/// no bolts and no place in a leaderboard below this.
+///
+/// Five quick tasks are a warm-up, not a result, and without a floor the
+/// shortest run would be the cheapest way to a full set of stars. The first
+/// steps are exempt - there the achievement is getting through at all, and
+/// five is a perfectly good length.
+const int minTasksForAward = 10;
 
 /// Total time plus the penalty for all wrong attempts.
 int penalizedTimeMs(int totalMs, int wrongAttempts) =>
@@ -42,7 +48,13 @@ const double threeStarErrorRate = 0.05;
 const double twoStarErrorRate = 0.25;
 
 /// One to three stars. Deliberately never zero - the goal is encouragement.
-int starsFor(int wrongAttempts, int taskCount) {
+///
+/// [scored] false means one of the first steps: those earn their stars for
+/// being finished, however long they were and however often the child had to
+/// try again.
+int starsFor(int wrongAttempts, int taskCount, {required bool scored}) {
+  if (!scored) return maxStars;
+  if (taskCount < minTasksForAward) return 0;
   final rate = errorRate(wrongAttempts, taskCount);
   if (rate <= threeStarErrorRate) return maxStars;
   if (rate <= twoStarErrorRate) return 2;
@@ -68,9 +80,10 @@ const double oneBoltFactor = 2.2;
 /// nothing at all.
 ///
 /// [targetMs] is the lesson's own three-bolt time; zero means the lesson is
-/// not timed, and then there are no bolts to give.
-int boltsFor(int targetMs, double scoreMsPerTask) {
-  if (targetMs <= 0) return 0;
+/// not timed, and then there are no bolts to give. A run too short to count
+/// earns none either - a sprint over five tasks is not a fast pace.
+int boltsFor(int targetMs, double scoreMsPerTask, int taskCount) {
+  if (targetMs <= 0 || taskCount < minTasksForAward) return 0;
   if (scoreMsPerTask <= targetMs) return maxBolts;
   if (scoreMsPerTask <= targetMs * twoBoltFactor) return 2;
   if (scoreMsPerTask <= targetMs * oneBoltFactor) return 1;

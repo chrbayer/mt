@@ -4,13 +4,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/db/app_database.dart';
 import '../../data/repositories/user_repository.dart';
 import '../../domain/lesson.dart';
+import '../../domain/practice_limit.dart';
 import '../../providers.dart';
 import '../../theme/app_theme.dart';
 import '../common/task_count_choice.dart';
 import '../lessons/lesson_example.dart';
 
 /// Everything a parent decides about one child: which lesson groups they are
-/// offered, and whether runs fold in what went badly last time.
+/// offered, how long a stretch of practice may be, and whether runs fold in
+/// what went badly last time.
 ///
 /// A first-grader who only ever sees "Bis 10" and "Bis 20" does not have to
 /// scroll past four ranges they cannot do yet - and cannot start a run that
@@ -35,6 +37,9 @@ class _ProfileSettingsDialogState
   late final Set<LessonGroup> _visible = widget.user.visibleGroups.toSet();
   late bool _review = widget.user.reviewHardTasks;
   late int? _taskCount = widget.user.defaultTaskCount;
+  late int _limitMinutes = widget.user.practiceLimitMinutes;
+  late int _breakMinutes = widget.user.breakMinutes;
+  late int _dailyMinutes = widget.user.dailyLimitMinutes;
 
   @override
   Widget build(BuildContext context) {
@@ -90,6 +95,88 @@ class _ProfileSettingsDialogState
                 onChanged: (count) => setState(() => _taskCount = count),
               ),
               const Divider(height: 32),
+              Text('Übungszeit am Stück',
+                  style: Theme.of(context).textTheme.titleLarge),
+              const SizedBox(height: 4),
+              const Text(
+                'Nach dieser Zeit gibt es eine Pause. Ein laufender '
+                'Durchgang wird nie abgebrochen - erst der nächste Start '
+                'ist gesperrt. Die Zeit zählt weiter, solange die Pause '
+                'nicht vollständig eingehalten wurde.',
+                style: TextStyle(fontSize: 17, color: AppColors.textMuted),
+              ),
+              const SizedBox(height: 10),
+              Wrap(
+                spacing: 10,
+                runSpacing: 10,
+                children: [
+                  for (final minutes in practiceLimitOptions)
+                    ChoiceChip(
+                      selected: _limitMinutes == minutes,
+                      onSelected: (_) =>
+                          setState(() => _limitMinutes = minutes),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 14, vertical: 10),
+                      label: Text(
+                        minutes == 0 ? 'ohne Grenze' : '$minutes min',
+                        style: const TextStyle(fontSize: 18),
+                      ),
+                    ),
+                ],
+              ),
+              // Only worth asking once there is a limit for it to end.
+              if (_limitMinutes > 0) ...[
+                const SizedBox(height: 16),
+                Text('Wie lange dauert die Pause?',
+                    style: Theme.of(context).textTheme.titleMedium),
+                const SizedBox(height: 10),
+                Wrap(
+                  spacing: 10,
+                  runSpacing: 10,
+                  children: [
+                    for (final minutes in breakMinuteOptions)
+                      ChoiceChip(
+                        selected: _breakMinutes == minutes,
+                        onSelected: (_) =>
+                            setState(() => _breakMinutes = minutes),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 14, vertical: 10),
+                        label: Text('$minutes min',
+                            style: const TextStyle(fontSize: 18)),
+                      ),
+                  ],
+                ),
+              ],
+              const SizedBox(height: 20),
+              Text('Und pro Tag insgesamt',
+                  style: Theme.of(context).textTheme.titleLarge),
+              const SizedBox(height: 4),
+              const Text(
+                'Zählt alle Durchgänge des Tages zusammen, Pausen hin oder '
+                'her. Ist die Zeit aufgebraucht, geht es erst am nächsten '
+                'Tag weiter.',
+                style: TextStyle(fontSize: 17, color: AppColors.textMuted),
+              ),
+              const SizedBox(height: 10),
+              Wrap(
+                spacing: 10,
+                runSpacing: 10,
+                children: [
+                  for (final minutes in dailyLimitOptions)
+                    ChoiceChip(
+                      selected: _dailyMinutes == minutes,
+                      onSelected: (_) =>
+                          setState(() => _dailyMinutes = minutes),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 14, vertical: 10),
+                      label: Text(
+                        minutes == 0 ? 'ohne Grenze' : '$minutes min',
+                        style: const TextStyle(fontSize: 18),
+                      ),
+                    ),
+                ],
+              ),
+              const Divider(height: 32),
               Text('Bereiche', style: Theme.of(context).textTheme.titleLarge),
               const Text(
                 'Abgeschaltete Bereiche erscheinen nicht mehr auf dem '
@@ -141,6 +228,12 @@ class _ProfileSettingsDialogState
                       await repository.setProfileTaskCount(
                         widget.user.id,
                         _taskCount,
+                      );
+                      await repository.setPracticeLimit(
+                        widget.user.id,
+                        limitMinutes: _limitMinutes,
+                        breakMinutes: _breakMinutes,
+                        dailyLimitMinutes: _dailyMinutes,
                       );
                       navigator.pop();
                     },

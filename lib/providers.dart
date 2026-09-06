@@ -2,6 +2,8 @@
 /// small amount of app-wide state (which child is currently logged in).
 library;
 
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'data/db/app_database.dart';
@@ -11,6 +13,7 @@ import 'data/repositories/settings_repository.dart';
 import 'data/repositories/stats_repository.dart';
 import 'data/repositories/user_repository.dart';
 import 'domain/lesson.dart';
+import 'domain/practice_limit.dart';
 import 'domain/task.dart';
 import 'domain/task_count.dart';
 
@@ -144,6 +147,80 @@ final starTotalsProvider = StreamProvider<Map<int, int>>(
 final boltTotalsProvider = StreamProvider<Map<int, int>>(
   (ref) => ref.watch(statsRepositoryProvider).watchBoltTotals(),
 );
+
+/// Whether the active child may start another run right now.
+///
+/// Re-emits when a run is stored, and once more exactly when the break is
+/// over - a screen that says "Pause bis 15:20" has to unlock itself at 15:20
+/// without anyone tapping anything. It ticks only while blocked; while
+/// practice is allowed nothing changes on its own.
+/// The wall clock, so a test can decide what time it is.
+///
+/// Only the practice cap needs this: it is the one rule that changes with the
+/// passing of time alone, without anybody touching the app.
+final clockProvider = Provider<DateTime Function()>((ref) => DateTime.now);
+
+final practiceAllowanceForProvider =
+    StreamProvider.family<PracticeAllowance, int>((ref, userId) {
+  final user = ref
+      .watch(usersProvider)
+      .value
+      ?.where((u) => u.id == userId)
+      .firstOrNull;
+  if (user == null ||
+      (user.practiceLimitMinutes <= 0 && user.dailyLimitMinutes <= 0)) {
+    return Stream.value(PracticeAllowance.unlimited);
+  }
+
+  final now = ref.watch(clockProvider);
+  final today = now();
+  final stretches = ref.watch(statsRepositoryProvider).watchPracticeStretch(
+        userId: user.id,
+        breakMinutes: user.breakMinutes,
+        dayStartMs:
+            DateTime(today.year, today.month, today.day).millisecondsSinceEpoch,
+      );
+
+  // Waking up at the end of a break rebuilds the whole provider rather than
+  // re-judging the old numbers: when the wake-up is midnight, the day itself
+  // has changed and the query has to be asked again.
+  //
+  // An explicit Timer, not an await inside a generator - only this one really
+  // stops once nobody is listening, and a pending alarm keeps both the app
+  // and every widget test awake.
+  Timer? alarm;
+  ref.onDispose(() => alarm?.cancel());
+
+  return stretches.map((stretch) {
+    final allowance = practiceAllowance(
+      limitMinutes: user.practiceLimitMinutes,
+      breakMinutes: user.breakMinutes,
+      practisedMs: stretch.practisedMs,
+      lastFinishedAt: stretch.lastFinishedAt,
+      now: now(),
+      dailyLimitMinutes: user.dailyLimitMinutes,
+      practisedTodayMs: stretch.todayMs,
+    );
+
+    alarm?.cancel();
+    final until = allowance.breakUntil;
+    if (until != null) {
+      final left = until.difference(now());
+      alarm = Timer(
+        left.isNegative ? Duration.zero : left + const Duration(seconds: 1),
+        ref.invalidateSelf,
+      );
+    }
+    return allowance;
+  });
+});
+
+/// The same, for the child currently practising.
+final practiceAllowanceProvider = Provider<AsyncValue<PracticeAllowance>>((ref) {
+  final user = ref.watch(activeUserProvider);
+  if (user == null) return const AsyncData(PracticeAllowance.unlimited);
+  return ref.watch(practiceAllowanceForProvider(user.id));
+});
 
 /// Days practised in a row, per child.
 final streaksProvider = StreamProvider<Map<int, int>>(

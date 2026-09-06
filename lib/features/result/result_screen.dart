@@ -30,7 +30,7 @@ class ResultScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final stars = starsFor(wrongAttempts, taskCount);
+    final stars = starsFor(wrongAttempts, taskCount, scored: lesson.scored);
     // One time, everywhere: what is shown here is what the leaderboard ranks
     // and what the learning curve plots. A second, penalty-free number would
     // only read as a contradiction.
@@ -39,7 +39,7 @@ class ResultScreen extends ConsumerWidget {
     final penalty = scoredTotal - totalMs;
     // Two axes, deliberately: stars say how carefully this run went, bolts
     // how fast. A child who is careful but slow still gets three stars.
-    final bolts = boltsFor(lesson.targetMsPerTask, perTask);
+    final bolts = boltsFor(lesson.targetMsPerTask, perTask, taskCount);
     final nextBolt = nextBoltTargetMs(lesson.targetMsPerTask, bolts);
     final user = ref.watch(activeUserProvider);
     final streak = user == null
@@ -148,14 +148,11 @@ class ResultScreen extends ConsumerWidget {
                       if (lesson.targetMsPerTask > 0) ...[
                         const SizedBox(width: 6),
                         BoltRow(
-                          earned: boltsFor(
-                            lesson.targetMsPerTask,
-                            ref
-                                    .watch(lessonStatsProvider(user.id))
-                                    .value?[lesson.id]
-                                    ?.bestScoreMs ??
-                                perTask,
-                          ),
+                          earned: ref
+                                  .watch(lessonStatsProvider(user.id))
+                                  .value?[lesson.id]
+                                  ?.bestBolts ??
+                              bolts,
                           size: 22,
                         ),
                       ],

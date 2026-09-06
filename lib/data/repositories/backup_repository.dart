@@ -65,6 +65,9 @@ class BackupRepository {
             'hiddenGroups': user.hiddenGroups,
             'reviewHardTasks': user.reviewHardTasks,
             'defaultTaskCount': user.defaultTaskCount,
+            'practiceLimitMinutes': user.practiceLimitMinutes,
+            'breakMinutes': user.breakMinutes,
+            'dailyLimitMinutes': user.dailyLimitMinutes,
           }
       ],
       'sessions': [
@@ -169,6 +172,13 @@ class BackupRepository {
                 reviewHardTasks:
                     Value(user['reviewHardTasks'] as bool? ?? true),
                 defaultTaskCount: Value(user['defaultTaskCount'] as int?),
+                // An older backup knows of no cap, and no cap is the
+                // default - a restore must not invent one.
+                practiceLimitMinutes:
+                    Value(user['practiceLimitMinutes'] as int? ?? 0),
+                breakMinutes: Value(user['breakMinutes'] as int? ?? 15),
+                dailyLimitMinutes:
+                    Value(user['dailyLimitMinutes'] as int? ?? 0),
               ),
             );
       }

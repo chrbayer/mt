@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../domain/lesson.dart';
+import '../../domain/practice_limit.dart';
 import '../../domain/scoring.dart';
 import '../../providers.dart';
 import '../../theme/app_theme.dart';
 import '../common/star_row.dart';
+import 'pause_notice.dart';
 import '../leaderboard/leaderboard_screen.dart';
 import '../practice/practice_screen.dart';
 import 'lesson_example.dart';
@@ -58,6 +60,12 @@ class _StartLessonSheetState extends ConsumerState<StartLessonSheet> {
                 (userId: user.id, lessonId: widget.lesson.id)))
             .value;
     final count = _selected ?? stored;
+
+    // The cap is checked here rather than on the tile: this is the one door
+    // every run goes through, and a child should still be able to look at a
+    // lesson and its ranking during the break.
+    final allowance =
+        ref.watch(practiceAllowanceProvider).value ?? PracticeAllowance.unlimited;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(40, 8, 40, 28),
@@ -146,13 +154,18 @@ class _StartLessonSheetState extends ConsumerState<StartLessonSheet> {
           const SizedBox(height: 30),
           // Stacked, not side by side: a bottom sheet is only ~640 dp wide,
           // and two labelled buttons in a row clip the second one.
+          if (!allowance.allowed)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 16),
+              child: PauseNotice(allowance: allowance, compact: true),
+            ),
           SizedBox(
             width: double.infinity,
             child: FilledButton.icon(
               icon: const Icon(Icons.play_arrow_rounded, size: 34),
               label: const Text("Los geht's"),
               // Disabled for the one frame before the stored count arrives.
-              onPressed: count == null
+              onPressed: !allowance.allowed || count == null
                   ? null
                   : () async {
                       // The navigator has to be captured before the sheet is

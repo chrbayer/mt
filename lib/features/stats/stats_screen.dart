@@ -197,13 +197,7 @@ class _LessonTable extends StatelessWidget {
                       children: [
                         StarRow(earned: stat.bestStars, size: 20),
                         if (lesson.targetMsPerTask > 0)
-                          BoltRow(
-                            earned: boltsFor(
-                              lesson.targetMsPerTask,
-                              stat.bestScoreMs,
-                            ),
-                            size: 20,
-                          ),
+                          BoltRow(earned: stat.bestBolts, size: 20),
                       ],
                     ),
                   ),

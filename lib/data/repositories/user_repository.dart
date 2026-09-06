@@ -76,6 +76,24 @@ class UserRepository {
       (_db.update(_db.users)..where((u) => u.id.equals(id)))
           .write(UsersCompanion(defaultTaskCount: Value(count)));
 
+  /// Sets how long this child may practise in one stretch, and how long the
+  /// break has to be. A limit of zero switches the cap off.
+  Future<void> setPracticeLimit(
+    int id, {
+    required int limitMinutes,
+    required int breakMinutes,
+    int? dailyLimitMinutes,
+  }) =>
+      (_db.update(_db.users)..where((u) => u.id.equals(id))).write(
+        UsersCompanion(
+          practiceLimitMinutes: Value(limitMinutes),
+          breakMinutes: Value(breakMinutes),
+          dailyLimitMinutes: dailyLimitMinutes == null
+              ? const Value.absent()
+              : Value(dailyLimitMinutes),
+        ),
+      );
+
   /// Turns the review of previously difficult tasks on or off for one child.
   Future<void> setReviewHardTasks(int id, bool value) =>
       (_db.update(_db.users)..where((u) => u.id.equals(id)))

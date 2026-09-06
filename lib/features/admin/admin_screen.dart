@@ -216,7 +216,8 @@ class _HistoryRow extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(left: 12),
               child: StarRow(
-                earned: starsFor(entry.wrongAttempts, entry.taskCount),
+                earned: starsFor(entry.wrongAttempts, entry.taskCount,
+                    scored: true),
                 size: 20,
               ),
             ),

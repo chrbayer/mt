@@ -114,7 +114,7 @@ class _LeaderboardsTab extends ConsumerWidget {
                 padding: EdgeInsets.all(40),
                 child: Text(
                   'Noch keine Bestenlisten.\n'
-                  'Ein Durchgang zählt ab $minTasksForLeaderboard Aufgaben.',
+                  'Ein Durchgang zählt ab $minTasksForAward Aufgaben.',
                   textAlign: TextAlign.center,
                   style: TextStyle(fontSize: 24, color: AppColors.textMuted),
                 ),

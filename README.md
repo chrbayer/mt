@@ -104,7 +104,10 @@ antreten. Die App läuft vollständig offline, ohne Konten und ohne Netzwerk.
 * **Empfehlung**: über dem Katalog steht ein Vorschlag — erst ein Wackelkandidat,
   sonst etwas Neues, sonst etwas lange nicht Geübtes.
 * **Sterne**: jede Lektionskachel trägt ihre drei Sterne — gefüllt, so viele
-  wie im besten Durchgang erreicht, sonst leer. Drei leere Sterne heißen „noch
+  wie im besten Durchgang erreicht, sonst leer. Gewertet wird erst **ab 10
+  Aufgaben**: fünf schnelle Aufgaben sind ein Aufwärmen, kein Ergebnis. Für
+  die **Ersten Schritte gilt das nicht** — dort ist das Durchhalten die
+  Leistung, und fünf Aufgaben sind eine völlig richtige Länge. Drei leere Sterne heißen „noch
   nicht geübt", ohne dass es dastehen muss. Oben läuft der Gesamtstand mit
   („24 von 150"), und zwar **pro Lektion nur einmal, mit dem besten
   Ergebnis** — sonst wäre es lohnender, die leichteste Lektion zu wiederholen
@@ -120,6 +123,21 @@ antreten. Die App läuft vollständig offline, ohne Konten und ohne Netzwerk.
   Zielzeit **vor** dem Durchgang, der Ergebnisbildschirm sagt danach, was der
   nächste Blitz kosten würde. Die Ersten Schritte haben keine — dort wird
   nicht gemessen.
+* **Übungszeit**: zwei Grenzen, beide pro Profil im Elternbereich einstellbar
+  und beide standardmäßig **aus**.
+  * **Am Stück**: nach der eingestellten Zeit gibt es eine Pause. Erst wenn
+    sie vollständig eingehalten wurde, fängt die Zählung wieder bei null an.
+    Der Hinweis nennt die Uhrzeit, zu der es weitergeht, und verschwindet von
+    selbst — ohne dass jemand etwas antippen muss.
+  * **Pro Tag insgesamt**: zählt alle Durchgänge des Tages zusammen, Pausen
+    hin oder her. Ist die Zeit aufgebraucht, hilft keine Pause mehr; es heißt
+    dann „Für heute reicht es!" statt einer Uhrzeit, die die App nicht halten
+    könnte.
+
+  Ein **laufender Durchgang wird nie abgebrochen** — gesperrt ist nur der
+  nächste Start. Während der Pause darf ein Kind weiter Lektionen und
+  Bestenlisten ansehen, nur eben nicht starten; das Duell ist ebenfalls
+  gesperrt, sonst wäre es der Weg um die Grenze herum.
 * **Serie**: Tage in Folge, auf dem Ergebnisbildschirm und in der Übersicht.
 * **Sicherung**: der ganze Datenbestand als JSON-Datei, über die Teilen-Funktion
   aus der App heraus, und genauso wieder einspielbar.
@@ -166,6 +184,7 @@ lib/
     task.dart            Aufgabe und Ergebnis einer Aufgabe
     task_generator.dart  deterministische Erzeugung aus einem Seed
     scoring.dart         Punktzeit, Sterne, Blitze, Zeitformatierung
+    practice_limit.dart  Übungszeit am Stück und Pausen
   data/
     db/          Drift-Schema (users, sessions, attempts, app_settings)
     repositories/ Zugriff und SQL-Aggregate für die Statistik

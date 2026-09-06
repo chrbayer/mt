@@ -172,6 +172,14 @@ void main() {
       await recordRun(SessionRepository(before),
           userId: id, lessonId: 'add_20_plain');
 
+      if (version < 5) {
+        await before.customStatement(
+            'ALTER TABLE users DROP COLUMN practice_limit_minutes');
+        await before.customStatement(
+            'ALTER TABLE users DROP COLUMN break_minutes');
+        await before.customStatement(
+            'ALTER TABLE users DROP COLUMN daily_limit_minutes');
+      }
       if (version < 4) {
         await before.customStatement('DROP TABLE lesson_preferences');
         await before.customStatement(
@@ -190,7 +198,7 @@ void main() {
       return file;
     }
 
-    for (final from in [1, 2, 3]) {
+    for (final from in [1, 2, 3, 4]) {
       test('a database from schema v$from keeps its data', () async {
         final file = await databaseAtVersion(from);
 
@@ -206,6 +214,11 @@ void main() {
         expect(user.visibleGroups, LessonGroup.values);
         expect(user.reviewHardTasks, isTrue);
         expect(user.defaultTaskCount, isNull);
+        // No practice cap unless a parent asks for one - a migration must
+        // not lock a child out of an app that worked yesterday.
+        expect(user.practiceLimitMinutes, 0);
+        expect(user.breakMinutes, 15);
+        expect(user.dailyLimitMinutes, 0);
         expect(await after.select(after.lessonPreferences).get(), isEmpty);
         expect(await after.select(after.sessions).get(), hasLength(1));
         expect(await after.select(after.attempts).get(), hasLength(10));
@@ -365,7 +378,7 @@ void main() {
         sessions,
         userId: mia,
         lessonId: 'sub_100_borrow',
-        taskCount: minTasksForLeaderboard - 1,
+        taskCount: minTasksForAward - 1,
         msPerTask: 1000,
       );
 
@@ -707,7 +720,7 @@ void main() {
       for (final (index, wrong) in [0, 1, 2, 3, 5, 10].indexed) {
         expect(
           byLesson[scored[index].id]!.bestStars,
-          starsFor(wrong, 10),
+          starsFor(wrong, 10, scored: true),
           reason: '$wrong Fehler',
         );
       }
@@ -742,7 +755,7 @@ void main() {
       var expectedTotal = 0;
       for (final lesson in lessons) {
         final best = (lesson.targetMsPerTask * 0.5).round().toDouble();
-        expectedTotal += boltsFor(lesson.targetMsPerTask, best);
+        expectedTotal += boltsFor(lesson.targetMsPerTask, best, 10);
       }
       expect((await stats.watchBoltTotals().first)[mia], expectedTotal);
     });
@@ -774,6 +787,50 @@ void main() {
       expect((await stats.watchBoltTotals().first)[mia], maxBolts);
     });
 
+    test('a run under ten tasks is worth no stars and no bolts', () async {
+      final mia =
+          await users.createUser(name: 'Mia', avatar: '🦊', colorIndex: 0);
+      // Flawless and fast - but only five tasks long.
+      await recordRun(sessions,
+          userId: mia,
+          lessonId: 'add_100_carry',
+          taskCount: 5,
+          msPerTask: 1000);
+
+      final byLesson = await stats.watchLessonStats(mia).first;
+      expect(byLesson['add_100_carry']!.bestStars, 0);
+      expect(byLesson['add_100_carry']!.bestBolts, 0);
+      expect((await stats.watchStarTotals().first)[mia], 0);
+      expect((await stats.watchBoltTotals().first)[mia] ?? 0, 0);
+
+      // Ten tasks of the same quality do count, and the short run neither
+      // adds to nor takes away from that.
+      await recordRun(sessions,
+          userId: mia,
+          lessonId: 'add_100_carry',
+          taskCount: 10,
+          msPerTask: 1000);
+      final after = await stats.watchLessonStats(mia).first;
+      expect(after['add_100_carry']!.bestStars, maxStars);
+      expect(after['add_100_carry']!.bestBolts, maxBolts);
+    });
+
+    test('the first steps keep their stars however short the run', () async {
+      final mia =
+          await users.createUser(name: 'Mia', avatar: '🦊', colorIndex: 0);
+      // Five apples counted is a result there, and the minimum must not
+      // quietly take it away.
+      await recordRun(sessions,
+          userId: mia, lessonId: 'count_pictures', taskCount: 5);
+
+      final byLesson = await stats.watchLessonStats(mia).first;
+      expect(byLesson['count_pictures']!.bestStars, maxStars);
+      expect((await stats.watchStarTotals().first)[mia], maxStars);
+      // And the Dart side says the same thing.
+      expect(starsFor(0, 5, scored: false), maxStars);
+      expect(starsFor(0, 5, scored: true), 0);
+    });
+
     test('a lesson that is not timed has no bolts to give', () async {
       final mia =
           await users.createUser(name: 'Mia', avatar: '🦊', colorIndex: 0);
@@ -802,6 +859,94 @@ void main() {
       // And it stays out of every ranking.
       expect(await stats.watchLeaderboard('count_pictures').first, isEmpty);
       expect(await stats.watchAllLeaderboards().first, isEmpty);
+    });
+
+    final now = DateTime.now();
+    final todayStartMs =
+        DateTime(now.year, now.month, now.day).millisecondsSinceEpoch;
+
+    test('the current stretch adds up until a real break', () async {
+      final mia =
+          await users.createUser(name: 'Mia', avatar: '🦊', colorIndex: 0);
+      // Three runs back to back, five minutes of practice each.
+      for (var i = 0; i < 3; i++) {
+        await recordRun(sessions,
+            userId: mia, lessonId: 'add_100_carry', msPerTask: 30000);
+      }
+
+      final stretch = await stats
+          .watchPracticeStretch(
+            userId: mia,
+            breakMinutes: 15,
+            dayStartMs: todayStartMs,
+          )
+          .first;
+      expect(stretch.practisedMs, 3 * 10 * 30000);
+      expect(stretch.lastFinishedAt, isNotNull);
+    });
+
+    test('an old run is a stretch of its own', () async {
+      final mia =
+          await users.createUser(name: 'Mia', avatar: '🦊', colorIndex: 0);
+      await recordRun(sessions,
+          userId: mia, lessonId: 'add_100_carry', msPerTask: 30000);
+
+      // Backdate it by an hour: with a fifteen minute break in between, the
+      // run that follows opens a new stretch.
+      final old = (await db.select(db.sessions).get()).single;
+      final anHourAgo =
+          DateTime.now().subtract(const Duration(hours: 1)).millisecondsSinceEpoch;
+      await (db.update(db.sessions)..where((s) => s.id.equals(old.id))).write(
+        SessionsCompanion(
+          startedAtMs: Value(anHourAgo),
+          finishedAtMs: Value(anHourAgo + 1000),
+        ),
+      );
+      await recordRun(sessions,
+          userId: mia, lessonId: 'add_100_carry', msPerTask: 6000);
+
+      final stretch = await stats
+          .watchPracticeStretch(
+            userId: mia,
+            breakMinutes: 15,
+            dayStartMs: todayStartMs,
+          )
+          .first;
+      expect(stretch.practisedMs, 10 * 6000,
+          reason: 'only the fresh run is in the current stretch');
+    });
+
+    test('an abandoned run still counts as time at the tablet', () async {
+      final mia =
+          await users.createUser(name: 'Mia', avatar: '🦊', colorIndex: 0);
+      await recordRun(sessions,
+          userId: mia,
+          lessonId: 'add_100_carry',
+          msPerTask: 30000,
+          completed: false);
+
+      final stretch = await stats
+          .watchPracticeStretch(
+            userId: mia,
+            breakMinutes: 15,
+            dayStartMs: todayStartMs,
+          )
+          .first;
+      expect(stretch.practisedMs, 10 * 30000);
+    });
+
+    test('a child with no history has an empty stretch', () async {
+      final mia =
+          await users.createUser(name: 'Mia', avatar: '🦊', colorIndex: 0);
+      final stretch = await stats
+          .watchPracticeStretch(
+            userId: mia,
+            breakMinutes: 15,
+            dayStartMs: todayStartMs,
+          )
+          .first;
+      expect(stretch.practisedMs, 0);
+      expect(stretch.lastFinishedAt, isNull);
     });
 
     test('a streak counts practice days in a row', () async {
