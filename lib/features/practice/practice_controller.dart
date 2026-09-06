@@ -27,6 +27,10 @@ class PracticeController extends ChangeNotifier {
   String _input = '';
   String _secondInput = '';
   AnswerField _field = AnswerField.primary;
+  /// The coins and notes tapped so far, newest last. Only a
+  /// [TaskForm.moneyCompose] task collects any.
+  final List<int> _pieces = [];
+
   int _wrongForCurrentTask = 0;
   AnswerFeedback _feedback = AnswerFeedback.none;
   bool _paused = false;
@@ -52,6 +56,9 @@ class PracticeController extends ChangeNotifier {
 
   /// Which box the keypad currently fills.
   AnswerField get activeField => _field;
+
+  /// The coins and notes laid out so far, in the order they were tapped.
+  List<int> get pieces => List.unmodifiable(_pieces);
 
   /// Whether this task asks for two numbers.
   bool get hasSecondField => currentTask.expectedSecond != null;
@@ -109,9 +116,39 @@ class PracticeController extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Taps one of the spoken forms. It replaces whatever was chosen before -
+  /// there is nothing to append to, so there is nothing to delete either.
+  void pressPhrase(int index) {
+    if (!_acceptsInput) return;
+    if (_feedback == AnswerFeedback.wrong) _feedback = AnswerFeedback.none;
+    _field = AnswerField.primary;
+    _input = '$index';
+    notifyListeners();
+  }
+
+  /// Lays down one coin or note. The answer to such a task is not a typed
+  /// number but the pile itself, so the box shows the running total.
+  void pressPiece(int cents) {
+    if (!_acceptsInput) return;
+    if (_feedback == AnswerFeedback.wrong) _feedback = AnswerFeedback.none;
+    _pieces.add(cents);
+    _input = '${_pieces.fold<int>(0, (sum, c) => sum + c)}';
+    notifyListeners();
+  }
+
   void backspace() {
     if (!_acceptsInput) return;
     if (_feedback == AnswerFeedback.wrong) _feedback = AnswerFeedback.none;
+    // A pile is taken apart piece by piece, not digit by digit: deleting a
+    // digit off the total would leave an amount nobody laid down.
+    if (_pieces.isNotEmpty) {
+      _pieces.removeLast();
+      _input = _pieces.isEmpty
+          ? ''
+          : '${_pieces.fold<int>(0, (sum, c) => sum + c)}';
+      notifyListeners();
+      return;
+    }
     if (_active.isEmpty) {
       // Backing out of the empty remainder box returns to the quotient, so a
       // mistyped first number can still be corrected.
@@ -153,6 +190,7 @@ class PracticeController extends ChangeNotifier {
       _wrongForCurrentTask++;
       _input = '';
       _secondInput = '';
+      _pieces.clear();
       _field = AnswerField.primary;
       _feedback = AnswerFeedback.wrong;
     }
@@ -167,6 +205,7 @@ class PracticeController extends ChangeNotifier {
     _feedback = AnswerFeedback.none;
     _input = '';
     _secondInput = '';
+    _pieces.clear();
     _field = AnswerField.primary;
     _wrongForCurrentTask = 0;
 

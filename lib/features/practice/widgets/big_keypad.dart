@@ -35,7 +35,7 @@ class BigKeypad extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget digit(int value) => _Key(
+    Widget digit(int value) => KeypadKey(
           key: Key('digit-$value'),
           onTap: () => _tap(() => onDigit(value)),
           enabled: enabled,
@@ -73,7 +73,7 @@ class BigKeypad extends StatelessWidget {
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.all(6),
-                  child: _Key(
+                  child: KeypadKey(
                     key: const Key('backspace'),
                     onTap: () => _tap(onBackspace),
                     enabled: enabled,
@@ -95,7 +95,7 @@ class BigKeypad extends StatelessWidget {
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.all(6),
-                  child: _Key(
+                  child: KeypadKey(
                     key: const Key('submit'),
                     onTap: () => _tap(onSubmit, strong: true),
                     enabled: enabled,
@@ -112,13 +112,15 @@ class BigKeypad extends StatelessWidget {
   }
 }
 
-class _Key extends StatelessWidget {
+/// One key of a practice keypad. Shared with the word and money pads so all
+/// three feel like the same keyboard.
+class KeypadKey extends StatelessWidget {
   final VoidCallback onTap;
   final Widget child;
   final bool enabled;
   final Color background;
 
-  const _Key({
+  const KeypadKey({
     super.key,
     required this.onTap,
     required this.child,

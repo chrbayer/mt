@@ -15,6 +15,7 @@ import '../profiles/profile_badge.dart';
 import '../result/result_screen.dart';
 import 'practice_controller.dart';
 import 'widgets/big_keypad.dart';
+import 'widgets/choice_keypad.dart';
 import 'widgets/progress_dots.dart';
 import 'widgets/task_display.dart';
 
@@ -144,6 +145,46 @@ class _PracticeScreenState extends ConsumerState<PracticeScreen>
       ?..removeListener(_onControllerChanged)
       ..dispose();
     super.dispose();
+  }
+
+  /// Which pad this task needs. Words for a spoken time, coins for an amount
+  /// to lay out, digits for everything else - including the hour that follows
+  /// a spoken form, which is a number again.
+  Widget _keypadFor(
+    PracticeController controller, {
+    required bool enabled,
+    required bool haptics,
+  }) {
+    final form = controller.currentTask.form;
+    if (form == TaskForm.moneyCompose) {
+      return ChoiceKeypad(
+        labels: [for (final cents in moneyPieces) formatPiece(cents)],
+        enabled: enabled,
+        haptics: haptics,
+        onChoice: (index) => controller.pressPiece(moneyPieces[index]),
+        onBackspace: controller.backspace,
+        onSubmit: _submit,
+      );
+    }
+    if (form == TaskForm.clockPhrase &&
+        controller.activeField == AnswerField.primary) {
+      return ChoiceKeypad(
+        labels: clockPhrases,
+        selected:
+            controller.input.isEmpty ? null : int.parse(controller.input),
+        enabled: enabled,
+        haptics: haptics,
+        onChoice: controller.pressPhrase,
+        onSubmit: _submit,
+      );
+    }
+    return BigKeypad(
+      enabled: enabled,
+      haptics: haptics,
+      onDigit: controller.pressDigit,
+      onBackspace: controller.backspace,
+      onSubmit: _submit,
+    );
   }
 
   void _submit() {
@@ -340,6 +381,8 @@ class _PracticeScreenState extends ConsumerState<PracticeScreen>
                                   feedback: controller.feedback,
                                   arrangement: widget.lesson.arrangement,
                                   showCounts: widget.lesson.showCounts,
+                                  clock24: widget.lesson.clock24,
+                                  pieces: controller.pieces,
                                 ),
                               ),
                             ),
@@ -347,12 +390,10 @@ class _PracticeScreenState extends ConsumerState<PracticeScreen>
                           const SizedBox(width: 24),
                           Expanded(
                             flex: 2,
-                            child: BigKeypad(
+                            child: _keypadFor(
+                              controller,
                               enabled: !locked,
                               haptics: preferences.haptics,
-                              onDigit: controller.pressDigit,
-                              onBackspace: controller.backspace,
-                              onSubmit: _submit,
                             ),
                           ),
                         ],

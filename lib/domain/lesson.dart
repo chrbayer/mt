@@ -93,6 +93,17 @@ enum TaskForm {
   /// A clock face to read: `? Uhr ?`.
   clock,
 
+  /// A clock face to say out loud: the spoken form ("viertel vor") and the
+  /// hour it names. Two answers, and the first one is a word.
+  clockPhrase,
+
+  /// An amount to lay out from coins and notes. The answer is not typed at
+  /// all - it is the pieces that were tapped.
+  moneyCompose,
+
+  /// A price, a round amount handed over, and the change as the answer.
+  change,
+
   /// A handful of pictures to count.
   quantity,
 
@@ -151,6 +162,10 @@ class LessonSpec {
   /// this. Half hours first, then quarters, then five-minute steps.
   final int minuteStep;
 
+  /// Whether the clock is read as a 24-hour time. The hands look the same at
+  /// 3 and at 15 o'clock, so these tasks also name the part of the day.
+  final bool clock24;
+
   /// Whether this lesson is measured and ranked.
   ///
   /// The first steps are not: no clock, no leaderboard, and the stars are for
@@ -171,6 +186,7 @@ class LessonSpec {
     this.timesTable,
     this.scale = FactorScale.table,
     this.minuteStep = 0,
+    this.clock24 = false,
     this.scored = true,
     this.arrangement = PictureArrangement.row,
     this.showCounts = false,
@@ -628,6 +644,29 @@ const _everydayLessons = [
     minuteStep: 5,
   ),
   LessonSpec(
+    id: 'clock_24',
+    title: 'Uhrzeit mit 24 Stunden',
+    description: 'Nachmittags zählt man weiter: aus 3 Uhr wird 15 Uhr. '
+        'Unter der Uhr steht, welche Tageszeit es ist.',
+    group: LessonGroup.everyday,
+    op: ArithmeticOp.add,
+    carry: CarryMode.any,
+    form: TaskForm.clock,
+    minuteStep: 5,
+    clock24: true,
+  ),
+  LessonSpec(
+    id: 'clock_words',
+    title: 'Uhrzeit sagen',
+    description: 'Wie sagt man die Uhrzeit? Erst die Sprechweise antippen, '
+        'dann die Stunde, die dabei genannt wird - bei "halb 3" ist das die 3.',
+    group: LessonGroup.everyday,
+    op: ArithmeticOp.add,
+    carry: CarryMode.any,
+    form: TaskForm.clockPhrase,
+    minuteStep: 5,
+  ),
+  LessonSpec(
     id: 'money_add',
     title: 'Geld zusammenzählen',
     description: 'Zwei Beträge addieren. Erst die Euro eingeben, dann die '
@@ -645,6 +684,26 @@ const _everydayLessons = [
     op: ArithmeticOp.sub,
     carry: CarryMode.any,
     form: TaskForm.money,
+  ),
+  LessonSpec(
+    id: 'money_compose',
+    title: 'Betrag zusammenlegen',
+    description: 'Lege den Betrag aus Münzen und Scheinen. Es gibt viele '
+        'richtige Wege - der Betrag muss am Ende genau stimmen.',
+    group: LessonGroup.everyday,
+    op: ArithmeticOp.add,
+    carry: CarryMode.any,
+    form: TaskForm.moneyCompose,
+  ),
+  LessonSpec(
+    id: 'money_change',
+    title: 'Was bekomme ich zurück?',
+    description: 'Etwas kostet einen krummen Betrag, bezahlt wird mit einem '
+        'glatten Schein oder Stück. Gesucht ist das Rückgeld.',
+    group: LessonGroup.everyday,
+    op: ArithmeticOp.sub,
+    carry: CarryMode.any,
+    form: TaskForm.change,
   ),
 ];
 

@@ -240,8 +240,14 @@ Task? _sample(LessonSpec lesson, Operation op, Random random) {
   switch (lesson.form) {
     case TaskForm.clock:
       return _sampleClock(lesson, random);
+    case TaskForm.clockPhrase:
+      return _sampleClockPhrase(random);
     case TaskForm.money:
       return _sampleMoney(lesson, op, random);
+    case TaskForm.moneyCompose:
+      return _sampleComposeAmount(random);
+    case TaskForm.change:
+      return _sampleChange(random);
     case TaskForm.quantity:
       // a is how many, b only picks the picture.
       return Task(
@@ -299,14 +305,58 @@ Task? _sample(LessonSpec lesson, Operation op, Random random) {
 
 /// A time on the clock face. Hours run 1..12 as they are read aloud, minutes
 /// in the steps this lesson practises.
+///
+/// A 24-hour lesson starts at six in the morning and runs to eleven at night:
+/// those are the hours a child has a name for. Half of them are past noon, so
+/// converting is the rule rather than the exception.
 Task _sampleClock(LessonSpec lesson, Random random) {
   final steps = 60 ~/ lesson.minuteStep;
   return Task(
-    a: _between(random, 1, 12),
+    a: lesson.clock24 ? _between(random, 6, 23) : _between(random, 1, 12),
     b: random.nextInt(steps) * lesson.minuteStep,
     op: Operation.add,
     form: TaskForm.clock,
   );
+}
+
+/// A time to say out loud. The full hour is left out - there is no spoken
+/// form for it on the pad, see [clockPhrases].
+Task _sampleClockPhrase(Random random) => Task(
+      a: _between(random, 1, 12),
+      b: _between(random, 1, 11) * 5,
+      op: Operation.add,
+      form: TaskForm.clockPhrase,
+    );
+
+/// An amount to lay out. Built by drawing a handful of coins and adding them
+/// up, so it can always be laid with few pieces - a random amount would too
+/// often need a fistful of ten-cent coins.
+Task _sampleComposeAmount(Random random) {
+  // Small pieces first: without the cap almost every draw would be euros,
+  // and the cent coins would never come up.
+  final pieces = _between(random, 2, 4);
+  var total = 0;
+  for (var i = 0; i < pieces; i++) {
+    total += moneyPieces[random.nextInt(moneyPieces.length - 2)];
+  }
+  return Task(
+    a: total,
+    b: 0,
+    op: Operation.add,
+    form: TaskForm.moneyCompose,
+  );
+}
+
+/// A price and a round amount handed over. `a` is what is given and `b` the
+/// price, so `a - b` is the change the child has to work out.
+Task? _sampleChange(Random random) {
+  const given = [100, 200, 500, 1000, 2000];
+  final handed = given[random.nextInt(given.length)];
+  final price = _between(random, 1, handed ~/ 5 - 1) * 5;
+  // Paying with a note that barely covers the price is not what anybody
+  // does, and the change would be a single coin.
+  if (handed - price < 10) return null;
+  return Task(a: handed, b: price, op: Operation.sub, form: TaskForm.change);
 }
 
 /// Two amounts of money, held in cents. Both land on five cents, the way

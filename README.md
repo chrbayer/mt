@@ -7,7 +7,7 @@ antreten. Die App läuft vollständig offline, ohne Konten und ohne Netzwerk.
 
 ## Was sie kann
 
-* **62 Lektionen** in acht Gruppen (Erste Schritte / Bis 10 / Bis 20 /
+* **66 Lektionen** in acht Gruppen (Erste Schritte / Bis 10 / Bis 20 /
   Bis 100 / Bis 1000 / Einmaleins / Mal und Geteilt / Uhrzeit und Geld).
   Ab 20 bietet jede Gruppe Plus und Minus mit und ohne Zehnerübergang, zwei
   Platzhalterformen (`34 + ? = 71`) und eine gemischte Lektion; jede Lektion
@@ -79,6 +79,21 @@ antreten. Die App läuft vollständig offline, ohne Konten und ohne Netzwerk.
   abziehen. Beide fragen zwei Zahlen ab — Stunden und Minuten, Euro und Cent —
   über dieselben zwei Felder wie „Geteilt mit Rest". Die Tastatur bleibt
   überall dieselbe, es gibt keine Komma-Taste.
+* **Uhrzeit mit 24 Stunden**: dieselbe gezeichnete Uhr, aber gefragt ist die
+  Zählung bis 23. Unter dem Zifferblatt steht die Tageszeit — vormittags,
+  mittags, nachmittags, abends —, denn die Zeiger sehen um 10 Uhr morgens
+  genauso aus wie um 22 Uhr.
+* **Uhrzeit sagen**: wie man die Zeit ausspricht. Statt Ziffern zeigt die
+  Tastatur die elf Sprechweisen (`5 nach`, `viertel nach`, `5 vor halb`,
+  `halb`, `viertel vor`, …); danach wird die Stunde eingetippt, **die dabei
+  genannt wird**. Genau darin steckt die Aufgabe: 2:30 ist „halb 3", nicht
+  „halb 2".
+* **Betrag zusammenlegen**: ein Betrag soll aus Münzen und Scheinen gelegt
+  werden. Die Tastatur zeigt die neun Stücke von 5 ct bis 20 €; getippte
+  Stücke erscheinen als Häufchen, die Rücktaste nimmt das letzte wieder weg.
+  Es gibt viele richtige Wege — am Ende muss der Betrag genau stimmen.
+* **Rückgeld**: etwas kostet einen krummen Betrag, bezahlt wird mit einem
+  glatten Schein oder Stück, gesucht ist das Wechselgeld.
 * **Duell**: zwei oder mehr Kinder bekommen exakt denselben Durchgang
   (gleicher Zufalls-Seed), spielen nacheinander am selben Tablet und sehen
   danach die Rangfolge. Angeboten werden nur Lektionen, die allen Beteiligten

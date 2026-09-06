@@ -59,7 +59,9 @@ void main() {
                     lesson.form == TaskForm.clock ||
                     lesson.form == TaskForm.quantity ||
                     lesson.form == TaskForm.dice ||
-                    lesson.form == TaskForm.sequence
+                    lesson.form == TaskForm.sequence ||
+                    // An amount to lay out has no second operand at all.
+                    lesson.form == TaskForm.moneyCompose
                 ? 0
                 : 1;
             for (final task in tasks) {
@@ -476,8 +478,16 @@ void main() {
           for (var seed = 0; seed < 30; seed++) {
             for (final task
                 in generateTasks(lesson: lesson, count: 20, seed: seed)) {
-              // Hours as they are spoken: 1 to 12, never 0.
-              expect(task.a, inInclusiveRange(1, 12), reason: '$task');
+              // Hours as they are spoken: 1 to 12, never 0. A 24-hour lesson
+              // counts on past noon, and starts at six so that every hour it
+              // shows is one a child has a name for.
+              expect(
+                task.a,
+                lesson.clock24
+                    ? inInclusiveRange(6, 23)
+                    : inInclusiveRange(1, 12),
+                reason: '$task',
+              );
               expect(task.b, inInclusiveRange(0, 59), reason: '$task');
               expect(task.b % lesson.minuteStep, 0, reason: '$task');
               expect(task.expected, task.a);
@@ -524,6 +534,113 @@ void main() {
             }
           }
         }
+      });
+
+      test('the spoken hour is the one that is coming, not the one gone by',
+          () {
+        // The whole point of the lesson: at half past, German names the next
+        // hour. Getting that wrong is the classic mistake.
+        Task at(int hour, int minute) =>
+            Task(a: hour, b: minute, op: Operation.add, form: TaskForm.clockPhrase);
+        expect(at(2, 15).spokenTime, 'viertel nach 2');
+        expect(at(2, 20).spokenTime, '20 nach 2');
+        expect(at(2, 25).spokenTime, '5 vor halb 3');
+        expect(at(2, 30).spokenTime, 'halb 3');
+        expect(at(2, 35).spokenTime, '5 nach halb 3');
+        expect(at(2, 45).spokenTime, 'viertel vor 3');
+        expect(at(2, 55).spokenTime, '5 vor 3');
+        // After twelve it starts over at one, not at thirteen.
+        expect(at(12, 30).spokenTime, 'halb 1');
+        expect(at(12, 45).spokenTime, 'viertel vor 1');
+        expect(at(12, 15).spokenTime, 'viertel nach 12');
+      });
+
+      test('every spoken time asks for a phrase and the hour it names', () {
+        final lesson = lessonById('clock_words');
+        for (var seed = 0; seed < 30; seed++) {
+          for (final task
+              in generateTasks(lesson: lesson, count: 20, seed: seed)) {
+            // The full hour has no key on the pad, so it must never come up.
+            expect(task.b, inInclusiveRange(5, 55), reason: '$task');
+            expect(task.b % 5, 0, reason: '$task');
+            expect(task.expected, inInclusiveRange(0, clockPhrases.length - 1),
+                reason: '$task');
+            // The two answers together are exactly what is said out loud.
+            expect(
+              task.spokenTime,
+              '${clockPhrases[task.expected]} ${task.expectedSecond}',
+              reason: '$task',
+            );
+            expect(task.expectedSecond, inInclusiveRange(1, 12),
+                reason: '$task');
+            expect(task.question, 'Wie sagt man das?');
+          }
+        }
+      });
+
+      test('a 24-hour clock says which part of the day it is', () {
+        final lesson = lessonById('clock_24');
+        expect(lesson.clock24, isTrue);
+        for (var seed = 0; seed < 30; seed++) {
+          for (final task
+              in generateTasks(lesson: lesson, count: 20, seed: seed)) {
+            expect(task.a, inInclusiveRange(6, 23), reason: '$task');
+            expect(task.expected, task.a, reason: '$task');
+            expect(task.dayPart, isNotEmpty, reason: '$task');
+          }
+        }
+        expect(dayPartOf(9), 'vormittags');
+        expect(dayPartOf(12), 'mittags');
+        expect(dayPartOf(13), 'nachmittags');
+        expect(dayPartOf(17), 'nachmittags');
+        expect(dayPartOf(18), 'abends');
+        expect(dayPartOf(23), 'abends');
+      });
+
+      test('an amount to lay out can always be laid from the pieces', () {
+        final lesson = lessonById('money_compose');
+        for (var seed = 0; seed < 30; seed++) {
+          for (final task
+              in generateTasks(lesson: lesson, count: 20, seed: seed)) {
+            expect(task.expected, task.a, reason: '$task');
+            expect(task.expectedSecond, isNull, reason: '$task');
+            expect(task.a % 5, 0, reason: '$task');
+            expect(task.a, greaterThanOrEqualTo(10), reason: '$task');
+            // Greedy from the largest piece down: if that clears the amount,
+            // it can be laid at all.
+            var rest = task.a;
+            for (final piece in moneyPieces.reversed) {
+              rest %= piece;
+            }
+            expect(rest, 0, reason: '$task');
+          }
+        }
+      });
+
+      test('change is given on a round amount that really covers the price',
+          () {
+        final lesson = lessonById('money_change');
+        for (var seed = 0; seed < 30; seed++) {
+          for (final task
+              in generateTasks(lesson: lesson, count: 20, seed: seed)) {
+            // a is what is handed over, b what it costs.
+            expect(const [100, 200, 500, 1000, 2000], contains(task.a),
+                reason: '$task');
+            expect(task.b, lessThan(task.a), reason: '$task');
+            expect(task.b % 5, 0, reason: '$task');
+            expect(task.result, greaterThanOrEqualTo(10), reason: '$task');
+            expect(task.expected * 100 + task.expectedSecond!, task.result,
+                reason: '$task');
+            expect(task.question, contains('zurück'), reason: '$task');
+          }
+        }
+      });
+
+      test('a coin is written the way it is stamped', () {
+        expect(formatPiece(5), '5 ct');
+        expect(formatPiece(50), '50 ct');
+        expect(formatPiece(100), '1 €');
+        expect(formatPiece(2000), '20 €');
       });
 
       test('money is written the way a price tag is', () {
@@ -854,10 +971,10 @@ void main() {
   });
 
   group('lesson catalog', () {
-    test('has 62 lessons in eight groups with unique ids', () {
-      expect(lessonCatalog, hasLength(62));
+    test('has 66 lessons in eight groups with unique ids', () {
+      expect(lessonCatalog, hasLength(66));
       expect(lessonsInGroup(LessonGroup.firstSteps), hasLength(12));
-      expect(lessonsInGroup(LessonGroup.everyday), hasLength(5));
+      expect(lessonsInGroup(LessonGroup.everyday), hasLength(9));
       // Nine rows of the times table plus a mixed one.
       expect(lessonsInGroup(LessonGroup.timesTables), hasLength(10));
       expect(lessonsInGroup(LessonGroup.timesAndDivision), hasLength(8));
@@ -868,7 +985,7 @@ void main() {
       expect(lessonsInGroup(LessonGroup.upTo100), hasLength(7));
       expect(lessonsInGroup(LessonGroup.upTo1000), hasLength(7));
       expect(lessonCatalog.first.id, 'count_pictures');
-      expect(lessonCatalog.map((l) => l.id).toSet(), hasLength(62));
+      expect(lessonCatalog.map((l) => l.id).toSet(), hasLength(66));
     });
 
     // The rule the numerals follow: a number belongs where an amount is meant

@@ -20,6 +20,47 @@ const countingPictures = ['🍎', '🐟', '⭐', '🚗', '🐝', '🎈'];
 String pictureFor(int a, int b) =>
     countingPictures[(a * 5 + b) % countingPictures.length];
 
+/// How a time is said out loud, in five-minute steps. The index is the
+/// answer to a [TaskForm.clockPhrase] task: minute 5 is index 0.
+///
+/// The full hour is deliberately missing. "3 Uhr" puts the hour first and
+/// every other reading puts it last, and a box that swaps places with its
+/// neighbour depending on the answer would be a puzzle of its own. Full hours
+/// are practised in the three lessons that ask for the digits.
+const clockPhrases = [
+  '5 nach', // :05
+  '10 nach', // :10
+  'viertel nach', // :15
+  '20 nach', // :20
+  '5 vor halb', // :25
+  'halb', // :30
+  '5 nach halb', // :35
+  '20 vor', // :40
+  'viertel vor', // :45
+  '10 vor', // :50
+  '5 vor', // :55
+];
+
+/// Coins and notes a child actually handles, in cents. One and two cent
+/// pieces are left out: every amount asked for lands on five cents, and two
+/// more keys would only make the pad harder to aim at.
+const moneyPieces = [5, 10, 20, 50, 100, 200, 500, 1000, 2000];
+
+/// The word for the part of the day, so a clock face can be read as a
+/// 24-hour time at all: the hands look the same at 3 and at 15 o'clock.
+String dayPartOf(int hour) => switch (hour) {
+      < 12 => 'vormittags',
+      // Twelve is its own word, and it is the hour where the counting starts
+      // to differ from the dial - the one worth naming exactly.
+      12 => 'mittags',
+      < 18 => 'nachmittags',
+      _ => 'abends',
+    };
+
+/// A single coin or note, the way it is stamped on it: `50 ct`, `2 €`.
+String formatPiece(int cents) =>
+    cents < 100 ? '$cents ct' : '${cents ~/ 100} €';
+
 /// Cents as they are written on a price tag: `350` becomes `3,50 €`.
 String formatEuro(int cents) =>
     '${cents ~/ 100},${(cents % 100).toString().padLeft(2, '0')} €';
@@ -48,10 +89,13 @@ class Task {
         TaskForm.result ||
         TaskForm.gap ||
         TaskForm.remainder ||
-        TaskForm.money =>
+        TaskForm.money ||
+        TaskForm.change =>
           true,
         TaskForm.partner ||
         TaskForm.clock ||
+        TaskForm.clockPhrase ||
+        TaskForm.moneyCompose ||
         TaskForm.quantity ||
         TaskForm.dice ||
         TaskForm.compare ||
@@ -78,13 +122,28 @@ class Task {
   /// What a division leaves over. Zero for every other operation.
   int get remainder => op == Operation.div ? a % b : 0;
 
+  /// The hour a spoken time names. From half past onwards German counts
+  /// towards the coming hour: 2:30 is "halb 3", 2:45 is "viertel vor 3".
+  int get namedHour => b >= 25 ? a % 12 + 1 : a;
+
+  /// The whole spoken form, for the review list and the lesson tile.
+  String get spokenTime => '${clockPhrases[expected]} $namedHour';
+
+  /// Which part of the day a 24-hour clock task falls in.
+  String get dayPart => dayPartOf(a);
+
   /// The number the child has to type in - the first of two where a task
   /// asks for two.
   int get expected => switch (form) {
         TaskForm.result || TaskForm.remainder => result,
         TaskForm.gap || TaskForm.partner => b,
         // Amounts are held in cents, so this is the euro part.
-        TaskForm.money => result ~/ 100,
+        TaskForm.money || TaskForm.change => result ~/ 100,
+        // The whole amount in cents; there is nothing to split into two
+        // boxes, because the pieces themselves are the answer.
+        TaskForm.moneyCompose => a,
+        // Which of the spoken forms fits - "viertel vor", "halb", …
+        TaskForm.clockPhrase => b ~/ 5 - 1,
         // A clock task holds the time itself: hours in a, minutes in b.
         TaskForm.clock => a,
         // How many pictures there are; b only picks which picture.
@@ -102,8 +161,11 @@ class Task {
   /// ones that ask for one.
   int? get expectedSecond => switch (form) {
         TaskForm.remainder => remainder,
-        TaskForm.money => result % 100,
+        TaskForm.money || TaskForm.change => result % 100,
         TaskForm.clock => b,
+        // "halb 3" names the hour that is coming, not the one gone by.
+        TaskForm.clockPhrase => namedHour,
+        TaskForm.moneyCompose => null,
         TaskForm.result ||
         TaskForm.gap ||
         TaskForm.partner ||
@@ -118,19 +180,27 @@ class Task {
   /// Label between the two boxes, for the forms that have two.
   String get secondLabel => switch (form) {
         TaskForm.remainder => 'Rest',
-        TaskForm.money => '€',
+        TaskForm.money || TaskForm.change => '€',
         TaskForm.clock => 'Uhr',
         _ => '',
       };
 
   /// Unit after the second box, where there is one.
-  String get secondUnit => form == TaskForm.money ? 'ct' : '';
+  String get secondUnit =>
+      form == TaskForm.money || form == TaskForm.change ? 'ct' : '';
 
   /// Spoken form of the task, shown above it for the forms that are not
   /// written as an equation. Null when the task speaks for itself.
   String? get question => switch (form) {
         TaskForm.partner => 'Welche Zahl ist mit $a verliebt?',
         TaskForm.clock => 'Wie spät ist es?',
+        TaskForm.clockPhrase => 'Wie sagt man das?',
+        TaskForm.moneyCompose =>
+          'Lege ${formatEuro(a)} - tippe die Münzen und Scheine an.',
+        // The price and what is handed over are both in the question, so
+        // nothing is written as an equation: at the till nobody writes one.
+        TaskForm.change => 'Es kostet ${formatEuro(b)}. '
+            'Du gibst ${formatEuro(a)}. Wie viel bekommst du zurück?',
         TaskForm.quantity => 'Wie viele?',
         TaskForm.dice =>
           b == 0 ? 'Wie viele Punkte?' : 'Wie viele Punkte sind es zusammen?',
@@ -160,6 +230,9 @@ class Task {
         TaskForm.money => '${formatEuro(a)} $opSymbol ${formatEuro(b)} =',
         // These all draw their own picture; there is nothing to write.
         TaskForm.clock ||
+        TaskForm.clockPhrase ||
+        TaskForm.moneyCompose ||
+        TaskForm.change ||
         TaskForm.quantity ||
         TaskForm.dice ||
         TaskForm.compare ||
@@ -182,6 +255,9 @@ class Task {
         TaskForm.money => '$prefix $answer',
         // A sample time says more about the lesson than a placeholder.
         TaskForm.clock => '$a:${b.toString().padLeft(2, '0')} Uhr',
+        TaskForm.clockPhrase => spokenTime,
+        TaskForm.moneyCompose => formatEuro(a),
+        TaskForm.change => '${formatEuro(b)}, bezahlt mit ${formatEuro(a)}',
         TaskForm.quantity => pictureFor(a, b) * a,
         // "Würfel 2" told nobody anything; the pips are what is on screen.
         TaskForm.dice => b == 0 ? '$a Punkte' : '$a + $b Punkte',

@@ -246,6 +246,37 @@ schnitt die letzte Reihe sonst ab, obwohl daneben noch Platz war. Der
 Regressionstest dazu lädt eine echte Schrift — mit der quadratischen Testschrift
 tritt der Überstand gar nicht auf und der Test wäre wertlos.
 
+## Antworten, die keine Zahlen sind
+
+Zwei Lektionen werden nicht auf der Zifferntastatur beantwortet, und beide
+lösen das über **dieselbe** Mechanik: `ChoiceKeypad` hat das Raster von
+`BigKeypad` (drei Spalten, vier Zeilen, grüne Taste unten rechts) und die
+gemeinsame Taste `KeypadKey`. Der Controller bleibt bei zwei Ganzzahlfeldern —
+das Wort ist der **Index** in `clockPhrases`, der Münzhaufen die **Summe** in
+Cent. So gilt der ganze Rest der Maschinerie unverändert: Wertung, Zeitmalus,
+Bestenliste, Wiedervorlage.
+
+`pressPhrase` ersetzt, statt anzuhängen: eine Sprechweise ist eine Auswahl,
+keine Eingabe. `pressPiece` legt dagegen auf, und die Rücktaste nimmt **ein
+Stück** weg statt einer Ziffer — eine Ziffer von der Summe abzuknapsen ergäbe
+einen Betrag, den niemand hingelegt hat.
+
+Bei „Uhrzeit sagen" wechselt die Tastatur mitten in der Aufgabe: Wörter fürs
+erste Feld, Ziffern fürs zweite. Das entscheidet `_keypadFor` im
+Übungsbildschirm anhand von Form **und** aktivem Feld.
+
+Die volle Stunde fehlt in `clockPhrases` mit Absicht: „3 Uhr" stellt die
+Stunde voran, jede andere Lesart stellt sie hinten an, und ein Feld, das je
+nach Antwort den Platz mit seinem Nachbarn tauscht, wäre ein Rätsel für sich.
+Volle Stunden üben die drei Lektionen, die nach Ziffern fragen.
+
+## 24-Stunden-Uhr
+
+`LessonSpec.clock24` ändert dreierlei an derselben `TaskForm.clock`: die
+Stunden laufen 6..23, unter dem Zifferblatt steht die Tageszeit, und die Frage
+sagt ausdrücklich „mit 24 Stunden". Ohne all das wäre die Aufgabe nicht
+lösbar — die Zeiger sehen um 10 und um 22 Uhr gleich aus.
+
 ## Nicht gewertete Lektionen
 
 `LessonSpec.scored == false` heißt dreierlei: keine sichtbare Uhr, kein

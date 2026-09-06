@@ -27,6 +27,13 @@ class TaskDisplay extends StatelessWidget {
   /// Whether each group carries its own number. Also a lesson property.
   final bool showCounts;
 
+  /// Whether the clock is read as a 24-hour time; then the part of the day
+  /// is written under the face, because the hands alone cannot say it.
+  final bool clock24;
+
+  /// The coins and notes laid down so far, for [TaskForm.moneyCompose].
+  final List<int> pieces;
+
   const TaskDisplay({
     super.key,
     required this.task,
@@ -36,6 +43,8 @@ class TaskDisplay extends StatelessWidget {
     this.activeField = AnswerField.primary,
     this.arrangement = PictureArrangement.row,
     this.showCounts = false,
+    this.clock24 = false,
+    this.pieces = const [],
   });
 
   @override
@@ -156,20 +165,74 @@ class TaskDisplay extends StatelessWidget {
               ),
           ],
         ),
+      // Two answers, and the first of them is a word. The pad swaps to
+      // words while that box is active, so both are typed the same way.
+      TaskForm.clockPhrase => Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ClockFace(hour: task.a, minute: task.b),
+            const SizedBox(width: 44),
+            _AnswerBox(
+              input: input.isEmpty ? '' : clockPhrases[int.parse(input)],
+              feedback: feedback,
+              active: activeField == AnswerField.primary,
+              width: 400,
+            ),
+            const SizedBox(width: 24),
+            _AnswerBox(
+              input: secondInput,
+              feedback: feedback,
+              active: activeField == AnswerField.second,
+              width: 190,
+            ),
+          ],
+        ),
+      // The pile itself is the answer, so it is drawn: a running total alone
+      // would not show which coins are already down.
+      TaskForm.moneyCompose => Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _AnswerBox(
+              input: input.isEmpty ? '' : formatEuro(int.parse(input)),
+              feedback: feedback,
+              width: 400,
+            ),
+            const SizedBox(height: 18),
+            SizedBox(
+              height: 54,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  for (final piece in pieces)
+                    Padding(
+                      padding: const EdgeInsets.only(right: 10),
+                      child: _PieceChip(cents: piece),
+                    ),
+                ],
+              ),
+            ),
+          ],
+        ),
       _ => null,
     };
 
     if (illustration != null) {
+      // These two bring their own answer boxes; everything else gets one
+      // placed beside the picture.
+      final bringsItsOwnBox = task.form == TaskForm.clockPhrase ||
+          task.form == TaskForm.moneyCompose;
       return _WithQuestion(
         question: task.question,
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            illustration,
-            const SizedBox(width: 36),
-            box,
-          ],
-        ),
+        child: bringsItsOwnBox
+            ? illustration
+            : Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  illustration,
+                  const SizedBox(width: 36),
+                  box,
+                ],
+              ),
       );
     }
 
@@ -191,7 +254,23 @@ class TaskDisplay extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               if (task.form == TaskForm.clock) ...[
-                ClockFace(hour: task.a, minute: task.b),
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ClockFace(hour: task.a, minute: task.b),
+                    if (clock24) ...[
+                      const SizedBox(height: 12),
+                      Text(
+                        task.dayPart,
+                        style: const TextStyle(
+                          fontSize: 32,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
                 const SizedBox(width: 44),
               ] else
                 Text(task.prefix, style: style),
@@ -220,7 +299,13 @@ class TaskDisplay extends StatelessWidget {
             ],
           );
 
-    return _WithQuestion(question: task.question, child: row);
+    // A 24-hour lesson has to say so: the hands look the same at 10 in the
+    // morning and at 10 at night, and the word under the dial only tells
+    // which of the two it is - not that the answer runs past twelve.
+    final question = clock24 && task.form == TaskForm.clock
+        ? 'Wie spät ist es? Sage es mit 24 Stunden.'
+        : task.question;
+    return _WithQuestion(question: question, child: row);
   }
 }
 
@@ -248,6 +333,36 @@ class _WithQuestion extends StatelessWidget {
         const SizedBox(height: 24),
         Flexible(child: FittedBox(fit: BoxFit.scaleDown, child: child)),
       ],
+    );
+  }
+}
+
+/// One coin or note in the pile a child has laid out.
+class _PieceChip extends StatelessWidget {
+  final int cents;
+
+  const _PieceChip({required this.cents});
+
+  @override
+  Widget build(BuildContext context) {
+    // Notes are drawn as notes and coins as coins: at the till they do not
+    // feel alike either.
+    final isNote = cents >= 500;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: isNote ? AppColors.correctSoft : AppColors.background,
+        border: Border.all(color: AppColors.divider, width: 2),
+        borderRadius: BorderRadius.circular(isNote ? 8 : 24),
+      ),
+      child: Text(
+        formatPiece(cents),
+        style: const TextStyle(
+          fontSize: 26,
+          fontWeight: FontWeight.w600,
+          color: AppColors.text,
+        ),
+      ),
     );
   }
 }
@@ -297,12 +412,20 @@ class _AnswerBox extends StatelessWidget {
         border: Border.all(color: border, width: active ? 7 : 5),
         borderRadius: BorderRadius.circular(24),
       ),
-      child: Text(
-        input,
-        style: Theme.of(context)
-            .textTheme
-            .displayLarge!
-            .copyWith(color: text, height: 1),
+      // Words go in this box too ("5 nach halb", "12,50 €"), and they have
+      // to get smaller rather than run over the edge.
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 18),
+          child: Text(
+            input,
+            style: Theme.of(context)
+                .textTheme
+                .displayLarge!
+                .copyWith(color: text, height: 1),
+          ),
+        ),
       ),
     );
   }

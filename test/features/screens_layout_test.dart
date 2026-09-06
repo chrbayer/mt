@@ -148,6 +148,22 @@ void main() {
           lesson: lessonById('compare_more_cloud'),
           taskCount: 5,
         ),
+    '03e-uhrzeit-sagen': () => PracticeScreen(
+          lesson: lessonById('clock_words'),
+          taskCount: 5,
+        ),
+    '03f-uhrzeit-24': () => PracticeScreen(
+          lesson: lessonById('clock_24'),
+          taskCount: 5,
+        ),
+    '03g-geld-legen': () => PracticeScreen(
+          lesson: lessonById('money_compose'),
+          taskCount: 5,
+        ),
+    '03h-rueckgeld': () => PracticeScreen(
+          lesson: lessonById('money_change'),
+          taskCount: 5,
+        ),
     '02d-zahlenreihe': () => PracticeScreen(
           lesson: lessonById('count_next'),
           taskCount: 5,
