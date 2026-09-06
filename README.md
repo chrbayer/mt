@@ -7,8 +7,9 @@ antreten. Die App läuft vollständig offline, ohne Konten und ohne Netzwerk.
 
 ## Was sie kann
 
-* **66 Lektionen** in acht Gruppen (Erste Schritte / Bis 10 / Bis 20 /
-  Bis 100 / Bis 1000 / Einmaleins / Mal und Geteilt / Uhrzeit und Geld).
+* **75 Lektionen** in neun Gruppen (Erste Schritte / Bis 10 / Bis 20 /
+  Bis 100 / Bis 1000 / Einmaleins / Einmaleins rückwärts / Mal und Geteilt /
+  Uhrzeit und Geld).
   Ab 20 bietet jede Gruppe Plus und Minus mit und ohne Zehnerübergang, zwei
   Platzhalterformen (`34 + ? = 71`) und eine gemischte Lektion; jede Lektion
   hat ihre eigene Bestenliste.
@@ -34,7 +35,13 @@ antreten. Die App läuft vollständig offline, ohne Konten und ohne Netzwerk.
   in der sie üblicherweise gelernt werden (2, 5, 10, dann 3, 4, 6, 7, 8, 9),
   dazu „Alle Reihen gemischt". Jede Reihe wird in beide Richtungen abgefragt —
   `3 · 7` genauso wie `7 · 3` — und hat ihre eigene Bestenliste.
-* **Mal und Geteilt**: Geteilt ohne Rest, Geteilt mit Rest, beide
+* **Einmaleins rückwärts**: dieselben neun Reihen noch einmal, nur geteilt —
+  `12 : 2`, `63 : 7`. Eine eigene Gruppe und nicht eine Ecke von „Mal und
+  Geteilt", weil es genauso gelernt wird wie das Einmaleins selbst: Reihe für
+  Reihe, und am besten die, die man gerade vorwärts geübt hat. Am Ende steht
+  „Alle Reihen rückwärts" — dieselbe Lektion, die vorher „Geteilt ohne Rest"
+  hieß und ihre Bestenliste behält.
+* **Mal und Geteilt**: Geteilt mit Rest, beide
   Platzhalterformen und alles gemischt. Bei „mit Rest" gibt es zwei
   Eingabefelder — erst das Ergebnis, dann der Rest; das aktive ist umrandet.
 * Ganz vorn stehen die **verliebten Zahlen** — die Paare, die zusammen 10

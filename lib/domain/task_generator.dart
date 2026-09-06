@@ -21,6 +21,7 @@ bool _isEasy(LessonSpec lesson, Task task) {
   switch (lesson.group) {
     case LessonGroup.upTo10:
     case LessonGroup.timesTables:
+    case LessonGroup.reverseTimesTables:
     case LessonGroup.timesAndDivision:
     case LessonGroup.everyday:
     case LessonGroup.firstSteps:
@@ -407,7 +408,9 @@ Task _sampleProduct(LessonSpec lesson, Random random) {
 /// small times table. Lessons in [TaskForm.remainder] always leave something
 /// over - that is what they are called after.
 Task? _sampleQuotient(LessonSpec lesson, Random random) {
-  final divisor = _between(random, 2, 10);
+  // A reverse-table lesson divides by its own row and nothing else; the rest
+  // draw a divisor freely.
+  final divisor = lesson.timesTable ?? _between(random, 2, 10);
   final quotient = switch (lesson.scale) {
     FactorScale.table => _between(random, 1, 10),
     FactorScale.tens => _between(random, 2, 9) * 10,
@@ -487,6 +490,7 @@ Task? _sampleSum(LessonSpec lesson, Operation op, Random random) {
       if (maxB < 1) return null;
       b = zeroResult ? a : _between(random, 1, maxB);
     case (LessonGroup.timesTables, _):
+    case (LessonGroup.reverseTimesTables, _):
     case (LessonGroup.timesAndDivision, _):
     case (LessonGroup.everyday, _):
       // Unreachable: those groups only ever ask for products and quotients,

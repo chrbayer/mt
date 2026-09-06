@@ -32,6 +32,10 @@ Task exampleTaskFor(LessonSpec lesson) => _examples.putIfAbsent(lesson.id, () {
         }
         if (task.a == 1 || task.b == 1) return false;
         if (task.result == 0) return false;
+        // For a division the answer is the quotient, so "4 : 4" is the
+        // division version of "times one" - it says nothing about the row.
+        // A round dividend is fine: that is what dividing by ten looks like.
+        if (task.op == Operation.div) return task.result != 1;
         // A ten belongs in the example only when it is the row being drilled.
         final table = lesson.timesTable;
         if (table != null) {

@@ -25,6 +25,19 @@ Version oder eine entfallene Lektion würde den Elternbereich sonst mitreißen.
 Deshalb behielt `calc_to_six` beim Aufspalten in Plus/Minus/gemischt auch
 seine ID.
 
+Eine **neue Gruppe in der Mitte des Enums einzufügen ist sicher**:
+`hidden_groups` speichert Namen, keine Indizes, und ungenannte Gruppen gelten
+als sichtbar. „Einmaleins rückwärts" erscheint dadurch bei allen Kindern, statt
+bei denen mit gespeicherten Einstellungen stillschweigend zu fehlen. Die
+Reihenfolge im Enum ist zugleich die Reihenfolge im Katalog.
+
+`div_plain` hat beim Umzug in die neue Gruppe **seine ID behalten** und nur
+Titel und Beschreibung gewechselt — Gruppe und Titel sind frei, die ID nicht.
+
+`_sampleQuotient` teilt durch `lesson.timesTable`, wenn eine gesetzt ist, und
+zieht sonst einen freien Divisor. Damit ist eine Rückwärts-Reihe dieselbe
+Lektion wie die Vorwärts-Reihe, nur von der anderen Seite.
+
 `LessonGroup` heißt nicht mehr `NumberRange`: die ersten vier Werte sind
 Zahlenräume, die letzten beiden gruppieren nach Rechenart. Das Einmaleins wird
 Reihe für Reihe gelernt, nicht nach Größe der Zahlen.

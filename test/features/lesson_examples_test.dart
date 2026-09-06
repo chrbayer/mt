@@ -35,4 +35,16 @@ void main() {
       expect(example, isNot(matches(r'(^|\D)1(\D|$).*=')), reason: lesson.id);
     }
   });
+
+  test('a division never advertises itself with an answer of one', () {
+    // "4 : 4" is the division version of "times one": it says nothing about
+    // the row the lesson is named after.
+    for (final lesson in lessonCatalog.where(
+      (l) => l.op == ArithmeticOp.div && l.form == TaskForm.result,
+    )) {
+      final task = exampleTaskFor(lesson);
+      expect(task.result, isNot(1), reason: '${lesson.id}: $task');
+      expect(task.a, isNot(task.b), reason: '${lesson.id}: $task');
+    }
+  });
 }

@@ -115,11 +115,14 @@ void main() {
       });
 
       final reloaded = (await users.findUser(mia))!;
+      // Everything not switched off, in catalogue order - including a group
+      // added in a later version, which nobody could have switched off.
       expect(reloaded.visibleGroups, [
         LessonGroup.firstSteps,
         LessonGroup.upTo10,
         LessonGroup.upTo20,
         LessonGroup.upTo100,
+        LessonGroup.reverseTimesTables,
       ]);
       expect(reloaded.shows(LessonGroup.timesTables), isFalse);
       // The setting belongs to one child only.

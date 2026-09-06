@@ -17,6 +17,7 @@ enum LessonGroup {
   upTo100,
   upTo1000,
   timesTables,
+  reverseTimesTables,
   timesAndDivision,
   everyday,
 }
@@ -29,6 +30,7 @@ String groupTitle(LessonGroup group) => switch (group) {
       LessonGroup.upTo100 => 'Bis 100',
       LessonGroup.upTo1000 => 'Bis 1000',
       LessonGroup.timesTables => 'Einmaleins',
+      LessonGroup.reverseTimesTables => 'Einmaleins rückwärts',
       LessonGroup.timesAndDivision => 'Mal und Geteilt',
       LessonGroup.everyday => 'Uhrzeit und Geld',
     };
@@ -216,6 +218,9 @@ class LessonSpec {
       // A row of the times table is learnt by heart, so it is quick once it
       // sits - quicker than adding two-digit numbers.
       LessonGroup.timesTables => 4000,
+      // Dividing takes a moment longer than the multiplication it undoes:
+      // the row has to be searched from the other end.
+      LessonGroup.reverseTimesTables => 5000,
       LessonGroup.timesAndDivision => 7000,
       // Reading a dial or a price tag takes longer than reading two numbers.
       LessonGroup.everyday => 8000,
@@ -244,7 +249,9 @@ class LessonSpec {
     final byTable = switch (timesTable) {
       2 || 5 || 10 => 0.85,
       // All rows at once: every task starts by working out which row it is.
-      null when group == LessonGroup.timesTables => 1.1,
+      null when group == LessonGroup.timesTables ||
+          group == LessonGroup.reverseTimesTables =>
+        1.1,
       _ => 1.0,
     };
 
@@ -447,17 +454,41 @@ List<LessonSpec> _timesTableLessons() => [
       ),
     ];
 
+/// The times tables read backwards: one lesson per row, dividing by it.
+///
+/// Its own group rather than a corner of "Mal und Geteilt", because it is
+/// learnt the same way the tables are - row by row, until each one sits. The
+/// row that has just been drilled forwards is the one to try backwards.
+List<LessonSpec> _reverseTimesTableLessons() => [
+      for (final n in _tableOrder)
+        LessonSpec(
+          id: 'div_by_$n',
+          title: '${n}er-Reihe rückwärts',
+          description: 'Geteilt durch $n. Jede Aufgabe ist die Umkehrung '
+              'einer Aufgabe der ${n}er-Reihe: aus $n · 4 = ${n * 4} '
+              'wird ${n * 4} : $n = 4.',
+          group: LessonGroup.reverseTimesTables,
+          op: ArithmeticOp.div,
+          carry: CarryMode.any,
+          form: TaskForm.result,
+          timesTable: n,
+        ),
+      // Closes the group the way "Alle Reihen gemischt" closes the tables.
+      // Keeps its old id: it has leaderboards behind it.
+      const LessonSpec(
+        id: 'div_plain',
+        title: 'Alle Reihen rückwärts',
+        description: 'Geteilt durch alles, bunt durcheinander. Jede Aufgabe '
+            'geht glatt auf - sie ist die Umkehrung einer '
+            'Einmaleins-Aufgabe.',
+        group: LessonGroup.reverseTimesTables,
+        op: ArithmeticOp.div,
+        carry: CarryMode.any,
+        form: TaskForm.result,
+      ),
+    ];
+
 const _timesAndDivisionLessons = [
-  LessonSpec(
-    id: 'div_plain',
-    title: 'Geteilt ohne Rest',
-    description: 'Die Aufgabe geht glatt auf - jede ist die Umkehrung '
-        'einer Einmaleins-Aufgabe.',
-    group: LessonGroup.timesAndDivision,
-    op: ArithmeticOp.div,
-    carry: CarryMode.any,
-    form: TaskForm.result,
-  ),
   LessonSpec(
     id: 'div_remainder',
     title: 'Geteilt mit Rest',
@@ -778,6 +809,7 @@ final List<LessonSpec> lessonCatalog = List.unmodifiable([
   ..._rangeGroup(LessonGroup.upTo100, '100', nameTheTen: true),
   ..._rangeGroup(LessonGroup.upTo1000, '1000', nameTheTen: false),
   ..._timesTableLessons(),
+  ..._reverseTimesTableLessons(),
   ..._timesAndDivisionLessons,
   ..._everydayLessons,
 ]);

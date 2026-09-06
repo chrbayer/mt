@@ -48,6 +48,8 @@ void main() {
               // The small times table tops out at 10 x 10, and every division
               // is built backwards from it.
               LessonGroup.timesTables => 100,
+              // Every dividend is a product from the small table.
+              LessonGroup.reverseTimesTables => 100,
               // Beyond the table: 25 x 9 and 96 : 6 both live here.
               LessonGroup.timesAndDivision => 999,
               // Money is held in cents, so the numbers are the biggest of all.
@@ -144,6 +146,7 @@ void main() {
         // from 20 upwards. In the 10er-Reihe every task contains a ten.
         if (lesson.group == LessonGroup.upTo10) return;
         if (lesson.group == LessonGroup.timesTables) return;
+        if (lesson.group == LessonGroup.reverseTimesTables) return;
         if (lesson.group == LessonGroup.timesAndDivision) return;
         // Clock hands land on zero minutes and money on round euro amounts;
         // neither is a shortcut the way "47 + 1" is.
@@ -971,13 +974,15 @@ void main() {
   });
 
   group('lesson catalog', () {
-    test('has 66 lessons in eight groups with unique ids', () {
-      expect(lessonCatalog, hasLength(66));
+    test('has 75 lessons in nine groups with unique ids', () {
+      expect(lessonCatalog, hasLength(75));
       expect(lessonsInGroup(LessonGroup.firstSteps), hasLength(12));
       expect(lessonsInGroup(LessonGroup.everyday), hasLength(9));
       // Nine rows of the times table plus a mixed one.
       expect(lessonsInGroup(LessonGroup.timesTables), hasLength(10));
-      expect(lessonsInGroup(LessonGroup.timesAndDivision), hasLength(8));
+      expect(lessonsInGroup(LessonGroup.timesAndDivision), hasLength(7));
+      // Nine rows read backwards plus all of them mixed.
+      expect(lessonsInGroup(LessonGroup.reverseTimesTables), hasLength(10));
       // Up to 10 nothing can cross the ten, so that group is shorter: the
       // pairs that make ten plus five lessons, instead of the usual seven.
       expect(lessonsInGroup(LessonGroup.upTo10), hasLength(6));
@@ -985,7 +990,7 @@ void main() {
       expect(lessonsInGroup(LessonGroup.upTo100), hasLength(7));
       expect(lessonsInGroup(LessonGroup.upTo1000), hasLength(7));
       expect(lessonCatalog.first.id, 'count_pictures');
-      expect(lessonCatalog.map((l) => l.id).toSet(), hasLength(66));
+      expect(lessonCatalog.map((l) => l.id).toSet(), hasLength(75));
     });
 
     // The rule the numerals follow: a number belongs where an amount is meant
@@ -1023,6 +1028,53 @@ void main() {
       expect(cloud.arrangement, PictureArrangement.scattered);
       expect(cloud.form, row.form);
       expect(cloud.scored, row.scored);
+    });
+
+    test('a reverse row divides by that row and nothing else', () {
+      for (final n in [2, 5, 10, 3, 4, 6, 7, 8, 9]) {
+        final lesson = lessonById('div_by_$n');
+        expect(lesson.timesTable, n);
+        for (var seed = 0; seed < 20; seed++) {
+          for (final task
+              in generateTasks(lesson: lesson, count: 20, seed: seed)) {
+            expect(task.op, Operation.div, reason: '$task');
+            expect(task.b, n, reason: 'divided by the row: $task');
+            // It goes out evenly, and the quotient stays in the table.
+            expect(task.a % n, 0, reason: '$task');
+            expect(task.result, inInclusiveRange(1, 10), reason: '$task');
+            expect(task.a, lessThanOrEqualTo(100), reason: '$task');
+          }
+        }
+      }
+    });
+
+    test('the reverse group mirrors the tables, and closes the same way', () {
+      final forwards = lessonsInGroup(LessonGroup.timesTables);
+      final backwards = lessonsInGroup(LessonGroup.reverseTimesTables);
+      expect(backwards, hasLength(forwards.length));
+      // Same rows, in the same order - the row just drilled forwards is the
+      // one to try backwards.
+      expect(
+        backwards.map((l) => l.timesTable).toList(),
+        forwards.map((l) => l.timesTable).toList(),
+      );
+      // The mixed lesson at the end kept its id, because leaderboards point
+      // at it.
+      expect(backwards.last.id, 'div_plain');
+      expect(backwards.last.timesTable, isNull);
+      expect(lessonById('div_plain').group, LessonGroup.reverseTimesTables);
+    });
+
+    test('the reverse group sits between the tables and mixed division', () {
+      const order = LessonGroup.values;
+      expect(
+        order.indexOf(LessonGroup.reverseTimesTables),
+        order.indexOf(LessonGroup.timesTables) + 1,
+      );
+      expect(
+        order.indexOf(LessonGroup.timesAndDivision),
+        order.indexOf(LessonGroup.reverseTimesTables) + 1,
+      );
     });
 
     test('the times tables are ordered easiest first', () {
