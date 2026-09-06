@@ -49,6 +49,17 @@ class GlobalSettingsTab extends ConsumerWidget {
           ),
         ),
         const Divider(height: 40),
+        SwitchListTile(
+          value: preferences?.sounds ?? true,
+          onChanged: preferences == null ? null : repository.setSounds,
+          title: const Text('Töne abspielen', style: TextStyle(fontSize: 24)),
+          subtitle: const Text(
+            'Ein kurzer Klang bei richtig und ein anderer bei falsch. Auf '
+            'einem flach liegenden Tablet spürt man die Vibration kaum.',
+            style: TextStyle(fontSize: 18),
+          ),
+        ),
+        const Divider(height: 40),
         const Text('Aufgaben pro Durchgang für alle',
             style: TextStyle(fontSize: 24)),
         const SizedBox(height: 4),

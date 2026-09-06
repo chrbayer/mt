@@ -73,10 +73,10 @@ List<Task> generateTasks({
   final random = Random(seed);
 
   if (lesson.fixedSum != null) {
-    return _generateFixedSumTasks(lesson, count, random);
+    return _generateFixedSumTasks(lesson, count, random, review);
   }
   if (lesson.form == TaskForm.clockPhrase) {
-    return _generateClockPhraseTasks(count, random);
+    return _generateClockPhraseTasks(count, random, review);
   }
 
   final operations = _operationSequence(lesson, count, random);
@@ -169,16 +169,29 @@ List<Task> generateTasks({
 ///
 /// The first operand runs 0..sum, so every pair is asked in both directions:
 /// from 3 to 7 just as much as from 7 to 3, and 0 and 10 are included.
-List<Task> _generateFixedSumTasks(LessonSpec lesson, int count, Random random) {
+List<Task> _generateFixedSumTasks(
+  LessonSpec lesson,
+  int count,
+  Random random,
+  List<Task> review,
+) {
   final sum = lesson.fixedSum!;
   final pool = [
     for (var a = 0; a <= sum; a++)
       Task(a: a, b: sum - a, op: Operation.add, form: lesson.form),
   ];
 
+  final hard = review.map((task) => task.key).toSet();
+
   final tasks = <Task>[];
   while (tasks.length < count) {
     final block = [...pool]..shuffle(random);
+    // What went badly last time goes to the front of the first pass. A run
+    // shorter than the pool would otherwise drop pairs at random, and the
+    // hard one is exactly the one that must not be dropped.
+    if (tasks.isEmpty && hard.isNotEmpty) {
+      _hardestFirst(block, (task) => hard.contains(task.key));
+    }
     // Avoid a repeat across the seam between two blocks.
     if (tasks.isNotEmpty && block.first == tasks.last && block.length > 1) {
       final other = 1 + random.nextInt(block.length - 1);
@@ -200,7 +213,18 @@ List<Task> _generateFixedSumTasks(LessonSpec lesson, int count, Random random) {
 /// entire point of the lesson. The hour stays random: it is the same skill
 /// whichever hour it is asked about, and drilling 11 x 12 combinations would
 /// take an afternoon.
-List<Task> _generateClockPhraseTasks(int count, Random random) {
+List<Task> _generateClockPhraseTasks(
+  int count,
+  Random random,
+  List<Task> review,
+) {
+  // A reviewed task names a spoken form; which hour it was asked about does
+  // not matter, because the form is what was hard.
+  final hard = {
+    for (final task in review)
+      if (task.form == TaskForm.clockPhrase) task.expected,
+  };
+
   final tasks = <Task>[];
   final recent = <String>[];
   var lastPhrase = -1;
@@ -208,6 +232,11 @@ List<Task> _generateClockPhraseTasks(int count, Random random) {
   while (tasks.length < count) {
     final block = [for (var i = 0; i < clockPhrases.length; i++) i]
       ..shuffle(random);
+    // Ten of eleven forms fit in a ten-task run; without this the missing
+    // one could be exactly the one the child keeps getting wrong.
+    if (tasks.isEmpty && hard.isNotEmpty) {
+      _hardestFirst(block, hard.contains);
+    }
     // Avoid the same form twice across the seam between two blocks.
     if (block.first == lastPhrase && block.length > 1) {
       final other = 1 + random.nextInt(block.length - 1);
@@ -239,6 +268,22 @@ List<Task> _generateClockPhraseTasks(int count, Random random) {
   }
 
   return List.unmodifiable(tasks.sublist(0, count));
+}
+
+/// Moves everything [isHard] matches to the front of [block], keeping the
+/// shuffled order inside each half.
+///
+/// Used by the two pool drills. They cover their whole pool eventually, so
+/// this changes nothing over a long run - it only decides what a run too
+/// short for the pool gets to see.
+void _hardestFirst<T>(List<T> block, bool Function(T) isHard) {
+  final hard = block.where(isHard).toList();
+  if (hard.isEmpty || hard.length == block.length) return;
+  final rest = block.where((item) => !isHard(item)).toList();
+  block
+    ..clear()
+    ..addAll(hard)
+    ..addAll(rest);
 }
 
 /// For a mixed lesson: a balanced, shuffled sequence of the two operations,

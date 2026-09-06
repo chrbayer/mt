@@ -608,7 +608,56 @@ void main() {
         }
       });
 
-      test('a short run of spoken times still spreads over the forms', () {
+      test('a spoken form that went badly is asked in a short run', () {
+      // Ten of eleven forms fit in a ten-task run. Without the review the
+      // missing one is random - and could be exactly the hard one.
+      final lesson = lessonById('clock_words');
+      const hard = 5; // "halb"
+      final review = [
+        const Task(a: 4, b: 30, op: Operation.add, form: TaskForm.clockPhrase),
+      ];
+      expect(review.single.expected, hard);
+
+      for (var seed = 0; seed < 40; seed++) {
+        final phrases =
+            generateTasks(lesson: lesson, count: 3, seed: seed, review: review)
+                .map((t) => t.expected)
+                .toList();
+        expect(phrases, contains(hard), reason: 'seed $seed');
+      }
+    });
+
+    test('a pair that went badly is asked in a short run', () {
+      final lesson = lessonById('partners_of_ten');
+      final review = [
+        const Task(a: 3, b: 7, op: Operation.add, form: TaskForm.partner),
+      ];
+      for (var seed = 0; seed < 40; seed++) {
+        final keys =
+            generateTasks(lesson: lesson, count: 3, seed: seed, review: review)
+                .map((t) => t.key)
+                .toList();
+        expect(keys, contains(review.single.key), reason: 'seed $seed');
+      }
+    });
+
+    test('the review only reorders - the pool is still covered', () {
+      // Over a full pass every form still comes exactly once, whatever was
+      // put at the front.
+      final review = [
+        const Task(a: 4, b: 30, op: Operation.add, form: TaskForm.clockPhrase),
+        const Task(a: 9, b: 45, op: Operation.add, form: TaskForm.clockPhrase),
+      ];
+      final phrases = generateTasks(
+        lesson: lessonById('clock_words'),
+        count: clockPhrases.length,
+        seed: 7,
+        review: review,
+      ).map((t) => t.expected).toSet();
+      expect(phrases, hasLength(clockPhrases.length));
+    });
+
+    test('a short run of spoken times still spreads over the forms', () {
         final lesson = lessonById('clock_words');
         for (var seed = 0; seed < 60; seed++) {
           final phrases = generateTasks(lesson: lesson, count: 10, seed: seed)

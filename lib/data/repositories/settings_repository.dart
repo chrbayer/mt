@@ -16,6 +16,10 @@ class AppPreferences {
   final bool showClock;
   final bool haptics;
 
+  /// Short sound on right and wrong. On by default: it is the one channel a
+  /// tablet lying flat on the table does not swallow.
+  final bool sounds;
+
   /// Task count preselected when a lesson is opened.
   final int defaultTaskCount;
 
@@ -25,6 +29,7 @@ class AppPreferences {
   const AppPreferences({
     this.showClock = false,
     this.haptics = true,
+    this.sounds = true,
     this.defaultTaskCount = fallbackTaskCount,
     this.limits = const PracticeLimits(),
   });
@@ -32,12 +37,14 @@ class AppPreferences {
   AppPreferences copyWith({
     bool? showClock,
     bool? haptics,
+    bool? sounds,
     int? defaultTaskCount,
     PracticeLimits? limits,
   }) =>
       AppPreferences(
         showClock: showClock ?? this.showClock,
         haptics: haptics ?? this.haptics,
+        sounds: sounds ?? this.sounds,
         defaultTaskCount: defaultTaskCount ?? this.defaultTaskCount,
         limits: limits ?? this.limits,
       );
@@ -50,6 +57,7 @@ const int adminPinLength = 4;
 class SettingsRepository {
   static const _showClock = 'show_clock';
   static const _haptics = 'haptics';
+  static const _sounds = 'sounds';
   static const _defaultTaskCount = 'default_task_count';
   static const _stretchMinutes = 'practice_limit_minutes';
   static const _breakMinutes = 'break_minutes';
@@ -73,6 +81,7 @@ class SettingsRepository {
     return AppPreferences(
       showClock: map[_showClock] == '1' ? true : defaults.showClock,
       haptics: map[_haptics] == null ? defaults.haptics : map[_haptics] == '1',
+      sounds: map[_sounds] == null ? defaults.sounds : map[_sounds] == '1',
       defaultTaskCount:
           int.tryParse(map[_defaultTaskCount] ?? '') ?? defaults.defaultTaskCount,
       limits: PracticeLimits(
@@ -89,6 +98,8 @@ class SettingsRepository {
   Future<void> setShowClock(bool value) => _put(_showClock, value ? '1' : '0');
 
   Future<void> setHaptics(bool value) => _put(_haptics, value ? '1' : '0');
+
+  Future<void> setSounds(bool value) => _put(_sounds, value ? '1' : '0');
 
   Future<void> setDefaultTaskCount(int value) =>
       _put(_defaultTaskCount, '$value');

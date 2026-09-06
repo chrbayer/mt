@@ -137,4 +137,22 @@ void main() {
       isTrue,
     );
   });
+
+  testWidgets('the sound switch is stored and read back', (tester) async {
+    await pump(tester, const Scaffold(body: GlobalSettingsTab()));
+    await tester.pumpAndSettle();
+
+    // On by default: a tablet flat on the table swallows the vibration.
+    final tile = tester.widget<SwitchListTile>(
+      find.widgetWithText(SwitchListTile, 'Töne abspielen'),
+    );
+    expect(tile.value, isTrue);
+
+    await tester.tap(find.widgetWithText(SwitchListTile, 'Töne abspielen'));
+    await tester.pumpAndSettle();
+    expect(
+      (await container.read(settingsRepositoryProvider).load()).sounds,
+      isFalse,
+    );
+  });
 }

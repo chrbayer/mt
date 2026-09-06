@@ -14,6 +14,7 @@ import '../../providers.dart';
 import '../../theme/app_theme.dart';
 import '../profiles/profile_badge.dart';
 import '../result/result_screen.dart';
+import 'feedback_sounds.dart';
 import 'practice_controller.dart';
 import '../lessons/pause_notice.dart';
 import 'widgets/big_keypad.dart';
@@ -76,6 +77,8 @@ class _PracticeScreenState extends ConsumerState<PracticeScreen>
   int? _sessionId;
   bool _leaving = false;
 
+  final FeedbackSounds _sounds = FeedbackSounds();
+
   /// Set when the practice cap was already reached as this screen opened.
   /// Then no run is generated at all and the break is shown instead.
   PracticeAllowance? _blocked;
@@ -92,6 +95,7 @@ class _PracticeScreenState extends ConsumerState<PracticeScreen>
     );
 
     unawaited(_prepare());
+    unawaited(_sounds.warmUp());
   }
 
   Future<void> _prepare() async {
@@ -179,6 +183,7 @@ class _PracticeScreenState extends ConsumerState<PracticeScreen>
     _controller
       ?..removeListener(_onControllerChanged)
       ..dispose();
+    unawaited(_sounds.dispose());
     super.dispose();
   }
 
@@ -225,11 +230,16 @@ class _PracticeScreenState extends ConsumerState<PracticeScreen>
   void _submit() {
     final controller = _controller!;
     final outcome = controller.submit();
+    // Sound, shake and colour say the same thing three ways. A child looking
+    // at the keypad rather than at the answer box gets only one of them.
+    final sounds = ref.read(preferencesProvider).value?.sounds ?? true;
     if (outcome == AnswerFeedback.wrong) {
+      if (sounds) _sounds.playWrong();
       _shake.forward(from: 0);
       return;
     }
     if (outcome == AnswerFeedback.correct) {
+      if (sounds) _sounds.playCorrect();
       _advanceTimer?.cancel();
       _advanceTimer = Timer(_correctFlash, () {
         controller.advance();

@@ -111,7 +111,10 @@ antreten. Die App läuft vollständig offline, ohne Konten und ohne Netzwerk.
   freigeschaltet sind.
 * **Schwere Aufgaben kommen wieder**: ein Viertel jedes Durchgangs besteht aus
   den Rechnungen, die diesem Kind zuletzt lange gedauert haben oder falsch
-  waren. Pro Profil im Elternbereich abschaltbar, standardmäßig an.
+  waren. Pro Profil im Elternbereich abschaltbar, standardmäßig an. Bei den
+  Lektionen, die ihren Vorrat vollständig durchgehen — verliebte Zahlen,
+  Uhrzeit sagen — rücken die schweren Aufgaben stattdessen an den Anfang:
+  ein Durchgang, der kürzer ist als der Vorrat, ließe sie sonst zufällig aus.
 * **Empfehlung**: über dem Katalog steht ein Vorschlag — erst ein Wackelkandidat,
   sonst etwas Neues, sonst etwas lange nicht Geübtes.
 * **Sterne**: jede Lektionskachel trägt ihre drei Sterne — gefüllt, so viele
@@ -152,6 +155,13 @@ antreten. Die App läuft vollständig offline, ohne Konten und ohne Netzwerk.
   nächste Start. Während der Pause darf ein Kind weiter Lektionen und
   Bestenlisten ansehen, nur eben nicht starten; das Duell ist ebenfalls
   gesperrt, sonst wäre es der Weg um die Grenze herum.
+* **Ton**: ein kurzer, freundlicher Zweiklang bei richtig, ein tieferer
+  einzelner Ton bei falsch. Zusammen mit Farbe und Vibration die dritte
+  Rückmeldung — ein Kind, das auf die Tastatur schaut statt aufs Antwortfeld,
+  bekommt sonst nur eine davon, und ein flach liegendes Tablet schluckt die
+  Vibration. Im Elternbereich abschaltbar. Die Töne sind von
+  `tool/make_sounds.py` erzeugt, nicht heruntergeladen: zwei Sinustöne sind
+  ein paar Zeilen Mathematik und wiegen zusammen 20 kB.
 * **Serie**: Tage in Folge, auf dem Ergebnisbildschirm und in der Übersicht.
 * **Sicherung**: der ganze Datenbestand als JSON-Datei, über die Teilen-Funktion
   aus der App heraus, und genauso wieder einspielbar.

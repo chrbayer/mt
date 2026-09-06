@@ -91,6 +91,13 @@ während eine bis zu sechsmal drankam — und die elf Formen sind der ganze
 Inhalt der Lektion. Die **Stunde** bleibt zufällig; sie wird nur neu gezogen,
 wenn dieselbe Uhrzeit sonst innerhalb des Abstandsfensters wiederkäme.
 
+Beide Vorrats-Lektionen nehmen die **Wiedervorlage** trotzdem an, nur anders:
+`_hardestFirst` zieht die schweren Formen an den Anfang des ersten Durchlaufs,
+statt sie wie die Stichprobe einzustreuen. Über einen vollen Durchlauf ändert
+das nichts — es entscheidet nur, was ein Durchgang zu sehen bekommt, der
+kürzer ist als der Vorrat. Ohne das konnte in zehn von elf Sprechweisen
+ausgerechnet die schwerste die fehlende sein.
+
 Lektionen mit `fixedSum` (verliebte Zahlen) laufen an dieser Stichprobenlogik
 vorbei: ihr Vorrat sind elf feste Paare, deshalb erzeugt
 `_generateFixedSumTasks` gemischte Durchläufe des kompletten Vorrats. Jedes
@@ -315,6 +322,21 @@ Volle Stunden üben die drei Lektionen, die nach Ziffern fragen.
 Stunden laufen 6..23, unter dem Zifferblatt steht die Tageszeit, und die Frage
 sagt ausdrücklich „mit 24 Stunden". Ohne all das wäre die Aufgabe nicht
 lösbar — die Zeiger sehen um 10 und um 22 Uhr gleich aus.
+
+## Rückmeldung auf drei Kanälen
+
+Farbe, Vibration und Ton sagen dasselbe. Wer auf die Tastatur schaut statt
+aufs Antwortfeld, sieht die Farbe nicht; ein flach auf dem Tisch liegendes
+Tablet schluckt die Vibration. Deshalb der Ton, und deshalb ist er
+standardmäßig an.
+
+Die WAV-Dateien erzeugt `tool/make_sounds.py`. Wer sie ändern will, ändert die
+Noten dort und lässt das Skript neu laufen — nicht die Dateien bearbeiten.
+
+`FeedbackSounds` hält beide Abspieler vorgeladen: einen erst beim ersten
+Fehler zu erzeugen verzögert genau den Ton, der sofort kommen soll. Jeder
+Fehler beim Laden oder Abspielen wird geschluckt und nur geloggt — auf einem
+Gerät ohne funktionierendes Audio darf der Durchgang nicht mitfallen.
 
 ## Nicht gewertete Lektionen
 

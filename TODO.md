@@ -56,11 +56,11 @@ oder eine eigene Taste zum Leeren würde reichen.
 
 ## Fehlt
 
-#12 Kein Ton. Der ursprüngliche Plan sah Ton und Haptik vor, es gibt nur
+#12 erledigt (2.1.5) — Kein Ton. Der ursprüngliche Plan sah Ton und Haptik vor, es gibt nur
 Haptik. Ein kurzer Klang bei richtig/falsch hilft Kindern, die das Tablet
 flach auf dem Tisch haben und die Vibration kaum spüren.
 
-#13 Die Wiedervorlage schwerer Aufgaben greift bei den Vorrats-Lektionen
+#13 erledigt (2.1.5) — Die Wiedervorlage schwerer Aufgaben greift bei den Vorrats-Lektionen
 nicht: _generateFixedSumTasks und _generateClockPhraseTasks ignorieren den
 review-Parameter. Bei "Uhrzeit sagen" kommen in zehn Aufgaben zehn der elf
 Formen dran — ausgerechnet die schwerste kann die fehlende sein. Ein Vorrat
