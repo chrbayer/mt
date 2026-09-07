@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mathe_trainer/domain/lesson.dart';
 import 'package:mathe_trainer/domain/task.dart';
@@ -83,6 +84,23 @@ void main() {
       expect(signs.last.center.dy, lessThan(left.bottom));
       expect(signs.last.left, greaterThan(left.right));
       expect(signs.last.right, lessThan(right.left));
+    });
+
+    testWidgets('the plus is as big as the numbers it separates',
+        (tester) async {
+      // It was set half their size and read as a mistake.
+      await pumpTask(
+        tester,
+        const Task(a: 3, b: 5, op: Operation.add, form: TaskForm.quantityAdd),
+        lessonById('bees_add'),
+      );
+
+      double sizeOf(Finder f) =>
+          tester.renderObject<RenderParagraph>(f).text.style!.fontSize!;
+
+      final lowerPlus = find.text('+').last;
+      expect(sizeOf(lowerPlus), sizeOf(find.text('3')));
+      expect(sizeOf(lowerPlus), sizeOf(find.text('5')));
     });
 
     testWidgets('two dice do the same', (tester) async {

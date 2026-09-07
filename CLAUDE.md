@@ -342,6 +342,13 @@ Zahlen, denn „2 + 4" ist genau der Schritt, auf den die Bilder vorbereiten.
 Bei „Wo sind mehr?" bleibt die Stelle leer — dort ein Plus zu schreiben würde
 eine Rechnung beibringen, nach der niemand gefragt hat.
 
+`countSeparator` wird **ohne Stil** übergeben: `CountedPair` zeichnet ihn in
+demselben Grad, Gewicht und Farbton wie die Zahlen, zwischen denen er steht.
+Solange jeder Aufrufer seine eigene Größe mitgab, stand im Übungsbildschirm
+ein Plus mit 52 neben Ziffern mit 68 und auf der Kachel eins, das größer war
+als sie — beides las sich als Versehen, und es gibt keinen Grund, warum die
+drei Zeichen je verschieden groß sein sollten.
+
 Der Trenner beim Vergleichen wächst über `stretchSeparator` (eine Zelle mit
 `TableCellVerticalAlignment.fill`) auf die Höhe der Häufchen mit. Zwischen
 zwei hohen Wolken trennt ein Strichstummel nichts.

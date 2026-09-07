@@ -23,6 +23,10 @@ class CountedPair extends StatelessWidget {
 
   /// The same thing between the counts, where it means something. Null leaves
   /// the gap empty.
+  ///
+  /// Pass it plain, without a style: it is drawn in the style of the numbers
+  /// it stands between. A plus half their size next to them looked like a
+  /// mistake, and there is no reason it should ever differ.
   final Widget? countSeparator;
 
   /// Whether the separator is stretched to the height of the two heaps
@@ -55,17 +59,17 @@ class CountedPair extends StatelessWidget {
   Widget build(BuildContext context) {
     final showCounts = leftCount != null && rightCount != null;
 
-    Widget number(int value) => Padding(
+    final numberStyle = TextStyle(
+      fontSize: countSize,
+      fontWeight: FontWeight.w700,
+      color: countColor,
+    );
+
+    // Number and separator share the cell, so they share the offset too -
+    // otherwise the plus sits half a padding higher than the digits.
+    Widget countCell(Widget child) => Padding(
           padding: EdgeInsets.only(top: countSize * 0.16),
-          child: Text(
-            '$value',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: countSize,
-              fontWeight: FontWeight.w700,
-              color: countColor,
-            ),
-          ),
+          child: Center(child: child),
         );
 
     return Table(
@@ -85,9 +89,14 @@ class CountedPair extends StatelessWidget {
         ]),
         if (showCounts)
           TableRow(children: [
-            Center(child: number(leftCount!)),
-            Center(child: countSeparator ?? const SizedBox.shrink()),
-            Center(child: number(rightCount!)),
+            countCell(Text('${leftCount!}',
+                textAlign: TextAlign.center, style: numberStyle)),
+            countCell(DefaultTextStyle.merge(
+              style: numberStyle,
+              child: countSeparator ?? const SizedBox.shrink(),
+            )),
+            countCell(Text('${rightCount!}',
+                textAlign: TextAlign.center, style: numberStyle)),
           ]),
       ],
     );
