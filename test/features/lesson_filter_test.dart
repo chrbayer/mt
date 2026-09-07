@@ -97,6 +97,11 @@ void main() {
   /// Zehnerübergang" exists in three number ranges. So the screen is checked
   /// by what a whole group does, and the per-lesson rule by its own test.
   Future<bool> showsGroup(WidgetTester tester, LessonGroup group) async {
+    // Back to the top first: the list keeps its offset across a re-pump, so
+    // a second look would otherwise start below what it is searching for.
+    await tester.drag(find.byType(ListView), const Offset(0, 12000));
+    await tester.pump();
+
     final heading = find.text(groupTitle(group));
     for (var i = 0; i < 30; i++) {
       if (heading.evaluate().isNotEmpty) return true;
@@ -155,9 +160,11 @@ void main() {
     expect(await showsGroup(tester, LessonGroup.upTo1000), isTrue);
   });
 
-  testWidgets('the first steps are never filtered away', (tester) async {
-    // Ten wrong out of ten and still three stars there - the whole group
-    // would vanish after a single run.
+  testWidgets('the first steps are filtered away like everything else',
+      (tester) async {
+    // Ten wrong out of ten and still three stars there: the stars come for
+    // finishing. One pass through the group therefore clears it - and a
+    // parent can hand the stars back when it should come back.
     for (final lesson in lessonsInGroup(LessonGroup.firstSteps)) {
       final sessions = container.read(sessionRepositoryProvider);
       final id = await sessions.startSession(
@@ -183,6 +190,12 @@ void main() {
     await setFilter(LessonFilter.mastered);
     await pump(tester);
 
+    expect(await showsGroup(tester, LessonGroup.firstSteps), isFalse);
+
+    // The stricter setting keeps them: there are no bolts to earn where
+    // nothing is timed.
+    await setFilter(LessonFilter.perfected);
+    await pump(tester);
     expect(await showsGroup(tester, LessonGroup.firstSteps), isTrue);
   });
 

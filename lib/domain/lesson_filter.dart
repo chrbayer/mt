@@ -43,9 +43,15 @@ String lessonFilterExplanation(LessonFilter filter) => switch (filter) {
 
 /// Whether this lesson drops out of the catalogue.
 ///
-/// Never the first steps, whatever they are worth: there the stars come for
-/// finishing rather than for being right, so they would all vanish after a
-/// single run - and repetition is the whole point of that group.
+/// The first steps are **not** exempt. They were, on the grounds that their
+/// stars come for finishing rather than for being right, so a single run of
+/// each would empty the group. That objection fell away when the stars became
+/// something a parent can hand back: hiding is no longer a one-way door, and
+/// the point of the filter is exactly to get what is done out of the way.
+///
+/// The stricter setting still keeps them, and not by special-casing: there
+/// are no bolts to earn where nothing is timed, so `bolts >= maxBolts` is
+/// never true for them.
 ///
 /// A lesson nobody has touched has no stars and therefore always stays.
 bool hiddenByFilter(
@@ -54,7 +60,6 @@ bool hiddenByFilter(
   required int stars,
   required int bolts,
 }) {
-  if (!lesson.scored) return false;
   return switch (filter) {
     LessonFilter.all => false,
     LessonFilter.mastered => stars >= maxStars,

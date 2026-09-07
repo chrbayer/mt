@@ -191,9 +191,10 @@ antreten. Die App läuft vollständig offline, ohne Konten und ohne Netzwerk.
   fehlerfrei läuft; **erst mit 3 Sternen und 3 Blitzen** ist strenger und
   lässt stehen, was zwar richtig, aber noch langsam ist. Pro Profil
   gespeichert, vom Kind selbst umstellbar und im Elternbereich einzurichten.
-  Die **Ersten Schritte bleiben immer stehen**: dort gibt es die Sterne fürs
-  Durchhalten, nicht fürs Richtigsein, und Wiederholung ist der Zweck der
-  Gruppe.
+  Auch die **Ersten Schritte** werden ausgeblendet, sobald sie durch sind —
+  die Sterne lassen sich ja im Elternbereich zurückgeben, wenn die Gruppe
+  wiederkommen soll. Bei der strengeren Stufe bleiben sie stehen: wo nichts
+  gemessen wird, gibt es keine Blitze zu holen.
 * **Serie**: Tage in Folge, auf dem Ergebnisbildschirm und in der Übersicht.
 * **Sicherung**: der ganze Datenbestand als JSON-Datei, über die Teilen-Funktion
   aus der App heraus, und genauso wieder einspielbar.

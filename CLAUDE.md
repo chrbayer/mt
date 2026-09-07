@@ -164,9 +164,14 @@ Blitze und blendet damit **weniger** aus. Richtig ist nicht dasselbe wie
 fertig, und wer schneller werden will, braucht die fehlerfreien, aber langsamen
 Lektionen weiter in der Liste.
 
-Die **Ersten Schritte** sind ausgenommen. Dort gibt es drei Sterne fürs
-Beenden, also wäre nach einem einzigen Durchgang die ganze Gruppe weg — und
-Wiederholung ist genau ihr Zweck.
+Die **Ersten Schritte sind nicht ausgenommen** — sie waren es, mit dem
+Argument, dass ihre Sterne fürs Beenden kommen und ein Durchgang je Lektion
+die Gruppe leert. Das galt, solange Ausblenden eine Einbahnstraße war; seit
+ein Elternteil die Sterne zurückgeben kann (2.3.0), ist es bloß Aufräumen.
+
+Die **strengere** Stufe lässt sie trotzdem stehen, und zwar ohne Sonderfall:
+wo nichts gemessen wird, gibt es keine Blitze zu holen, also wird
+`bolts >= maxBolts` dort nie wahr.
 
 Der Filter gilt auch für die **Empfehlung**: eine Lektion vorzuschlagen, die
 eine Zeile weiter unten ausgeblendet ist, wäre ein Widerspruch. Ist am Ende

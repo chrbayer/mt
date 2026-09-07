@@ -34,13 +34,19 @@ void main() {
     }
   });
 
-  test('the first steps stay whatever they are worth', () {
-    // There the stars come for finishing, so every lesson of the group would
-    // vanish after one run - and repeating is the point of that group.
-    for (final filter in LessonFilter.values) {
-      expect(hidden(filter, firstSteps, maxStars, maxBolts), isFalse,
-          reason: filter.name);
-    }
+  test('the first steps go too, once they are finished', () {
+    // They used to be exempt, because their stars come for finishing rather
+    // than for being right. That held while hiding was a one-way door; since
+    // a parent can hand the stars back, it is just tidying up.
+    expect(hidden(LessonFilter.all, firstSteps, maxStars, 0), isFalse);
+    expect(hidden(LessonFilter.mastered, firstSteps, maxStars, 0), isTrue);
+  });
+
+  test('but the stricter setting keeps them, without a special case', () {
+    // Nothing is timed there, so there are no bolts to earn and the second
+    // condition can never be met.
+    expect(firstSteps.targetMsPerTask, 0);
+    expect(hidden(LessonFilter.perfected, firstSteps, maxStars, 0), isFalse);
   });
 
   test('an unknown stored name shows everything rather than hiding blindly',
