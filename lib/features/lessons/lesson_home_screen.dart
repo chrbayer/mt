@@ -55,11 +55,22 @@ class LessonHomeScreen extends ConsumerWidget {
           children: [
             ProfileBadge(user: user, size: 28),
             const SizedBox(width: 24),
-            // The running total, right where the child looks anyway.
+            // The running totals, right where the child looks anyway.
+            //
+            // Asymmetric on purpose: the stars carry the maximum, the bolts
+            // only their count. That says which of the two is the goal -
+            // care has a target to reach, speed is the extra on top. It also
+            // happens to be what fits on a 10" tablet.
             StarTotal(
               earned: _earnedStars(user.visibleGroups, stats),
               possible: _possibleStars(user.visibleGroups),
               size: 24,
+            ),
+            const SizedBox(width: 18),
+            StarTotal(
+              earned: _earnedBolts(user.visibleGroups, stats),
+              size: 24,
+              bolts: true,
             ),
           ],
         ),
@@ -231,8 +242,25 @@ class _NothingLeft extends StatelessWidget {
       );
 }
 
+/// Bolts a child has collected, counted like the stars: over every lesson of
+/// every group they can see, best run once.
+int _earnedBolts(List<LessonGroup> groups, Map<String, LessonStat> stats) {
+  var total = 0;
+  for (final group in groups) {
+    for (final lesson in lessonsInGroup(group)) {
+      total += stats[lesson.id]?.bestBolts ?? 0;
+    }
+  }
+  return total;
+}
+
 /// Stars a child has collected in the groups they can see - each lesson's
 /// best run counted once.
+///
+/// Deliberately over `lessonsInGroup` rather than over what the filter leaves
+/// standing: hiding a finished lesson is a way of tidying the list, not of
+/// giving its stars back. Only a parent unlocking or locking a group changes
+/// what there is to collect.
 int _earnedStars(List<LessonGroup> groups, Map<String, LessonStat> stats) {
   var total = 0;
   for (final group in groups) {

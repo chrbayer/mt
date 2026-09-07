@@ -400,6 +400,16 @@ Die Schwellen stehen in `domain/scoring.dart` (`threeStarErrorRate`,
 „was zählt als drei Sterne" würden auseinanderlaufen. Ein Test vergleicht beide
 Fassungen gegeneinander.
 
+Der Gesamtstand läuft über `lessonsInGroup`, **nicht** über das, was der
+Filter stehen lässt: fertige Lektionen auszublenden räumt die Liste auf und
+nimmt keine Sterne weg. Was es zu holen gibt, hängt allein daran, welche
+Bereiche freigeschaltet sind — ein Test hält beides fest.
+
+In der Statuszeile trägt der Sternstand sein Maximum, der Blitzstand nur seine
+Zahl. Die Ungleichheit ist die Aussage: Sorgfalt hat eine Marke, Tempo ist die
+Zugabe. Mit zwei vollen Abzeichen läuft die Kopfzeile auf dem 10-Zoll-Tablet
+außerdem um 24 Pixel über.
+
 Der Gesamtstand zählt **pro Lektion die beste Runde, einmal**. Sonst wäre es
 lohnender, dieselbe leichte Lektion zu wiederholen, als eine neue anzufangen.
 

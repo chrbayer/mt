@@ -8,6 +8,7 @@ import 'package:mathe_trainer/domain/lesson_filter.dart';
 import 'package:mathe_trainer/domain/practice_limit.dart';
 import 'package:mathe_trainer/data/repositories/user_repository.dart';
 import 'package:mathe_trainer/domain/task.dart';
+import 'package:mathe_trainer/features/common/star_row.dart';
 import 'package:mathe_trainer/features/lessons/lesson_home_screen.dart';
 import 'package:mathe_trainer/providers.dart';
 import 'package:mathe_trainer/theme/app_theme.dart';
@@ -213,5 +214,60 @@ void main() {
     await pump(tester);
 
     expect(find.text('Alles geschafft!'), findsOneWidget);
+  });
+
+  group('the totals in the status line', () {
+    /// Reads the two badges off the app bar: stars first, then bolts.
+    List<String> badges(WidgetTester tester) => [
+          for (final total in tester.widgetList<StarTotal>(
+              find.byType(StarTotal)))
+            total.possible == null
+                ? '${total.earned}'
+                : '${total.earned} von ${total.possible}',
+        ];
+
+    testWidgets('the filter does not touch them', (tester) async {
+      await finishEveryday(msPerTask: 1000);
+      await pump(tester);
+      final before = badges(tester);
+
+      // Hiding what is done tidies the list; it does not hand the stars
+      // back, and the maximum is unchanged either way.
+      await setFilter(LessonFilter.mastered);
+      await pump(tester);
+
+      expect(badges(tester), before);
+      expect(await showsGroup(tester, LessonGroup.everyday), isFalse,
+          reason: 'the group really is filtered away');
+    });
+
+    testWidgets('only locking a group changes what there is to collect',
+        (tester) async {
+      await pump(tester);
+      final withEverything = badges(tester).first;
+
+      await container.read(userRepositoryProvider).setHiddenGroups(
+            mia.id,
+            {LessonGroup.upTo1000},
+          );
+      container.read(activeUserProvider.notifier).select(
+            (await container.read(userRepositoryProvider).findUser(mia.id))!,
+          );
+      await pump(tester);
+
+      expect(badges(tester).first, isNot(withEverything));
+    });
+
+    testWidgets('the bolts are counted, the stars also carry the maximum',
+        (tester) async {
+      // Clean and quick: three stars and three bolts for one lesson.
+      await run('add_100_carry', msPerTask: 3000);
+      await pump(tester);
+
+      final shown = badges(tester);
+      expect(shown, hasLength(2));
+      expect(shown.first, contains(' von '));
+      expect(shown.last, '3', reason: 'bolts show a count, not a maximum');
+    });
   });
 }

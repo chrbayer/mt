@@ -131,6 +131,16 @@ antreten. Die App läuft vollständig offline, ohne Konten und ohne Netzwerk.
   als eine neue anzufangen. Die Sterne tauchen außerdem im Ergebnis, in der
   persönlichen Statistik, in der Übersicht über alle Kinder und im
   Übungsverlauf auf.
+
+  In der Statuszeile stehen beide Stände nebeneinander, aber **nicht
+  gleichrangig**: die Sterne mit ihrem Maximum („143 von 225"), die Blitze nur
+  als Zahl. Das sagt, was das Ziel ist — Sorgfalt hat eine Marke zu erreichen,
+  Tempo ist die Zugabe.
+
+  Beide Stände richten sich **nur** danach, welche Bereiche freigeschaltet
+  sind. Wer fertige Lektionen ausblendet, räumt die Liste auf und gibt keine
+  Sterne zurück; das Maximum ändert sich nur, wenn Eltern eine Gruppe
+  freischalten oder sperren.
 * **Blitze**: die zweite Achse neben den Sternen. Sterne stehen für Sorgfalt,
   Blitze fürs Tempo — wer sich Zeit lässt und fehlerfrei bleibt, bekommt drei
   Sterne und keinen Blitz. Jede Lektion hat ihre **eigene Zielzeit pro
