@@ -7,6 +7,7 @@ import 'package:mathe_trainer/domain/lesson.dart';
 import 'package:mathe_trainer/domain/task.dart';
 import 'package:mathe_trainer/features/admin/admin_screen.dart';
 import 'package:mathe_trainer/features/admin/global_settings_tab.dart';
+import 'package:mathe_trainer/features/admin/profile_settings_dialog.dart';
 import 'package:mathe_trainer/features/leaderboard/leaderboard_screen.dart';
 import 'package:mathe_trainer/features/lessons/lesson_home_screen.dart';
 import 'package:mathe_trainer/features/practice/practice_screen.dart';
@@ -232,6 +233,34 @@ void main() {
       expect(find.text('Für alle'), findsNothing);
       // What holds for everyone is behind the PIN now.
       expect(find.byType(SwitchListTile), findsNothing);
+    });
+
+    testWidgets('13b-profileinstellungen passt auf ${size.key}',
+        (tester) async {
+      // Grown section by section - Aufgabenzahl, Übungszeit, Tagesgrenze,
+      // Filter, Bereiche - and each one was added without a test here.
+      await pumpScreen(
+        tester,
+        Builder(
+          builder: (context) => TextButton(
+            onPressed: () => ProfileSettingsDialog.show(context, mia),
+            child: const Text('auf'),
+          ),
+        ),
+        size.value,
+      );
+      await tester.tap(find.text('auf'));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+
+      // Scrolled to the bottom it must still not overflow.
+      await tester.drag(
+        find.byType(SingleChildScrollView).first,
+        const Offset(0, -2000),
+      );
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      expect(find.text('Speichern'), findsOneWidget);
     });
 
     testWidgets('14-elternbereich-einstellungen passt auf ${size.key}',

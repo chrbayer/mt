@@ -68,6 +68,7 @@ class BackupRepository {
             'practiceLimitMinutes': user.practiceLimitMinutes,
             'breakMinutes': user.breakMinutes,
             'dailyLimitMinutes': user.dailyLimitMinutes,
+            'lessonFilter': user.lessonFilter,
           }
       ],
       'sessions': [
@@ -181,6 +182,10 @@ class BackupRepository {
                     Value(user['practiceLimitMinutes'] as int?),
                 breakMinutes: Value(user['breakMinutes'] as int?),
                 dailyLimitMinutes: Value(user['dailyLimitMinutes'] as int?),
+                // An older backup knows no filter, and showing everything is
+                // the safe reading of that.
+                lessonFilter:
+                    Value(user['lessonFilter'] as String? ?? 'all'),
               ),
             );
       }

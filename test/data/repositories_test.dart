@@ -10,6 +10,7 @@ import 'package:mathe_trainer/data/repositories/stats_repository.dart';
 import 'package:mathe_trainer/data/repositories/user_repository.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:mathe_trainer/domain/lesson.dart';
+import 'package:mathe_trainer/domain/lesson_filter.dart';
 import 'package:mathe_trainer/domain/scoring.dart';
 import 'package:mathe_trainer/domain/task.dart';
 
@@ -175,6 +176,10 @@ void main() {
       await recordRun(SessionRepository(before),
           userId: id, lessonId: 'add_20_plain');
 
+      if (version < 7) {
+        await before
+            .customStatement('ALTER TABLE users DROP COLUMN lesson_filter');
+      }
       if (version < 5) {
         await before.customStatement(
             'ALTER TABLE users DROP COLUMN practice_limit_minutes');
@@ -208,7 +213,7 @@ void main() {
       return file;
     }
 
-    for (final from in [1, 2, 3, 4, 5]) {
+    for (final from in [1, 2, 3, 4, 5, 6]) {
       test('a database from schema v$from keeps its data', () async {
         final file = await databaseAtVersion(from);
 
@@ -229,6 +234,8 @@ void main() {
         expect(user.practiceLimitMinutes, isNull);
         expect(user.breakMinutes, isNull);
         expect(user.dailyLimitMinutes, isNull);
+        // Nothing was ever filtered away, so nothing is.
+        expect(user.filter, LessonFilter.all);
         expect(await after.select(after.lessonPreferences).get(), isEmpty);
         expect(await after.select(after.sessions).get(), hasLength(1));
         expect(await after.select(after.attempts).get(), hasLength(10));

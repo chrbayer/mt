@@ -50,6 +50,12 @@ class Users extends Table {
   /// of the stretch cap: enough breaks would otherwise add up to an
   /// afternoon.
   IntColumn get dailyLimitMinutes => integer().nullable()();
+
+  /// Which finished lessons the catalogue leaves out, as a [LessonFilter]
+  /// name. Stored as a name rather than an index so a reordered enum cannot
+  /// silently turn one setting into another.
+  TextColumn get lessonFilter =>
+      text().withDefault(const Constant('all'))();
 }
 
 /// What one child last chose for one lesson.
@@ -120,7 +126,7 @@ class AppDatabase extends _$AppDatabase {
       : super(executor ?? driftDatabase(name: 'mathe_trainer'));
 
   @override
-  int get schemaVersion => 6;
+  int get schemaVersion => 7;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -143,7 +149,12 @@ class AppDatabase extends _$AppDatabase {
           // v6 lets the caps be set once for everyone, so a profile may now
           // say "as for everyone" (null) as well as "none" (zero).
           if (from < 6) {
-            await m.alterTable(TableMigration(users));
+            // The rebuild takes the table as it looks *now*, so the column
+            // that v7 adds comes along for the ride and has to be declared
+            // as new - otherwise the copy looks for it in the old table.
+            await m.alterTable(
+              TableMigration(users, newColumns: [users.lessonFilter]),
+            );
             // A profile still carrying what v5 handed it never had a decision
             // made about it, so it follows the app-wide setting from now on.
             // Anything a parent actually chose stays as chosen.
@@ -159,6 +170,9 @@ class AppDatabase extends _$AppDatabase {
               'WHERE daily_limit_minutes = 0',
             );
           }
+          // v7 can leave finished lessons out of the catalogue. Only needed
+          // when the rebuild above did not already run.
+          if (from == 6) await m.addColumn(users, users.lessonFilter);
         },
         beforeOpen: (details) async {
           // Needed for the ON DELETE CASCADE above to actually fire.

@@ -169,6 +169,15 @@ antreten. Die App läuft vollständig offline, ohne Konten und ohne Netzwerk.
   Vibration. Im Elternbereich abschaltbar. Die Töne sind von
   `tool/make_sounds.py` erzeugt, nicht heruntergeladen: zwei Sinustöne sind
   ein paar Zeilen Mathematik und wiegen zusammen 20 kB.
+* **Fertige Lektionen ausblenden**: bei 75 Lektionen ist die Liste lang, und
+  das meiste, woran ein Kind vorbeiscrollt, sitzt längst. Der Filter oben im
+  Katalog kürzt sie in zwei Stufen — **mit 3 Sternen** verschwindet, was
+  fehlerfrei läuft; **erst mit 3 Sternen und 3 Blitzen** ist strenger und
+  lässt stehen, was zwar richtig, aber noch langsam ist. Pro Profil
+  gespeichert, vom Kind selbst umstellbar und im Elternbereich einzurichten.
+  Die **Ersten Schritte bleiben immer stehen**: dort gibt es die Sterne fürs
+  Durchhalten, nicht fürs Richtigsein, und Wiederholung ist der Zweck der
+  Gruppe.
 * **Serie**: Tage in Folge, auf dem Ergebnisbildschirm und in der Übersicht.
 * **Sicherung**: der ganze Datenbestand als JSON-Datei, über die Teilen-Funktion
   aus der App heraus, und genauso wieder einspielbar.

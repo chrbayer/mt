@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/repositories/stats_repository.dart';
 import '../../data/repositories/user_repository.dart';
 import '../../domain/lesson.dart';
+import '../../domain/lesson_filter.dart';
 import '../../domain/practice_limit.dart';
 import '../../domain/scoring.dart';
 import '../../providers.dart';
@@ -36,6 +37,18 @@ class LessonHomeScreen extends ConsumerWidget {
     final allowance = ref.watch(practiceAllowanceProvider).value ??
         PracticeAllowance.unlimited;
 
+    /// The lessons of a group after the child's filter has had its say.
+    List<LessonSpec> offered(LessonGroup group) => [
+          for (final lesson in lessonsInGroup(group))
+            if (!hiddenByFilter(
+              user.filter,
+              lesson: lesson,
+              stars: stats[lesson.id]?.bestStars ?? 0,
+              bolts: stats[lesson.id]?.bestBolts ?? 0,
+            ))
+              lesson,
+        ];
+
     return Scaffold(
       appBar: AppBar(
         title: Row(
@@ -51,6 +64,54 @@ class LessonHomeScreen extends ConsumerWidget {
           ],
         ),
         actions: [
+          // The filter belongs here rather than in the settings: it changes
+          // what is on this screen, and a child should be able to put the
+          // catalogue back without going looking for a switch.
+          PopupMenuButton<LessonFilter>(
+            tooltip: 'Fertige Lektionen ausblenden',
+            icon: Icon(
+              user.filter == LessonFilter.all
+                  ? Icons.filter_list_off
+                  : Icons.filter_list,
+              size: 28,
+              color: user.filter == LessonFilter.all
+                  ? AppColors.textMuted
+                  : AppColors.primary,
+            ),
+            onSelected: (filter) =>
+                ref.read(userRepositoryProvider).setLessonFilter(
+                      user.id,
+                      filter,
+                    ),
+            itemBuilder: (context) => [
+              for (final filter in LessonFilter.values)
+                PopupMenuItem<LessonFilter>(
+                  value: filter,
+                  child: Row(
+                    children: [
+                      Icon(
+                        filter == user.filter
+                            ? Icons.radio_button_checked
+                            : Icons.radio_button_unchecked,
+                        size: 22,
+                        color: filter == user.filter
+                            ? AppColors.primary
+                            : AppColors.textMuted,
+                      ),
+                      const SizedBox(width: 12),
+                      // Wraps rather than overflows: the longest label is a
+                      // whole sentence, and the menu is only as wide as the
+                      // button it hangs under.
+                      Flexible(
+                        child: Text(lessonFilterTitle(filter),
+                            style: const TextStyle(fontSize: 19)),
+                      ),
+                    ],
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(width: 4),
           TextButton.icon(
             icon: const Icon(Icons.insights_outlined, size: 28),
             label: const Text('Statistik', style: TextStyle(fontSize: 20)),
@@ -102,28 +163,72 @@ class LessonHomeScreen extends ConsumerWidget {
                     child: PauseNotice(allowance: allowance, compact: true),
                   ),
                 _RecommendationCard(
+                  // A lesson the child has filtered away must not be
+                  // suggested a line later.
                   recommendation: recommendLesson(
                     candidates: [
                       for (final group in user.visibleGroups)
-                        ...lessonsInGroup(group),
+                        ...offered(group),
                     ],
                     stats: stats,
                   ),
                   userId: user.id,
                 ),
                 for (final group in user.visibleGroups)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 28),
-                    child: _LessonGroup(
-                      title: groupTitle(group),
-                      lessons: lessonsInGroup(group),
-                      stats: stats,
+                  if (offered(group).isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 28),
+                      child: _LessonGroup(
+                        title: groupTitle(group),
+                        lessons: offered(group),
+                        stats: stats,
+                      ),
                     ),
-                  ),
+                if (user.visibleGroups.every((g) => offered(g).isEmpty))
+                  const _NothingLeft(),
               ],
             ),
     );
   }
+}
+
+/// What is left when the filter has taken everything away.
+///
+/// Not an empty screen: a child who has just finished the last lesson should
+/// read that they finished it, and find the way back in the same breath.
+class _NothingLeft extends StatelessWidget {
+  const _NothingLeft();
+
+  @override
+  Widget build(BuildContext context) => Container(
+        padding: const EdgeInsets.all(32),
+        decoration: BoxDecoration(
+          color: AppColors.correctSoft,
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: AppColors.correct, width: 2),
+        ),
+        child: Column(
+          children: [
+            const Icon(Icons.emoji_events_outlined,
+                size: 64, color: AppColors.correct),
+            const SizedBox(height: 12),
+            Text(
+              'Alles geschafft!',
+              style: Theme.of(context)
+                  .textTheme
+                  .headlineMedium
+                  ?.copyWith(color: AppColors.correct),
+            ),
+            const SizedBox(height: 6),
+            const Text(
+              'Was du kannst, ist gerade ausgeblendet. Über den Filter oben '
+              'kommt der ganze Katalog zurück.',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 19, color: AppColors.text),
+            ),
+          ],
+        ),
+      );
 }
 
 /// Stars a child has collected in the groups they can see - each lesson's

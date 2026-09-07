@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/db/app_database.dart';
 import '../../data/repositories/user_repository.dart';
 import '../../domain/lesson.dart';
+import '../../domain/lesson_filter.dart';
 import '../../domain/practice_limit.dart';
 import '../../providers.dart';
 import '../../theme/app_theme.dart';
@@ -41,6 +42,7 @@ class _ProfileSettingsDialogState
   late int? _limitMinutes = widget.user.practiceLimitMinutes;
   late int? _breakMinutes = widget.user.breakMinutes;
   late int? _dailyMinutes = widget.user.dailyLimitMinutes;
+  late LessonFilter _filter = widget.user.filter;
 
   @override
   Widget build(BuildContext context) {
@@ -154,6 +156,41 @@ class _ProfileSettingsDialogState
                     setState(() => _dailyMinutes = minutes),
               ),
               const Divider(height: 32),
+              Text('Fertige Lektionen ausblenden',
+                  style: Theme.of(context).textTheme.titleLarge),
+              const SizedBox(height: 4),
+              const Text(
+                'Kürzt den Katalog um das, was schon sitzt. Das Kind kann es '
+                'auf dem Übungsbildschirm selbst umstellen - hier steht es, '
+                'damit man es einmal einrichten kann. Die Ersten Schritte '
+                'bleiben immer stehen: dort gibt es die Sterne fürs '
+                'Durchhalten, nicht fürs Richtigsein.',
+                style: TextStyle(fontSize: 17, color: AppColors.textMuted),
+              ),
+              const SizedBox(height: 10),
+              RadioGroup<LessonFilter>(
+                groupValue: _filter,
+                onChanged: (chosen) =>
+                    setState(() => _filter = chosen ?? _filter),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    for (final filter in LessonFilter.values)
+                      RadioListTile<LessonFilter>(
+                        value: filter,
+                        contentPadding: EdgeInsets.zero,
+                        title: Text(lessonFilterTitle(filter),
+                            style: const TextStyle(fontSize: 20)),
+                        subtitle: Text(
+                          lessonFilterExplanation(filter).replaceAll('**', ''),
+                          style: const TextStyle(
+                              fontSize: 16, color: AppColors.textMuted),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              const Divider(height: 32),
               Text('Bereiche', style: Theme.of(context).textTheme.titleLarge),
               const Text(
                 'Abgeschaltete Bereiche erscheinen nicht mehr auf dem '
@@ -205,6 +242,10 @@ class _ProfileSettingsDialogState
                       await repository.setProfileTaskCount(
                         widget.user.id,
                         _taskCount,
+                      );
+                      await repository.setLessonFilter(
+                        widget.user.id,
+                        _filter,
                       );
                       await repository.setPracticeLimit(
                         widget.user.id,

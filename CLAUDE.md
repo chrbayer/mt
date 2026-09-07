@@ -151,6 +151,28 @@ Abfrage, nicht in einer je Lektion — es sind über vierzig. Sie nutzt dieselbe
 aus der Bestzeile) und ermittelt „zuletzt geübt" über eine korrelierte
 Unterabfrage, weil das etwas anderes ist als der Zeitpunkt der Bestleistung.
 
+## Fertige Lektionen ausblenden
+
+`LessonFilter` ist eine Eigenschaft des **Profils**, kein Anzeigezustand: der
+Katalog soll morgen so aussehen wie heute. Gespeichert wird der **Name**, nicht
+der Index — dieselbe Vorsicht wie bei `hidden_groups`, und Unbekanntes zählt
+als `all`. Ein Downgrade darf keine Lektionen aus Gründen verstecken, die
+niemand sehen kann.
+
+Die zweite Stufe ist **strenger, nicht lockerer**: sie verlangt Sterne *und*
+Blitze und blendet damit **weniger** aus. Richtig ist nicht dasselbe wie
+fertig, und wer schneller werden will, braucht die fehlerfreien, aber langsamen
+Lektionen weiter in der Liste.
+
+Die **Ersten Schritte** sind ausgenommen. Dort gibt es drei Sterne fürs
+Beenden, also wäre nach einem einzigen Durchgang die ganze Gruppe weg — und
+Wiederholung ist genau ihr Zweck.
+
+Der Filter gilt auch für die **Empfehlung**: eine Lektion vorzuschlagen, die
+eine Zeile weiter unten ausgeblendet ist, wäre ein Widerspruch. Ist am Ende
+nichts übrig, steht dort, wie man den Katalog zurückholt — ein leerer
+Bildschirm wäre ein Fehler und kein Erfolg.
+
 ## Sichtbare Bereiche
 
 `users.hidden_groups` speichert die **abgeschalteten** Gruppen als

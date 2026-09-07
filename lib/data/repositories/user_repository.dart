@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 
 import '../../domain/lesson.dart';
+import '../../domain/lesson_filter.dart';
 import '../db/app_database.dart';
 
 /// Reads the per-child group visibility out of its stored representation.
@@ -18,6 +19,9 @@ extension UserVisibleGroups on User {
   /// The groups to offer this child, in catalog order.
   List<LessonGroup> get visibleGroups =>
       LessonGroup.values.where(shows).toList(growable: false);
+
+  /// Which finished lessons this child's catalogue leaves out.
+  LessonFilter get filter => lessonFilterByName(lessonFilter);
 }
 
 /// Profiles: create, rename, delete, and wipe a child's results.
@@ -98,6 +102,12 @@ class UserRepository {
   Future<void> setReviewHardTasks(int id, bool value) =>
       (_db.update(_db.users)..where((u) => u.id.equals(id)))
           .write(UsersCompanion(reviewHardTasks: Value(value)));
+
+  /// Sets how much of a finished lesson has to be done before it drops out
+  /// of this child's catalogue.
+  Future<void> setLessonFilter(int id, LessonFilter filter) =>
+      (_db.update(_db.users)..where((u) => u.id.equals(id)))
+          .write(UsersCompanion(lessonFilter: Value(filter.name)));
 
   /// Hides or shows whole lesson groups for one child - a first-grader has no
   /// business being offered "Bis 1000".
