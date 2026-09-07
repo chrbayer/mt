@@ -607,11 +607,22 @@ mit, sonst sperrt eine Wiederherstellung die Eltern aus.
 ## Versionierung
 
 `pubspec.yaml` führt nur den Build-Namen: `version: 1.0.0`. Der Teil vor einem
-`+` wird zum Android-`versionName`, der Teil dahinter zum `versionCode`. Ohne
-`+N` vergibt Flutter `versionCode = 1`. Die Build-Skripte übergeben die Nummer
-nur, wenn sie tatsächlich in der pubspec steht — die ganze Zeichenkette an
-`--build-name` zu hängen wäre falsch, dann stünde das `+N` im sichtbaren
-Versionsnamen.
+`+` wird zum Android-`versionName`, der Teil dahinter zum `versionCode` — die
+ganze Zeichenkette an `--build-name` zu hängen wäre falsch, dann stünde das
+`+N` im sichtbaren Versionsnamen.
+
+Ohne `+N` gäbe Flutter jeder App **`versionCode = 1`**, und genau daran
+entscheidet Android, ob eine APK ein Update ist. Zwei verschiedene Builds, die
+beide 1 behaupten, sind für den Paketmanager kein Update; eine über die andere
+zu installieren kann die App halb ersetzt zurücklassen, so dass sie nicht mehr
+startet. Genau das ist einmal passiert — 2.4.0 startete nicht, lief aber
+einwandfrei, nachdem die Zwischenversionen der Reihe nach installiert worden
+waren, obwohl sich zwischen 2.3.0 und 2.4.0 am Schema nichts geändert hatte.
+
+Die Skripte leiten den Code deshalb aus der Version ab: `2.4.1` wird `20401`.
+Damit ist jede Version wirklich neuer als die vorige — und ältere lassen sich
+nicht mehr darüber installieren, ohne vorher zu deinstallieren. Das ist der
+Preis und er ist richtig herum.
 
 ## Versionsnummer in der App
 
