@@ -3,7 +3,8 @@ import 'dart:async';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/foundation.dart';
 
-/// The two short sounds a run gives back: one for right, one for wrong.
+/// The short sounds a run gives back: one for right, one for wrong, and a
+/// click under every key that actually did something.
 ///
 /// A tablet lying flat on the table swallows the vibration, and a child who
 /// is looking at the keypad rather than at the answer box misses the colour
@@ -17,6 +18,7 @@ class FeedbackSounds {
   /// very sound that is supposed to be immediate.
   final AudioPlayer _correct = AudioPlayer(playerId: 'mt-correct');
   final AudioPlayer _wrong = AudioPlayer(playerId: 'mt-wrong');
+  final AudioPlayer _key = AudioPlayer(playerId: 'mt-key');
   bool _ready = false;
 
   Future<void> warmUp() async {
@@ -25,8 +27,10 @@ class FeedbackSounds {
     try {
       await _correct.setReleaseMode(ReleaseMode.stop);
       await _wrong.setReleaseMode(ReleaseMode.stop);
+      await _key.setReleaseMode(ReleaseMode.stop);
       await _correct.setSource(AssetSource('sound/correct.wav'));
       await _wrong.setSource(AssetSource('sound/wrong.wav'));
+      await _key.setSource(AssetSource('sound/key.wav'));
     } catch (error) {
       // A device without working audio must not take the practice screen
       // down with it - the run matters, the sound does not.
@@ -49,8 +53,14 @@ class FeedbackSounds {
 
   void playWrong() => unawaited(_play(_wrong));
 
+  /// The click under a key. It fires far more often than the other two, so it
+  /// is the one that must never get in the way: 35 ms, no pitch to speak of,
+  /// and well under half their volume.
+  void playKey() => unawaited(_play(_key));
+
   Future<void> dispose() async {
     await _correct.dispose();
     await _wrong.dispose();
+    await _key.dispose();
   }
 }

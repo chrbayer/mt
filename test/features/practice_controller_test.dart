@@ -137,6 +137,95 @@ void main() {
     expect(controller.input, '8');
   });
 
+  group('a key press says whether it changed anything', () {
+    // The click under a key hangs off this. A key that did nothing must stay
+    // silent, or it tells the child the tap arrived when it did not.
+    test('a digit is taken, a fourth one is not', () {
+      expect(controller.pressDigit(1), isTrue);
+      expect(controller.pressDigit(2), isTrue);
+      expect(controller.pressDigit(3), isTrue);
+      expect(controller.pressDigit(4), isFalse);
+      expect(controller.input, '123');
+    });
+
+    test('a digit over a bare zero replaces it and counts', () {
+      controller.pressDigit(0);
+      expect(controller.pressDigit(7), isTrue);
+      expect(controller.input, '7');
+    });
+
+    test('backspace only counts while there is something to delete', () {
+      expect(controller.backspace(), isFalse);
+      controller.pressDigit(8);
+      expect(controller.backspace(), isTrue);
+      expect(controller.backspace(), isFalse);
+    });
+
+    test('backspace counts when it clears the red state', () {
+      type('12');
+      controller.submit();
+      expect(controller.backspace(), isTrue,
+          reason: 'the red box goes back to normal - that is a change');
+    });
+
+    test('nothing counts while the green flash is up', () {
+      type('85');
+      controller.submit();
+      expect(controller.pressDigit(1), isFalse);
+      expect(controller.backspace(), isFalse);
+    });
+
+    test('nothing counts while paused', () {
+      controller.pause();
+      expect(controller.pressDigit(1), isFalse);
+      expect(controller.backspace(), isFalse);
+    });
+
+    test('backspace out of the remainder box counts once', () {
+      final division = PracticeController(
+        lesson: lessonById('div_remainder'),
+        tasks: const [
+          Task(a: 17, b: 4, op: Operation.div, form: TaskForm.remainder),
+        ],
+        stopwatch: FakeStopwatch(),
+      );
+      division.pressDigit(4);
+      division.submit(); // moves to the remainder box
+      expect(division.activeField, AnswerField.second);
+      expect(division.backspace(), isTrue, reason: 'back to the quotient');
+      expect(division.activeField, AnswerField.primary);
+    });
+
+    test('a coin counts, and sweeping an empty pile does not', () {
+      final money = PracticeController(
+        lesson: lessonById('money_compose'),
+        tasks: const [
+          Task(a: 250, b: 0, op: Operation.add, form: TaskForm.moneyCompose),
+        ],
+        stopwatch: FakeStopwatch(),
+      );
+      expect(money.clearPieces(), isFalse);
+      expect(money.pressPiece(100), isTrue);
+      expect(money.backspace(), isTrue);
+      expect(money.clearPieces(), isFalse);
+      expect(money.pressPiece(50), isTrue);
+      expect(money.clearPieces(), isTrue);
+    });
+
+    test('picking a spoken form always counts, even the same one twice', () {
+      final phrase = PracticeController(
+        lesson: lessonById('clock_words'),
+        tasks: const [
+          Task(a: 9, b: 45, op: Operation.add, form: TaskForm.clockPhrase),
+        ],
+        stopwatch: FakeStopwatch(),
+      );
+      expect(phrase.pressPhrase(2), isTrue);
+      expect(phrase.pressPhrase(2), isTrue,
+          reason: 'a choice re-made is still a choice arriving');
+    });
+  });
+
   test('pausing stops the clock, resuming continues it', () {
     clock.advance(const Duration(seconds: 2));
     controller.pause();

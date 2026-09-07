@@ -201,9 +201,12 @@ antreten. Die App läuft vollständig offline, ohne Konten und ohne Netzwerk.
   einzelner Ton bei falsch. Zusammen mit Farbe und Vibration die dritte
   Rückmeldung — ein Kind, das auf die Tastatur schaut statt aufs Antwortfeld,
   bekommt sonst nur eine davon, und ein flach liegendes Tablet schluckt die
-  Vibration. Im Elternbereich abschaltbar. Die Töne sind von
-  `tool/make_sounds.py` erzeugt, nicht heruntergeladen: zwei Sinustöne sind
-  ein paar Zeilen Mathematik und wiegen zusammen 20 kB.
+  Vibration. Dazu ein **leiser Klick unter jeder Taste**, aber nur, wenn die
+  Eingabe wirklich angenommen wurde: die vierte Ziffer, die nicht mehr ins
+  Feld passt, und die Rücktaste im leeren Feld bleiben stumm. Der grüne Haken
+  klickt nicht — dort sagen die beiden anderen Töne schon mehr.
+  Im Elternbereich abschaltbar. Die Töne sind von `tool/make_sounds.py`
+  erzeugt, nicht heruntergeladen: ein paar Zeilen Mathematik, zusammen 25 kB.
 * **Fertige Lektionen ausblenden**: bei 75 Lektionen ist die Liste lang, und
   das meiste, woran ein Kind vorbeiscrollt, sitzt längst. Der Filter oben im
   Katalog kürzt sie in zwei Stufen — **mit 3 Sternen** verschwindet, was

@@ -201,9 +201,9 @@ class _PracticeScreenState extends ConsumerState<PracticeScreen>
         labels: [for (final cents in moneyPieces) formatPiece(cents)],
         enabled: enabled,
         haptics: haptics,
-        onChoice: (index) => controller.pressPiece(moneyPieces[index]),
-        onBackspace: controller.backspace,
-        onClear: controller.clearPieces,
+        onChoice: (index) => _key(() => controller.pressPiece(moneyPieces[index])),
+        onBackspace: () => _key(controller.backspace),
+        onClear: () => _key(controller.clearPieces),
         onSubmit: _submit,
       );
     }
@@ -215,17 +215,31 @@ class _PracticeScreenState extends ConsumerState<PracticeScreen>
             controller.input.isEmpty ? null : int.parse(controller.input),
         enabled: enabled,
         haptics: haptics,
-        onChoice: controller.pressPhrase,
+        onChoice: (index) => _key(() => controller.pressPhrase(index)),
         onSubmit: _submit,
       );
     }
     return BigKeypad(
       enabled: enabled,
       haptics: haptics,
-      onDigit: controller.pressDigit,
-      onBackspace: controller.backspace,
+      onDigit: (digit) => _key(() => controller.pressDigit(digit)),
+      onBackspace: () => _key(controller.backspace),
       onSubmit: _submit,
     );
+  }
+
+  /// Runs one key action and clicks if it actually did something.
+  ///
+  /// Not every press is an input: the tenth digit, a backspace on an empty
+  /// box, anything tapped while the green flash is still up. A click there
+  /// would tell the child the tap arrived when it did not - the silence is
+  /// the answer. The green key is excluded from this entirely; it has its
+  /// own two sounds and says far more than "angekommen".
+  void _key(bool Function() action) {
+    if (!action()) return;
+    if (ref.read(preferencesProvider).value?.sounds ?? true) {
+      _sounds.playKey();
+    }
   }
 
   void _submit() {

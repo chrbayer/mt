@@ -405,10 +405,29 @@ standardmäßig an.
 Die WAV-Dateien erzeugt `tool/make_sounds.py`. Wer sie ändern will, ändert die
 Noten dort und lässt das Skript neu laufen — nicht die Dateien bearbeiten.
 
-`FeedbackSounds` hält beide Abspieler vorgeladen: einen erst beim ersten
+`FeedbackSounds` hält alle Abspieler vorgeladen: einen erst beim ersten
 Fehler zu erzeugen verzögert genau den Ton, der sofort kommen soll. Jeder
 Fehler beim Laden oder Abspielen wird geschluckt und nur geloggt — auf einem
 Gerät ohne funktionierendes Audio darf der Durchgang nicht mitfallen.
+
+## Der Klick unter der Taste
+
+Dazu kommt ein dritter Ton, aber kein Urteil: 35 ms, ohne erkennbare Tonhöhe
+und mit 41 % der Lautstärke der Rückmeldung. Er kommt bis zu fünfzigmal je
+Aufgabe und darf deshalb nichts behaupten — er bestätigt nur, dass die Taste
+angekommen ist. Der grüne Haken bekommt ihn **nicht**: dort sagen schon zwei
+Töne etwas viel Wichtigeres.
+
+Er klingt nur, wenn die Eingabe **angenommen** wurde. Deshalb geben
+`pressDigit`, `pressPhrase`, `pressPiece`, `clearPieces` und `backspace` ein
+`bool` zurück, und `PracticeScreen._key` hängt den Ton daran. Ob eine vierte
+Ziffer, eine Rücktaste im leeren Feld oder ein Tipp während des grünen
+Aufblitzens etwas bewirkt hat, weiß nur der Controller — und ein Klick, der
+trotzdem käme, meldete dem Kind ein Ankommen, das nicht stattgefunden hat.
+
+Die **Vibration** folgt dieser Regel nicht: sie sitzt im Tastatur-Widget und
+kommt bei jedem Druck. Das ist so geblieben, weil ein Finger auf einer Taste
+etwas anderes ist als eine Zahl im Feld.
 
 ## Nicht gewertete Lektionen
 

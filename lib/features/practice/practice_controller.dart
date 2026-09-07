@@ -100,8 +100,12 @@ class PracticeController extends ChangeNotifier {
     }
   }
 
-  void pressDigit(int digit) {
-    if (!_acceptsInput) return;
+  /// All the key methods return whether the press **changed anything**. A
+  /// tenth digit, a backspace on an empty box, a tap while the green flash is
+  /// still up: those are pressed keys that did nothing, and the screen owes
+  /// them no click. Only the controller can tell the difference.
+  bool pressDigit(int digit) {
+    if (!_acceptsInput) return false;
     // Typing right after a mistake is allowed and clears the red state - the
     // child should not have to wait out an animation.
     if (_feedback == AnswerFeedback.wrong) _feedback = AnswerFeedback.none;
@@ -110,47 +114,52 @@ class PracticeController extends ChangeNotifier {
     if (_active == '0') {
       _setActive('$digit');
     } else {
-      if (_active.length >= maxInputDigits) return;
+      if (_active.length >= maxInputDigits) return false;
       _setActive('$_active$digit');
     }
     notifyListeners();
+    return true;
   }
 
   /// Taps one of the spoken forms. It replaces whatever was chosen before -
   /// there is nothing to append to, so there is nothing to delete either.
-  void pressPhrase(int index) {
-    if (!_acceptsInput) return;
+  bool pressPhrase(int index) {
+    if (!_acceptsInput) return false;
     if (_feedback == AnswerFeedback.wrong) _feedback = AnswerFeedback.none;
     _field = AnswerField.primary;
     _input = '$index';
     notifyListeners();
+    return true;
   }
 
   /// Lays down one coin or note. The answer to such a task is not a typed
   /// number but the pile itself, so the box shows the running total.
-  void pressPiece(int cents) {
-    if (!_acceptsInput) return;
+  bool pressPiece(int cents) {
+    if (!_acceptsInput) return false;
     if (_feedback == AnswerFeedback.wrong) _feedback = AnswerFeedback.none;
     _pieces.add(cents);
     _input = '${_pieces.fold<int>(0, (sum, c) => sum + c)}';
     notifyListeners();
+    return true;
   }
 
   /// Sweeps the whole pile away at once.
   ///
   /// Taking six coins off one at a time to start over is six taps of the same
   /// key, and a child who has lost count wants to start over, not to undo.
-  void clearPieces() {
-    if (!_acceptsInput || _pieces.isEmpty) return;
+  bool clearPieces() {
+    if (!_acceptsInput || _pieces.isEmpty) return false;
     if (_feedback == AnswerFeedback.wrong) _feedback = AnswerFeedback.none;
     _pieces.clear();
     _input = '';
     notifyListeners();
+    return true;
   }
 
-  void backspace() {
-    if (!_acceptsInput) return;
-    if (_feedback == AnswerFeedback.wrong) _feedback = AnswerFeedback.none;
+  bool backspace() {
+    if (!_acceptsInput) return false;
+    final wasRed = _feedback == AnswerFeedback.wrong;
+    if (wasRed) _feedback = AnswerFeedback.none;
     // A pile is taken apart piece by piece, not digit by digit: deleting a
     // digit off the total would leave an amount nobody laid down.
     if (_pieces.isNotEmpty) {
@@ -159,16 +168,22 @@ class PracticeController extends ChangeNotifier {
           ? ''
           : '${_pieces.fold<int>(0, (sum, c) => sum + c)}';
       notifyListeners();
-      return;
+      return true;
     }
+    var changed = wasRed;
     if (_active.isEmpty) {
       // Backing out of the empty remainder box returns to the quotient, so a
       // mistyped first number can still be corrected.
-      if (_field == AnswerField.second) _field = AnswerField.primary;
+      if (_field == AnswerField.second) {
+        _field = AnswerField.primary;
+        changed = true;
+      }
     } else {
       _setActive(_active.substring(0, _active.length - 1));
+      changed = true;
     }
     notifyListeners();
+    return changed;
   }
 
   /// Checks the typed number. Returns the resulting feedback so the screen can

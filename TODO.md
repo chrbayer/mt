@@ -66,3 +66,5 @@ review-Parameter. Bei "Uhrzeit sagen" kommen in zehn Aufgaben zehn der elf
 Formen dran — ausgerechnet die schwerste kann die fehlende sein. Ein Vorrat
 könnte die Wiedervorlage-Formen an den Anfang des Blocks ziehen, statt sie zu
 verwerfen.
+
+#14 Abbruch einer Übung hat über einen kurz sichtbaren Pausenscreen geführt.

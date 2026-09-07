@@ -54,8 +54,9 @@ class GlobalSettingsTab extends ConsumerWidget {
           onChanged: preferences == null ? null : repository.setSounds,
           title: const Text('Töne abspielen', style: TextStyle(fontSize: 24)),
           subtitle: const Text(
-            'Ein kurzer Klang bei richtig und ein anderer bei falsch. Auf '
-            'einem flach liegenden Tablet spürt man die Vibration kaum.',
+            'Ein kurzer Klang bei richtig, ein anderer bei falsch und ein '
+            'leiser Klick unter jeder Taste. Auf einem flach liegenden '
+            'Tablet spürt man die Vibration kaum.',
             style: TextStyle(fontSize: 18),
           ),
         ),
