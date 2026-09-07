@@ -21,6 +21,25 @@ class FeedbackSounds {
   final AudioPlayer _key = AudioPlayer(playerId: 'mt-key');
   bool _ready = false;
 
+  FeedbackSounds() {
+    // No position polling. Every player starts life with a
+    // [FramePositionUpdater] that asks the platform for the playback position
+    // **once per frame** while a sound is running, plus once more on every
+    // stop. Nothing here draws a progress bar - the sounds are between 35 and
+    // 300 ms long - so all of that is pure traffic on the channel.
+    //
+    // On Linux it is worse than waste. Each poll is a GStreamer position query
+    // on the same thread that performs the playback state changes, and the
+    // updater restarts its frame-callback chain on every resume without
+    // reliably ending the previous one: after a few dozen key presses several
+    // chains poll in parallel, and the resume that should start the next
+    // click queues up behind them. That is what "der Ton verschwindet" looks
+    // like from the outside.
+    _correct.positionUpdater = null;
+    _wrong.positionUpdater = null;
+    _key.positionUpdater = null;
+  }
+
   /// Why the sound is not working, if it is not.
   ///
   /// Kept rather than only logged: "der Ton geht nicht" is impossible to act
@@ -82,6 +101,29 @@ class FeedbackSounds {
   /// is the one that must never get in the way: 35 ms, no pitch to speak of,
   /// and well under half their volume.
   void playKey() => unawaited(_play(_key));
+
+  /// Plays the click [plays] times and reports how many actually finished.
+  ///
+  /// A completion event only arrives for a sound that really ran, so this
+  /// measures the symptom instead of asking somebody to listen carefully:
+  /// "8 von 10" says something, "der Ton geht nicht" does not.
+  Future<({int played, int expected})> selfTest({int plays = 10}) async {
+    if (!await warmUp()) return (played: 0, expected: plays);
+
+    var completed = 0;
+    final subscription = _key.onPlayerComplete.listen((_) => completed++);
+    try {
+      for (var i = 0; i < plays; i++) {
+        playKey();
+        await Future<void>.delayed(const Duration(milliseconds: 200));
+      }
+      // The last one still needs its moment to finish and report.
+      await Future<void>.delayed(const Duration(milliseconds: 250));
+    } finally {
+      await subscription.cancel();
+    }
+    return (played: completed, expected: plays);
+  }
 
   Future<void> dispose() async {
     await _correct.dispose();

@@ -418,12 +418,29 @@ standardmäßig an.
 Die WAV-Dateien erzeugt `tool/make_sounds.py`. Wer sie ändern will, ändert die
 Noten dort und lässt das Skript neu laufen — nicht die Dateien bearbeiten.
 
+`FeedbackSounds` schaltet bei jedem Abspieler den **`positionUpdater` ab**.
+Jeder `AudioPlayer` fragt sonst über einen `FramePositionUpdater` die
+Abspielposition **einmal pro Bild** ab, solange ein Ton läuft, und einmal
+zusätzlich bei jedem `stop()`. Hier zeichnet niemand einen Fortschrittsbalken
+— die Töne sind 35 bis 300 ms lang —, also ist das reiner Verkehr auf dem
+Kanal.
+
+Unter Linux ist es mehr als Verschwendung: jede Abfrage ist eine
+GStreamer-Positionsabfrage auf demselben Thread, der die Zustandswechsel der
+Wiedergabe ausführt, und der Updater startet seine Frame-Callback-Kette bei
+jedem `resume()` neu, ohne die vorige zuverlässig zu beenden. Nach ein paar
+Dutzend Tastendrücken fragen mehrere Ketten parallel, und das `resume()`, das
+den nächsten Klick starten soll, steht hinter ihnen in der Schlange. Von
+außen sieht das so aus, als verschwände der Ton.
+
 `FeedbackSounds` merkt sich seinen letzten Fehler (`lastError`), statt ihn nur
 zu loggen: auf einem Tablet gibt es keine Konsole, und „der Ton geht nicht"
 lässt sich ohne den Fehlertext nicht bearbeiten. Der Knopf **Ton testen** im
-Elternbereich spielt alle vier Töne nacheinander — Klick, richtig, falsch,
-Klick — und zeigt sonst genau diesen Text. Vier statt einem, weil ein Fehler
-schon einmal genau so aussah: der erste Ton kam, alle weiteren nicht.
+Elternbereich spielt den Klick **zehnmal** und zählt über
+`onPlayerComplete`, wie viele davon wirklich gelaufen sind — ein
+Abschlussereignis kommt nur für einen Ton, der tatsächlich lief. „8 von 10"
+sagt etwas, „der Ton geht nicht" nicht. Genau diese Fehlerform ist zweimal
+aufgetreten: die ersten Töne kommen, die späteren nicht mehr.
 
 `FeedbackSounds` hält alle Abspieler vorgeladen: einen erst beim ersten
 Fehler zu erzeugen verzögert genau den Ton, der sofort kommen soll. Jeder

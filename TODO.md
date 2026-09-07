@@ -74,3 +74,5 @@ verwerfen.
 #16 erledigt (2.4.7) — Um zu verhindern, dass man bei leichten Übungen nur auf Geschwindigkeit geht, ein konfigurierbateres Maximum Sterne pro Übung pro Tag einführen, einstellbar im Elternbereich die die Zeiten auch
 
 #17 erledigt (2.5.0) — Im Elternbereich, Übungsverlauf: Knopf zum Aufräumen unvollständiger Übungsläufe, nur für ausgewählte Version. Das und auch das normale Löschen einer Übung darf die Bestenliste und STerne/Blitze beeinflussen, aber nicht die verbrauchte Zeit. Version 2.5.0
+
+#18 Grüner Knopf für Pineingabe unnötig: Entwerder Eingabe abwarten oder nicht mehr anzeigen.
