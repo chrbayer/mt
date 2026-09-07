@@ -50,6 +50,44 @@ class ShortRunHint extends StatelessWidget {
   }
 }
 
+/// Says that this lesson has used up its scoring for today.
+///
+/// The lesson can still be practised - that is the point, and the button
+/// stays live. What it no longer does is set a best time or hand out stars
+/// and bolts, and a rule that quietly stops counting is exactly the kind of
+/// thing that has to be said out loud.
+class UsedUpTodayHint extends StatelessWidget {
+  /// How often this lesson counted today. Named rather than implied: "schon
+  /// 3-mal" is a different sentence from "du darfst nicht mehr".
+  final int scoredToday;
+
+  final double fontSize;
+
+  const UsedUpTodayHint({
+    super.key,
+    required this.scoredToday,
+    this.fontSize = 18,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Icon(Icons.check_circle_outline,
+            size: fontSize * 1.2, color: AppColors.profile1),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            'Heute schon $scoredToday× gewertet - üben geht weiter, '
+            'zählen nicht mehr.',
+            style: TextStyle(fontSize: fontSize, color: AppColors.profile1),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 /// Says how much practice time is left before the next break.
 ///
 /// Shown where the run is chosen, because that is where it changes a

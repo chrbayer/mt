@@ -32,7 +32,17 @@ class ResultScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final stars = starsFor(wrongAttempts, taskCount, scored: lesson.scored);
+    // Whether this run was allowed to earn anything. Read from the stored
+    // session rather than worked out again: the decision was made when the
+    // run finished, against the cap as it stood then.
+    final counted = sessionId == null ||
+        (ref.watch(sessionScoredProvider(sessionId!)).value ?? true);
+
+    // Shown as nothing when it counted for nothing. The same line a run
+    // under ten tasks already follows: three golden stars beside "zählt
+    // nicht" would be two answers to the same question.
+    final stars =
+        counted ? starsFor(wrongAttempts, taskCount, scored: lesson.scored) : 0;
     // One time, everywhere: what is shown here is what the leaderboard ranks
     // and what the learning curve plots. A second, penalty-free number would
     // only read as a contradiction.
@@ -41,13 +51,28 @@ class ResultScreen extends ConsumerWidget {
     final penalty = scoredTotal - totalMs;
     // Two axes, deliberately: stars say how carefully this run went, bolts
     // how fast. A child who is careful but slow still gets three stars.
-    final bolts = boltsFor(lesson.targetMsPerTask, perTask, taskCount);
-    final nextBolt = nextBoltTargetMs(lesson.targetMsPerTask, bolts);
+    final bolts =
+        counted ? boltsFor(lesson.targetMsPerTask, perTask, taskCount) : 0;
+    // No next bolt to chase either: this run cannot earn one however fast it
+    // was, and naming a target would be an invitation to run it again.
+    final nextBolt =
+        counted ? nextBoltTargetMs(lesson.targetMsPerTask, bolts) : null;
     final user = ref.watch(activeUserProvider);
     final gate = ref.watch(practiceGateProvider);
     final streak = user == null
         ? 0
         : ref.watch(streaksProvider).value?[user.id] ?? 0;
+
+    final capToday = user == null || counted
+        ? null
+        : ref
+            .watch(scoredRunsTodayProvider(
+              (userId: user.id, lessonId: lesson.id),
+            ))
+            .value;
+    // Only when the cap is what stopped it - an abandoned run is not scored
+    // either, and it does not reach this screen with something to explain.
+    final usedUpToday = capToday?.used;
 
     return Scaffold(
       body: SafeArea(
@@ -182,8 +207,20 @@ class ResultScreen extends ConsumerWidget {
                 ),
               // The extra line takes the space the gap below would have had:
               // this column has no room to grow, and the explanation is
-              // worth more than the air.
-              if (taskCount < minTasksForAward && lesson.scored) ...[
+              // worth more than the air. One line at most, so the two share
+              // the slot - and "did not count today" outranks "too short",
+              // because it is the one the child could not have foreseen.
+              if (usedUpToday != null) ...[
+                const SizedBox(height: 10),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 40),
+                  child: UsedUpTodayHint(
+                    scoredToday: usedUpToday,
+                    fontSize: 17,
+                  ),
+                ),
+                const SizedBox(height: 6),
+              ] else if (taskCount < minTasksForAward && lesson.scored) ...[
                 const SizedBox(height: 10),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 40),

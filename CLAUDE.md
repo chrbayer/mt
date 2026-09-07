@@ -666,6 +666,41 @@ Die Migration auf v6 setzt genau die Werte auf NULL, die v5 selbst vergeben
 hat (0 / 15 / 0). Was ein Elternteil tatsächlich gewählt hat, bleibt stehen —
 alles andere hätte eine bewusste Entscheidung stillschweigend überschrieben.
 
+## Wie oft eine Übung am Tag zählt
+
+Sterne stehen für Sorgfalt, Blitze fürs Tempo — beides ließ sich aber
+erarbeiten, indem man die leichteste Lektion so lange wiederholte, bis die
+Zeit stimmte oder kein Fehler mehr passierte. Dagegen steht ein Deckel:
+`scoredRunsPerLesson` sagt, wie viele Durchgänge **einer Lektion an einem
+Tag** noch etwas einbringen dürfen. Vorgabe drei, null heißt kein Deckel.
+
+Der Deckel sperrt **nichts**. Dieselbe Übung darf weiter gemacht werden, sie
+zählt zur geübten Zeit, steht im Verlauf und erhöht „12× geübt" auf der
+Kachel. Was sie nicht mehr tut: eine Bestzeit setzen, Sterne oder Blitze
+vergeben, in eine Bestenliste kommen. Üben zu verbieten wäre die falsche
+Antwort auf zu viel Üben.
+
+Entschieden wird **einmal, beim Speichern**, und in `sessions.scored`
+festgehalten. Später neu zu rechnen bräuchte den Deckel, wie er an jenem Tag
+stand — und Eltern dürfen ihn morgen ändern. Abgebrochene Durchgänge sind nie
+gewertet und verbrauchen deshalb auch keinen Platz.
+
+In den Abfragen ist die Trennung genau die zwischen **Rekord und Tatsache**:
+`best_score` und `best_bolts` in `watchLessonStats`, beide Bestenlisten und
+`watchBoltTotals` sehen nur gewertete Läufe; `runs`, Durchschnitt,
+Fehlerquote, geübte Zeit, Verlauf und Serie sehen alle. Ein Lauf über dem
+Deckel hat wirklich stattgefunden.
+
+Die Sterne hängen nicht am SQL, sondern an `_awardStars`, das nur noch bei
+`scored` läuft. Ein perfekter vierter Lauf hebt den Stand also nicht.
+
+Gesagt wird es an beiden Stellen, an denen es eine Entscheidung ändert: im
+Startdialog teilt sich `UsedUpTodayHint` den Platz mit Blitzziel und
+Kurzlauf-Hinweis (der Dialog darf nicht wachsen), und auf dem
+Ergebnisbildschirm stehen dann **null Sterne und null Blitze** — dieselbe
+Linie, die ein zu kurzer Lauf schon zieht. Drei goldene Sterne neben „zählt
+nicht" wären zwei Antworten auf dieselbe Frage.
+
 ## Mindestlänge für eine Wertung
 
 `minTasksForAward` (10) gilt für **Bestenliste, Sterne und Blitze**

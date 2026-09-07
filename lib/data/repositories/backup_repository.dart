@@ -70,6 +70,7 @@ class BackupRepository {
             'breakMinutes': user.breakMinutes,
             'dailyLimitMinutes': user.dailyLimitMinutes,
             'lessonFilter': user.lessonFilter,
+            'scoredRunsPerLesson': user.scoredRunsPerLesson,
           }
       ],
       'sessions': [
@@ -85,6 +86,7 @@ class BackupRepository {
             'totalMs': session.totalMs,
             'wrongAttempts': session.wrongAttempts,
             'completed': session.completed,
+            'scored': session.scored,
           }
       ],
       'attempts': [
@@ -197,6 +199,8 @@ class BackupRepository {
                 // the safe reading of that.
                 lessonFilter:
                     Value(user['lessonFilter'] as String? ?? 'all'),
+                scoredRunsPerLesson:
+                    Value(user['scoredRunsPerLesson'] as int?),
               ),
             );
       }
@@ -213,6 +217,8 @@ class BackupRepository {
                 totalMs: Value(session['totalMs'] as int? ?? 0),
                 wrongAttempts: Value(session['wrongAttempts'] as int? ?? 0),
                 completed: Value(session['completed'] as bool? ?? false),
+                // An older backup knew no cap, so everything in it counted.
+                scored: Value(session['scored'] as bool? ?? true),
               ),
             );
       }

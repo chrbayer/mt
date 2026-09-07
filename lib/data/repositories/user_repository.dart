@@ -98,6 +98,12 @@ class UserRepository {
         ),
       );
 
+  /// Sets how many runs of one lesson may still earn something in a day for
+  /// this child. Null means "as for everyone", zero means no cap.
+  Future<void> setScoredRunsPerLesson(int id, int? runs) =>
+      (_db.update(_db.users)..where((u) => u.id.equals(id)))
+          .write(UsersCompanion(scoredRunsPerLesson: Value(runs)));
+
   /// Turns the review of previously difficult tasks on or off for one child.
   Future<void> setReviewHardTasks(int id, bool value) =>
       (_db.update(_db.users)..where((u) => u.id.equals(id)))

@@ -268,6 +268,76 @@ void main() {
     );
   });
 
+  group('the daily cap on scored runs', () {
+    /// The lesson [openSheet] opens - taken from the catalogue rather than
+    /// written down, because the title is what the tap actually finds.
+    final sheetLesson = lessonCatalog
+        .firstWhere((l) => l.title == 'Plus mit Zehnerübergang')
+        .id;
+
+    /// One completed run of the lesson the start sheet opens.
+    Future<void> countedRun() async {
+      final user = container.read(activeUserProvider)!;
+      final sessions = container.read(sessionRepositoryProvider);
+      final now = DateTime.now();
+      final id = await sessions.startSession(
+        userId: user.id,
+        lessonId: sheetLesson,
+        taskCount: 10,
+        seed: 1,
+      );
+      await sessions.finishSession(
+        sessionId: id,
+        completed: true,
+        scoredRunLimit: 3,
+        dayStartMs:
+            DateTime(now.year, now.month, now.day).millisecondsSinceEpoch,
+        results: [
+          for (var i = 0; i < 10; i++)
+            const TaskResult(
+              task:
+                  Task(a: 47, b: 38, op: Operation.add, form: TaskForm.result),
+              elapsedMs: 3000,
+              wrongAttempts: 0,
+            ),
+        ],
+      );
+    }
+
+    testWidgets('says nothing while there are runs left', (tester) async {
+      await countedRun();
+      await countedRun();
+      await pumpHome(tester);
+      await openSheet(tester);
+
+      expect(find.textContaining('gewertet'), findsNothing);
+      // The slot still carries what three bolts take.
+      expect(find.textContaining('pro Aufgabe'), findsOneWidget);
+    });
+
+    testWidgets('and says so once the lesson has counted three times',
+        (tester) async {
+      // A rule that quietly stops counting is exactly what must be said.
+      for (var i = 0; i < 3; i++) {
+        await countedRun();
+      }
+      await pumpHome(tester);
+      await openSheet(tester);
+
+      expect(find.textContaining('Heute schon 3× gewertet'), findsOneWidget);
+      // It takes the slot rather than adding a line - the sheet must not grow.
+      expect(find.textContaining('pro Aufgabe'), findsNothing);
+      // Practising is still allowed; only the counting stopped.
+      final start = tester.widget<FilledButton>(
+        find.ancestor(
+          of: find.text("Los geht's"),
+          matching: find.byType(FilledButton),
+        ),
+      );
+      expect(start.onPressed, isNotNull);
+    });
+  });
+
   testWidgets('the very first lesson is the gentlest one', (tester) async {
     await pumpHome(tester);
 

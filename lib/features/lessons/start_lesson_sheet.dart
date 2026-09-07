@@ -67,6 +67,19 @@ class _StartLessonSheetState extends ConsumerState<StartLessonSheet> {
     // sits in the practice screen; this one only greys the button out.
     final gate = ref.watch(practiceGateProvider);
 
+    // How often this lesson already counted today, but only when it may not
+    // count again - while there is scoring left there is nothing to warn
+    // about, and the slot below says what three bolts take instead.
+    final capToday = user == null
+        ? null
+        : ref
+            .watch(scoredRunsTodayProvider(
+              (userId: user.id, lessonId: widget.lesson.id),
+            ))
+            .value;
+    final usedUpToday =
+        capToday != null && capToday.left <= 0 ? capToday.used : null;
+
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(40, 8, 40, 28),
       child: Column(
@@ -132,37 +145,41 @@ class _StartLessonSheetState extends ConsumerState<StartLessonSheet> {
                 ),
             ],
           ),
-          // One line, one slot: either what three bolts take, or that this
-          // run is too short to be worth any. The two never apply at once -
-          // under ten tasks there are no bolts to earn - and sharing the
-          // slot is what keeps the sheet from growing and shrinking under a
-          // finger on its way to a button.
+          // One line, one slot: what three bolts take, or that this run is
+          // too short to be worth any, or that this lesson has already
+          // counted as often today as it may. Never two at once, and sharing
+          // the slot is what keeps the sheet from growing and shrinking under
+          // a finger on its way to a button.
           if (count != null && widget.lesson.targetMsPerTask > 0)
             Padding(
               padding: const EdgeInsets.only(top: 14),
               child: SizedBox(
                 height: 30,
-                child: count < minTasksForAward
-                    ? ShortRunHint(
-                        taskCount: count,
-                        scored: widget.lesson.scored,
-                        fontSize: 17,
-                      )
-                    : Row(
-                        children: [
-                          const BoltRow(earned: maxBolts, size: 26),
-                          const SizedBox(width: 10),
-                          Text(
-                            'ab ${formatPerTask(
-                              widget.lesson.targetMsPerTask.toDouble(),
-                            )} pro Aufgabe',
-                            style: const TextStyle(
-                              fontSize: 19,
-                              color: AppColors.textMuted,
-                            ),
+                // The daily cap comes first: no choice on this sheet changes
+                // it, a shorter or longer run counts just as little.
+                child: usedUpToday != null
+                    ? UsedUpTodayHint(scoredToday: usedUpToday, fontSize: 17)
+                    : count < minTasksForAward
+                        ? ShortRunHint(
+                            taskCount: count,
+                            scored: widget.lesson.scored,
+                            fontSize: 17,
+                          )
+                        : Row(
+                            children: [
+                              const BoltRow(earned: maxBolts, size: 26),
+                              const SizedBox(width: 10),
+                              Text(
+                                'ab ${formatPerTask(
+                                  widget.lesson.targetMsPerTask.toDouble(),
+                                )} pro Aufgabe',
+                                style: const TextStyle(
+                                  fontSize: 19,
+                                  color: AppColors.textMuted,
+                                ),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
               ),
             ),
           if (gate.pause == null && widget.lesson.scored)

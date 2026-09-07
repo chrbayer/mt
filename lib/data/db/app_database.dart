@@ -59,6 +59,10 @@ class Users extends Table {
   /// silently turn one setting into another.
   TextColumn get lessonFilter =>
       text().withDefault(const Constant('all'))();
+
+  /// How many runs of one lesson may earn something on one day. Null takes
+  /// the app-wide setting, zero means this child has no cap.
+  IntColumn get scoredRunsPerLesson => integer().nullable()();
 }
 
 /// What one child last chose for one lesson.
@@ -114,6 +118,16 @@ class Sessions extends Table {
 
   /// Only completed runs count for statistics and leaderboards.
   BoolColumn get completed => boolean().withDefault(const Constant(false))();
+
+  /// Whether this run was allowed to earn anything: a best time, stars,
+  /// bolts, a place in the ranking. Runs past the daily cap for their lesson
+  /// are stored with this false - they are practice, and they count towards
+  /// the day's time, but they set no records.
+  ///
+  /// Decided once, when the run finishes, and stored: working it out again
+  /// later would need the cap as it stood that day, and a parent may change
+  /// it tomorrow.
+  BoolColumn get scored => boolean().withDefault(const Constant(true))();
 }
 
 /// One task within a session - the basis for "which calculations are slow?".
@@ -153,7 +167,7 @@ class AppDatabase extends _$AppDatabase {
       : super(executor ?? driftDatabase(name: 'mathe_trainer'));
 
   @override
-  int get schemaVersion => 8;
+  int get schemaVersion => 9;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -176,11 +190,14 @@ class AppDatabase extends _$AppDatabase {
           // v6 lets the caps be set once for everyone, so a profile may now
           // say "as for everyone" (null) as well as "none" (zero).
           if (from < 6) {
-            // The rebuild takes the table as it looks *now*, so the column
-            // that v7 adds comes along for the ride and has to be declared
+            // The rebuild takes the table as it looks *now*, so every column
+            // added after v6 comes along for the ride and has to be declared
             // as new - otherwise the copy looks for it in the old table.
             await m.alterTable(
-              TableMigration(users, newColumns: [users.lessonFilter]),
+              TableMigration(users, newColumns: [
+                users.lessonFilter,
+                users.scoredRunsPerLesson,
+              ]),
             );
             // A profile still carrying what v5 handed it never had a decision
             // made about it, so it follows the app-wide setting from now on.
@@ -205,6 +222,15 @@ class AppDatabase extends _$AppDatabase {
           if (from < 8) {
             await m.createTable(lessonStars);
             await _carryStarsOver(m.database);
+          }
+          // v9 caps how many runs of one lesson may earn something in a day.
+          // Everything already in the database was earned under no cap and
+          // keeps counting: the column's default of true is exactly right,
+          // and nobody loses a best time to a rule made after the fact.
+          if (from < 9) {
+            // Only where the v6 rebuild above did not already bring it along.
+            if (from >= 6) await m.addColumn(users, users.scoredRunsPerLesson);
+            await m.addColumn(sessions, sessions.scored);
           }
         },
         beforeOpen: (details) async {

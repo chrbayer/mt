@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 
-/// Picks a number of minutes, with an optional "same as everyone".
+/// Picks one number out of a few, with an optional "same as everyone".
 ///
 /// Used for the app-wide limits and for a single child's, so the two always
-/// look and behave the same - the twin of [TaskCountChoice] for times.
-class MinutesChoice extends StatelessWidget {
+/// look and behave the same - the twin of [TaskCountChoice]. It started out
+/// as a minute picker and stayed generic when the daily cap on scored runs
+/// needed exactly the same two levels with a different unit.
+class AmountChoice extends StatelessWidget {
   /// The chosen value, or null when this level inherits.
   final int? value;
 
@@ -24,7 +26,11 @@ class MinutesChoice extends StatelessWidget {
   /// a limit of zero means there is none.
   final String? zeroLabel;
 
-  const MinutesChoice({
+  /// How a value reads. Minutes by default, because that is what most of
+  /// these rows are.
+  final String Function(int)? labelFor;
+
+  const AmountChoice({
     super.key,
     required this.value,
     required this.options,
@@ -32,10 +38,12 @@ class MinutesChoice extends StatelessWidget {
     this.inherited,
     this.allowInherit = false,
     this.zeroLabel = 'ohne Grenze',
+    this.labelFor,
   });
 
-  String _label(int minutes) =>
-      minutes == 0 ? (zeroLabel ?? '0 min') : '$minutes min';
+  String _label(int value) => value == 0
+      ? (zeroLabel ?? (labelFor?.call(0) ?? '0 min'))
+      : (labelFor?.call(value) ?? '$value min');
 
   @override
   Widget build(BuildContext context) {

@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 
 import '../../domain/lesson.dart';
+import '../../domain/practice_limit.dart';
 import '../../domain/scoring.dart';
 import '../../domain/task.dart';
 import '../db/app_database.dart';
@@ -30,13 +31,30 @@ class SessionRepository {
             ),
           );
 
+  /// Stores the finished run.
+  ///
+  /// [scoredRunLimit] is how many runs of this lesson may still earn
+  /// something today; zero means no cap. [dayStartMs] says when that day
+  /// began - handed in rather than taken from SQL's `now` for the same reason
+  /// the practice caps do it: the app has one clock, and a rule that turns
+  /// over at midnight has to be testable at any time of day.
   Future<void> finishSession({
     required int sessionId,
     required List<TaskResult> results,
     required bool completed,
+    int scoredRunLimit = 0,
+    int dayStartMs = 0,
   }) async {
     final totalMs = results.fold<int>(0, (sum, r) => sum + r.elapsedMs);
     final wrong = results.fold<int>(0, (sum, r) => sum + r.wrongAttempts);
+
+    // An abandoned run never counted anyway, so it neither earns nor uses up
+    // one of the day's scoring slots.
+    final scored = completed &&
+        runStillCounts(
+          limit: scoredRunLimit,
+          scoredToday: await _scoredToday(sessionId, dayStartMs),
+        );
 
     await _db.transaction(() async {
       await _db.batch((batch) {
@@ -63,14 +81,33 @@ class SessionRepository {
           totalMs: Value(totalMs),
           wrongAttempts: Value(wrong),
           completed: Value(completed),
+          scored: Value(scored),
           // An abandoned run is stored with the number of tasks actually done,
           // otherwise its per-task averages would be meaningless.
           taskCount: completed ? const Value.absent() : Value(results.length),
         ),
       );
 
-      if (completed) await _awardStars(sessionId, wrong, results.length);
+      if (scored) await _awardStars(sessionId, wrong, results.length);
     });
+  }
+
+  /// How many runs of this session's lesson already counted today, for this
+  /// child. The session being finished is excluded - it has not been marked
+  /// yet, and counting itself would make the cap one too small.
+  Future<int> _scoredToday(int sessionId, int dayStartMs) async {
+    final session = await sessionById(sessionId);
+    if (session == null) return 0;
+    final rows = await (_db.select(_db.sessions)
+          ..where((s) =>
+              s.userId.equals(session.userId) &
+              s.lessonId.equals(session.lessonId) &
+              s.completed.equals(true) &
+              s.scored.equals(true) &
+              s.id.equals(sessionId).not() &
+              s.finishedAtMs.isBiggerOrEqualValue(dayStartMs)))
+        .get();
+    return rows.length;
   }
 
   /// Writes down what this run was worth, keeping the best.

@@ -88,6 +88,11 @@ class _PracticeScreenState extends ConsumerState<PracticeScreen>
 
   final FeedbackSounds _sounds = FeedbackSounds();
 
+  /// How many runs of this lesson may still earn something today. Resolved
+  /// in [_prepare], where the providers are already held open, and used when
+  /// the run is stored. Zero means no cap.
+  int _scoredRunLimit = 0;
+
   /// Set when the practice cap was already reached as this screen opened.
   /// Then no run is generated at all and the break is shown instead.
   PracticeAllowance? _blocked;
@@ -136,6 +141,17 @@ class _PracticeScreenState extends ConsumerState<PracticeScreen>
         setState(() => _blocked = allowance);
         return;
       }
+
+      // Read here, where a listener is held anyway, and kept for the end of
+      // the run: the same reason the allowance is read here and not later.
+      final capProvider = scoredRunLimitProvider(user.id);
+      final capSubscription = ref.listenManual(capProvider, (_, _) {});
+      try {
+        _scoredRunLimit = await ref.read(capProvider.future);
+      } finally {
+        capSubscription.close();
+      }
+      if (!mounted) return;
     }
 
     final review = user == null || widget.seed != null
@@ -272,6 +288,14 @@ class _PracticeScreenState extends ConsumerState<PracticeScreen>
     }
   }
 
+  /// Midnight before now, by the app's own clock rather than SQL's - the same
+  /// rule the practice caps follow, and for the same reason: a rule that
+  /// turns over at midnight has to be testable at any time of day.
+  int _dayStartMs() {
+    final now = ref.read(clockProvider)();
+    return DateTime(now.year, now.month, now.day).millisecondsSinceEpoch;
+  }
+
   Future<void> _finish() async {
     if (_leaving) return;
     _leaving = true;
@@ -281,6 +305,8 @@ class _PracticeScreenState extends ConsumerState<PracticeScreen>
             sessionId: sessionId,
             results: _controller!.results,
             completed: true,
+            scoredRunLimit: _scoredRunLimit,
+            dayStartMs: _dayStartMs(),
           );
     }
     if (!mounted) return;

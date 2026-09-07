@@ -230,20 +230,28 @@ class StatsRepository {
 
   /// Per-lesson summary for one child. Streams so screens refresh themselves
   /// after a run.
+  /// Only the **records** are capped, never the practice facts: "12x geübt",
+  /// the average and the error rate cover every completed run, while the best
+  /// time and the bolts see only the runs that were allowed to count. A run
+  /// past the daily cap really did happen; it just did not set a record.
   Stream<Map<String, LessonStat>> watchLessonStats(int userId) {
     return _db
         .customSelect(
           '''
           SELECT s.lesson_id                       AS lesson_id,
                  COUNT(*)                          AS runs,
-                 MIN($_score)                      AS best_score,
+                 COALESCE(
+                   MIN(CASE WHEN s.scored = 1 THEN $_score END),
+                   MIN($_score))                   AS best_score,
                  AVG($_score)                      AS average_ms,
                  SUM(s.wrong_attempts) * 1.0 / SUM(s.task_count) AS error_rate,
                  COALESCE(
                    (SELECT ls.stars FROM lesson_stars ls
                      WHERE ls.user_id = s.user_id
                        AND ls.lesson_id = s.lesson_id), 0) AS best_stars,
-                 MAX($_bolts)                      AS best_bolts,
+                 COALESCE(
+                   MAX(CASE WHEN s.scored = 1 THEN $_bolts END), 0)
+                                                   AS best_bolts,
                  MAX(s.finished_at_ms)             AS last_played
           FROM sessions s
           WHERE s.user_id = ?1 AND s.completed = 1
@@ -290,6 +298,7 @@ class StatsRepository {
           JOIN users u ON u.id = s.user_id
           WHERE s.lesson_id = ?1
             AND s.completed = 1
+            AND s.scored = 1
             AND s.task_count >= ?2
             AND s.lesson_id NOT IN ($_unscored)
           GROUP BY u.id
@@ -346,6 +355,7 @@ class StatsRepository {
           FROM sessions s
           JOIN users u ON u.id = s.user_id
           WHERE s.completed = 1
+            AND s.scored = 1
             AND s.task_count >= ?1
             AND s.lesson_id NOT IN ($_unscored)
           GROUP BY s.lesson_id, u.id
@@ -581,7 +591,7 @@ class StatsRepository {
           FROM (
             SELECT s.user_id AS user_id, MAX($_bolts) AS bolts
             FROM sessions s
-            WHERE s.completed = 1
+            WHERE s.completed = 1 AND s.scored = 1
             GROUP BY s.user_id, s.lesson_id
           ) AS best
           GROUP BY best.user_id
@@ -594,6 +604,36 @@ class StatsRepository {
                 row.read<int>('user_id'): row.read<int>('bolts'),
             });
   }
+
+  /// How many runs of one lesson already counted for this child today.
+  ///
+  /// Only completed **and** scored runs: an abandoned run never counted, and
+  /// one past the cap must not use up a second slot.
+  Stream<int> watchScoredRunsToday({
+    required int userId,
+    required String lessonId,
+    required int dayStartMs,
+  }) =>
+      _db
+          .customSelect(
+            '''
+          SELECT COUNT(*) AS runs
+          FROM sessions s
+          WHERE s.user_id = ?1
+            AND s.lesson_id = ?2
+            AND s.completed = 1
+            AND s.scored = 1
+            AND s.finished_at_ms >= ?3
+          ''',
+            variables: [
+              Variable.withInt(userId),
+              Variable.withString(lessonId),
+              Variable.withInt(dayStartMs),
+            ],
+            readsFrom: {_db.sessions},
+          )
+          .watch()
+          .map((rows) => rows.single.read<int>('runs'));
 
   /// Practice in the current stretch: how many milliseconds, when it last
   /// ended, and what the day since [dayStartMs] adds up to.

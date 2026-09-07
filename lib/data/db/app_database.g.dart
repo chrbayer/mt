@@ -147,6 +147,16 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
     requiredDuringInsert: false,
     defaultValue: const Constant('all'),
   );
+  static const VerificationMeta _scoredRunsPerLessonMeta =
+      const VerificationMeta('scoredRunsPerLesson');
+  @override
+  late final GeneratedColumn<int> scoredRunsPerLesson = GeneratedColumn<int>(
+    'scored_runs_per_lesson',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -161,6 +171,7 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
     breakMinutes,
     dailyLimitMinutes,
     lessonFilter,
+    scoredRunsPerLesson,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -275,6 +286,15 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
         ),
       );
     }
+    if (data.containsKey('scored_runs_per_lesson')) {
+      context.handle(
+        _scoredRunsPerLessonMeta,
+        scoredRunsPerLesson.isAcceptableOrUnknown(
+          data['scored_runs_per_lesson']!,
+          _scoredRunsPerLessonMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -332,6 +352,10 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
         DriftSqlType.string,
         data['${effectivePrefix}lesson_filter'],
       )!,
+      scoredRunsPerLesson: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}scored_runs_per_lesson'],
+      ),
     );
   }
 
@@ -387,6 +411,10 @@ class User extends DataClass implements Insertable<User> {
   /// name. Stored as a name rather than an index so a reordered enum cannot
   /// silently turn one setting into another.
   final String lessonFilter;
+
+  /// How many runs of one lesson may earn something on one day. Null takes
+  /// the app-wide setting, zero means this child has no cap.
+  final int? scoredRunsPerLesson;
   const User({
     required this.id,
     required this.name,
@@ -400,6 +428,7 @@ class User extends DataClass implements Insertable<User> {
     this.breakMinutes,
     this.dailyLimitMinutes,
     required this.lessonFilter,
+    this.scoredRunsPerLesson,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -424,6 +453,9 @@ class User extends DataClass implements Insertable<User> {
       map['daily_limit_minutes'] = Variable<int>(dailyLimitMinutes);
     }
     map['lesson_filter'] = Variable<String>(lessonFilter);
+    if (!nullToAbsent || scoredRunsPerLesson != null) {
+      map['scored_runs_per_lesson'] = Variable<int>(scoredRunsPerLesson);
+    }
     return map;
   }
 
@@ -449,6 +481,9 @@ class User extends DataClass implements Insertable<User> {
           ? const Value.absent()
           : Value(dailyLimitMinutes),
       lessonFilter: Value(lessonFilter),
+      scoredRunsPerLesson: scoredRunsPerLesson == null && nullToAbsent
+          ? const Value.absent()
+          : Value(scoredRunsPerLesson),
     );
   }
 
@@ -472,6 +507,9 @@ class User extends DataClass implements Insertable<User> {
       breakMinutes: serializer.fromJson<int?>(json['breakMinutes']),
       dailyLimitMinutes: serializer.fromJson<int?>(json['dailyLimitMinutes']),
       lessonFilter: serializer.fromJson<String>(json['lessonFilter']),
+      scoredRunsPerLesson: serializer.fromJson<int?>(
+        json['scoredRunsPerLesson'],
+      ),
     );
   }
   @override
@@ -490,6 +528,7 @@ class User extends DataClass implements Insertable<User> {
       'breakMinutes': serializer.toJson<int?>(breakMinutes),
       'dailyLimitMinutes': serializer.toJson<int?>(dailyLimitMinutes),
       'lessonFilter': serializer.toJson<String>(lessonFilter),
+      'scoredRunsPerLesson': serializer.toJson<int?>(scoredRunsPerLesson),
     };
   }
 
@@ -506,6 +545,7 @@ class User extends DataClass implements Insertable<User> {
     Value<int?> breakMinutes = const Value.absent(),
     Value<int?> dailyLimitMinutes = const Value.absent(),
     String? lessonFilter,
+    Value<int?> scoredRunsPerLesson = const Value.absent(),
   }) => User(
     id: id ?? this.id,
     name: name ?? this.name,
@@ -525,6 +565,9 @@ class User extends DataClass implements Insertable<User> {
         ? dailyLimitMinutes.value
         : this.dailyLimitMinutes,
     lessonFilter: lessonFilter ?? this.lessonFilter,
+    scoredRunsPerLesson: scoredRunsPerLesson.present
+        ? scoredRunsPerLesson.value
+        : this.scoredRunsPerLesson,
   );
   User copyWithCompanion(UsersCompanion data) {
     return User(
@@ -558,6 +601,9 @@ class User extends DataClass implements Insertable<User> {
       lessonFilter: data.lessonFilter.present
           ? data.lessonFilter.value
           : this.lessonFilter,
+      scoredRunsPerLesson: data.scoredRunsPerLesson.present
+          ? data.scoredRunsPerLesson.value
+          : this.scoredRunsPerLesson,
     );
   }
 
@@ -575,7 +621,8 @@ class User extends DataClass implements Insertable<User> {
           ..write('practiceLimitMinutes: $practiceLimitMinutes, ')
           ..write('breakMinutes: $breakMinutes, ')
           ..write('dailyLimitMinutes: $dailyLimitMinutes, ')
-          ..write('lessonFilter: $lessonFilter')
+          ..write('lessonFilter: $lessonFilter, ')
+          ..write('scoredRunsPerLesson: $scoredRunsPerLesson')
           ..write(')'))
         .toString();
   }
@@ -594,6 +641,7 @@ class User extends DataClass implements Insertable<User> {
     breakMinutes,
     dailyLimitMinutes,
     lessonFilter,
+    scoredRunsPerLesson,
   );
   @override
   bool operator ==(Object other) =>
@@ -610,7 +658,8 @@ class User extends DataClass implements Insertable<User> {
           other.practiceLimitMinutes == this.practiceLimitMinutes &&
           other.breakMinutes == this.breakMinutes &&
           other.dailyLimitMinutes == this.dailyLimitMinutes &&
-          other.lessonFilter == this.lessonFilter);
+          other.lessonFilter == this.lessonFilter &&
+          other.scoredRunsPerLesson == this.scoredRunsPerLesson);
 }
 
 class UsersCompanion extends UpdateCompanion<User> {
@@ -626,6 +675,7 @@ class UsersCompanion extends UpdateCompanion<User> {
   final Value<int?> breakMinutes;
   final Value<int?> dailyLimitMinutes;
   final Value<String> lessonFilter;
+  final Value<int?> scoredRunsPerLesson;
   const UsersCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
@@ -639,6 +689,7 @@ class UsersCompanion extends UpdateCompanion<User> {
     this.breakMinutes = const Value.absent(),
     this.dailyLimitMinutes = const Value.absent(),
     this.lessonFilter = const Value.absent(),
+    this.scoredRunsPerLesson = const Value.absent(),
   });
   UsersCompanion.insert({
     this.id = const Value.absent(),
@@ -653,6 +704,7 @@ class UsersCompanion extends UpdateCompanion<User> {
     this.breakMinutes = const Value.absent(),
     this.dailyLimitMinutes = const Value.absent(),
     this.lessonFilter = const Value.absent(),
+    this.scoredRunsPerLesson = const Value.absent(),
   }) : name = Value(name),
        avatar = Value(avatar),
        colorIndex = Value(colorIndex),
@@ -670,6 +722,7 @@ class UsersCompanion extends UpdateCompanion<User> {
     Expression<int>? breakMinutes,
     Expression<int>? dailyLimitMinutes,
     Expression<String>? lessonFilter,
+    Expression<int>? scoredRunsPerLesson,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -685,6 +738,8 @@ class UsersCompanion extends UpdateCompanion<User> {
       if (breakMinutes != null) 'break_minutes': breakMinutes,
       if (dailyLimitMinutes != null) 'daily_limit_minutes': dailyLimitMinutes,
       if (lessonFilter != null) 'lesson_filter': lessonFilter,
+      if (scoredRunsPerLesson != null)
+        'scored_runs_per_lesson': scoredRunsPerLesson,
     });
   }
 
@@ -701,6 +756,7 @@ class UsersCompanion extends UpdateCompanion<User> {
     Value<int?>? breakMinutes,
     Value<int?>? dailyLimitMinutes,
     Value<String>? lessonFilter,
+    Value<int?>? scoredRunsPerLesson,
   }) {
     return UsersCompanion(
       id: id ?? this.id,
@@ -715,6 +771,7 @@ class UsersCompanion extends UpdateCompanion<User> {
       breakMinutes: breakMinutes ?? this.breakMinutes,
       dailyLimitMinutes: dailyLimitMinutes ?? this.dailyLimitMinutes,
       lessonFilter: lessonFilter ?? this.lessonFilter,
+      scoredRunsPerLesson: scoredRunsPerLesson ?? this.scoredRunsPerLesson,
     );
   }
 
@@ -757,6 +814,9 @@ class UsersCompanion extends UpdateCompanion<User> {
     if (lessonFilter.present) {
       map['lesson_filter'] = Variable<String>(lessonFilter.value);
     }
+    if (scoredRunsPerLesson.present) {
+      map['scored_runs_per_lesson'] = Variable<int>(scoredRunsPerLesson.value);
+    }
     return map;
   }
 
@@ -774,7 +834,8 @@ class UsersCompanion extends UpdateCompanion<User> {
           ..write('practiceLimitMinutes: $practiceLimitMinutes, ')
           ..write('breakMinutes: $breakMinutes, ')
           ..write('dailyLimitMinutes: $dailyLimitMinutes, ')
-          ..write('lessonFilter: $lessonFilter')
+          ..write('lessonFilter: $lessonFilter, ')
+          ..write('scoredRunsPerLesson: $scoredRunsPerLesson')
           ..write(')'))
         .toString();
   }
@@ -902,6 +963,19 @@ class $SessionsTable extends Sessions with TableInfo<$SessionsTable, Session> {
     ),
     defaultValue: const Constant(false),
   );
+  static const VerificationMeta _scoredMeta = const VerificationMeta('scored');
+  @override
+  late final GeneratedColumn<bool> scored = GeneratedColumn<bool>(
+    'scored',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("scored" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -914,6 +988,7 @@ class $SessionsTable extends Sessions with TableInfo<$SessionsTable, Session> {
     totalMs,
     wrongAttempts,
     completed,
+    scored,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1003,6 +1078,12 @@ class $SessionsTable extends Sessions with TableInfo<$SessionsTable, Session> {
         completed.isAcceptableOrUnknown(data['completed']!, _completedMeta),
       );
     }
+    if (data.containsKey('scored')) {
+      context.handle(
+        _scoredMeta,
+        scored.isAcceptableOrUnknown(data['scored']!, _scoredMeta),
+      );
+    }
     return context;
   }
 
@@ -1052,6 +1133,10 @@ class $SessionsTable extends Sessions with TableInfo<$SessionsTable, Session> {
         DriftSqlType.bool,
         data['${effectivePrefix}completed'],
       )!,
+      scored: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}scored'],
+      )!,
     );
   }
 
@@ -1078,6 +1163,16 @@ class Session extends DataClass implements Insertable<Session> {
 
   /// Only completed runs count for statistics and leaderboards.
   final bool completed;
+
+  /// Whether this run was allowed to earn anything: a best time, stars,
+  /// bolts, a place in the ranking. Runs past the daily cap for their lesson
+  /// are stored with this false - they are practice, and they count towards
+  /// the day's time, but they set no records.
+  ///
+  /// Decided once, when the run finishes, and stored: working it out again
+  /// later would need the cap as it stood that day, and a parent may change
+  /// it tomorrow.
+  final bool scored;
   const Session({
     required this.id,
     required this.userId,
@@ -1089,6 +1184,7 @@ class Session extends DataClass implements Insertable<Session> {
     required this.totalMs,
     required this.wrongAttempts,
     required this.completed,
+    required this.scored,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1105,6 +1201,7 @@ class Session extends DataClass implements Insertable<Session> {
     map['total_ms'] = Variable<int>(totalMs);
     map['wrong_attempts'] = Variable<int>(wrongAttempts);
     map['completed'] = Variable<bool>(completed);
+    map['scored'] = Variable<bool>(scored);
     return map;
   }
 
@@ -1122,6 +1219,7 @@ class Session extends DataClass implements Insertable<Session> {
       totalMs: Value(totalMs),
       wrongAttempts: Value(wrongAttempts),
       completed: Value(completed),
+      scored: Value(scored),
     );
   }
 
@@ -1141,6 +1239,7 @@ class Session extends DataClass implements Insertable<Session> {
       totalMs: serializer.fromJson<int>(json['totalMs']),
       wrongAttempts: serializer.fromJson<int>(json['wrongAttempts']),
       completed: serializer.fromJson<bool>(json['completed']),
+      scored: serializer.fromJson<bool>(json['scored']),
     );
   }
   @override
@@ -1157,6 +1256,7 @@ class Session extends DataClass implements Insertable<Session> {
       'totalMs': serializer.toJson<int>(totalMs),
       'wrongAttempts': serializer.toJson<int>(wrongAttempts),
       'completed': serializer.toJson<bool>(completed),
+      'scored': serializer.toJson<bool>(scored),
     };
   }
 
@@ -1171,6 +1271,7 @@ class Session extends DataClass implements Insertable<Session> {
     int? totalMs,
     int? wrongAttempts,
     bool? completed,
+    bool? scored,
   }) => Session(
     id: id ?? this.id,
     userId: userId ?? this.userId,
@@ -1182,6 +1283,7 @@ class Session extends DataClass implements Insertable<Session> {
     totalMs: totalMs ?? this.totalMs,
     wrongAttempts: wrongAttempts ?? this.wrongAttempts,
     completed: completed ?? this.completed,
+    scored: scored ?? this.scored,
   );
   Session copyWithCompanion(SessionsCompanion data) {
     return Session(
@@ -1201,6 +1303,7 @@ class Session extends DataClass implements Insertable<Session> {
           ? data.wrongAttempts.value
           : this.wrongAttempts,
       completed: data.completed.present ? data.completed.value : this.completed,
+      scored: data.scored.present ? data.scored.value : this.scored,
     );
   }
 
@@ -1216,7 +1319,8 @@ class Session extends DataClass implements Insertable<Session> {
           ..write('finishedAtMs: $finishedAtMs, ')
           ..write('totalMs: $totalMs, ')
           ..write('wrongAttempts: $wrongAttempts, ')
-          ..write('completed: $completed')
+          ..write('completed: $completed, ')
+          ..write('scored: $scored')
           ..write(')'))
         .toString();
   }
@@ -1233,6 +1337,7 @@ class Session extends DataClass implements Insertable<Session> {
     totalMs,
     wrongAttempts,
     completed,
+    scored,
   );
   @override
   bool operator ==(Object other) =>
@@ -1247,7 +1352,8 @@ class Session extends DataClass implements Insertable<Session> {
           other.finishedAtMs == this.finishedAtMs &&
           other.totalMs == this.totalMs &&
           other.wrongAttempts == this.wrongAttempts &&
-          other.completed == this.completed);
+          other.completed == this.completed &&
+          other.scored == this.scored);
 }
 
 class SessionsCompanion extends UpdateCompanion<Session> {
@@ -1261,6 +1367,7 @@ class SessionsCompanion extends UpdateCompanion<Session> {
   final Value<int> totalMs;
   final Value<int> wrongAttempts;
   final Value<bool> completed;
+  final Value<bool> scored;
   const SessionsCompanion({
     this.id = const Value.absent(),
     this.userId = const Value.absent(),
@@ -1272,6 +1379,7 @@ class SessionsCompanion extends UpdateCompanion<Session> {
     this.totalMs = const Value.absent(),
     this.wrongAttempts = const Value.absent(),
     this.completed = const Value.absent(),
+    this.scored = const Value.absent(),
   });
   SessionsCompanion.insert({
     this.id = const Value.absent(),
@@ -1284,6 +1392,7 @@ class SessionsCompanion extends UpdateCompanion<Session> {
     this.totalMs = const Value.absent(),
     this.wrongAttempts = const Value.absent(),
     this.completed = const Value.absent(),
+    this.scored = const Value.absent(),
   }) : userId = Value(userId),
        lessonId = Value(lessonId),
        taskCount = Value(taskCount),
@@ -1300,6 +1409,7 @@ class SessionsCompanion extends UpdateCompanion<Session> {
     Expression<int>? totalMs,
     Expression<int>? wrongAttempts,
     Expression<bool>? completed,
+    Expression<bool>? scored,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -1312,6 +1422,7 @@ class SessionsCompanion extends UpdateCompanion<Session> {
       if (totalMs != null) 'total_ms': totalMs,
       if (wrongAttempts != null) 'wrong_attempts': wrongAttempts,
       if (completed != null) 'completed': completed,
+      if (scored != null) 'scored': scored,
     });
   }
 
@@ -1326,6 +1437,7 @@ class SessionsCompanion extends UpdateCompanion<Session> {
     Value<int>? totalMs,
     Value<int>? wrongAttempts,
     Value<bool>? completed,
+    Value<bool>? scored,
   }) {
     return SessionsCompanion(
       id: id ?? this.id,
@@ -1338,6 +1450,7 @@ class SessionsCompanion extends UpdateCompanion<Session> {
       totalMs: totalMs ?? this.totalMs,
       wrongAttempts: wrongAttempts ?? this.wrongAttempts,
       completed: completed ?? this.completed,
+      scored: scored ?? this.scored,
     );
   }
 
@@ -1374,6 +1487,9 @@ class SessionsCompanion extends UpdateCompanion<Session> {
     if (completed.present) {
       map['completed'] = Variable<bool>(completed.value);
     }
+    if (scored.present) {
+      map['scored'] = Variable<bool>(scored.value);
+    }
     return map;
   }
 
@@ -1389,7 +1505,8 @@ class SessionsCompanion extends UpdateCompanion<Session> {
           ..write('finishedAtMs: $finishedAtMs, ')
           ..write('totalMs: $totalMs, ')
           ..write('wrongAttempts: $wrongAttempts, ')
-          ..write('completed: $completed')
+          ..write('completed: $completed, ')
+          ..write('scored: $scored')
           ..write(')'))
         .toString();
   }
@@ -2821,6 +2938,7 @@ typedef $$UsersTableCreateCompanionBuilder = UsersCompanion Function({
   Value<int?> breakMinutes,
   Value<int?> dailyLimitMinutes,
   Value<String> lessonFilter,
+  Value<int?> scoredRunsPerLesson,
 });
 typedef $$UsersTableUpdateCompanionBuilder = UsersCompanion Function({
   Value<int> id,
@@ -2835,6 +2953,7 @@ typedef $$UsersTableUpdateCompanionBuilder = UsersCompanion Function({
   Value<int?> breakMinutes,
   Value<int?> dailyLimitMinutes,
   Value<String> lessonFilter,
+  Value<int?> scoredRunsPerLesson,
 });
 
 final class $$UsersTableReferences
@@ -2965,6 +3084,11 @@ class $$UsersTableFilterComposer extends Composer<_$AppDatabase, $UsersTable> {
 
   ColumnFilters<String> get lessonFilter => $composableBuilder(
     column: $table.lessonFilter,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get scoredRunsPerLesson => $composableBuilder(
+    column: $table.scoredRunsPerLesson,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -3112,6 +3236,11 @@ class $$UsersTableOrderingComposer
     column: $table.lessonFilter,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<int> get scoredRunsPerLesson => $composableBuilder(
+    column: $table.scoredRunsPerLesson,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$UsersTableAnnotationComposer
@@ -3174,6 +3303,11 @@ class $$UsersTableAnnotationComposer
 
   GeneratedColumn<String> get lessonFilter => $composableBuilder(
     column: $table.lessonFilter,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get scoredRunsPerLesson => $composableBuilder(
+    column: $table.scoredRunsPerLesson,
     builder: (column) => column,
   );
 
@@ -3298,6 +3432,7 @@ class $$UsersTableTableManager
                 Value<int?> breakMinutes = const Value.absent(),
                 Value<int?> dailyLimitMinutes = const Value.absent(),
                 Value<String> lessonFilter = const Value.absent(),
+                Value<int?> scoredRunsPerLesson = const Value.absent(),
               }) => UsersCompanion(
                 id: id,
                 name: name,
@@ -3311,6 +3446,7 @@ class $$UsersTableTableManager
                 breakMinutes: breakMinutes,
                 dailyLimitMinutes: dailyLimitMinutes,
                 lessonFilter: lessonFilter,
+                scoredRunsPerLesson: scoredRunsPerLesson,
               ),
           createCompanionCallback:
               ({
@@ -3326,6 +3462,7 @@ class $$UsersTableTableManager
                 Value<int?> breakMinutes = const Value.absent(),
                 Value<int?> dailyLimitMinutes = const Value.absent(),
                 Value<String> lessonFilter = const Value.absent(),
+                Value<int?> scoredRunsPerLesson = const Value.absent(),
               }) => UsersCompanion.insert(
                 id: id,
                 name: name,
@@ -3339,6 +3476,7 @@ class $$UsersTableTableManager
                 breakMinutes: breakMinutes,
                 dailyLimitMinutes: dailyLimitMinutes,
                 lessonFilter: lessonFilter,
+                scoredRunsPerLesson: scoredRunsPerLesson,
               ),
           withReferenceMapper: (p0) => p0
               .map(
@@ -3460,6 +3598,7 @@ typedef $$SessionsTableCreateCompanionBuilder = SessionsCompanion Function({
   Value<int> totalMs,
   Value<int> wrongAttempts,
   Value<bool> completed,
+  Value<bool> scored,
 });
 typedef $$SessionsTableUpdateCompanionBuilder = SessionsCompanion Function({
   Value<int> id,
@@ -3472,6 +3611,7 @@ typedef $$SessionsTableUpdateCompanionBuilder = SessionsCompanion Function({
   Value<int> totalMs,
   Value<int> wrongAttempts,
   Value<bool> completed,
+  Value<bool> scored,
 });
 
 final class $$SessionsTableReferences
@@ -3566,6 +3706,11 @@ class $$SessionsTableFilterComposer
 
   ColumnFilters<bool> get completed => $composableBuilder(
     column: $table.completed,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get scored => $composableBuilder(
+    column: $table.scored,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -3672,6 +3817,11 @@ class $$SessionsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<bool> get scored => $composableBuilder(
+    column: $table.scored,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$UsersTableOrderingComposer get userId {
     final $$UsersTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -3737,6 +3887,9 @@ class $$SessionsTableAnnotationComposer
 
   GeneratedColumn<bool> get completed =>
       $composableBuilder(column: $table.completed, builder: (column) => column);
+
+  GeneratedColumn<bool> get scored =>
+      $composableBuilder(column: $table.scored, builder: (column) => column);
 
   $$UsersTableAnnotationComposer get userId {
     final $$UsersTableAnnotationComposer composer = $composerBuilder(
@@ -3825,6 +3978,7 @@ class $$SessionsTableTableManager
                 Value<int> totalMs = const Value.absent(),
                 Value<int> wrongAttempts = const Value.absent(),
                 Value<bool> completed = const Value.absent(),
+                Value<bool> scored = const Value.absent(),
               }) => SessionsCompanion(
                 id: id,
                 userId: userId,
@@ -3836,6 +3990,7 @@ class $$SessionsTableTableManager
                 totalMs: totalMs,
                 wrongAttempts: wrongAttempts,
                 completed: completed,
+                scored: scored,
               ),
           createCompanionCallback:
               ({
@@ -3849,6 +4004,7 @@ class $$SessionsTableTableManager
                 Value<int> totalMs = const Value.absent(),
                 Value<int> wrongAttempts = const Value.absent(),
                 Value<bool> completed = const Value.absent(),
+                Value<bool> scored = const Value.absent(),
               }) => SessionsCompanion.insert(
                 id: id,
                 userId: userId,
@@ -3860,6 +4016,7 @@ class $$SessionsTableTableManager
                 totalMs: totalMs,
                 wrongAttempts: wrongAttempts,
                 completed: completed,
+                scored: scored,
               ),
           withReferenceMapper: (p0) => p0
               .map(

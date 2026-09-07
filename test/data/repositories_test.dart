@@ -176,6 +176,11 @@ void main() {
       await recordRun(SessionRepository(before),
           userId: id, lessonId: 'add_20_plain');
 
+      if (version < 9) {
+        await before
+            .customStatement('ALTER TABLE users DROP COLUMN scored_runs_per_lesson');
+        await before.customStatement('ALTER TABLE sessions DROP COLUMN scored');
+      }
       if (version < 8) {
         await before.customStatement('DROP TABLE lesson_stars');
       }
@@ -216,7 +221,7 @@ void main() {
       return file;
     }
 
-    for (final from in [1, 2, 3, 4, 5, 6, 7]) {
+    for (final from in [1, 2, 3, 4, 5, 6, 7, 8]) {
       test('a database from schema v$from keeps its data', () async {
         final file = await databaseAtVersion(from);
 
@@ -239,6 +244,13 @@ void main() {
         expect(user.dailyLimitMinutes, isNull);
         // Nothing was ever filtered away, so nothing is.
         expect(user.filter, LessonFilter.all);
+        // The daily cap on scored runs is new too: nobody decided about it,
+        // so this profile follows the app-wide setting.
+        expect(user.scoredRunsPerLesson, isNull);
+        // And everything already in the database was earned under no cap at
+        // all. A rule made afterwards must not take a best time away.
+        expect((await after.select(after.sessions).get()).single.scored,
+            isTrue);
         // The stars were worked out from the runs before v8 and are carried
         // over once: a clean run of ten is worth three, and nobody loses
         // what they collected because the app changed how it keeps score.

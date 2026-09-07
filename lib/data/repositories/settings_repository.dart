@@ -26,12 +26,17 @@ class AppPreferences {
   /// The time limits that hold for every child without their own.
   final PracticeLimits limits;
 
+  /// How many runs of one lesson may earn something in a day, for every child
+  /// without their own setting. Zero means no cap.
+  final int scoredRunsPerLesson;
+
   const AppPreferences({
     this.showClock = false,
     this.haptics = true,
     this.sounds = true,
     this.defaultTaskCount = fallbackTaskCount,
     this.limits = const PracticeLimits(),
+    this.scoredRunsPerLesson = defaultScoredRunsPerLesson,
   });
 
   AppPreferences copyWith({
@@ -40,6 +45,7 @@ class AppPreferences {
     bool? sounds,
     int? defaultTaskCount,
     PracticeLimits? limits,
+    int? scoredRunsPerLesson,
   }) =>
       AppPreferences(
         showClock: showClock ?? this.showClock,
@@ -47,6 +53,7 @@ class AppPreferences {
         sounds: sounds ?? this.sounds,
         defaultTaskCount: defaultTaskCount ?? this.defaultTaskCount,
         limits: limits ?? this.limits,
+        scoredRunsPerLesson: scoredRunsPerLesson ?? this.scoredRunsPerLesson,
       );
 }
 
@@ -62,6 +69,7 @@ class SettingsRepository {
   static const _stretchMinutes = 'practice_limit_minutes';
   static const _breakMinutes = 'break_minutes';
   static const _dailyMinutes = 'daily_limit_minutes';
+  static const _scoredRuns = 'scored_runs_per_lesson';
   static const _pinSalt = 'admin_pin_salt';
   static const _pinHash = 'admin_pin_hash';
 
@@ -92,6 +100,8 @@ class SettingsRepository {
         dailyMinutes: int.tryParse(map[_dailyMinutes] ?? '') ??
             defaults.limits.dailyMinutes,
       ),
+      scoredRunsPerLesson: int.tryParse(map[_scoredRuns] ?? '') ??
+          defaults.scoredRunsPerLesson,
     );
   }
 
@@ -103,6 +113,10 @@ class SettingsRepository {
 
   Future<void> setDefaultTaskCount(int value) =>
       _put(_defaultTaskCount, '$value');
+
+  /// How many runs of a lesson count for every child without their own cap.
+  Future<void> setScoredRunsPerLesson(int value) =>
+      _put(_scoredRuns, '$value');
 
   /// The time limits for every child who has none of their own.
   Future<void> setPracticeLimits(PracticeLimits limits) async {

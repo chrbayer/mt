@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/practice_limit.dart';
 import '../../providers.dart';
 import '../../theme/app_theme.dart';
-import '../common/minutes_choice.dart';
+import '../common/amount_choice.dart';
 import '../common/task_count_choice.dart';
 
 /// Everything that holds for the whole app rather than for one child.
@@ -92,7 +92,7 @@ class GlobalSettingsTab extends ConsumerWidget {
         const Text('Am Stück, dann Pause',
             style: TextStyle(fontSize: 20, color: AppColors.text)),
         const SizedBox(height: 8),
-        MinutesChoice(
+        AmountChoice(
           value: limits?.stretchMinutes,
           options: practiceLimitOptions,
           onChanged: limits == null
@@ -110,7 +110,7 @@ class GlobalSettingsTab extends ConsumerWidget {
           const Text('Wie lange dauert die Pause?',
               style: TextStyle(fontSize: 20, color: AppColors.text)),
           const SizedBox(height: 8),
-          MinutesChoice(
+          AmountChoice(
             value: limits?.breakMinutes,
             options: breakMinuteOptions,
             zeroLabel: null,
@@ -129,7 +129,7 @@ class GlobalSettingsTab extends ConsumerWidget {
         const Text('Und pro Tag insgesamt',
             style: TextStyle(fontSize: 20, color: AppColors.text)),
         const SizedBox(height: 8),
-        MinutesChoice(
+        AmountChoice(
           value: limits?.dailyMinutes,
           options: dailyLimitOptions,
           onChanged: limits == null
@@ -141,6 +141,26 @@ class GlobalSettingsTab extends ConsumerWidget {
                       dailyMinutes: minutes!,
                     ),
                   ),
+        ),
+        const Divider(height: 40),
+        const Text('Gewertete Durchgänge je Übung und Tag',
+            style: TextStyle(fontSize: 24)),
+        const SizedBox(height: 6),
+        const Text(
+          'Danach darf dieselbe Übung weiter gemacht werden, sie bringt nur '
+          'keine Bestzeit, keine Sterne und keine Blitze mehr. Das nimmt den '
+          'Anreiz, die leichteste Übung so lange zu wiederholen, bis die Zeit '
+          'stimmt. Geübte Zeit und Verlauf zählen weiter mit.',
+          style: TextStyle(fontSize: 17, color: AppColors.textMuted),
+        ),
+        const SizedBox(height: 12),
+        AmountChoice(
+          value: preferences?.scoredRunsPerLesson,
+          options: scoredRunOptions,
+          labelFor: (runs) => '$runs×',
+          onChanged: preferences == null
+              ? null
+              : (runs) => repository.setScoredRunsPerLesson(runs!),
         ),
       ],
     );

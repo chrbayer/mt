@@ -8,7 +8,7 @@ import '../../domain/lesson_filter.dart';
 import '../../domain/practice_limit.dart';
 import '../../providers.dart';
 import '../../theme/app_theme.dart';
-import '../common/minutes_choice.dart';
+import '../common/amount_choice.dart';
 import '../common/task_count_choice.dart';
 import 'reset_stars_dialog.dart';
 import '../lessons/lesson_example.dart';
@@ -43,6 +43,7 @@ class _ProfileSettingsDialogState
   late int? _limitMinutes = widget.user.practiceLimitMinutes;
   late int? _breakMinutes = widget.user.breakMinutes;
   late int? _dailyMinutes = widget.user.dailyLimitMinutes;
+  late int? _scoredRuns = widget.user.scoredRunsPerLesson;
   late LessonFilter _filter = widget.user.filter;
 
   @override
@@ -50,7 +51,9 @@ class _ProfileSettingsDialogState
     final color = AppColors.profileColor(widget.user.colorIndex);
     // Null while the app-wide limits are still being read; the inherit chips
     // then say "wie für alle" without a number rather than a guessed one.
-    final global = ref.watch(preferencesProvider).value?.limits;
+    final preferences = ref.watch(preferencesProvider).value;
+    final global = preferences?.limits;
+    final globalRuns = preferences?.scoredRunsPerLesson;
 
     return Dialog(
       insetPadding: const EdgeInsets.all(32),
@@ -113,7 +116,7 @@ class _ProfileSettingsDialogState
                 style: TextStyle(fontSize: 17, color: AppColors.textMuted),
               ),
               const SizedBox(height: 10),
-              MinutesChoice(
+              AmountChoice(
                 value: _limitMinutes,
                 options: practiceLimitOptions,
                 inherited: global?.stretchMinutes,
@@ -127,7 +130,7 @@ class _ProfileSettingsDialogState
                 Text('Wie lange dauert die Pause?',
                     style: Theme.of(context).textTheme.titleMedium),
                 const SizedBox(height: 10),
-                MinutesChoice(
+                AmountChoice(
                   value: _breakMinutes,
                   options: breakMinuteOptions,
                   inherited: global?.breakMinutes,
@@ -148,13 +151,32 @@ class _ProfileSettingsDialogState
                 style: TextStyle(fontSize: 17, color: AppColors.textMuted),
               ),
               const SizedBox(height: 10),
-              MinutesChoice(
+              AmountChoice(
                 value: _dailyMinutes,
                 options: dailyLimitOptions,
                 inherited: global?.dailyMinutes,
                 allowInherit: true,
                 onChanged: (minutes) =>
                     setState(() => _dailyMinutes = minutes),
+              ),
+              const Divider(height: 32),
+              Text('Gewertete Durchgänge je Übung und Tag',
+                  style: Theme.of(context).textTheme.titleLarge),
+              const SizedBox(height: 4),
+              const Text(
+                'Danach darf dieselbe Übung weiter gemacht werden, sie '
+                'bringt nur keine Bestzeit, keine Sterne und keine Blitze '
+                'mehr. Geübte Zeit und Verlauf zählen weiter mit.',
+                style: TextStyle(fontSize: 17, color: AppColors.textMuted),
+              ),
+              const SizedBox(height: 10),
+              AmountChoice(
+                value: _scoredRuns,
+                options: scoredRunOptions,
+                inherited: globalRuns,
+                allowInherit: true,
+                labelFor: (runs) => '$runs×',
+                onChanged: (runs) => setState(() => _scoredRuns = runs),
               ),
               const Divider(height: 32),
               Text('Sterne', style: Theme.of(context).textTheme.titleLarge),
@@ -267,6 +289,10 @@ class _ProfileSettingsDialogState
                         limitMinutes: _limitMinutes,
                         breakMinutes: _breakMinutes,
                         dailyLimitMinutes: _dailyMinutes,
+                      );
+                      await repository.setScoredRunsPerLesson(
+                        widget.user.id,
+                        _scoredRuns,
                       );
                       navigator.pop();
                     },

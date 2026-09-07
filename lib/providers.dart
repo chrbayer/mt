@@ -160,6 +160,54 @@ final boltTotalsProvider = StreamProvider<Map<int, int>>(
 /// passing of time alone, without anybody touching the app.
 final clockProvider = Provider<DateTime Function()>((ref) => DateTime.now);
 
+/// How many runs of one lesson may still earn something today, for one
+/// child: their own cap where they have one, the app-wide one where not.
+///
+/// Zero means no cap. Awaited rather than guessed for the same reason the
+/// time limits are: while the profile is loading, nobody knows.
+final scoredRunLimitProvider =
+    FutureProvider.family<int, int>((ref, userId) async {
+  final users = await ref.watch(usersProvider.future);
+  final preferences = await ref.watch(preferencesProvider.future);
+  final user = users.where((u) => u.id == userId).firstOrNull;
+  return resolveScoredRuns(
+    global: preferences.scoredRunsPerLesson,
+    scoredRuns: user?.scoredRunsPerLesson,
+  );
+});
+
+/// How often one lesson counted for one child today, and how often it still
+/// may. Null when there is no cap at all - then there is nothing to say.
+final scoredRunsTodayProvider = StreamProvider.family<({int used, int left})?,
+    ({int userId, String lessonId})>((ref, key) async* {
+  final limit = await ref.watch(scoredRunLimitProvider(key.userId).future);
+  if (limit <= 0) {
+    yield null;
+    return;
+  }
+  final today = ref.watch(clockProvider)();
+  final dayStartMs =
+      DateTime(today.year, today.month, today.day).millisecondsSinceEpoch;
+  yield* ref
+      .watch(statsRepositoryProvider)
+      .watchScoredRunsToday(
+        userId: key.userId,
+        lessonId: key.lessonId,
+        dayStartMs: dayStartMs,
+      )
+      .map((used) => (used: used, left: limit - used < 0 ? 0 : limit - used));
+});
+
+/// Whether one stored run was allowed to earn anything. Read on the result
+/// screen, which otherwise has no way of knowing that this run was the
+/// fourth of the day.
+final sessionScoredProvider =
+    FutureProvider.family<bool, int>((ref, sessionId) async {
+  final session =
+      await ref.watch(sessionRepositoryProvider).sessionById(sessionId);
+  return session?.scored ?? true;
+});
+
 final practiceAllowanceForProvider =
     StreamProvider.family<PracticeAllowance, int>((ref, userId) async* {
   // Awaited, not read off an AsyncValue: while the profile or the app-wide

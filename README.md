@@ -207,6 +207,12 @@ antreten. Die App läuft vollständig offline, ohne Konten und ohne Netzwerk.
   klickt nicht — dort sagen die beiden anderen Töne schon mehr.
   Im Elternbereich abschaltbar. Die Töne sind von `tool/make_sounds.py`
   erzeugt, nicht heruntergeladen: ein paar Zeilen Mathematik, zusammen 25 kB.
+* **Gewertete Durchgänge je Übung und Tag**: dieselbe leichte Übung so lange
+  zu wiederholen, bis die Zeit stimmt, bringt ab dem vierten Mal nichts mehr.
+  Geübt werden darf sie weiter — sie zählt zur Übungszeit und steht im
+  Verlauf —, sie setzt nur keine Bestzeit mehr und vergibt keine Sterne und
+  Blitze. Die App sagt es vorher im Startdialog und hinterher auf dem
+  Ergebnisbildschirm. Im Elternbereich einstellbar, für alle und je Kind.
 * **Fertige Lektionen ausblenden**: bei 75 Lektionen ist die Liste lang, und
   das meiste, woran ein Kind vorbeiscrollt, sitzt längst. Der Filter oben im
   Katalog kürzt sie in zwei Stufen — **mit 3 Sternen** verschwindet, was

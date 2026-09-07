@@ -209,3 +209,31 @@ String formatRemaining(Duration left) {
     _ => 'noch $minutes Minuten',
   };
 }
+
+/// How many runs of one lesson may count for awards on one day.
+///
+/// The point is not to stop a child practising - repetition is the whole
+/// idea - but to take away the reason for grinding the easiest lesson over
+/// and over: a better time, or three stars forced out of a lesson by sheer
+/// repetition. Beyond the cap a run is still practice, still logged, still
+/// counted against the day's time; it just does not set a record.
+///
+/// Zero means no cap.
+const scoredRunOptions = [0, 1, 2, 3, 5, 10];
+
+/// What holds when nobody has decided otherwise. Three is enough to have a
+/// bad round and try again, and few enough that a fourth attempt is clearly
+/// about the leaderboard rather than about the maths.
+const defaultScoredRunsPerLesson = 3;
+
+/// A child's own cap where they have one, the app-wide one where not - the
+/// same two levels as the times, and the same reason for nullability.
+int resolveScoredRuns({required int global, int? scoredRuns}) =>
+    scoredRuns ?? global;
+
+/// Whether a run that is finishing now still counts, given how many scored
+/// runs of the same lesson the child already has today.
+///
+/// [limit] of zero means no cap at all.
+bool runStillCounts({required int limit, required int scoredToday}) =>
+    limit <= 0 || scoredToday < limit;
