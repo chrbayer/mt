@@ -257,6 +257,14 @@ final practiceAllowanceProvider = Provider<AsyncValue<PracticeAllowance>>((ref) 
   return ref.watch(practiceAllowanceForProvider(user.id));
 });
 
+/// What each child has practised today, per the app's own clock.
+final practisedTodayProvider = StreamProvider<Map<int, int>>((ref) {
+  final now = ref.watch(clockProvider)();
+  return ref.watch(statsRepositoryProvider).watchPractisedToday(
+        DateTime(now.year, now.month, now.day).millisecondsSinceEpoch,
+      );
+});
+
 /// Days practised in a row, per child.
 final streaksProvider = StreamProvider<Map<int, int>>(
   (ref) => ref.watch(statsRepositoryProvider).watchStreaks(),

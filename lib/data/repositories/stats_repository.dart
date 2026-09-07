@@ -672,6 +672,31 @@ class StatsRepository {
         });
   }
 
+  /// What each child has practised today, in milliseconds.
+  ///
+  /// Counted exactly the way the daily cap counts it: from [dayStartMs], and
+  /// **including abandoned runs** - who starts and stops has still been
+  /// sitting at the tablet. Anything else and the overview would say twelve
+  /// minutes while the app told the child the twenty were up.
+  Stream<Map<int, int>> watchPractisedToday(int dayStartMs) {
+    return _db
+        .customSelect(
+          '''
+          SELECT s.user_id AS user_id, SUM(s.total_ms) AS ms
+          FROM sessions s
+          WHERE s.started_at_ms >= ?1
+          GROUP BY s.user_id
+          ''',
+          variables: [Variable.withInt(dayStartMs)],
+          readsFrom: {_db.sessions},
+        )
+        .watch()
+        .map((rows) => {
+              for (final row in rows)
+                row.read<int>('user_id'): row.read<int>('ms'),
+            });
+  }
+
   /// Days practised in a row, per child.
   ///
   /// Today only extends a streak once something has been practised; until

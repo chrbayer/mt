@@ -538,6 +538,18 @@ Generator: nur so bricht ihn das Abmelden wirklich ab. Er ruft
 Mitternacht ist, hat sich der Tag geändert und die Abfrage muss neu gestellt
 werden.
 
+## „Heute geübt"
+
+`TodaySummary` oben im Übungsverlauf zählt mit **derselben Buchführung wie die
+Tagesgrenze**: ab Tagesbeginn nach `clockProvider`, und **abgebrochene
+Durchgänge zählen mit**. Anders gerechnet stünde dort „12 min", während die
+App dem Kind sagt, die zwanzig seien um — und ein Elternteil würde dem einen
+oder dem anderen nicht mehr glauben. Ein Test prüft beide Zahlen
+gegeneinander.
+
+Deshalb **nicht** `watchActivity` wiederverwendet: die zählt nur beendete
+Läufe, was für eine Lernkurve richtig ist und für eine Zeitgrenze falsch wäre.
+
 ## Zwei Ebenen für die Übungszeit
 
 Wie bei der Aufgabenzahl, nur mit zwei Ebenen statt dreien: `users` speichert

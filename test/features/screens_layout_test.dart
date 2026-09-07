@@ -264,6 +264,16 @@ void main() {
       expect(find.text('Speichern'), findsOneWidget);
     });
 
+    testWidgets('10c-elternbereich-heute passt auf ${size.key}',
+        (tester) async {
+      // Three profiles side by side above the filter chips: the widest the
+      // history tab gets before it scrolls.
+      await pumpScreen(tester, const AdminScreen(), size.value);
+      expect(tester.takeException(), isNull);
+      expect(find.text('Heute geübt'), findsOneWidget);
+      expect(find.text('Mia'), findsWidgets);
+    });
+
     testWidgets('13c-sterne-zuruecksetzen passt auf ${size.key}',
         (tester) async {
       // One row per group, nine of them, each with a button - the tallest

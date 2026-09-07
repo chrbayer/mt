@@ -81,7 +81,11 @@ antreten. Die App läuft vollständig offline, ohne Konten und ohne Netzwerk.
 * **Elternbereich**, geschützt durch eine PIN: der vollständige Übungsverlauf
   (wann, welches Kind, welche Lektion, Zeit, Fehler, abgeschlossen oder
   abgebrochen), einzelne Durchgänge löschen, Profile anlegen, umbenennen und
-  löschen, Statistiken zurücksetzen, PIN ändern — und die **Einstellungen für
+  löschen, Statistiken zurücksetzen, PIN ändern. Ganz oben steht **„Heute
+  geübt"** — für jedes Profil die heutige Zeit, und wo eine Tagesgrenze gilt,
+  gleich daneben („45 min von 120 min"), damit auf einen Blick klar ist, wer
+  schon wie viel gemacht hat. Gezählt wird genau wie die Grenze zählt,
+  abgebrochene Durchgänge eingeschlossen — und die **Einstellungen für
   alle**: Uhr während der Übung, Vibration und die Vorgabe für die Länge eines
   Durchgangs. Ein Kind kann in seinen eigenen Einstellungen nur die Länge
   seiner eigenen Durchgänge ändern.

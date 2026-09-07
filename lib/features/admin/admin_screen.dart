@@ -14,6 +14,7 @@ import 'backup_actions.dart';
 import 'global_settings_tab.dart';
 import 'pin_gate.dart';
 import 'profile_settings_dialog.dart';
+import 'today_summary.dart';
 
 /// The parent area behind the PIN: what was practised when and how well, plus
 /// the operations a child should not be able to trigger - renaming, deleting
@@ -72,8 +73,15 @@ class _HistoryTabState extends ConsumerState<_HistoryTab> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Above the filter and the list: "who has done how much today" is
+        // the question this area is opened with, and reading the whole
+        // history to answer it was the wrong way round.
+        const Padding(
+          padding: EdgeInsets.fromLTRB(32, 16, 32, 4),
+          child: TodaySummary(),
+        ),
         Padding(
-          padding: const EdgeInsets.fromLTRB(32, 16, 32, 8),
+          padding: const EdgeInsets.fromLTRB(32, 12, 32, 8),
           child: Wrap(
             spacing: 12,
             runSpacing: 8,
