@@ -49,6 +49,19 @@ class FeedbackSounds {
     _key.positionUpdater = null;
   }
 
+  /// Which click file this platform needs.
+  ///
+  /// Android gets it without a lead-in: there the sound is there at once, and
+  /// every millisecond of delay is felt under the finger. Linux gets 45 ms of
+  /// silence in front, because between two clicks the player is paused, which
+  /// corks the PulseAudio stream, and a real sound card needs a moment before
+  /// it emits anything again. Without the lead-in the whole click falls into
+  /// that ramp: measured on real hardware, one of 33 clicks arrived; with it,
+  /// 33 of 33. The delay belongs to the platform, not to the sound.
+  static String get _keyAsset => defaultTargetPlatform == TargetPlatform.linux
+      ? 'sound/key_desktop.wav'
+      : 'sound/key.wav';
+
   /// Why the sound is not working, if it is not.
   ///
   /// Kept rather than only logged: "der Ton geht nicht" is impossible to act
@@ -66,7 +79,7 @@ class FeedbackSounds {
       await _key.setReleaseMode(ReleaseMode.stop);
       await _correct.setSource(AssetSource('sound/correct.wav'));
       await _wrong.setSource(AssetSource('sound/wrong.wav'));
-      await _key.setSource(AssetSource('sound/key.wav'));
+      await _key.setSource(AssetSource(_keyAsset));
       _ready = true;
       lastError = null;
     } catch (error) {

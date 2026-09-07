@@ -65,26 +65,31 @@ write('wrong', 0.22, [(311.13, 0.0, 0.20)])
 # bestätigt nur, dass die Taste angekommen ist. Die zweite Frequenz ist
 # absichtlich kein Vielfaches der ersten: zusammen ergeben sie ein Geräusch
 # statt einer Note.
-#
-# LEAD_SILENCE ist kein Schönheitsfehler, sondern der eigentliche Punkt.
-# Zwischen zwei Klicks wird der Abspielstrang angehalten, was den
-# PulseAudio-Strom korkt; beim nächsten Klick braucht die echte Soundkarte
-# einige Millisekunden, bis sie wieder Töne ausgibt. Ein 35-ms-Klick fiel
-# vollständig in dieses Anlaufen: an einem Null-Sink gemessen kamen 33 von 33
-# Klicks, an der echten Karte genau einer. Die Stille vorn lässt das Gerät
-# anlaufen, bevor der hörbare Teil beginnt.
-LEAD_SILENCE = 0.045
-frames = [0.0] * int((LEAD_SILENCE + 0.12) * RATE)
-lead = [0.0] * int(0.12 * RATE)
-click(lead, 1720.0, 0.100, 0.13, 0.022)
-click(lead, 2630.0, 0.060, 0.06, 0.014)
-offset = int(LEAD_SILENCE * RATE)
-for i, value in enumerate(lead):
-    frames[offset + i] += value
-with wave.open('assets/sound/key.wav', 'wb') as out:
-    out.setnchannels(1)
-    out.setsampwidth(2)
-    out.setframerate(RATE)
-    out.writeframes(b''.join(
-        struct.pack('<h', int(max(-1.0, min(1.0, f)) * 32000))
-        for f in frames))
+def key_click(lead_silence):
+    """Derselbe Klick, nur mit unterschiedlich viel Stille davor."""
+    body = [0.0] * int(0.12 * RATE)
+    click(body, 1720.0, 0.100, 0.13, 0.022)
+    click(body, 2630.0, 0.060, 0.06, 0.014)
+    return [0.0] * int(lead_silence * RATE) + body
+
+
+def write_frames(name, frames):
+    with wave.open(f'assets/sound/{name}.wav', 'wb') as out:
+        out.setnchannels(1)
+        out.setsampwidth(2)
+        out.setframerate(RATE)
+        out.writeframes(b''.join(
+            struct.pack('<h', int(max(-1.0, min(1.0, f)) * 32000))
+            for f in frames))
+
+
+# Android bekommt den Klick ohne Vorlauf: dort ist er sofort da, und jede
+# Millisekunde Verzögerung ist unter dem Finger zu spüren.
+write_frames('key', key_click(0.0))
+
+# Der Desktop bekommt 45 ms Stille davor. Zwischen zwei Klicks wird der
+# Abspielstrang angehalten, was den PulseAudio-Strom korkt, und eine echte
+# Soundkarte braucht danach einige Millisekunden, bis wieder Töne
+# herauskommen. Ohne den Vorlauf fällt der ganze Klick in dieses Anlaufen: an
+# der echten Karte gemessen kam einer von 33 an, mit Vorlauf 33 von 33.
+write_frames('key_desktop', key_click(0.045))

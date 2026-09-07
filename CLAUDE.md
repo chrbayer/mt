@@ -466,10 +466,16 @@ IDs vergibt das Paket eine uuid, und sechs Durchgänge hintereinander spielen
 vergebene ID anders ab. Die Fehlerform „geht einmal, dann nie wieder" war auf
 beiden Plattformen dieselbe Ursache — sie hat sich nur auf einer gezeigt.
 
-## Warum der Klick 45 ms Stille vorn hat
+## Warum der Klick auf dem Desktop 45 ms Stille vorn hat
 
-`tool/make_sounds.py` setzt `LEAD_SILENCE` vor den Tastenklick. Das ist kein
-Schönheitsfehler, sondern der ganze Punkt.
+`tool/make_sounds.py` schreibt **zwei** Klickdateien mit demselben Körper:
+`key.wav` ohne Vorlauf und `key_desktop.wav` mit 45 ms Stille davor.
+`FeedbackSounds._keyAsset` wählt nach `defaultTargetPlatform`.
+
+Der Vorlauf ist kein Schönheitsfehler, sondern die Behebung eines echten
+Fehlers — und er gehört **der Plattform, nicht dem Ton**. Auf Android ist er
+nur Verzögerung, und die ist dort unter dem Finger zu spüren; Android ist die
+Hauptplattform.
 
 Zwischen zwei Klicks hält `_play` den Abspielstrang an (`stop()` → PAUSED),
 und das **korkt den PulseAudio-Strom**. Beim nächsten Klick braucht eine
@@ -486,9 +492,11 @@ gewechseltem Ausgabegerät:
 
 Deshalb sahen alle früheren Messungen gesund aus: ein Null-Sink läuft nicht
 an. Mit 45 ms Stille vorn, längerem Ausklang und knapp der halben Lautstärke
-der Antworttöne kommen an der echten Karte **33 von 33** an. Die 45 ms
-Verzögerung liegen weit unter der Schwelle, ab der sich eine Taste träge
-anfühlt.
+der Antworttöne kommen an der echten Karte **33 von 33** an.
+
+Auf Android bleibt der Klick ohne Vorlauf. Dort gibt es das Problem nicht,
+und die 45 ms waren dort sofort als Trägheit zu hören — was der Grund ist,
+warum die beiden Dateien getrennt sind, statt einen Kompromiss zu suchen.
 
 Wer den Klang ändert, muss ihn an einer **echten** Karte gegenmessen. Ein
 kürzerer oder leiserer Klick fällt sofort wieder in dieselbe Lücke.

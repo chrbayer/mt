@@ -94,3 +94,7 @@ kommen an der echten Karte 33 von 33 an.
 Auf dem Weg dorthin nebenbei gefunden und behoben (2.6.1): feste
 Abspieler-IDs plus ein nicht abgewartetes dispose ließen warmUp bei jedem
 zweiten Durchgang hängen. Ein echter Fehler, aber nicht dieser.
+
+#22 click Geräusch ist jetzt unter Android spürbar später, als Hauptplattform nicht ideal
+
+
