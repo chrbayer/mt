@@ -296,8 +296,37 @@ soll sie nicht verraten. Beim Ändern wird die alte PIN gelöscht und der
 Einrichtungsdialog erneut gezeigt; nach der alten zu fragen wäre sinnlos, der
 Weg dorthin führte gerade durch sie hindurch.
 
+Die PIN-Tastatur hat **keine grüne Taste**. Eine PIN ist genau
+`adminPinLength` Ziffern lang, und die letzte schickt sie ab — die grüne
+Taste wäre also nur in dem Moment drückbar, in dem die Eingabe noch
+unvollständig ist und sie nichts tut. Eine Taste, die manchmal nichts tut,
+bringt dem Kind das Falsche über die grüne Taste im Übungsbildschirm bei.
+`BigKeypad.showSubmit` lässt sie weg; ihr Platz im Raster bleibt frei, damit
+die Ziffern darüber nicht verrutschen.
+
 `requireAdminPin(context)` ist die einzige Schranke. Wer sie umgeht, umgeht den
 Schutz — neue geschützte Aktionen also immer dahinter aufhängen.
+
+## Profil vorübergehend sperren
+
+`users.locked` ist eine **Pause, keine Löschung**: Runden, Sterne, Blitze und
+Bestzeiten bleiben unangetastet und sind nach dem Freigeben unverändert da.
+Ein Elternteil, das das Tablet für eine Weile stilllegen will, soll nicht
+zwischen Ermahnen und dem Zerstören eines Jahres Bestzeiten wählen müssen.
+
+Die Schranke sitzt an **einer** Stelle: `_open` im Profilbildschirm. Jeder Weg
+in eine Übung beginnt mit einem Tipp auf eine Profilkachel, also reicht diese
+eine — dieselbe Überlegung wie bei `PracticeScreen._prepare()`. Die zweite
+Tür ist das **Duell**, das Profile ohne Anmeldung auswählt; dort ist ein
+gesperrtes Profil nicht wählbar, sonst wäre das Duell der Weg um die Sperre
+herum (genau wie bei der Zeitgrenze).
+
+Eine gesperrte Kachel **antwortet trotzdem**: Stille läse sich als kaputte
+App. Der Dialog sagt ausdrücklich, dass nichts verloren ist. Die Kachel
+behält ihre Farbe, nur gedämpft — sie ist weiterhin Mias Kachel, und sie ins
+Graue zu ziehen hieße „weg" statt „später". Das Paletten-Symbol weicht dem
+Schloss: Bild und Farbe für eine Kachel zu wählen, die sich nicht öffnen
+lässt, wäre eine Tür ins Nichts.
 
 ## Aufgabenzahl: drei Ebenen
 
@@ -683,8 +712,9 @@ eine Grenze für ein Kind nicht gezielt abschalten, ohne sie für alle
 abzuschalten.
 
 Die Vorgaben sind bewusst **nicht** „keine Grenze": 20 Minuten am Stück und
-zwei Stunden am Tag. Wer die Einstellungen nie öffnet, bekommt trotzdem eine
-vernünftige Feierabendzeit fürs Tablet.
+**eine Stunde** am Tag. Wer die Einstellungen nie öffnet, bekommt trotzdem
+eine vernünftige Feierabendzeit fürs Tablet. Zwei Stunden, wie es anfangs
+war, sind für ein Grundschulkind keine Grenze, sondern eine Formalie.
 
 Die Migration auf v6 setzt genau die Werte auf NULL, die v5 selbst vergeben
 hat (0 / 15 / 0). Was ein Elternteil tatsächlich gewählt hat, bleibt stehen —

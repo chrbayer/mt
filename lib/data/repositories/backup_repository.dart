@@ -71,6 +71,7 @@ class BackupRepository {
             'dailyLimitMinutes': user.dailyLimitMinutes,
             'lessonFilter': user.lessonFilter,
             'scoredRunsPerLesson': user.scoredRunsPerLesson,
+            'locked': user.locked,
           }
       ],
       'sessions': [
@@ -202,6 +203,7 @@ class BackupRepository {
                     Value(user['lessonFilter'] as String? ?? 'all'),
                 scoredRunsPerLesson:
                     Value(user['scoredRunsPerLesson'] as int?),
+                locked: Value(user['locked'] as bool? ?? false),
               ),
             );
       }

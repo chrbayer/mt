@@ -104,6 +104,14 @@ class UserRepository {
       (_db.update(_db.users)..where((u) => u.id.equals(id)))
           .write(UsersCompanion(scoredRunsPerLesson: Value(runs)));
 
+  /// Puts a profile aside, or brings it back.
+  ///
+  /// Nothing is removed: the runs, the stars and the best times stay exactly
+  /// as they are and return the moment the lock is lifted.
+  Future<void> setLocked(int id, bool locked) =>
+      (_db.update(_db.users)..where((u) => u.id.equals(id)))
+          .write(UsersCompanion(locked: Value(locked)));
+
   /// Turns the review of previously difficult tasks on or off for one child.
   Future<void> setReviewHardTasks(int id, bool value) =>
       (_db.update(_db.users)..where((u) => u.id.equals(id)))

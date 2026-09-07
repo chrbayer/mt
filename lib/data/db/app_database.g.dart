@@ -157,6 +157,19 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
     type: DriftSqlType.int,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _lockedMeta = const VerificationMeta('locked');
+  @override
+  late final GeneratedColumn<bool> locked = GeneratedColumn<bool>(
+    'locked',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("locked" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -172,6 +185,7 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
     dailyLimitMinutes,
     lessonFilter,
     scoredRunsPerLesson,
+    locked,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -295,6 +309,12 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
         ),
       );
     }
+    if (data.containsKey('locked')) {
+      context.handle(
+        _lockedMeta,
+        locked.isAcceptableOrUnknown(data['locked']!, _lockedMeta),
+      );
+    }
     return context;
   }
 
@@ -356,6 +376,10 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
         DriftSqlType.int,
         data['${effectivePrefix}scored_runs_per_lesson'],
       ),
+      locked: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}locked'],
+      )!,
     );
   }
 
@@ -415,6 +439,14 @@ class User extends DataClass implements Insertable<User> {
   /// How many runs of one lesson may earn something on one day. Null takes
   /// the app-wide setting, zero means this child has no cap.
   final int? scoredRunsPerLesson;
+
+  /// Whether a parent has put this profile aside for now.
+  ///
+  /// A pause, not a deletion: everything the child collected stays exactly
+  /// where it is and comes back untouched when the lock is lifted. That is
+  /// the point - a parent who wants to stop the tablet for a while should not
+  /// have to choose between nagging and destroying a year of best times.
+  final bool locked;
   const User({
     required this.id,
     required this.name,
@@ -429,6 +461,7 @@ class User extends DataClass implements Insertable<User> {
     this.dailyLimitMinutes,
     required this.lessonFilter,
     this.scoredRunsPerLesson,
+    required this.locked,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -456,6 +489,7 @@ class User extends DataClass implements Insertable<User> {
     if (!nullToAbsent || scoredRunsPerLesson != null) {
       map['scored_runs_per_lesson'] = Variable<int>(scoredRunsPerLesson);
     }
+    map['locked'] = Variable<bool>(locked);
     return map;
   }
 
@@ -484,6 +518,7 @@ class User extends DataClass implements Insertable<User> {
       scoredRunsPerLesson: scoredRunsPerLesson == null && nullToAbsent
           ? const Value.absent()
           : Value(scoredRunsPerLesson),
+      locked: Value(locked),
     );
   }
 
@@ -510,6 +545,7 @@ class User extends DataClass implements Insertable<User> {
       scoredRunsPerLesson: serializer.fromJson<int?>(
         json['scoredRunsPerLesson'],
       ),
+      locked: serializer.fromJson<bool>(json['locked']),
     );
   }
   @override
@@ -529,6 +565,7 @@ class User extends DataClass implements Insertable<User> {
       'dailyLimitMinutes': serializer.toJson<int?>(dailyLimitMinutes),
       'lessonFilter': serializer.toJson<String>(lessonFilter),
       'scoredRunsPerLesson': serializer.toJson<int?>(scoredRunsPerLesson),
+      'locked': serializer.toJson<bool>(locked),
     };
   }
 
@@ -546,6 +583,7 @@ class User extends DataClass implements Insertable<User> {
     Value<int?> dailyLimitMinutes = const Value.absent(),
     String? lessonFilter,
     Value<int?> scoredRunsPerLesson = const Value.absent(),
+    bool? locked,
   }) => User(
     id: id ?? this.id,
     name: name ?? this.name,
@@ -568,6 +606,7 @@ class User extends DataClass implements Insertable<User> {
     scoredRunsPerLesson: scoredRunsPerLesson.present
         ? scoredRunsPerLesson.value
         : this.scoredRunsPerLesson,
+    locked: locked ?? this.locked,
   );
   User copyWithCompanion(UsersCompanion data) {
     return User(
@@ -604,6 +643,7 @@ class User extends DataClass implements Insertable<User> {
       scoredRunsPerLesson: data.scoredRunsPerLesson.present
           ? data.scoredRunsPerLesson.value
           : this.scoredRunsPerLesson,
+      locked: data.locked.present ? data.locked.value : this.locked,
     );
   }
 
@@ -622,7 +662,8 @@ class User extends DataClass implements Insertable<User> {
           ..write('breakMinutes: $breakMinutes, ')
           ..write('dailyLimitMinutes: $dailyLimitMinutes, ')
           ..write('lessonFilter: $lessonFilter, ')
-          ..write('scoredRunsPerLesson: $scoredRunsPerLesson')
+          ..write('scoredRunsPerLesson: $scoredRunsPerLesson, ')
+          ..write('locked: $locked')
           ..write(')'))
         .toString();
   }
@@ -642,6 +683,7 @@ class User extends DataClass implements Insertable<User> {
     dailyLimitMinutes,
     lessonFilter,
     scoredRunsPerLesson,
+    locked,
   );
   @override
   bool operator ==(Object other) =>
@@ -659,7 +701,8 @@ class User extends DataClass implements Insertable<User> {
           other.breakMinutes == this.breakMinutes &&
           other.dailyLimitMinutes == this.dailyLimitMinutes &&
           other.lessonFilter == this.lessonFilter &&
-          other.scoredRunsPerLesson == this.scoredRunsPerLesson);
+          other.scoredRunsPerLesson == this.scoredRunsPerLesson &&
+          other.locked == this.locked);
 }
 
 class UsersCompanion extends UpdateCompanion<User> {
@@ -676,6 +719,7 @@ class UsersCompanion extends UpdateCompanion<User> {
   final Value<int?> dailyLimitMinutes;
   final Value<String> lessonFilter;
   final Value<int?> scoredRunsPerLesson;
+  final Value<bool> locked;
   const UsersCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
@@ -690,6 +734,7 @@ class UsersCompanion extends UpdateCompanion<User> {
     this.dailyLimitMinutes = const Value.absent(),
     this.lessonFilter = const Value.absent(),
     this.scoredRunsPerLesson = const Value.absent(),
+    this.locked = const Value.absent(),
   });
   UsersCompanion.insert({
     this.id = const Value.absent(),
@@ -705,6 +750,7 @@ class UsersCompanion extends UpdateCompanion<User> {
     this.dailyLimitMinutes = const Value.absent(),
     this.lessonFilter = const Value.absent(),
     this.scoredRunsPerLesson = const Value.absent(),
+    this.locked = const Value.absent(),
   }) : name = Value(name),
        avatar = Value(avatar),
        colorIndex = Value(colorIndex),
@@ -723,6 +769,7 @@ class UsersCompanion extends UpdateCompanion<User> {
     Expression<int>? dailyLimitMinutes,
     Expression<String>? lessonFilter,
     Expression<int>? scoredRunsPerLesson,
+    Expression<bool>? locked,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -740,6 +787,7 @@ class UsersCompanion extends UpdateCompanion<User> {
       if (lessonFilter != null) 'lesson_filter': lessonFilter,
       if (scoredRunsPerLesson != null)
         'scored_runs_per_lesson': scoredRunsPerLesson,
+      if (locked != null) 'locked': locked,
     });
   }
 
@@ -757,6 +805,7 @@ class UsersCompanion extends UpdateCompanion<User> {
     Value<int?>? dailyLimitMinutes,
     Value<String>? lessonFilter,
     Value<int?>? scoredRunsPerLesson,
+    Value<bool>? locked,
   }) {
     return UsersCompanion(
       id: id ?? this.id,
@@ -772,6 +821,7 @@ class UsersCompanion extends UpdateCompanion<User> {
       dailyLimitMinutes: dailyLimitMinutes ?? this.dailyLimitMinutes,
       lessonFilter: lessonFilter ?? this.lessonFilter,
       scoredRunsPerLesson: scoredRunsPerLesson ?? this.scoredRunsPerLesson,
+      locked: locked ?? this.locked,
     );
   }
 
@@ -817,6 +867,9 @@ class UsersCompanion extends UpdateCompanion<User> {
     if (scoredRunsPerLesson.present) {
       map['scored_runs_per_lesson'] = Variable<int>(scoredRunsPerLesson.value);
     }
+    if (locked.present) {
+      map['locked'] = Variable<bool>(locked.value);
+    }
     return map;
   }
 
@@ -835,7 +888,8 @@ class UsersCompanion extends UpdateCompanion<User> {
           ..write('breakMinutes: $breakMinutes, ')
           ..write('dailyLimitMinutes: $dailyLimitMinutes, ')
           ..write('lessonFilter: $lessonFilter, ')
-          ..write('scoredRunsPerLesson: $scoredRunsPerLesson')
+          ..write('scoredRunsPerLesson: $scoredRunsPerLesson, ')
+          ..write('locked: $locked')
           ..write(')'))
         .toString();
   }
@@ -2996,6 +3050,7 @@ typedef $$UsersTableCreateCompanionBuilder = UsersCompanion Function({
   Value<int?> dailyLimitMinutes,
   Value<String> lessonFilter,
   Value<int?> scoredRunsPerLesson,
+  Value<bool> locked,
 });
 typedef $$UsersTableUpdateCompanionBuilder = UsersCompanion Function({
   Value<int> id,
@@ -3011,6 +3066,7 @@ typedef $$UsersTableUpdateCompanionBuilder = UsersCompanion Function({
   Value<int?> dailyLimitMinutes,
   Value<String> lessonFilter,
   Value<int?> scoredRunsPerLesson,
+  Value<bool> locked,
 });
 
 final class $$UsersTableReferences
@@ -3146,6 +3202,11 @@ class $$UsersTableFilterComposer extends Composer<_$AppDatabase, $UsersTable> {
 
   ColumnFilters<int> get scoredRunsPerLesson => $composableBuilder(
     column: $table.scoredRunsPerLesson,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get locked => $composableBuilder(
+    column: $table.locked,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -3298,6 +3359,11 @@ class $$UsersTableOrderingComposer
     column: $table.scoredRunsPerLesson,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<bool> get locked => $composableBuilder(
+    column: $table.locked,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$UsersTableAnnotationComposer
@@ -3367,6 +3433,9 @@ class $$UsersTableAnnotationComposer
     column: $table.scoredRunsPerLesson,
     builder: (column) => column,
   );
+
+  GeneratedColumn<bool> get locked =>
+      $composableBuilder(column: $table.locked, builder: (column) => column);
 
   Expression<T> sessionsRefs<T extends Object>(
     Expression<T> Function($$SessionsTableAnnotationComposer a) f,
@@ -3490,6 +3559,7 @@ class $$UsersTableTableManager
                 Value<int?> dailyLimitMinutes = const Value.absent(),
                 Value<String> lessonFilter = const Value.absent(),
                 Value<int?> scoredRunsPerLesson = const Value.absent(),
+                Value<bool> locked = const Value.absent(),
               }) => UsersCompanion(
                 id: id,
                 name: name,
@@ -3504,6 +3574,7 @@ class $$UsersTableTableManager
                 dailyLimitMinutes: dailyLimitMinutes,
                 lessonFilter: lessonFilter,
                 scoredRunsPerLesson: scoredRunsPerLesson,
+                locked: locked,
               ),
           createCompanionCallback:
               ({
@@ -3520,6 +3591,7 @@ class $$UsersTableTableManager
                 Value<int?> dailyLimitMinutes = const Value.absent(),
                 Value<String> lessonFilter = const Value.absent(),
                 Value<int?> scoredRunsPerLesson = const Value.absent(),
+                Value<bool> locked = const Value.absent(),
               }) => UsersCompanion.insert(
                 id: id,
                 name: name,
@@ -3534,6 +3606,7 @@ class $$UsersTableTableManager
                 dailyLimitMinutes: dailyLimitMinutes,
                 lessonFilter: lessonFilter,
                 scoredRunsPerLesson: scoredRunsPerLesson,
+                locked: locked,
               ),
           withReferenceMapper: (p0) => p0
               .map(

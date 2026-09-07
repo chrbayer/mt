@@ -176,6 +176,9 @@ void main() {
       await recordRun(SessionRepository(before),
           userId: id, lessonId: 'add_20_plain');
 
+      if (version < 11) {
+        await before.customStatement('ALTER TABLE users DROP COLUMN locked');
+      }
       if (version < 10) {
         await before.customStatement('ALTER TABLE sessions DROP COLUMN deleted');
       }
@@ -224,7 +227,7 @@ void main() {
       return file;
     }
 
-    for (final from in [1, 2, 3, 4, 5, 6, 7, 8, 9]) {
+    for (final from in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]) {
       test('a database from schema v$from keeps its data', () async {
         final file = await databaseAtVersion(from);
 
@@ -257,6 +260,8 @@ void main() {
         // Nothing was ever deleted before v10 either.
         expect((await after.select(after.sessions).get()).single.deleted,
             isFalse);
+        // And nobody was locked out by an update.
+        expect(user.locked, isFalse);
         // The stars were worked out from the runs before v8 and are carried
         // over once: a clean run of ten is worth three, and nobody loses
         // what they collected because the app changed how it keeps score.

@@ -44,6 +44,7 @@ class _ProfileSettingsDialogState
   late int? _breakMinutes = widget.user.breakMinutes;
   late int? _dailyMinutes = widget.user.dailyLimitMinutes;
   late int? _scoredRuns = widget.user.scoredRunsPerLesson;
+  late bool _locked = widget.user.locked;
   late LessonFilter _filter = widget.user.filter;
 
   @override
@@ -179,6 +180,20 @@ class _ProfileSettingsDialogState
                 onChanged: (runs) => setState(() => _scoredRuns = runs),
               ),
               const Divider(height: 32),
+              SwitchListTile(
+                value: _locked,
+                onChanged: (value) => setState(() => _locked = value),
+                contentPadding: EdgeInsets.zero,
+                title: Text('Profil vorübergehend sperren',
+                    style: Theme.of(context).textTheme.titleLarge),
+                subtitle: const Text(
+                  'Das Profil lässt sich dann nicht öffnen und nicht zum '
+                  'Duell einladen. Nichts geht verloren: Sterne, Blitze und '
+                  'Bestzeiten sind nach dem Freigeben unverändert da.',
+                  style: TextStyle(fontSize: 17, color: AppColors.textMuted),
+                ),
+              ),
+              const Divider(height: 32),
               Text('Sterne', style: Theme.of(context).textTheme.titleLarge),
               const SizedBox(height: 4),
               const Text(
@@ -294,6 +309,7 @@ class _ProfileSettingsDialogState
                         widget.user.id,
                         _scoredRuns,
                       );
+                      await repository.setLocked(widget.user.id, _locked);
                       navigator.pop();
                     },
                     child: const Text('Speichern'),

@@ -75,4 +75,20 @@ verwerfen.
 
 #17 erledigt (2.5.0) — Im Elternbereich, Übungsverlauf: Knopf zum Aufräumen unvollständiger Übungsläufe, nur für ausgewählte Version. Das und auch das normale Löschen einer Übung darf die Bestenliste und STerne/Blitze beeinflussen, aber nicht die verbrauchte Zeit. Version 2.5.0
 
-#18 Grüner Knopf für Pineingabe unnötig: Entwerder Eingabe abwarten oder nicht mehr anzeigen.
+#18 erledigt (2.6.0) — Grüner Knopf für Pineingabe unnötig: Entwerder Eingabe abwarten oder nicht mehr anzeigen.
+
+#19 erledigt (2.6.0) — Neuer default für Gesamtzeit zum Üben: 60 min statt 120 min
+
+#20 erledigt (2.6.0) — Profil temporär im Elternbereich sperrbar machen
+
+#21 Ton unter Linux: die ersten Töne kommen, dann bleibt es still. Auf Android
+läuft es. Nicht gelöst durch stop() statt seek() (2.4.6) und nicht durch das
+Abschalten des Positions-Pollings (2.5.2). Nachgewiesen ist bisher nur, dass
+die native Seite trägt: ein C-Prüfprogramm, das die Abfolge von
+audioplayers_linux nachbaut (READY → PAUSED → PLAYING → EOS → Pause +
+Flush-Seek → PLAYING), spielt im Tipp-Takt achtmal fehlerfrei ab. Der Fehler
+sitzt also zwischen Dart-Wrapper und Plugin. Zum Weiterkommen fehlt ein Lauf
+der echten App auf Linux mit Protokoll — auf dem Rechner gibt es keinen
+headless-Compositor (kein Xvfb, kein weston/cage), und der Desktop-Build
+gehört auf den Bildschirm des Benutzers. Der Knopf "Ton testen" im
+Elternbereich zählt die tatsächlich gelaufenen Klicks und ist der Einstieg.

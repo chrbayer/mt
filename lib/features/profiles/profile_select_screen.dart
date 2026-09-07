@@ -16,10 +16,39 @@ import 'profile_editor.dart';
 class ProfileSelectScreen extends ConsumerWidget {
   const ProfileSelectScreen({super.key});
 
+  /// The one door into a run: every path to practice starts with a tap on a
+  /// profile tile, so this is where a locked profile is turned away.
   void _open(BuildContext context, WidgetRef ref, User user) {
+    if (user.locked) {
+      _sayItIsLocked(context, user);
+      return;
+    }
     ref.read(activeUserProvider.notifier).select(user);
     Navigator.of(context).push(
       MaterialPageRoute<void>(builder: (_) => const LessonHomeScreen()),
+    );
+  }
+
+  /// A locked tile still answers. Silence would read as a broken app, and a
+  /// child needs to know that nothing of theirs is gone.
+  void _sayItIsLocked(BuildContext context, User user) {
+    showDialog<void>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text('${user.name} macht gerade Pause'),
+        content: const Text(
+          'Dieses Profil ist vorübergehend gesperrt. Alle Sterne, Blitze und '
+          'Bestzeiten bleiben erhalten - sie sind wieder da, sobald die '
+          'Eltern es freigeben.',
+          style: TextStyle(fontSize: 20),
+        ),
+        actions: [
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: const Text('Alles klar'),
+          ),
+        ],
+      ),
     );
   }
 
@@ -147,7 +176,13 @@ class _ProfileTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = AppColors.profileColor(user.colorIndex);
+    // A locked profile keeps its own colour, only muted: it is still Mia's
+    // tile, and greying it into anonymity would say "gone" rather than
+    // "later".
+    final locked = user.locked;
+    final color = locked
+        ? AppColors.textMuted
+        : AppColors.profileColor(user.colorIndex);
     return SizedBox(
       width: _tileWidth,
       height: _tileHeight,
@@ -155,7 +190,7 @@ class _ProfileTile extends StatelessWidget {
         children: [
           Positioned.fill(
             child: Material(
-              color: color.withValues(alpha: 0.12),
+              color: color.withValues(alpha: locked ? 0.06 : 0.12),
               borderRadius: BorderRadius.circular(24),
               child: InkWell(
                 onTap: onTap,
@@ -168,7 +203,11 @@ class _ProfileTile extends StatelessWidget {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(user.avatar, style: const TextStyle(fontSize: 88)),
+                      Opacity(
+                        opacity: locked ? 0.4 : 1,
+                        child: Text(user.avatar,
+                            style: const TextStyle(fontSize: 88)),
+                      ),
                       const SizedBox(height: 10),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -192,11 +231,15 @@ class _ProfileTile extends StatelessWidget {
           Positioned(
             top: 4,
             right: 4,
-            child: IconButton(
-              tooltip: 'Bild und Farbe ändern',
-              icon: Icon(Icons.palette_outlined, color: color, size: 28),
-              onPressed: onEditLook,
-            ),
+            child: locked
+                // No palette while locked: choosing a colour for a tile you
+                // cannot open is a door that leads nowhere.
+                ? Icon(Icons.lock_outline, color: color, size: 28)
+                : IconButton(
+                    tooltip: 'Bild und Farbe ändern',
+                    icon: Icon(Icons.palette_outlined, color: color, size: 28),
+                    onPressed: onEditLook,
+                  ),
           ),
         ],
       ),

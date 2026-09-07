@@ -13,6 +13,14 @@ class BigKeypad extends StatelessWidget {
   final bool enabled;
   final bool haptics;
 
+  /// Whether the green key is there at all.
+  ///
+  /// The PIN pad does without: a PIN is exactly four digits long, so the
+  /// fourth one submits it. A key that can only ever be pressed on an
+  /// incomplete entry - where it does nothing - is a key that teaches the
+  /// wrong thing about the green key everywhere else.
+  final bool showSubmit;
+
   /// Minimum edge length of a key. Keys grow to fill the available space.
   static const double minKeySize = 96;
 
@@ -23,6 +31,7 @@ class BigKeypad extends StatelessWidget {
     required this.onSubmit,
     this.enabled = true,
     this.haptics = true,
+    this.showSubmit = true,
   });
 
   void _tap(VoidCallback action, {bool strong = false}) {
@@ -92,16 +101,21 @@ class BigKeypad extends StatelessWidget {
                   child: digit(0),
                 ),
               ),
+              // The empty half of the row still takes its place: the digits
+              // above must not shift when the green key is away.
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.all(6),
-                  child: KeypadKey(
-                    key: const Key('submit'),
-                    onTap: () => _tap(onSubmit, strong: true),
-                    enabled: enabled,
-                    background: AppColors.correct,
-                    child: const Icon(Icons.check, size: 52, color: Colors.white),
-                  ),
+                  child: showSubmit
+                      ? KeypadKey(
+                          key: const Key('submit'),
+                          onTap: () => _tap(onSubmit, strong: true),
+                          enabled: enabled,
+                          background: AppColors.correct,
+                          child: const Icon(Icons.check,
+                              size: 52, color: Colors.white),
+                        )
+                      : const SizedBox.shrink(),
                 ),
               ),
             ],

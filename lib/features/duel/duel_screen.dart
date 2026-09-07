@@ -71,8 +71,9 @@ class _DuelSetupScreenState extends ConsumerState<DuelSetupScreen> {
                     spacing: 12,
                     runSpacing: 12,
                     children: [
-                      // A child on a break stays on it. Otherwise the duel
-                      // would be the way around a cap a parent has set.
+                      // A child on a break stays on it, and so does a locked
+                      // profile. Otherwise the duel would be the way around
+                      // both, and a parent would have set neither.
                       for (final user in users)
                         Builder(builder: (context) {
                           final onBreak = !(ref
@@ -80,9 +81,10 @@ class _DuelSetupScreenState extends ConsumerState<DuelSetupScreen> {
                                   .value ??
                               PracticeAllowance.unlimited)
                               .allowed;
+                          final away = user.locked || onBreak;
                           return ChoiceChip(
                             selected: _players.contains(user.id),
-                            onSelected: onBreak
+                            onSelected: away
                                 ? null
                                 : (on) => setState(() => on
                                     ? _players.add(user.id)
@@ -90,9 +92,11 @@ class _DuelSetupScreenState extends ConsumerState<DuelSetupScreen> {
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 16, vertical: 12),
                             label: Text(
-                              onBreak
-                                  ? '${user.avatar}  ${user.name} · Pause'
-                                  : '${user.avatar}  ${user.name}',
+                              user.locked
+                                  ? '${user.avatar}  ${user.name} · gesperrt'
+                                  : onBreak
+                                      ? '${user.avatar}  ${user.name} · Pause'
+                                      : '${user.avatar}  ${user.name}',
                               style: const TextStyle(fontSize: 21),
                             ),
                           );

@@ -98,7 +98,7 @@ antreten. Die App läuft vollständig offline, ohne Konten und ohne Netzwerk.
   abgebrochen), einzelne Durchgänge löschen, Profile anlegen, umbenennen und
   löschen, Statistiken zurücksetzen, PIN ändern. Ganz oben steht **„Heute
   geübt"** — für jedes Profil die heutige Zeit, und wo eine Tagesgrenze gilt,
-  gleich daneben („45 min von 120 min"), damit auf einen Blick klar ist, wer
+  gleich daneben („45 min von 60 min"), damit auf einen Blick klar ist, wer
   schon wie viel gemacht hat. Gezählt wird genau wie die Grenze zählt,
   abgebrochene Durchgänge eingeschlossen — und die **Einstellungen für
   alle**: Uhr während der Übung, Vibration und die Vorgabe für die Länge eines
@@ -176,7 +176,7 @@ antreten. Die App läuft vollständig offline, ohne Konten und ohne Netzwerk.
   nächste Blitz kosten würde. Die Ersten Schritte haben keine — dort wird
   nicht gemessen.
 * **Übungszeit**: zwei Grenzen, standardmäßig **20 Minuten am Stück** und
-  **2 Stunden am Tag**. Beide gelten erst einmal für alle und lassen sich im
+  **1 Stunde am Tag**. Beide gelten erst einmal für alle und lassen sich im
   Elternbereich ändern; für ein einzelnes Kind steht daneben eine eigene
   Vorgabe, die die allgemeine ersetzt. „Ohne Grenze" ist dabei eine
   Entscheidung und etwas anderes als „wie für alle".
@@ -213,6 +213,10 @@ antreten. Die App läuft vollständig offline, ohne Konten und ohne Netzwerk.
   Verlauf —, sie setzt nur keine Bestzeit mehr und vergibt keine Sterne und
   Blitze. Die App sagt es vorher im Startdialog und hinterher auf dem
   Ergebnisbildschirm. Im Elternbereich einstellbar, für alle und je Kind.
+* **Profil vorübergehend sperren**: ein Kind kann für eine Weile pausiert
+  werden. Die Kachel lässt sich dann nicht öffnen und nicht zum Duell
+  einladen, sagt aber, was los ist — und **nichts geht verloren**: Sterne,
+  Blitze und Bestzeiten sind nach dem Freigeben unverändert da.
 * **Aufräumen im Elternbereich**: abgebrochene Durchgänge lassen sich mit
   einem Knopf aus dem Verlauf räumen — für alle oder nur für das gewählte
   Kind. Löschen kostet Sterne, Blitze und Bestenlistenplätze, **aber nie die

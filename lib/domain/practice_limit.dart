@@ -12,12 +12,13 @@ const dailyLimitOptions = [0, 15, 30, 45, 60, 90, 120];
 
 /// What holds when nobody has decided otherwise.
 ///
-/// Deliberately not "no limit": two hours of maths in a day and twenty
-/// minutes without getting up are already generous, and a parent who never
-/// opens the settings should still get a sensible bedtime for the tablet.
+/// Deliberately not "no limit": a parent who never opens the settings should
+/// still get a sensible bedtime for the tablet. An hour of mental arithmetic
+/// is a long day for a primary-school child - two, which this used to be, is
+/// not a limit so much as a formality.
 const defaultStretchMinutes = 20;
 const defaultBreakMinutes = 15;
-const defaultDailyMinutes = 120;
+const defaultDailyMinutes = 60;
 
 /// The three time limits, as they apply to one child.
 class PracticeLimits {

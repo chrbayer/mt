@@ -239,6 +239,59 @@ void main() {
       expect(find.textContaining('aufräumen'), findsNothing);
     });
 
+    testWidgets('the PIN pad has no green key', (tester) async {
+      // A PIN is exactly four digits, and the fourth submits it - so the
+      // green key could only ever be pressed on an incomplete entry, where
+      // it does nothing. That would teach the wrong thing about the green
+      // key everywhere else.
+      await pumpProfiles(tester);
+      await tester.tap(find.text('Eltern'));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('digit-1')), findsOneWidget);
+      expect(find.byKey(const Key('backspace')), findsOneWidget);
+      expect(find.byKey(const Key('submit')), findsNothing);
+    });
+
+    testWidgets('the fourth digit opens the parent area by itself',
+        (tester) async {
+      await pumpProfiles(tester);
+      await tester.tap(find.text('Eltern'));
+      await tester.pumpAndSettle();
+      await enterPin(tester, '1234');
+      await enterPin(tester, '1234');
+
+      expect(find.text('Übungsverlauf'), findsOneWidget);
+    });
+
+    testWidgets('a profile can be locked and unlocked again', (tester) async {
+      await openAdmin(tester);
+      await tester.tap(find.text('Verwaltung'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Einstellungen').first);
+      await tester.pumpAndSettle();
+      expect(find.text('Einstellungen für Mia'), findsOneWidget);
+
+      // The dialog scrolls, so the switch has to be brought into view first.
+      final lock = find.widgetWithText(
+          SwitchListTile, 'Profil vorübergehend sperren');
+      await tester.ensureVisible(lock);
+      await tester.pumpAndSettle();
+      await tester.tap(lock);
+      await tester.pump();
+      // The dialog scrolls, and the button is below the fold.
+      await tester.ensureVisible(find.text('Speichern'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Speichern'));
+      await tester.pumpAndSettle();
+
+      final locked = await container.read(userRepositoryProvider).findUser(mia);
+      expect(locked!.locked, isTrue);
+      // Nothing else moved - a lock is a pause, not a reset.
+      expect(locked.name, 'Mia');
+      expect(locked.avatar, '🦊');
+    });
+
     testWidgets('statistics can be reset per profile', (tester) async {
       await run(mia, 'add_20_plain');
       await run(tom, 'mix_100');

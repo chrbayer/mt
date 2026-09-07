@@ -150,11 +150,11 @@ void main() {
   });
 
   group('two levels', () {
-    test('the defaults are two hours a day and twenty minutes at a stretch',
+    test('the defaults are an hour a day and twenty minutes at a stretch',
         () {
       const global = PracticeLimits();
       expect(global.stretchMinutes, 20);
-      expect(global.dailyMinutes, 120);
+      expect(global.dailyMinutes, 60);
       expect(global.breakMinutes, 15);
       // Both are among the offered values, so a parent can see which one is
       // in force rather than facing an unselected row.

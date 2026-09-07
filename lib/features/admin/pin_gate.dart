@@ -180,8 +180,12 @@ class _PinDialogState extends ConsumerState<_PinDialog> {
               ),
               SizedBox(
                 height: 380,
+                // No green key: the fourth digit submits the PIN by itself,
+                // so the only moment it could ever be pressed is on an
+                // incomplete entry, where it does nothing.
                 child: BigKeypad(
                   haptics: preferences.haptics,
+                  showSubmit: false,
                   onDigit: _press,
                   onBackspace: _backspace,
                   onSubmit: _submit,

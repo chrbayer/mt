@@ -63,6 +63,14 @@ class Users extends Table {
   /// How many runs of one lesson may earn something on one day. Null takes
   /// the app-wide setting, zero means this child has no cap.
   IntColumn get scoredRunsPerLesson => integer().nullable()();
+
+  /// Whether a parent has put this profile aside for now.
+  ///
+  /// A pause, not a deletion: everything the child collected stays exactly
+  /// where it is and comes back untouched when the lock is lifted. That is
+  /// the point - a parent who wants to stop the tablet for a while should not
+  /// have to choose between nagging and destroying a year of best times.
+  BoolColumn get locked => boolean().withDefault(const Constant(false))();
 }
 
 /// What one child last chose for one lesson.
@@ -176,7 +184,7 @@ class AppDatabase extends _$AppDatabase {
       : super(executor ?? driftDatabase(name: 'mathe_trainer'));
 
   @override
-  int get schemaVersion => 10;
+  int get schemaVersion => 11;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -206,6 +214,7 @@ class AppDatabase extends _$AppDatabase {
               TableMigration(users, newColumns: [
                 users.lessonFilter,
                 users.scoredRunsPerLesson,
+                users.locked,
               ]),
             );
             // A profile still carrying what v5 handed it never had a decision
@@ -245,6 +254,13 @@ class AppDatabase extends _$AppDatabase {
           // stays counted. Nothing was ever deleted before, so the column's
           // default of false is the whole migration.
           if (from < 10) await m.addColumn(sessions, sessions.deleted);
+          // v11 lets a parent put a profile aside for a while. Nobody was
+          // ever locked before, so the default of false is the migration -
+          // and again only where the v6 rebuild did not already bring the
+          // column along.
+          if (from < 11 && from >= 6) {
+            await m.addColumn(users, users.locked);
+          }
         },
         beforeOpen: (details) async {
           // Needed for the ON DELETE CASCADE above to actually fire.
