@@ -5,6 +5,7 @@ import '../../domain/practice_limit.dart';
 import '../../providers.dart';
 import '../../theme/app_theme.dart';
 import '../common/amount_choice.dart';
+import 'sound_test_button.dart';
 import '../common/task_count_choice.dart';
 
 /// Everything that holds for the whole app rather than for one child.
@@ -59,6 +60,10 @@ class GlobalSettingsTab extends ConsumerWidget {
             'Tablet spürt man die Vibration kaum.',
             style: TextStyle(fontSize: 18),
           ),
+        ),
+        const Padding(
+          padding: EdgeInsets.fromLTRB(16, 4, 16, 0),
+          child: SoundTestButton(),
         ),
         const Divider(height: 40),
         const Text('Aufgaben pro Durchgang für alle',

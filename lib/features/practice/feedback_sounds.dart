@@ -21,9 +21,17 @@ class FeedbackSounds {
   final AudioPlayer _key = AudioPlayer(playerId: 'mt-key');
   bool _ready = false;
 
-  Future<void> warmUp() async {
-    if (_ready) return;
-    _ready = true;
+  /// Why the sound is not working, if it is not.
+  ///
+  /// Kept rather than only logged: "der Ton geht nicht" is impossible to act
+  /// on, and on a tablet there is no console to read. The parent area can
+  /// show this.
+  String? lastError;
+
+  bool get isReady => _ready;
+
+  Future<bool> warmUp() async {
+    if (_ready) return true;
     try {
       await _correct.setReleaseMode(ReleaseMode.stop);
       await _wrong.setReleaseMode(ReleaseMode.stop);
@@ -31,12 +39,16 @@ class FeedbackSounds {
       await _correct.setSource(AssetSource('sound/correct.wav'));
       await _wrong.setSource(AssetSource('sound/wrong.wav'));
       await _key.setSource(AssetSource('sound/key.wav'));
+      _ready = true;
+      lastError = null;
     } catch (error) {
       // A device without working audio must not take the practice screen
       // down with it - the run matters, the sound does not.
       debugPrint('Rückmeldungstöne nicht verfügbar: $error');
+      lastError = '$error';
       _ready = false;
     }
+    return _ready;
   }
 
   /// Rewinds with [AudioPlayer.stop] rather than [AudioPlayer.seek].
@@ -55,8 +67,10 @@ class FeedbackSounds {
     try {
       await player.stop();
       await player.resume();
+      lastError = null;
     } catch (error) {
       debugPrint('Ton konnte nicht abgespielt werden: $error');
+      lastError = '$error';
     }
   }
 

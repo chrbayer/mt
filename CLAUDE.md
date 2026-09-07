@@ -418,6 +418,13 @@ standardmäßig an.
 Die WAV-Dateien erzeugt `tool/make_sounds.py`. Wer sie ändern will, ändert die
 Noten dort und lässt das Skript neu laufen — nicht die Dateien bearbeiten.
 
+`FeedbackSounds` merkt sich seinen letzten Fehler (`lastError`), statt ihn nur
+zu loggen: auf einem Tablet gibt es keine Konsole, und „der Ton geht nicht"
+lässt sich ohne den Fehlertext nicht bearbeiten. Der Knopf **Ton testen** im
+Elternbereich spielt alle vier Töne nacheinander — Klick, richtig, falsch,
+Klick — und zeigt sonst genau diesen Text. Vier statt einem, weil ein Fehler
+schon einmal genau so aussah: der erste Ton kam, alle weiteren nicht.
+
 `FeedbackSounds` hält alle Abspieler vorgeladen: einen erst beim ersten
 Fehler zu erzeugen verzögert genau den Ton, der sofort kommen soll. Jeder
 Fehler beim Laden oder Abspielen wird geschluckt und nur geloggt — auf einem
@@ -784,6 +791,15 @@ wäre schlimmer als keine. Der Test passt sich an, wie er läuft, und deckt
 damit beide Wege ab — einmal ohne Define, einmal mit.
 
 ## Linux-Build
+
+Der Desktop-Build wird **nicht** von `build_android.sh` mitgebaut. Wer eine
+Android-Version veröffentlicht, hat damit noch keine neue Linux-Version — und
+ein alter Bundle sieht aus wie ein Fehler in der neuen Fassung. Beides ist
+genau so passiert: „Ton kommt nur einmal" und „Versionsnummer fehlt" waren
+zwei bereits behobene Fehler in einem Bundle, das seit Wochen nicht neu
+gebaut worden war. Die Versionsnummer unten rechts auf dem Profilbildschirm
+sagt, welcher Stand tatsächlich läuft; steht dort nichts, wurde ohne
+`build_client.sh` gebaut.
 
 Braucht GStreamer-Entwicklungspakete (`gstreamer1-devel`,
 `gstreamer1-plugins-base-devel`): `audioplayers` zieht auf Linux
