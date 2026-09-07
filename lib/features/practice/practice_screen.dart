@@ -77,6 +77,15 @@ class _PracticeScreenState extends ConsumerState<PracticeScreen>
   int? _sessionId;
   bool _leaving = false;
 
+  /// True while the "Übung beenden?" dialog is up.
+  ///
+  /// The clock is stopped meanwhile - a child deciding whether to stop should
+  /// not be timed - but the pause **screen** stays away. It exists to offer a
+  /// "Weiter" button, and behind a modal dialog that button cannot be reached
+  /// anyway. Without this the child saw the pause screen flash by on the way
+  /// out of every aborted run.
+  bool _askingToAbort = false;
+
   final FeedbackSounds _sounds = FeedbackSounds();
 
   /// Set when the practice cap was already reached as this screen opened.
@@ -300,6 +309,8 @@ class _PracticeScreenState extends ConsumerState<PracticeScreen>
   }
 
   Future<void> _confirmAbort() async {
+    if (_askingToAbort) return;
+    setState(() => _askingToAbort = true);
     _controller?.pause();
     final leave = await showDialog<bool>(
       context: context,
@@ -324,6 +335,8 @@ class _PracticeScreenState extends ConsumerState<PracticeScreen>
 
     if (!mounted) return;
     if (leave ?? false) {
+      // Set before the first await: from here on the screen is on its way
+      // out, and neither the pause screen nor a second dialog belongs on it.
       _leaving = true;
       final sessionId = _sessionId;
       if (sessionId != null) {
@@ -346,6 +359,7 @@ class _PracticeScreenState extends ConsumerState<PracticeScreen>
         );
       }
     } else {
+      setState(() => _askingToAbort = false);
       _controller?.resume();
     }
   }
@@ -491,7 +505,11 @@ class _PracticeScreenState extends ConsumerState<PracticeScreen>
                   ],
                 ),
               ),
-              if (controller.isPaused) _PauseOverlay(onResume: controller.resume),
+              // A stopped clock is not the same thing as a pause screen: the
+              // abort dialog stops the clock too, and on the way out of a run
+              // this screen would otherwise flash by.
+              if (controller.isPaused && !_askingToAbort && !_leaving)
+                _PauseOverlay(onResume: controller.resume),
             ],
           ),
         ),

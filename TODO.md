@@ -67,4 +67,10 @@ Formen dran — ausgerechnet die schwerste kann die fehlende sein. Ein Vorrat
 könnte die Wiedervorlage-Formen an den Anfang des Blocks ziehen, statt sie zu
 verwerfen.
 
-#14 Abbruch einer Übung hat über einen kurz sichtbaren Pausenscreen geführt.
+#14 erledigt (2.4.6) — Klickgeräusch ist nur einmal hörbar.
+
+#15 erledigt (2.4.6) — Abbruch einer Übung hat über einen kurz sichtbaren Pausenscreen geführt.
+
+#16 Um zu verhindern, dass man bei leichten Übungen nur auf Geschwindigkeit geht, ein konfigurierbateres Maximum Sterne pro Übung pro Tag einführen, einstellbar im Elternbereich die die Zeiten auch
+
+#17 Im Elternbereich, Übungsverlauf: Knopf zum Aufräumen unvollständiger Übungsläufe, nur für ausgewählte Version. Das und auch das normale Löschen einer Übung darf die Bestenliste und STerne/Blitze beeinflussen, aber nicht die verbrauchte Zeit. Version 2.5.0

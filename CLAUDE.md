@@ -248,6 +248,19 @@ Der Test in `test/features/profile_editor_test.dart` simuliert die Tastatur
 muss** — scrollen hieße, dass etwas verdeckt ist. Wer dort etwas ergänzt, muss
 diesen Test bestehen.
 
+## Angehaltene Uhr ist kein Pausenbildschirm
+
+`_confirmAbort` hält die Uhr an, während das Kind überlegt — richtig, denn
+diese Sekunden sind keine Rechenzeit. Der **Pausenbildschirm** darf dabei
+trotzdem nicht erscheinen: er trägt den „Weiter"-Knopf, und hinter einem
+modalen Dialog ist der ohnehin nicht erreichbar. Er stand dort hinter dem
+Dialog und blitzte nach „Beenden" noch einmal formatfüllend auf, bevor der
+Bildschirm wechselte.
+
+`_askingToAbort` und `_leaving` halten ihn heraus. Für die Unterbrechung von
+außen (`didChangeAppLifecycleState`) bleibt er unverändert — dort ist er der
+ganze Zweck.
+
 ## Navigation aus einem Bottom Sheet
 
 Den `NavigatorState` **vor** dem `pop()` in eine lokale Variable holen. Nach
@@ -428,6 +441,15 @@ trotzdem käme, meldete dem Kind ein Ankommen, das nicht stattgefunden hat.
 Die **Vibration** folgt dieser Regel nicht: sie sitzt im Tastatur-Widget und
 kommt bei jedem Druck. Das ist so geblieben, weil ein Finger auf einer Taste
 etwas anderes ist als eine Zahl im Feld.
+
+`FeedbackSounds._play` spult mit `stop()` zurück, **nicht** mit `seek()`.
+`seek` wartet auf das Plattform-Ereignis `onSeekComplete` — mit 30 Sekunden
+Zeitlimit. Androids MediaPlayer meldet einen Sprung, der nirgendwohin geht,
+nicht zuverlässig, und nach dem Ende eines Tons hat das Plugin ihn bereits
+auf null zurückgespult: jede Wiederholung war genau so ein Sprung. Das
+`await` kam nie zurück, das `resume()` darunter lief nie, und **jeder Ton war
+genau einmal je Durchgang hörbar**. `stop()` spult ohne Ereignis zurück, und
+mit `ReleaseMode.stop` bleibt die Quelle geladen.
 
 ## Nicht gewertete Lektionen
 

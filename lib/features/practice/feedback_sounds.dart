@@ -39,10 +39,21 @@ class FeedbackSounds {
     }
   }
 
+  /// Rewinds with [AudioPlayer.stop] rather than [AudioPlayer.seek].
+  ///
+  /// `seek` waits for the platform's `onSeekComplete` event, with a thirty
+  /// second timeout. Android's MediaPlayer does not reliably report a seek
+  /// that goes nowhere - and after a sound has finished, the plugin has
+  /// already rewound it to zero, so every replay was exactly such a seek.
+  /// The await never returned, `resume()` below it never ran, and each sound
+  /// was audible exactly once per run.
+  ///
+  /// `stop()` rewinds natively without waiting for an event, and with
+  /// [ReleaseMode.stop] the source stays prepared.
   Future<void> _play(AudioPlayer player) async {
     if (!_ready) return;
     try {
-      await player.seek(Duration.zero);
+      await player.stop();
       await player.resume();
     } catch (error) {
       debugPrint('Ton konnte nicht abgespielt werden: $error');

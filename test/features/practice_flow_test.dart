@@ -267,4 +267,46 @@ void main() {
     await typeNumber(tester, 7);
     expect(tester.widget<TaskDisplay>(find.byType(TaskDisplay)).input, '7');
   });
+
+  testWidgets('leaving never shows the pause screen on the way out',
+      (tester) async {
+    // The dialog stops the clock, which used to raise the pause overlay -
+    // it stood behind the dialog and then flashed up full screen for a frame
+    // between "Beenden" and the lesson list.
+    await pumpPractice(tester);
+
+    await tester.tap(find.byIcon(Icons.close));
+    await tester.pumpAndSettle();
+    expect(find.text('Übung beenden?'), findsOneWidget);
+    expect(find.text('Pause'), findsNothing,
+        reason: 'the dialog stops the clock, it does not pause the child');
+
+    await tester.tap(find.text('Beenden'));
+    // Frame by frame rather than pumpAndSettle: the flash lasted one frame.
+    for (var i = 0; i < 12; i++) {
+      await tester.pump(const Duration(milliseconds: 16));
+      expect(find.text('Pause'), findsNothing);
+    }
+    await tester.pumpAndSettle();
+    expect(find.text('Pause'), findsNothing);
+  });
+
+  testWidgets('a deliberate pause still shows it', (tester) async {
+    // The overlay is not gone, only kept out of the abort path: it carries
+    // the "Weiter" button a child needs after the app was in the background.
+    await pumpPractice(tester);
+
+    // The binding only accepts legal transitions, so the app goes away the
+    // way it really does: resumed -> inactive.
+    tester.binding
+        .handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Pause'), findsOneWidget);
+    expect(find.text('Die Zeit läuft nicht weiter.'), findsOneWidget);
+
+    await tester.tap(find.text('Weiter'));
+    await tester.pumpAndSettle();
+    expect(find.text('Pause'), findsNothing);
+  });
 }
