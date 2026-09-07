@@ -48,6 +48,14 @@ antreten. Die App läuft vollständig offline, ohne Konten und ohne Netzwerk.
   ergeben. Sie werden noch nicht als Rechnung gestellt, sondern als Frage mit
   einem Herz dazwischen (`3 ♥ ?`), und in beide Richtungen abgefragt: von 3
   nach 7 genauso wie von 7 nach 3.
+* **Jede Gruppe hat ihre Farbe**: die Kacheln liegen in einem hellen Pastellton
+  je Gruppe, damit der Katalog in Blöcke zerfällt und man die Naht zwischen
+  zwei Gruppen sieht, bevor man eine Überschrift liest. Die Reihenfolge ist
+  nicht beliebig — die Zahlenräume laufen kühl von Minze über Himmelblau nach
+  Lavendel, das Einmaleins warm von Sonne über Apricot nach Rosé; die
+  wachsende Schwierigkeit bekommt damit eine Richtung statt neun unverbundener
+  Farben. Ein Test misst für jeden Ton nach, dass Titel, Beispiel und die
+  kleine graue Zeile darauf lesbar bleiben.
 * Jede Lektion erklärt sich auf Wunsch selbst: ein Tipp auf das Fragezeichen im
   Startdialog sagt, was „Zehnerübergang" bedeutet. Standardmäßig ist der Text
   eingeklappt, damit der Bildschirm fürs Kind ruhig bleibt.

@@ -429,8 +429,10 @@ class _LessonTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Each group in its own pastel, so the catalogue falls into blocks and
+    // the seam between two groups is visible before a heading is read.
     return Material(
-      color: AppColors.surface,
+      color: AppColors.groupTint(lesson.group.index),
       borderRadius: BorderRadius.circular(20),
       child: InkWell(
         borderRadius: BorderRadius.circular(20),
@@ -438,7 +440,10 @@ class _LessonTile extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            border: Border.all(color: AppColors.divider, width: 1.5),
+            border: Border.all(
+              color: AppColors.groupEdge(lesson.group.index),
+              width: 1.5,
+            ),
             borderRadius: BorderRadius.circular(20),
           ),
           child: Column(

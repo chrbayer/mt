@@ -197,6 +197,23 @@ in `test/data/repositories_test.dart`, der eine Datenbank ins alte Schema
 zurückbaut, sie erneut öffnet und prüft, dass Profile und Durchgänge die
 Migration überleben. Auf den Tablets liegen echte Ergebnisse.
 
+## Farben der Gruppen
+
+`AppColors.groupTints` liefert je Gruppe einen Pastellton für den
+Kachelhintergrund, `groupEdges` denselben Ton eine Spur dunkler für den Rand —
+ein Pastell ohne Kante liest sich als Fleck, nicht als Karte. Beide sind über
+`LessonGroup.index` indiziert und laufen um, damit eine später ergänzte Gruppe
+eine Farbe bekommt statt den Katalog abstürzen zu lassen.
+
+Nicht nach Gefühl gewählt: `test/features/group_tints_test.dart` rechnet die
+WCAG-Kontraste aus und verlangt 4,5:1 für die kleine graue Zeile, 7:1 für den
+Titel und 3:1 für das große blaue Beispiel. Genau daran ist die erste Auswahl
+gescheitert — sie landete bei 4,0:1.
+
+Deshalb wurde `textMuted` von `0xFF6B7280` auf `0xFF5E6572` nachgedunkelt: auf
+Weiß hatte es nur 4,8:1, und jeder Farbton kostet etwa 0,4. Der Test hält auch
+fest, dass es auf den ungetönten Flächen nicht schlechter geworden ist.
+
 ## Icon
 
 Alle Android-Icons werden aus `assets/icon/*.svg` erzeugt, nicht von Hand

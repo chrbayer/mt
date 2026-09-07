@@ -11,7 +11,11 @@ abstract final class AppColors {
   static const primary = Color(0xFF2D6CDF);
   static const onPrimary = Color(0xFFFFFFFF);
   static const text = Color(0xFF1D2330);
-  static const textMuted = Color(0xFF6B7280);
+  /// Darkened from 0xFF6B7280 when the lesson tiles took on their pastel
+  /// backgrounds: on the palest of them the old grey fell to 4.0:1, under
+  /// the 4.5:1 a small label needs. On white it was only 4.8 to begin with,
+  /// so there was no headroom to spend.
+  static const textMuted = Color(0xFF5E6572);
   static const correct = Color(0xFF1E9E5A);
   static const correctSoft = Color(0xFFDFF3E7);
   static const wrong = Color(0xFFD64545);
@@ -43,6 +47,49 @@ abstract final class AppColors {
   /// vanishing: it is what tells a child there is something left to do.
   static const star = Color(0xFFE0A800);
   static const starEmpty = Color(0xFFD8D4C6);
+
+  /// One pastel per lesson group, in catalogue order, for the tile
+  /// backgrounds - so a group is one block of colour and the eye finds the
+  /// seam between two of them without reading a heading.
+  ///
+  /// The ramp is not arbitrary: the number ranges run cool from mint through
+  /// sky to lavender, the times tables warm from sun through apricot to rosé.
+  /// Growing difficulty gets a direction rather than nine unrelated colours.
+  ///
+  /// Every one of them is light enough to carry [text], [textMuted] and the
+  /// blue of a lesson example; a test measures that rather than trusting the
+  /// eye.
+  static const groupTints = <Color>[
+    Color(0xFFFDEDE3), // Erste Schritte - Pfirsich
+    Color(0xFFE4F4EA), // Bis 10 - Minze
+    Color(0xFFE1F2F3), // Bis 20 - Türkis
+    Color(0xFFE4EEFA), // Bis 100 - Himmel
+    Color(0xFFEAE9F8), // Bis 1000 - Lavendel
+    Color(0xFFFBF2DA), // Einmaleins - Sonne
+    Color(0xFFFCEBDB), // Einmaleins rückwärts - Apricot
+    Color(0xFFFBE9EE), // Mal und Geteilt - Rosé
+    Color(0xFFF2E9F6), // Uhrzeit und Geld - Flieder
+  ];
+
+  /// The same colours a shade deeper, for the tile border. A pastel without
+  /// an edge reads as a smudge rather than as a card.
+  static const groupEdges = <Color>[
+    Color(0xFFDCCEC5),
+    Color(0xFFC6D4CB),
+    Color(0xFFC3D2D3),
+    Color(0xFFC6CFD9),
+    Color(0xFFCBCAD7),
+    Color(0xFFDAD2BD),
+    Color(0xFFDBCCBE),
+    Color(0xFFDACACF),
+    Color(0xFFD2CAD6),
+  ];
+
+  /// Wraps around, so a group added without a colour still gets one instead
+  /// of crashing the catalogue.
+  static Color groupTint(int index) => groupTints[index % groupTints.length];
+
+  static Color groupEdge(int index) => groupEdges[index % groupEdges.length];
 
   /// Lightning bolts stand for speed, stars for care. A different colour so
   /// the two rows are told apart at a glance, even side by side.
