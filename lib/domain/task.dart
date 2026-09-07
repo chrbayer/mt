@@ -228,6 +228,10 @@ class Task {
         // The heart between the two numbers replaces the operator.
         TaskForm.partner => '$a',
         TaskForm.money => '${formatEuro(a)} $opSymbol ${formatEuro(b)} =',
+        // The row so far, and the box takes the place of the next number.
+        // This one used to sit in the list below and showed nothing at all:
+        // a question, an empty box and no numbers to continue.
+        TaskForm.sequence => sequenceNumbers.join(' '),
         // These all draw their own picture; there is nothing to write.
         TaskForm.clock ||
         TaskForm.clockPhrase ||
@@ -236,7 +240,6 @@ class Task {
         TaskForm.quantity ||
         TaskForm.dice ||
         TaskForm.compare ||
-        TaskForm.sequence ||
         TaskForm.quantityAdd =>
           '',
       };

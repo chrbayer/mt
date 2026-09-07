@@ -406,6 +406,24 @@ schnitt die letzte Reihe sonst ab, obwohl daneben noch Platz war. Der
 Regressionstest dazu lädt eine echte Schrift — mit der quadratischen Testschrift
 tritt der Überstand gar nicht auf und der Test wäre wertlos.
 
+## Eine Aufgabe muss sich selbst zeigen
+
+`Task.prefix` ist der Text **links vom Kasten**, und wer eine neue
+`TaskForm` hinzufügt, muss dort entscheiden: Bild oder Text. `sequence` lag
+in der Sammelzeile „diese zeichnen ihr eigenes Bild, da ist nichts zu
+schreiben" — und zeichnet keines. Ergebnis: „Welche Zahl kommt danach?", ein
+leerer Kasten und keine Zahlen zum Weiterzählen. Die Aufgabe war nicht
+lösbar, und die Kachel zeigte sie richtig an, weil die über `render()` läuft.
+
+`test/features/task_display_shows_the_task_test.dart` prüft das jetzt für
+**jede** Lektion des Katalogs: entweder wird ein Bild gezeichnet, oder
+irgendwo auf dem Bildschirm steht eine Ziffer — in der Frage oder neben dem
+Kasten. Eine Frage ganz ohne Zahlen lässt nichts zu beantworten übrig.
+
+Der Abstand zum Kasten ist bei `sequence` größer als sonst: dort ist der
+Kasten die **nächste Zahl der Reihe** und steht deshalb so weit weg wie die
+Zahlen voneinander. Mit dem üblichen Abstand klebte er an der letzten.
+
 ## Antworten, die keine Zahlen sind
 
 Zwei Lektionen werden nicht auf der Zifferntastatur beantwortet, und beide

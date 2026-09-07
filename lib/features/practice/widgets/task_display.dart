@@ -249,7 +249,10 @@ class TaskDisplay extends StatelessWidget {
                 const SizedBox(width: 44),
               ] else
                 Text(task.prefix, style: style),
-              const SizedBox(width: 20),
+              // The box is the next number in the row, so it stands at the
+              // same distance as the numbers before it - a tighter gap made
+              // it look stuck to the last one.
+              SizedBox(width: task.form == TaskForm.sequence ? 40 : 20),
               box,
               if (task.suffix.isNotEmpty) ...[
                 const SizedBox(width: 20),
