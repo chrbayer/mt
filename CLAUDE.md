@@ -636,6 +636,15 @@ nichts**. Eine leere Ecke ist ehrlich; eine erfundene oder veraltete Nummer
 wäre schlimmer als keine. Der Test passt sich an, wie er läuft, und deckt
 damit beide Wege ab — einmal ohne Define, einmal mit.
 
+## Linux-Build
+
+Braucht GStreamer-Entwicklungspakete (`gstreamer1-devel`,
+`gstreamer1-plugins-base-devel`): `audioplayers` zieht auf Linux
+`audioplayers_linux` nach, und dessen CMake bricht ohne sie ab, bevor etwas
+übersetzt wird. Das ist der Preis für den Ton — auf einem frischen Rechner
+scheitert der Desktop-Build sonst mit „required package not found:
+gstreamer-1.0" und man sucht ihn im eigenen Code.
+
 ## Vor dem Abschluss
 
 ```bash

@@ -288,13 +288,24 @@ Das APK trägt die Version im Dateinamen: `mt-1.0.1.apk`, im Debug-Fall
 liegt, noch immer, welcher Stand sie ist. Lokal liegt sie neben dem
 unveränderten `app-release.apk`, das Flutter selbst schreibt.
 
+Der **Linux-Build braucht GStreamer-Entwicklungspakete**, weil das Ton-Plugin
+sie mitbringt — ohne sie bricht CMake mit „required package not found:
+gstreamer-1.0" ab, bevor überhaupt etwas übersetzt wird:
+
+```bash
+sudo dnf install gstreamer1-devel gstreamer1-plugins-base-devel
+```
+
 Beide Skripte lesen die Version aus `pubspec.yaml`. Aktuell steht dort
 `version: 1.0.0` — das ist der **Build-Name** und landet als Android-
-`versionName` in der App. Eine Build-Nummer (`1.0.0+7`) ist optional; ohne sie
-setzt Flutter den `versionCode` auf 1. Die Nummer sieht niemand, aber Android
-entscheidet daran, welches APK neuer ist: eine niedrigere Nummer lässt sich
-nicht über eine höhere installieren. Wer mehrere Auslieferungen unterscheiden
-will, hängt sie an und zählt sie hoch.
+`versionName` in der App. Den **`versionCode`** leiten die Skripte daraus ab
+(`2.4.1` → `20401`), falls keine Build-Nummer wie `1.0.0+7` angegeben ist. Die
+Nummer sieht niemand, aber Android entscheidet daran, ob eine APK ein Update
+ist. Ließe man sie wie früher bei 1 stehen, wären zwei verschiedene Builds für
+den Paketmanager dieselbe Version — eine über die andere zu installieren kann
+die App dann halb ersetzt zurücklassen, so dass sie nicht mehr startet. Umkehrt
+heißt das: eine ältere Version lässt sich nicht über eine neuere installieren,
+ohne vorher zu deinstallieren.
 
 `build_android.sh` lädt das APK unter demselben Namen nach
 `/srv/http/main_ssl/mt` und meldet die URL `https://criby.de/mt/mt-1.0.1.apk`.
