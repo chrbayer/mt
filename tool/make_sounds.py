@@ -60,14 +60,27 @@ write('correct', 0.30, [(659.25, 0.0, 0.12), (987.77, 0.11, 0.18)])
 # Hinweis, keine Rüge.
 write('wrong', 0.22, [(311.13, 0.0, 0.20)])
 
-# Tastenklick: 35 ms, halb so laut wie die Rückmeldung und ohne erkennbare
-# Tonhöhe. Er kommt bis zu fünfzigmal je Aufgabe, also darf er nichts
-# behaupten - er bestätigt nur, dass die Taste angekommen ist. Die zweite
-# Frequenz ist absichtlich kein Vielfaches der ersten: zusammen ergeben sie
-# ein Geräusch statt einer Note.
-frames = [0.0] * int(0.05 * RATE)
-click(frames, 1720.0, 0.035, 0.15, 0.006)
-click(frames, 2630.0, 0.020, 0.07, 0.004)
+# Tastenklick: ohne erkennbare Tonhöhe und leiser als die Rückmeldung. Er
+# kommt bis zu fünfzigmal je Aufgabe, also darf er nichts behaupten - er
+# bestätigt nur, dass die Taste angekommen ist. Die zweite Frequenz ist
+# absichtlich kein Vielfaches der ersten: zusammen ergeben sie ein Geräusch
+# statt einer Note.
+#
+# LEAD_SILENCE ist kein Schönheitsfehler, sondern der eigentliche Punkt.
+# Zwischen zwei Klicks wird der Abspielstrang angehalten, was den
+# PulseAudio-Strom korkt; beim nächsten Klick braucht die echte Soundkarte
+# einige Millisekunden, bis sie wieder Töne ausgibt. Ein 35-ms-Klick fiel
+# vollständig in dieses Anlaufen: an einem Null-Sink gemessen kamen 33 von 33
+# Klicks, an der echten Karte genau einer. Die Stille vorn lässt das Gerät
+# anlaufen, bevor der hörbare Teil beginnt.
+LEAD_SILENCE = 0.045
+frames = [0.0] * int((LEAD_SILENCE + 0.12) * RATE)
+lead = [0.0] * int(0.12 * RATE)
+click(lead, 1720.0, 0.100, 0.13, 0.022)
+click(lead, 2630.0, 0.060, 0.06, 0.014)
+offset = int(LEAD_SILENCE * RATE)
+for i, value in enumerate(lead):
+    frames[offset + i] += value
 with wave.open('assets/sound/key.wav', 'wb') as out:
     out.setnchannels(1)
     out.setsampwidth(2)

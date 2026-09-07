@@ -81,10 +81,16 @@ verwerfen.
 
 #20 erledigt (2.6.0) — Profil temporär im Elternbereich sperrbar machen
 
-#21 erledigt (2.6.1) — Ton unter Linux: die ersten Töne kommen, dann bleibt es
-still. Ursache waren feste Abspieler-IDs zusammen mit einem nicht abgewarteten
-dispose: der Übungsbildschirm baute pro Durchgang eine neue FeedbackSounds und
-meldete Abspieler unter IDs an, die gerade abgebaut wurden. warmUp kehrte nie
-zurück. Headless nachgestellt (weston + wlheadless-run) und deterministisch:
-Durchgang 1 spielt, 2 hängt, 3 spielt, 4 hängt. Behoben durch uuid-IDs und eine
-einzige, app-weite Instanz.
+#21 erledigt (2.6.2) — Klick unter Linux: kam einmal, das zweite Mal leiser,
+dann gar nicht mehr. Ursache war nicht die App, sondern die Länge des Tons:
+zwischen zwei Klicks wird der Abspielstrang angehalten, was den
+PulseAudio-Strom korkt, und die echte Soundkarte braucht danach einige
+Millisekunden. Der 35-ms-Klick fiel komplett in dieses Anlaufen. Mit
+demselben Integrationstest gemessen, nur das Ausgabegerät gewechselt: am
+Null-Sink 33 von 33 Klicks, an der echten Karte 1 von 33 — deshalb sah jede
+frühere Messung gesund aus. Mit 45 ms Stille vorn und längerem Ausklang
+kommen an der echten Karte 33 von 33 an.
+
+Auf dem Weg dorthin nebenbei gefunden und behoben (2.6.1): feste
+Abspieler-IDs plus ein nicht abgewartetes dispose ließen warmUp bei jedem
+zweiten Durchgang hängen. Ein echter Fehler, aber nicht dieser.

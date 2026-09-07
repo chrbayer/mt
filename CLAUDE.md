@@ -466,6 +466,33 @@ IDs vergibt das Paket eine uuid, und sechs Durchgänge hintereinander spielen
 vergebene ID anders ab. Die Fehlerform „geht einmal, dann nie wieder" war auf
 beiden Plattformen dieselbe Ursache — sie hat sich nur auf einer gezeigt.
 
+## Warum der Klick 45 ms Stille vorn hat
+
+`tool/make_sounds.py` setzt `LEAD_SILENCE` vor den Tastenklick. Das ist kein
+Schönheitsfehler, sondern der ganze Punkt.
+
+Zwischen zwei Klicks hält `_play` den Abspielstrang an (`stop()` → PAUSED),
+und das **korkt den PulseAudio-Strom**. Beim nächsten Klick braucht eine
+echte Soundkarte einige Millisekunden, bis sie wieder Töne ausgibt. Der alte
+Klick war 35 ms lang und fiel vollständig in dieses Anlaufen.
+
+Gemessen, mit demselben Integrationstest und derselben Aufnahme, nur mit
+gewechseltem Ausgabegerät:
+
+| Ziel | Klicks hörbar |
+|---|---|
+| Null-Sink (`module-null-sink`) | 33 von 33 |
+| echte Soundkarte | **1 von 33** |
+
+Deshalb sahen alle früheren Messungen gesund aus: ein Null-Sink läuft nicht
+an. Mit 45 ms Stille vorn, längerem Ausklang und knapp der halben Lautstärke
+der Antworttöne kommen an der echten Karte **33 von 33** an. Die 45 ms
+Verzögerung liegen weit unter der Schwelle, ab der sich eine Taste träge
+anfühlt.
+
+Wer den Klang ändert, muss ihn an einer **echten** Karte gegenmessen. Ein
+kürzerer oder leiserer Klick fällt sofort wieder in dieselbe Lücke.
+
 ## Wie man das debuggt
 
 Der Desktop-Build lässt sich **headless** fahren, ohne ein Fenster auf den
@@ -481,6 +508,24 @@ App ist der Trick: er braucht keine Eingaben, fährt die fragliche Abfolge
 selbst und schreibt das Ergebnis nach stdout. Für `log()` bitte `print` —
 `stdout.writeln` mit `flush()` wirft beim nächsten Schreiben „StreamSink is
 bound to a stream".
+
+Für den **Ton** reicht das aber nicht: was das Plugin meldet und was aus dem
+Lautsprecher kommt, sind zwei verschiedene Dinge. `onPlayerComplete` zählte
+zehn von zehn, während nichts zu hören war. Also den Schall selbst aufnehmen
+und vermessen — und dabei an der **echten** Karte, nicht an einem Null-Sink:
+
+```bash
+DEF=$(pactl get-default-sink)
+parec -d "$DEF.monitor" --format=s16le --rate=48000 --channels=1 \
+      --file-format=raw > audio.raw &
+wlheadless-run -c weston -- \
+  flutter test integration_test/sound_on_keypad_test.dart -d linux
+```
+
+`integration_test/sound_on_keypad_test.dart` tippt dafür echte Ziffern auf
+den echten Übungsbildschirm. Es läuft **nicht** bei `flutter test` mit — es
+braucht ein Gerät und ein Aufnahmegerät daneben — und ist als Reproduktion
+aufgehoben, nicht als Regressionstest.
 
 `FeedbackSounds` schaltet bei jedem Abspieler den **`positionUpdater` ab**.
 Jeder `AudioPlayer` fragt sonst über einen `FramePositionUpdater` die

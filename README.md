@@ -206,7 +206,10 @@ antreten. Die App läuft vollständig offline, ohne Konten und ohne Netzwerk.
   Feld passt, und die Rücktaste im leeren Feld bleiben stumm. Der grüne Haken
   klickt nicht — dort sagen die beiden anderen Töne schon mehr.
   Im Elternbereich abschaltbar. Die Töne sind von `tool/make_sounds.py`
-  erzeugt, nicht heruntergeladen: ein paar Zeilen Mathematik, zusammen 25 kB.
+  erzeugt, nicht heruntergeladen: ein paar Zeilen Mathematik, zusammen 30 kB.
+  Der Klick beginnt mit 45 ms Stille — eine echte Soundkarte braucht nach
+  einer Pause einen Moment, bis sie wieder Töne ausgibt, und ein kürzerer
+  Klick fiel vollständig in dieses Anlaufen.
 * **Gewertete Durchgänge je Übung und Tag**: dieselbe leichte Übung so lange
   zu wiederholen, bis die Zeit stimmt, bringt ab dem vierten Mal nichts mehr.
   Geübt werden darf sie weiter — sie zählt zur Übungszeit und steht im
