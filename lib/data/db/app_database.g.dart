@@ -976,6 +976,21 @@ class $SessionsTable extends Sessions with TableInfo<$SessionsTable, Session> {
     ),
     defaultValue: const Constant(true),
   );
+  static const VerificationMeta _deletedMeta = const VerificationMeta(
+    'deleted',
+  );
+  @override
+  late final GeneratedColumn<bool> deleted = GeneratedColumn<bool>(
+    'deleted',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("deleted" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -989,6 +1004,7 @@ class $SessionsTable extends Sessions with TableInfo<$SessionsTable, Session> {
     wrongAttempts,
     completed,
     scored,
+    deleted,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1084,6 +1100,12 @@ class $SessionsTable extends Sessions with TableInfo<$SessionsTable, Session> {
         scored.isAcceptableOrUnknown(data['scored']!, _scoredMeta),
       );
     }
+    if (data.containsKey('deleted')) {
+      context.handle(
+        _deletedMeta,
+        deleted.isAcceptableOrUnknown(data['deleted']!, _deletedMeta),
+      );
+    }
     return context;
   }
 
@@ -1137,6 +1159,10 @@ class $SessionsTable extends Sessions with TableInfo<$SessionsTable, Session> {
         DriftSqlType.bool,
         data['${effectivePrefix}scored'],
       )!,
+      deleted: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}deleted'],
+      )!,
     );
   }
 
@@ -1173,6 +1199,15 @@ class Session extends DataClass implements Insertable<Session> {
   /// later would need the cap as it stood that day, and a parent may change
   /// it tomorrow.
   final bool scored;
+
+  /// Whether a parent has removed this run from the record.
+  ///
+  /// Removed, not erased: the row stays so the **practised time** stays.
+  /// Deleting a run may cost stars, bolts and a place in the ranking - that
+  /// is what a parent tidying up is asking for - but it must not hand back
+  /// an afternoon of screen time. Otherwise the daily limit would have a
+  /// delete button next to it.
+  final bool deleted;
   const Session({
     required this.id,
     required this.userId,
@@ -1185,6 +1220,7 @@ class Session extends DataClass implements Insertable<Session> {
     required this.wrongAttempts,
     required this.completed,
     required this.scored,
+    required this.deleted,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1202,6 +1238,7 @@ class Session extends DataClass implements Insertable<Session> {
     map['wrong_attempts'] = Variable<int>(wrongAttempts);
     map['completed'] = Variable<bool>(completed);
     map['scored'] = Variable<bool>(scored);
+    map['deleted'] = Variable<bool>(deleted);
     return map;
   }
 
@@ -1220,6 +1257,7 @@ class Session extends DataClass implements Insertable<Session> {
       wrongAttempts: Value(wrongAttempts),
       completed: Value(completed),
       scored: Value(scored),
+      deleted: Value(deleted),
     );
   }
 
@@ -1240,6 +1278,7 @@ class Session extends DataClass implements Insertable<Session> {
       wrongAttempts: serializer.fromJson<int>(json['wrongAttempts']),
       completed: serializer.fromJson<bool>(json['completed']),
       scored: serializer.fromJson<bool>(json['scored']),
+      deleted: serializer.fromJson<bool>(json['deleted']),
     );
   }
   @override
@@ -1257,6 +1296,7 @@ class Session extends DataClass implements Insertable<Session> {
       'wrongAttempts': serializer.toJson<int>(wrongAttempts),
       'completed': serializer.toJson<bool>(completed),
       'scored': serializer.toJson<bool>(scored),
+      'deleted': serializer.toJson<bool>(deleted),
     };
   }
 
@@ -1272,6 +1312,7 @@ class Session extends DataClass implements Insertable<Session> {
     int? wrongAttempts,
     bool? completed,
     bool? scored,
+    bool? deleted,
   }) => Session(
     id: id ?? this.id,
     userId: userId ?? this.userId,
@@ -1284,6 +1325,7 @@ class Session extends DataClass implements Insertable<Session> {
     wrongAttempts: wrongAttempts ?? this.wrongAttempts,
     completed: completed ?? this.completed,
     scored: scored ?? this.scored,
+    deleted: deleted ?? this.deleted,
   );
   Session copyWithCompanion(SessionsCompanion data) {
     return Session(
@@ -1304,6 +1346,7 @@ class Session extends DataClass implements Insertable<Session> {
           : this.wrongAttempts,
       completed: data.completed.present ? data.completed.value : this.completed,
       scored: data.scored.present ? data.scored.value : this.scored,
+      deleted: data.deleted.present ? data.deleted.value : this.deleted,
     );
   }
 
@@ -1320,7 +1363,8 @@ class Session extends DataClass implements Insertable<Session> {
           ..write('totalMs: $totalMs, ')
           ..write('wrongAttempts: $wrongAttempts, ')
           ..write('completed: $completed, ')
-          ..write('scored: $scored')
+          ..write('scored: $scored, ')
+          ..write('deleted: $deleted')
           ..write(')'))
         .toString();
   }
@@ -1338,6 +1382,7 @@ class Session extends DataClass implements Insertable<Session> {
     wrongAttempts,
     completed,
     scored,
+    deleted,
   );
   @override
   bool operator ==(Object other) =>
@@ -1353,7 +1398,8 @@ class Session extends DataClass implements Insertable<Session> {
           other.totalMs == this.totalMs &&
           other.wrongAttempts == this.wrongAttempts &&
           other.completed == this.completed &&
-          other.scored == this.scored);
+          other.scored == this.scored &&
+          other.deleted == this.deleted);
 }
 
 class SessionsCompanion extends UpdateCompanion<Session> {
@@ -1368,6 +1414,7 @@ class SessionsCompanion extends UpdateCompanion<Session> {
   final Value<int> wrongAttempts;
   final Value<bool> completed;
   final Value<bool> scored;
+  final Value<bool> deleted;
   const SessionsCompanion({
     this.id = const Value.absent(),
     this.userId = const Value.absent(),
@@ -1380,6 +1427,7 @@ class SessionsCompanion extends UpdateCompanion<Session> {
     this.wrongAttempts = const Value.absent(),
     this.completed = const Value.absent(),
     this.scored = const Value.absent(),
+    this.deleted = const Value.absent(),
   });
   SessionsCompanion.insert({
     this.id = const Value.absent(),
@@ -1393,6 +1441,7 @@ class SessionsCompanion extends UpdateCompanion<Session> {
     this.wrongAttempts = const Value.absent(),
     this.completed = const Value.absent(),
     this.scored = const Value.absent(),
+    this.deleted = const Value.absent(),
   }) : userId = Value(userId),
        lessonId = Value(lessonId),
        taskCount = Value(taskCount),
@@ -1410,6 +1459,7 @@ class SessionsCompanion extends UpdateCompanion<Session> {
     Expression<int>? wrongAttempts,
     Expression<bool>? completed,
     Expression<bool>? scored,
+    Expression<bool>? deleted,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -1423,6 +1473,7 @@ class SessionsCompanion extends UpdateCompanion<Session> {
       if (wrongAttempts != null) 'wrong_attempts': wrongAttempts,
       if (completed != null) 'completed': completed,
       if (scored != null) 'scored': scored,
+      if (deleted != null) 'deleted': deleted,
     });
   }
 
@@ -1438,6 +1489,7 @@ class SessionsCompanion extends UpdateCompanion<Session> {
     Value<int>? wrongAttempts,
     Value<bool>? completed,
     Value<bool>? scored,
+    Value<bool>? deleted,
   }) {
     return SessionsCompanion(
       id: id ?? this.id,
@@ -1451,6 +1503,7 @@ class SessionsCompanion extends UpdateCompanion<Session> {
       wrongAttempts: wrongAttempts ?? this.wrongAttempts,
       completed: completed ?? this.completed,
       scored: scored ?? this.scored,
+      deleted: deleted ?? this.deleted,
     );
   }
 
@@ -1490,6 +1543,9 @@ class SessionsCompanion extends UpdateCompanion<Session> {
     if (scored.present) {
       map['scored'] = Variable<bool>(scored.value);
     }
+    if (deleted.present) {
+      map['deleted'] = Variable<bool>(deleted.value);
+    }
     return map;
   }
 
@@ -1506,7 +1562,8 @@ class SessionsCompanion extends UpdateCompanion<Session> {
           ..write('totalMs: $totalMs, ')
           ..write('wrongAttempts: $wrongAttempts, ')
           ..write('completed: $completed, ')
-          ..write('scored: $scored')
+          ..write('scored: $scored, ')
+          ..write('deleted: $deleted')
           ..write(')'))
         .toString();
   }
@@ -3599,6 +3656,7 @@ typedef $$SessionsTableCreateCompanionBuilder = SessionsCompanion Function({
   Value<int> wrongAttempts,
   Value<bool> completed,
   Value<bool> scored,
+  Value<bool> deleted,
 });
 typedef $$SessionsTableUpdateCompanionBuilder = SessionsCompanion Function({
   Value<int> id,
@@ -3612,6 +3670,7 @@ typedef $$SessionsTableUpdateCompanionBuilder = SessionsCompanion Function({
   Value<int> wrongAttempts,
   Value<bool> completed,
   Value<bool> scored,
+  Value<bool> deleted,
 });
 
 final class $$SessionsTableReferences
@@ -3711,6 +3770,11 @@ class $$SessionsTableFilterComposer
 
   ColumnFilters<bool> get scored => $composableBuilder(
     column: $table.scored,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get deleted => $composableBuilder(
+    column: $table.deleted,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -3822,6 +3886,11 @@ class $$SessionsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<bool> get deleted => $composableBuilder(
+    column: $table.deleted,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$UsersTableOrderingComposer get userId {
     final $$UsersTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -3890,6 +3959,9 @@ class $$SessionsTableAnnotationComposer
 
   GeneratedColumn<bool> get scored =>
       $composableBuilder(column: $table.scored, builder: (column) => column);
+
+  GeneratedColumn<bool> get deleted =>
+      $composableBuilder(column: $table.deleted, builder: (column) => column);
 
   $$UsersTableAnnotationComposer get userId {
     final $$UsersTableAnnotationComposer composer = $composerBuilder(
@@ -3979,6 +4051,7 @@ class $$SessionsTableTableManager
                 Value<int> wrongAttempts = const Value.absent(),
                 Value<bool> completed = const Value.absent(),
                 Value<bool> scored = const Value.absent(),
+                Value<bool> deleted = const Value.absent(),
               }) => SessionsCompanion(
                 id: id,
                 userId: userId,
@@ -3991,6 +4064,7 @@ class $$SessionsTableTableManager
                 wrongAttempts: wrongAttempts,
                 completed: completed,
                 scored: scored,
+                deleted: deleted,
               ),
           createCompanionCallback:
               ({
@@ -4005,6 +4079,7 @@ class $$SessionsTableTableManager
                 Value<int> wrongAttempts = const Value.absent(),
                 Value<bool> completed = const Value.absent(),
                 Value<bool> scored = const Value.absent(),
+                Value<bool> deleted = const Value.absent(),
               }) => SessionsCompanion.insert(
                 id: id,
                 userId: userId,
@@ -4017,6 +4092,7 @@ class $$SessionsTableTableManager
                 wrongAttempts: wrongAttempts,
                 completed: completed,
                 scored: scored,
+                deleted: deleted,
               ),
           withReferenceMapper: (p0) => p0
               .map(

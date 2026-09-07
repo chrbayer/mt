@@ -701,6 +701,32 @@ Ergebnisbildschirm stehen dann **null Sterne und null Blitze** — dieselbe
 Linie, die ein zu kurzer Lauf schon zieht. Drei goldene Sterne neben „zählt
 nicht" wären zwei Antworten auf dieselbe Frage.
 
+## Löschen, ohne die Zeit zurückzugeben
+
+`deleteSession` **markiert** (`sessions.deleted`), es löscht nicht. Die Zeile
+bleibt, weil die **geübte Zeit** bleiben muss: dass Eltern beim Aufräumen
+Sterne, Blitze und einen Bestenlistenplatz kosten, ist genau das, worum sie
+bitten — einen Nachmittag Bildschirmzeit zurückzugeben ist es nicht. Sonst
+hätte die Tagesgrenze einen Löschknopf daneben.
+
+Die Grenze verläuft wieder zwischen **Rekord und Zeit**: Kachelwerte,
+Bestenlisten, Lernkurve, Verlauf, schwere Aufgaben und der Tagesdeckel sehen
+gelöschte Läufe nicht; `watchPracticeStretch`, `watchPractisedToday`,
+`watchActivity`, `watchStreaks` und die Kinderübersicht sehen sie weiter.
+Letztere ist ausdrücklich eine **Aufwands**-Ansicht — gesessen hat das Kind
+trotzdem.
+
+Weil die Sterne gespeichert sind, rechnet `_recountStars` sie nach dem
+Löschen aus den übriggebliebenen Läufen neu — in Dart über `starsFor`, nicht
+in SQL: seit v8 steht diese Regel an genau einer Stelle, und eine zweite
+Fassung hier wäre das, was die gespeicherten Sterne gerade beenden sollten.
+Bleibt nichts übrig, verschwindet die Zeile aus `lesson_stars`.
+
+`deleteIncompleteSessions` räumt abgebrochene Läufe weg und **nur die vom
+gewählten Filter** — die Liste aufzuräumen, die man ansieht, ist etwas
+anderes, als stillschweigend die aller Kinder aufzuräumen. Sie haben nie
+etwas verdient, also ist danach auch nichts nachzurechnen.
+
 ## Mindestlänge für eine Wertung
 
 `minTasksForAward` (10) gilt für **Bestenliste, Sterne und Blitze**

@@ -254,7 +254,7 @@ class StatsRepository {
                                                    AS best_bolts,
                  MAX(s.finished_at_ms)             AS last_played
           FROM sessions s
-          WHERE s.user_id = ?1 AND s.completed = 1
+          WHERE s.user_id = ?1 AND s.completed = 1 AND s.deleted = 0
           GROUP BY s.lesson_id
           ''',
           variables: [Variable.withInt(userId)],
@@ -299,6 +299,7 @@ class StatsRepository {
           WHERE s.lesson_id = ?1
             AND s.completed = 1
             AND s.scored = 1
+            AND s.deleted = 0
             AND s.task_count >= ?2
             AND s.lesson_id NOT IN ($_unscored)
           GROUP BY u.id
@@ -351,11 +352,13 @@ class StatsRepository {
                  (SELECT MAX(l.finished_at_ms)
                     FROM sessions l
                    WHERE l.lesson_id = s.lesson_id
-                     AND l.completed = 1) AS last_played_ms
+                     AND l.completed = 1
+                     AND l.deleted = 0) AS last_played_ms
           FROM sessions s
           JOIN users u ON u.id = s.user_id
           WHERE s.completed = 1
             AND s.scored = 1
+            AND s.deleted = 0
             AND s.task_count >= ?1
             AND s.lesson_id NOT IN ($_unscored)
           GROUP BY s.lesson_id, u.id
@@ -426,6 +429,7 @@ class StatsRepository {
                  $_score AS ms_per_task
           FROM sessions s
           WHERE s.user_id = ?1 AND s.lesson_id = ?2 AND s.completed = 1
+            AND s.deleted = 0
           ORDER BY s.finished_at_ms DESC
           LIMIT ?3
           ''',
@@ -470,6 +474,7 @@ class StatsRepository {
           FROM sessions s
           JOIN users u ON u.id = s.user_id
           WHERE (?1 IS NULL OR s.user_id = ?1)
+            AND s.deleted = 0
           ORDER BY played_at_ms DESC
           LIMIT ?2
           ''',
@@ -503,6 +508,10 @@ class StatsRepository {
   /// One row per profile for the overview screen. Profiles without a single
   /// finished run are included with zeroes, so nobody is missing from the
   /// comparison.
+  ///
+  /// Deleted runs still count here. This row is about **effort** - how long
+  /// somebody sat at the tablet - and that did happen, whatever a parent
+  /// later tidied out of the record.
   Stream<List<UserSummary>> watchUserSummaries() {
     return _db
         .customSelect(
@@ -591,7 +600,7 @@ class StatsRepository {
           FROM (
             SELECT s.user_id AS user_id, MAX($_bolts) AS bolts
             FROM sessions s
-            WHERE s.completed = 1 AND s.scored = 1
+            WHERE s.completed = 1 AND s.scored = 1 AND s.deleted = 0
             GROUP BY s.user_id, s.lesson_id
           ) AS best
           GROUP BY best.user_id
@@ -623,6 +632,7 @@ class StatsRepository {
             AND s.lesson_id = ?2
             AND s.completed = 1
             AND s.scored = 1
+            AND s.deleted = 0
             AND s.finished_at_ms >= ?3
           ''',
             variables: [
@@ -739,6 +749,9 @@ class StatsRepository {
 
   /// Days practised in a row, per child.
   ///
+  /// Deleted runs still count: the child practised that day. A streak is not
+  /// a record to be revised.
+  ///
   /// Today only extends a streak once something has been practised; until
   /// then the run of days up to yesterday still counts, so a streak does not
   /// look broken all morning.
@@ -795,6 +808,9 @@ class StatsRepository {
   ///
   /// Days are bucketed with SQLite's `localtime`, so an evening session counts
   /// for the day it felt like, not for the UTC day.
+  /// Runs and time per day. Deleted runs count towards both - this is the
+  /// practised-time side of the ledger, and deleting a run must not hand
+  /// back an afternoon.
   Stream<List<ActivityPoint>> watchActivity({int days = 30}) {
     final since = DateTime.now()
         .subtract(Duration(days: days - 1))
@@ -848,12 +864,14 @@ class StatsRepository {
       FROM attempts a
       JOIN sessions s ON s.id = a.session_id
       WHERE s.user_id = ?1 AND s.lesson_id = ?2 AND s.completed = 1
+        AND s.deleted = 0
       GROUP BY a.operand_a, a.operand_b, a.op, a.form
       HAVING average_wrong > 0 OR average_ms > (
         SELECT AVG(a2.elapsed_ms) * 1.4
         FROM attempts a2
         JOIN sessions s2 ON s2.id = a2.session_id
         WHERE s2.user_id = ?1 AND s2.lesson_id = ?2 AND s2.completed = 1
+          AND s2.deleted = 0
       )
       ORDER BY average_ms + $wrongAttemptPenaltyMs * average_wrong DESC
       LIMIT ?3
@@ -881,8 +899,80 @@ class StatsRepository {
 
   /// Removes a single run, for when a sibling scribbled through someone's
   /// lesson.
-  Future<void> deleteSession(int sessionId) =>
-      (_db.delete(_db.sessions)..where((s) => s.id.equals(sessionId))).go();
+  /// Takes one run out of the record, keeping its time.
+  ///
+  /// Marked rather than erased. A parent tidying up may well cost a child a
+  /// best time, a star or a place in the ranking - that is what deleting a
+  /// run means - but the practised time has to stay, or the daily limit
+  /// would come with a delete button next to it.
+  ///
+  /// The stars are stored, so they are worked out again from what is left.
+  Future<void> deleteSession(int sessionId) async {
+    final session = await (_db.select(_db.sessions)
+          ..where((s) => s.id.equals(sessionId)))
+        .getSingleOrNull();
+    if (session == null) return;
+
+    await (_db.update(_db.sessions)..where((s) => s.id.equals(sessionId)))
+        .write(const SessionsCompanion(deleted: Value(true)));
+    await _recountStars(session.userId, session.lessonId);
+  }
+
+  /// Takes every abandoned run out of the record, for one child or for all.
+  ///
+  /// Abandoned runs are shown on purpose - "started and gave up" is worth
+  /// seeing - but after a few weeks they are mostly noise between the runs a
+  /// parent actually wants to read. They never earned anything, so nothing
+  /// has to be worked out again. Returns how many were tidied away.
+  Future<int> deleteIncompleteSessions({int? userId}) async {
+    final query = _db.update(_db.sessions)
+      ..where((s) =>
+          s.completed.equals(false) &
+          s.deleted.equals(false) &
+          (userId == null ? const Constant(true) : s.userId.equals(userId)));
+    return query.write(const SessionsCompanion(deleted: Value(true)));
+  }
+
+  /// Rebuilds the stored stars of one lesson from the runs that are left.
+  ///
+  /// In Dart and through [starsFor], not in SQL: since v8 that rule lives in
+  /// exactly one place, and a second copy here would be the very thing the
+  /// stored stars were meant to end.
+  Future<void> _recountStars(int userId, String lessonId) async {
+    final lesson = lessonByIdOrNull(lessonId);
+    if (lesson == null) return;
+
+    final left = await (_db.select(_db.sessions)
+          ..where((s) =>
+              s.userId.equals(userId) &
+              s.lessonId.equals(lessonId) &
+              s.completed.equals(true) &
+              s.scored.equals(true) &
+              s.deleted.equals(false)))
+        .get();
+
+    var best = 0;
+    for (final run in left) {
+      final stars = starsFor(run.wrongAttempts, run.taskCount,
+          scored: lesson.scored);
+      if (stars > best) best = stars;
+    }
+
+    final row = _db.lessonStars;
+    if (best <= 0) {
+      await (_db.delete(row)
+            ..where((r) => r.userId.equals(userId) & r.lessonId.equals(lessonId)))
+          .go();
+      return;
+    }
+    await _db.into(row).insertOnConflictUpdate(
+          LessonStarsCompanion.insert(
+            userId: userId,
+            lessonId: lessonId,
+            stars: best,
+          ),
+        );
+  }
 
   /// Calculations that cost the child the most time, penalty included.
   Future<List<HardTask>> hardestTasks({
@@ -900,7 +990,7 @@ class StatsRepository {
              AVG(a.wrong_attempts) AS average_wrong
       FROM attempts a
       JOIN sessions s ON s.id = a.session_id
-      WHERE s.user_id = ?1 AND s.completed = 1
+      WHERE s.user_id = ?1 AND s.completed = 1 AND s.deleted = 0
       GROUP BY a.operand_a, a.operand_b, a.op, a.form
       ORDER BY average_ms + $wrongAttemptPenaltyMs * average_wrong DESC
       LIMIT ?2

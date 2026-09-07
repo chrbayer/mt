@@ -128,6 +128,15 @@ class Sessions extends Table {
   /// later would need the cap as it stood that day, and a parent may change
   /// it tomorrow.
   BoolColumn get scored => boolean().withDefault(const Constant(true))();
+
+  /// Whether a parent has removed this run from the record.
+  ///
+  /// Removed, not erased: the row stays so the **practised time** stays.
+  /// Deleting a run may cost stars, bolts and a place in the ranking - that
+  /// is what a parent tidying up is asking for - but it must not hand back
+  /// an afternoon of screen time. Otherwise the daily limit would have a
+  /// delete button next to it.
+  BoolColumn get deleted => boolean().withDefault(const Constant(false))();
 }
 
 /// One task within a session - the basis for "which calculations are slow?".
@@ -167,7 +176,7 @@ class AppDatabase extends _$AppDatabase {
       : super(executor ?? driftDatabase(name: 'mathe_trainer'));
 
   @override
-  int get schemaVersion => 9;
+  int get schemaVersion => 10;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -232,6 +241,10 @@ class AppDatabase extends _$AppDatabase {
             if (from >= 6) await m.addColumn(users, users.scoredRunsPerLesson);
             await m.addColumn(sessions, sessions.scored);
           }
+          // v10 lets a parent take a run out of the record while its time
+          // stays counted. Nothing was ever deleted before, so the column's
+          // default of false is the whole migration.
+          if (from < 10) await m.addColumn(sessions, sessions.deleted);
         },
         beforeOpen: (details) async {
           // Needed for the ON DELETE CASCADE above to actually fire.

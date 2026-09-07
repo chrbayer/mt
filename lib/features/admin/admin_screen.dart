@@ -70,6 +70,11 @@ class _HistoryTabState extends ConsumerState<_HistoryTab> {
     final users = ref.watch(usersProvider).value ?? const <User>[];
     final history = ref.watch(historyProvider(_filter));
 
+    // Counted off the list that is actually shown, so the number on the
+    // button and the rows it will remove are the same thing.
+    final abandoned =
+        history.value?.where((entry) => !entry.completed).length ?? 0;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -107,6 +112,27 @@ class _HistoryTabState extends ConsumerState<_HistoryTab> {
             ],
           ),
         ),
+        // Only ever what the filter above shows. Tidying up the list one is
+        // looking at is a different act from tidying up every child's list
+        // at once, and a button that silently did the second would be a trap.
+        if (abandoned > 0)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(32, 0, 32, 8),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: OutlinedButton.icon(
+                icon: const Icon(Icons.cleaning_services_outlined, size: 22),
+                label: Text(
+                  _filter == null
+                      ? 'Abgebrochene Durchgänge aufräumen ($abandoned)'
+                      : 'Abgebrochene von ${_filterName(users)} aufräumen '
+                          '($abandoned)',
+                  style: const TextStyle(fontSize: 18),
+                ),
+                onPressed: () => _confirmCleanup(abandoned),
+              ),
+            ),
+          ),
         Expanded(
           child: history.when(
             loading: () => const Center(child: CircularProgressIndicator()),
@@ -160,6 +186,43 @@ class _HistoryTabState extends ConsumerState<_HistoryTab> {
     );
     if (confirmed ?? false) {
       await ref.read(statsRepositoryProvider).deleteSession(entry.sessionId);
+    }
+  }
+
+  String _filterName(List<User> users) =>
+      users.where((u) => u.id == _filter).firstOrNull?.name ?? 'diesem Kind';
+
+  Future<void> _confirmCleanup(int count) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(
+          count == 1
+              ? 'Einen abgebrochenen Durchgang aufräumen?'
+              : '$count abgebrochene Durchgänge aufräumen?',
+        ),
+        content: const Text(
+          'Abgebrochene Durchgänge zählten nie für Sterne, Blitze oder eine '
+          'Bestenliste - sie verschwinden nur aus dieser Liste. Die geübte '
+          'Zeit bleibt gezählt.',
+          style: TextStyle(fontSize: 20),
+        ),
+        actions: [
+          OutlinedButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Abbrechen'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('Aufräumen'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed ?? false) {
+      await ref
+          .read(statsRepositoryProvider)
+          .deleteIncompleteSessions(userId: _filter);
     }
   }
 }

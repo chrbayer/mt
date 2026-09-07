@@ -87,6 +87,7 @@ class BackupRepository {
             'wrongAttempts': session.wrongAttempts,
             'completed': session.completed,
             'scored': session.scored,
+            'deleted': session.deleted,
           }
       ],
       'attempts': [
@@ -219,6 +220,7 @@ class BackupRepository {
                 completed: Value(session['completed'] as bool? ?? false),
                 // An older backup knew no cap, so everything in it counted.
                 scored: Value(session['scored'] as bool? ?? true),
+                deleted: Value(session['deleted'] as bool? ?? false),
               ),
             );
       }

@@ -213,6 +213,10 @@ antreten. Die App läuft vollständig offline, ohne Konten und ohne Netzwerk.
   Verlauf —, sie setzt nur keine Bestzeit mehr und vergibt keine Sterne und
   Blitze. Die App sagt es vorher im Startdialog und hinterher auf dem
   Ergebnisbildschirm. Im Elternbereich einstellbar, für alle und je Kind.
+* **Aufräumen im Elternbereich**: abgebrochene Durchgänge lassen sich mit
+  einem Knopf aus dem Verlauf räumen — für alle oder nur für das gewählte
+  Kind. Löschen kostet Sterne, Blitze und Bestenlistenplätze, **aber nie die
+  geübte Zeit**: sonst hätte die Tagesgrenze einen Löschknopf daneben.
 * **Fertige Lektionen ausblenden**: bei 75 Lektionen ist die Liste lang, und
   das meiste, woran ein Kind vorbeiscrollt, sitzt längst. Der Filter oben im
   Katalog kürzt sie in zwei Stufen — **mit 3 Sternen** verschwindet, was

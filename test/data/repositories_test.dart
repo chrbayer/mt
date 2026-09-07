@@ -176,6 +176,9 @@ void main() {
       await recordRun(SessionRepository(before),
           userId: id, lessonId: 'add_20_plain');
 
+      if (version < 10) {
+        await before.customStatement('ALTER TABLE sessions DROP COLUMN deleted');
+      }
       if (version < 9) {
         await before
             .customStatement('ALTER TABLE users DROP COLUMN scored_runs_per_lesson');
@@ -221,7 +224,7 @@ void main() {
       return file;
     }
 
-    for (final from in [1, 2, 3, 4, 5, 6, 7, 8]) {
+    for (final from in [1, 2, 3, 4, 5, 6, 7, 8, 9]) {
       test('a database from schema v$from keeps its data', () async {
         final file = await databaseAtVersion(from);
 
@@ -251,6 +254,9 @@ void main() {
         // all. A rule made afterwards must not take a best time away.
         expect((await after.select(after.sessions).get()).single.scored,
             isTrue);
+        // Nothing was ever deleted before v10 either.
+        expect((await after.select(after.sessions).get()).single.deleted,
+            isFalse);
         // The stars were worked out from the runs before v8 and are carried
         // over once: a clean run of ten is worth three, and nobody loses
         // what they collected because the app changed how it keeps score.
@@ -641,8 +647,10 @@ void main() {
       await stats.deleteSession(drop);
       final history = await stats.watchHistory().first;
       expect(history.map((h) => h.sessionId), [keep]);
-      // The attempts of the deleted run go with it.
-      expect(await db.select(db.attempts).get(), hasLength(10));
+      // Marked, not erased: the row and its attempts stay so the practised
+      // time stays. Deleting a run must not hand back an afternoon.
+      expect(await db.select(db.sessions).get(), hasLength(2));
+      expect(await db.select(db.attempts).get(), hasLength(20));
     });
 
     test('summaries cover every profile, also the ones without a run',

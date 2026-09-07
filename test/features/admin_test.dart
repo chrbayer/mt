@@ -218,7 +218,25 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Noch keine Durchgänge.'), findsOneWidget);
-      expect(await db.select(db.sessions).get(), isEmpty);
+      // Gone from the log, still on disk: the row carries the practised time,
+      // and deleting a run must not hand that back.
+      expect((await db.select(db.sessions).get()).single.deleted, isTrue);
+    });
+
+    testWidgets('abandoned runs can be tidied away in one go', (tester) async {
+      await run(mia, 'add_20_plain');
+      await run(mia, 'mix_100', completed: false);
+      await openAdmin(tester);
+
+      await tester.tap(find.textContaining('aufräumen (1)'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Aufräumen'));
+      await tester.pumpAndSettle();
+
+      // The finished run stays, the abandoned one is gone from the list, and
+      // the button with it - there is nothing left to tidy.
+      expect(find.text('Plus ohne Zehnerübergang  ·  bis 20'), findsOneWidget);
+      expect(find.textContaining('aufräumen'), findsNothing);
     });
 
     testWidgets('statistics can be reset per profile', (tester) async {

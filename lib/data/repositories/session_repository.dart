@@ -104,6 +104,7 @@ class SessionRepository {
               s.lessonId.equals(session.lessonId) &
               s.completed.equals(true) &
               s.scored.equals(true) &
+              s.deleted.equals(false) &
               s.id.equals(sessionId).not() &
               s.finishedAtMs.isBiggerOrEqualValue(dayStartMs)))
         .get();
