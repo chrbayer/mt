@@ -5,6 +5,7 @@ import '../../../domain/task.dart';
 import '../../../theme/app_theme.dart';
 import '../practice_controller.dart';
 import 'clock_face.dart';
+import 'counted_pair.dart';
 import 'dice_face.dart';
 import 'picture_group.dart';
 
@@ -64,106 +65,80 @@ class TaskDisplay extends StatelessWidget {
     // The gentlest forms draw a picture and put the box beside it. Nothing is
     // written as an equation, because reading one is not the point yet.
     final Widget? illustration = switch (task.form) {
+      // A single heap to count: never a number, or the answer would be
+      // standing right there.
       TaskForm.quantity => PictureGroup(
           count: task.a,
           picture: task.picture,
           arrangement: arrangement,
           seed: task.a * 31 + task.b,
-          showCount: showCounts,
         ),
-      TaskForm.dice => Row(
-          mainAxisSize: MainAxisSize.min,
-          // Top-aligned so the plus lines up with the dice themselves rather
-          // than with the numerals printed underneath them.
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            DiceFace(pips: task.a, showNumber: showCounts),
-            if (task.b > 0) ...[
-              SizedBox(
-                height: DiceFace.defaultSize,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 26),
-                  child: Center(
-                    child: Text('+', style: style.copyWith(fontSize: 72)),
-                  ),
-                ),
+      TaskForm.dice => task.b == 0
+          ? DiceFace(pips: task.a)
+          : CountedPair(
+              left: DiceFace(pips: task.a),
+              right: DiceFace(pips: task.b),
+              separator: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 26),
+                child: Text('+', style: style.copyWith(fontSize: 72)),
               ),
-              DiceFace(pips: task.b, showNumber: showCounts),
-            ],
-          ],
-        ),
-      TaskForm.quantityAdd => Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            PictureGroup(
-              count: task.a,
-              picture: task.picture,
-              arrangement: arrangement,
-              seed: task.a * 31 + task.b,
-              showCount: showCounts,
+              countSeparator: Text('+', style: style.copyWith(fontSize: 52)),
+              leftCount: showCounts ? task.a : null,
+              rightCount: showCounts ? task.b : null,
+              countSize: 68,
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 28),
-              child: Text('+', style: style.copyWith(fontSize: 72)),
-            ),
-            PictureGroup(
-              count: task.b,
-              picture: task.picture,
-              arrangement: arrangement,
-              seed: task.b * 31 + task.a,
-              showCount: showCounts,
-            ),
-          ],
+      TaskForm.quantityAdd => CountedPair(
+          left: PictureGroup(
+            count: task.a,
+            picture: task.picture,
+            arrangement: arrangement,
+            seed: task.a * 31 + task.b,
+          ),
+          right: PictureGroup(
+            count: task.b,
+            picture: task.picture,
+            arrangement: arrangement,
+            seed: task.b * 31 + task.a,
+          ),
+          separator: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 28),
+            child: Text('+', style: style.copyWith(fontSize: 72)),
+          ),
+          countSeparator: Text('+', style: style.copyWith(fontSize: 52)),
+          leftCount: showCounts ? task.a : null,
+          rightCount: showCounts ? task.b : null,
+          countSize: 68,
         ),
       // The divider is what makes two heaps read as two heaps, so it grows
       // with them - a cloud is far taller than a row, and a stub of a line
       // between two tall clouds separates nothing.
-      TaskForm.compare => IntrinsicHeight(
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Center(
-                child: PictureGroup(
-                  count: task.a,
-                  picture: task.picture,
-                  arrangement: arrangement,
-                  seed: task.a * 31 + task.b,
-                  showCount: showCounts,
-                ),
-              ),
-              // Bold rather than discreet: this line carries the whole
-              // message "these are two heaps". In divider grey on the pale
-              // background it was barely visible.
-              Container(
-                width: 8,
-                margin: const EdgeInsets.symmetric(horizontal: 36),
-                decoration: BoxDecoration(
-                  color: AppColors.textMuted,
-                  borderRadius: BorderRadius.circular(4),
-                ),
-              ),
-              Center(
-                child: PictureGroup(
-                  count: task.b,
-                  picture: task.picture,
-                  arrangement: arrangement,
-                  seed: task.b * 31 + task.a,
-                  showCount: showCounts,
-                ),
-              ),
-            ],
+      // No plus between these counts: the heaps are compared, not added, and
+      // a plus underneath would teach the wrong sum.
+      TaskForm.compare => CountedPair(
+          left: PictureGroup(
+            count: task.a,
+            picture: task.picture,
+            arrangement: arrangement,
+            seed: task.a * 31 + task.b,
           ),
-        ),
-      TaskForm.sequence => Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            for (final number in task.sequenceNumbers)
-              Padding(
-                padding: const EdgeInsets.only(right: 28),
-                child: Text('$number', style: style),
-              ),
-          ],
+          right: PictureGroup(
+            count: task.b,
+            picture: task.picture,
+            arrangement: arrangement,
+            seed: task.b * 31 + task.a,
+          ),
+          stretchSeparator: true,
+          separator: Container(
+            width: 8,
+            margin: const EdgeInsets.symmetric(horizontal: 36),
+            decoration: BoxDecoration(
+              color: AppColors.textMuted,
+              borderRadius: BorderRadius.circular(4),
+            ),
+          ),
+          leftCount: showCounts ? task.a : null,
+          rightCount: showCounts ? task.b : null,
+          countSize: 68,
         ),
       // Two answers, and the first of them is a word. The pad swaps to
       // words while that box is active, so both are typed the same way.

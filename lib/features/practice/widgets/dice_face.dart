@@ -2,11 +2,10 @@ import 'package:flutter/material.dart';
 
 import '../../../theme/app_theme.dart';
 
-/// A die with its pips, and the numeral underneath.
+/// A die with its pips.
 ///
-/// Both at once on purpose: the pattern is what a child recognises first, the
-/// numeral is what they are learning to attach to it. Seeing them together is
-/// the whole lesson.
+/// The numeral that belongs with it is drawn by whoever places the die, so
+/// that two dice can share one line of numbers - see [CountedPair].
 class DiceFace extends StatelessWidget {
   /// Edge length of the die itself, without the numeral underneath.
   static const double defaultSize = 190;
@@ -14,14 +13,15 @@ class DiceFace extends StatelessWidget {
   final int pips;
   final double size;
 
-  /// The numeral under the die. Dropped where the die is only a thumbnail.
-  final bool showNumber;
+  /// Outline and pips. Blue on a lesson tile, where every other example is
+  /// blue too and a black die stood out as if it were something else.
+  final Color color;
 
   const DiceFace({
     super.key,
     required this.pips,
     this.size = defaultSize,
-    this.showNumber = true,
+    this.color = AppColors.text,
   });
 
   /// Pip positions in a unit square, in the arrangement every die uses.
@@ -54,43 +54,28 @@ class DiceFace extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: size,
-          height: size,
-          decoration: BoxDecoration(
-            color: AppColors.surface,
-            border: Border.all(color: AppColors.text, width: 5),
-            borderRadius: BorderRadius.circular(size * 0.18),
-          ),
-          child: CustomPaint(painter: _PipPainter(pips: pips)),
-        ),
-        if (showNumber) ...[
-          SizedBox(height: size * 0.09),
-          Text(
-            '$pips',
-            style: TextStyle(
-              fontSize: size * 0.36,
-              fontWeight: FontWeight.w700,
-              color: AppColors.text,
-            ),
-          ),
-        ],
-      ],
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        border: Border.all(color: color, width: size * 0.026),
+        borderRadius: BorderRadius.circular(size * 0.18),
+      ),
+      child: CustomPaint(painter: _PipPainter(pips: pips, color: color)),
     );
   }
 }
 
 class _PipPainter extends CustomPainter {
   final int pips;
+  final Color color;
 
-  _PipPainter({required this.pips});
+  _PipPainter({required this.pips, required this.color});
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()..color = AppColors.text;
+    final paint = Paint()..color = color;
     final radius = size.width * 0.085;
     for (final spot in DiceFace._layouts[pips] ?? const <Offset>[]) {
       canvas.drawCircle(
@@ -102,5 +87,6 @@ class _PipPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_PipPainter old) => old.pips != pips;
+  bool shouldRepaint(_PipPainter old) =>
+      old.pips != pips || old.color != color;
 }

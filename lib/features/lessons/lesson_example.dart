@@ -4,6 +4,7 @@ import '../../domain/lesson.dart';
 import '../../domain/task.dart';
 import '../../domain/task_generator.dart';
 import '../../theme/app_theme.dart';
+import '../practice/widgets/counted_pair.dart';
 import '../practice/widgets/dice_face.dart';
 import '../practice/widgets/picture_group.dart';
 
@@ -69,121 +70,84 @@ class LessonExample extends StatelessWidget {
   Widget build(BuildContext context) {
     final task = exampleTaskFor(lesson);
 
+    // Every tile speaks in the same blue. The first steps draw pictures and
+    // dice instead of an equation, and in black they read as a different
+    // kind of thing altogether - the emoji cannot be recoloured, but their
+    // numbers and the dice can.
+    const ink = AppColors.primary;
+
+    Widget plus() => Padding(
+          padding: EdgeInsets.symmetric(horizontal: fontSize * 0.3),
+          child: Text(
+            '+',
+            style: TextStyle(
+              fontSize: fontSize,
+              color: ink,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        );
+
+    PictureGroup heap(int count, int seed) => PictureGroup(
+          count: count,
+          picture: task.picture,
+          arrangement: lesson.arrangement,
+          seed: seed,
+          size: fontSize,
+        );
+
     // The two picture variants differ only in their layout, so the tile has
     // to show it - otherwise "Reihe" and "Wolke" look like the same lesson.
     if (task.form == TaskForm.quantity) {
-      return PictureGroup(
-        count: task.a,
-        picture: task.picture,
-        arrangement: lesson.arrangement,
-        seed: task.a * 31 + task.b,
-        size: fontSize,
-        showCount: lesson.showCounts,
-      );
+      return heap(task.a, task.a * 31 + task.b);
     }
     if (task.form == TaskForm.quantityAdd) {
-      return Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          PictureGroup(
-            count: task.a,
-            picture: task.picture,
-            arrangement: lesson.arrangement,
-            seed: task.a * 31 + task.b,
-            size: fontSize,
-            showCount: lesson.showCounts,
-          ),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: fontSize * 0.3),
-            child: Text(
-              '+',
-              style: TextStyle(
-                fontSize: fontSize,
-                color: AppColors.primary,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-          PictureGroup(
-            count: task.b,
-            picture: task.picture,
-            arrangement: lesson.arrangement,
-            seed: task.b * 31 + task.a,
-            size: fontSize,
-            showCount: lesson.showCounts,
-          ),
-        ],
+      return CountedPair(
+        left: heap(task.a, task.a * 31 + task.b),
+        right: heap(task.b, task.b * 31 + task.a),
+        separator: plus(),
+        countSeparator: lesson.showCounts ? plus() : null,
+        leftCount: lesson.showCounts ? task.a : null,
+        rightCount: lesson.showCounts ? task.b : null,
+        countSize: fontSize * 0.85,
+        countColor: ink,
       );
     }
     // Both comparison lessons draw two real heaps with their numbers, the
     // same as the practice screen. Written out as text they lost the numbers
     // and, worse, the row and the cloud looked identical.
     if (task.form == TaskForm.compare) {
-      return IntrinsicHeight(
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Center(
-              child: PictureGroup(
-                count: task.a,
-                picture: task.picture,
-                arrangement: lesson.arrangement,
-                seed: task.a * 31 + task.b,
-                size: fontSize,
-                showCount: lesson.showCounts,
-              ),
-            ),
-            Container(
-              width: fontSize * 0.12,
-              margin: EdgeInsets.symmetric(horizontal: fontSize * 0.45),
-              decoration: BoxDecoration(
-                color: AppColors.textMuted,
-                borderRadius: BorderRadius.circular(fontSize * 0.06),
-              ),
-            ),
-            Center(
-              child: PictureGroup(
-                count: task.b,
-                picture: task.picture,
-                arrangement: lesson.arrangement,
-                seed: task.b * 31 + task.a,
-                size: fontSize,
-                showCount: lesson.showCounts,
-              ),
-            ),
-          ],
+      return CountedPair(
+        left: heap(task.a, task.a * 31 + task.b),
+        right: heap(task.b, task.b * 31 + task.a),
+        stretchSeparator: true,
+        separator: Container(
+          width: fontSize * 0.12,
+          margin: EdgeInsets.symmetric(horizontal: fontSize * 0.45),
+          decoration: BoxDecoration(
+            color: ink,
+            borderRadius: BorderRadius.circular(fontSize * 0.06),
+          ),
         ),
+        leftCount: lesson.showCounts ? task.a : null,
+        rightCount: lesson.showCounts ? task.b : null,
+        countSize: fontSize * 0.85,
+        countColor: ink,
       );
     }
     if (task.form == TaskForm.dice) {
-      return Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          DiceFace(
-            pips: task.a,
-            size: fontSize * 1.7,
-            showNumber: lesson.showCounts,
-          ),
-          if (task.b > 0) ...[
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: fontSize * 0.35),
-              child: Text(
-                '+',
-                style: TextStyle(
-                  fontSize: fontSize,
-                  color: AppColors.primary,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-            DiceFace(
-              pips: task.b,
-              size: fontSize * 1.7,
-              showNumber: lesson.showCounts,
-            ),
-          ],
-        ],
+      if (task.b == 0) {
+        return DiceFace(pips: task.a, size: fontSize * 1.7, color: ink);
+      }
+      return CountedPair(
+        left: DiceFace(pips: task.a, size: fontSize * 1.7, color: ink),
+        right: DiceFace(pips: task.b, size: fontSize * 1.7, color: ink),
+        separator: plus(),
+        countSeparator: lesson.showCounts ? plus() : null,
+        leftCount: lesson.showCounts ? task.a : null,
+        rightCount: lesson.showCounts ? task.b : null,
+        countSize: fontSize * 0.85,
+        countColor: ink,
       );
     }
 

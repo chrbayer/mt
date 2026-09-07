@@ -3,9 +3,11 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 import '../../../domain/lesson.dart';
-import '../../../theme/app_theme.dart';
 
 /// A handful of identical pictures, either lined up or scattered.
+///
+/// Draws no number of its own: where a count belongs, it is [CountedPair]
+/// that places it, so that two heaps can share one line of numbers.
 ///
 /// The two are different exercises. A row can be counted by running a finger
 /// along it; a cloud cannot, and the child has to keep track of what is
@@ -21,13 +23,6 @@ class PictureGroup extends StatelessWidget {
 
   final double size;
 
-  /// Prints the count under the group.
-  ///
-  /// On where it belongs: a number helps where the point is to tie it to an
-  /// amount - comparing two heaps, adding two of them. It gives the game away
-  /// where the point is to count, so the counting lessons show none.
-  final bool showCount;
-
   const PictureGroup({
     super.key,
     required this.count,
@@ -35,7 +30,6 @@ class PictureGroup extends StatelessWidget {
     required this.arrangement,
     this.seed = 0,
     this.size = 76,
-    this.showCount = false,
   });
 
   @override
@@ -57,22 +51,7 @@ class PictureGroup extends StatelessWidget {
           )
         : _Cloud(count: count, picture: picture, seed: seed, size: size);
 
-    if (!showCount) return pictures;
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        pictures,
-        SizedBox(height: size * 0.12),
-        Text(
-          '$count',
-          style: TextStyle(
-            fontSize: size * 0.62,
-            fontWeight: FontWeight.w700,
-            color: AppColors.text,
-          ),
-        ),
-      ],
-    );
+    return pictures;
   }
 }
 

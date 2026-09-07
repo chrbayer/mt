@@ -25,6 +25,10 @@ antreten. Die App läuft vollständig offline, ohne Konten und ohne Netzwerk.
   Eine Zahl steht nur dort neben den Bildern, wo sie mit der Menge verknüpft
   werden soll — beim Vergleichen und beim Zusammenrechnen. Wo das Zählen
   selbst die Aufgabe ist, verrät keine Zahl das Ergebnis.
+  Wo zwei Zahlen stehen, stehen sie **auf einer Linie**, und beim
+  Zusammenrechnen steht ein **Pluszeichen** zwischen ihnen — dasselbe, das
+  auch zwischen den Häufchen steht. Beim Vergleichen steht dort keins: die
+  Mengen werden verglichen, nicht addiert.
   Diese Lektionen werden **nicht gemessen und nicht gewertet**: keine Uhr,
   keine Bestenliste, und die Sterne gibt es fürs Durchhalten statt fürs Tempo.
   Wer fünf Äpfel zählt, soll nicht gegen ein Geschwisterkind antreten.

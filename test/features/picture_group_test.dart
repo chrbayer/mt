@@ -157,26 +157,24 @@ void main() {
     }
   });
 
-  testWidgets('the count is shown only where it is asked for',
-      (tester) async {
-    for (final show in [false, true]) {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Center(
-              child: PictureGroup(
-                count: 4,
-                picture: '🐝',
-                arrangement: PictureArrangement.row,
-                showCount: show,
-              ),
+  testWidgets('a heap draws no number of its own', (tester) async {
+    // The count moved to CountedPair, so that two heaps can share one line
+    // of numbers instead of hanging them at two different heights.
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: PictureGroup(
+              count: 4,
+              picture: '🐝',
+              arrangement: PictureArrangement.row,
             ),
           ),
         ),
-      );
-      await tester.pump();
-      expect(find.text('4'), show ? findsOneWidget : findsNothing);
-    }
+      ),
+    );
+    await tester.pump();
+    expect(find.text('4'), findsNothing);
   });
 
   testWidgets('a row is a row', (tester) async {

@@ -330,6 +330,27 @@ dorthin, wo gezählt werden soll.** Beim Vergleichen und beim Zusammenrechnen
 hilft sie, beim Zählen verrät sie die Lösung. Ein Test im Katalog hält die
 Zuordnung je Lektion fest.
 
+Wo zwei Mengen nebeneinander stehen, baut `CountedPair` sie als **Tabelle**
+auf, nicht als zwei aneinandergeklebte Spalten. Eine Wolke aus vier Bienen ist
+höher als eine aus zweien, und unter jedes Häufchen gehängt landeten die
+Zahlen auf verschiedenen Höhen und lasen sich nicht mehr als Zahlenpaar. Das
+Raster erzwingt, was die Spalten allein nicht halten konnten.
+
+Das Trennzeichen **wiederholt sich unter den Zahlen**, aber nur, wo es etwas
+bedeutet: das Plus zwischen zwei Bienenhäufchen gehört auch zwischen ihre
+Zahlen, denn „2 + 4" ist genau der Schritt, auf den die Bilder vorbereiten.
+Bei „Wo sind mehr?" bleibt die Stelle leer — dort ein Plus zu schreiben würde
+eine Rechnung beibringen, nach der niemand gefragt hat.
+
+Der Trenner beim Vergleichen wächst über `stretchSeparator` (eine Zelle mit
+`TableCellVerticalAlignment.fill`) auf die Höhe der Häufchen mit. Zwischen
+zwei hohen Wolken trennt ein Strichstummel nichts.
+
+Auf der Kachel zeichnen Würfel und Zahlen in `AppColors.primary`. Jede andere
+Kachel spricht in Blau; in Schwarz lasen sich die Ersten Schritte als etwas
+ganz anderes. Die Emoji lassen sich nicht umfärben, ihre Zahlen und die
+Würfel schon.
+
 Bei der Wolke werden die Zellen aus einem Glyphen-`extent` bemessen, nicht aus
 der Schriftgröße: ein Zeichen ist höher als sein Schriftgrad, und der `Stack`
 schnitt die letzte Reihe sonst ab, obwohl daneben noch Platz war. Der
