@@ -11,6 +11,7 @@ import 'package:mathe_trainer/features/admin/profile_settings_dialog.dart';
 import 'package:mathe_trainer/features/admin/reset_stars_dialog.dart';
 import 'package:mathe_trainer/features/leaderboard/leaderboard_screen.dart';
 import 'package:mathe_trainer/features/lessons/lesson_home_screen.dart';
+import 'package:mathe_trainer/features/lessons/start_lesson_sheet.dart';
 import 'package:mathe_trainer/features/practice/practice_screen.dart';
 import 'package:mathe_trainer/features/profiles/profile_select_screen.dart';
 import 'package:mathe_trainer/features/result/result_screen.dart';
@@ -367,6 +368,61 @@ void main() {
         expect(box.right, lessThanOrEqualTo(size.value.width), reason: label);
         expect(box.bottom, lessThanOrEqualTo(size.value.height), reason: label);
       }
+
+      // With five chosen it must still fit. It did not: the hint underneath
+      // pushed the sheet past the bottom of a 10" tablet, and only the
+      // preselected ten was ever measured here.
+      final sheetBefore = tester.getRect(find.text("Los geht's"));
+      await tester.tap(find.widgetWithText(Material, '5').first);
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      expect(
+        tester.getRect(find.text("Los geht's")),
+        sheetBefore,
+        reason: 'the sheet must not move when the count changes',
+      );
+      for (final label in ["Los geht's", 'Bestenliste']) {
+        final box = tester.getRect(find.text(label));
+        expect(box.bottom, lessThanOrEqualTo(size.value.height), reason: label);
+      }
+    });
+  }
+
+  // Landscape on a phone is the narrowest the app ever gets. The start
+  // dialog is the one place where that was an open question.
+  for (final size in const {
+    '08b-startdialog-handy-klein': Size(640, 360),
+    '08c-startdialog-handy': Size(800, 400),
+  }.entries) {
+    testWidgets('${size.key} bleibt bedienbar', (tester) async {
+      await pumpScreen(
+        tester,
+        Builder(
+          builder: (context) => TextButton(
+            onPressed: () =>
+                StartLessonSheet.show(context, lessonById('add_100_carry')),
+            child: const Text('auf'),
+          ),
+        ),
+        size.value,
+      );
+      await tester.tap(find.text('auf'));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+
+      for (final count in ['5', '10', '50']) {
+        await tester.tap(find.widgetWithText(Material, count).first);
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull, reason: count);
+      }
+
+      // The sheet scrolls on a screen this short, so the buttons need not be
+      // on screen at once - but they must exist and be reachable.
+      await tester.ensureVisible(find.text("Los geht's"));
+      await tester.pumpAndSettle();
+      final box = tester.getRect(find.text("Los geht's"));
+      expect(box.right, lessThanOrEqualTo(size.value.width));
+      expect(box.left, greaterThanOrEqualTo(0));
     });
   }
 }

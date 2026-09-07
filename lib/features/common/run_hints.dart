@@ -27,20 +27,22 @@ class ShortRunHint extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Nothing is being withheld in the first steps, so nothing to say.
     if (!scored || taskCount >= minTasksForAward) {
       return const SizedBox.shrink();
     }
+
+    // The warm accent, the same one the chip wears: choosing five is a
+    // legitimate way to practise, not a mistake, so not the red one.
     return Row(
       children: [
-        Icon(Icons.info_outline, size: fontSize * 1.2,
-            color: AppColors.textMuted),
+        Icon(Icons.info_outline,
+            size: fontSize * 1.2, color: AppColors.profile1),
         const SizedBox(width: 8),
         Expanded(
           child: Text(
-            'Unter $minTasksForAward Aufgaben gibt es keine Sterne, keine '
-            'Blitze und keinen Eintrag in der Bestenliste - zum Üben ist es '
-            'trotzdem gut.',
-            style: TextStyle(fontSize: fontSize, color: AppColors.textMuted),
+            'Zählt nicht: keine Sterne, keine Blitze, keine Bestenliste.',
+            style: TextStyle(fontSize: fontSize, color: AppColors.profile1),
           ),
         ),
       ],

@@ -112,27 +112,6 @@ class _StartLessonSheetState extends ConsumerState<StartLessonSheet> {
                     const TextStyle(fontSize: 19, color: AppColors.textMuted),
               ),
             ),
-          // The target, before the run rather than after it: a child who
-          // knows what three bolts take can go for them.
-          if (widget.lesson.targetMsPerTask > 0)
-            Padding(
-              padding: const EdgeInsets.only(top: 14),
-              child: Row(
-                children: [
-                  const BoltRow(earned: maxBolts, size: 26),
-                  const SizedBox(width: 10),
-                  Text(
-                    'ab ${formatPerTask(
-                      widget.lesson.targetMsPerTask.toDouble(),
-                    )} pro Aufgabe',
-                    style: const TextStyle(
-                      fontSize: 19,
-                      color: AppColors.textMuted,
-                    ),
-                  ),
-                ],
-              ),
-            ),
           const SizedBox(height: 26),
           const Text('Wie viele Aufgaben?', style: TextStyle(fontSize: 22)),
           const SizedBox(height: 12),
@@ -146,19 +125,44 @@ class _StartLessonSheetState extends ConsumerState<StartLessonSheet> {
                   child: _CountChip(
                     value: option,
                     selected: count != null && option == count,
+                    countsForNothing: widget.lesson.scored &&
+                        option < minTasksForAward,
                     onTap: () => setState(() => _selected = option),
                   ),
                 ),
             ],
           ),
-          // Both hints sit under the choice they are about: how long the run
-          // is, and how much time is left for it.
-          if (count != null)
+          // One line, one slot: either what three bolts take, or that this
+          // run is too short to be worth any. The two never apply at once -
+          // under ten tasks there are no bolts to earn - and sharing the
+          // slot is what keeps the sheet from growing and shrinking under a
+          // finger on its way to a button.
+          if (count != null && widget.lesson.targetMsPerTask > 0)
             Padding(
               padding: const EdgeInsets.only(top: 14),
-              child: ShortRunHint(
-                taskCount: count,
-                scored: widget.lesson.scored,
+              child: SizedBox(
+                height: 30,
+                child: count < minTasksForAward
+                    ? ShortRunHint(
+                        taskCount: count,
+                        scored: widget.lesson.scored,
+                        fontSize: 17,
+                      )
+                    : Row(
+                        children: [
+                          const BoltRow(earned: maxBolts, size: 26),
+                          const SizedBox(width: 10),
+                          Text(
+                            'ab ${formatPerTask(
+                              widget.lesson.targetMsPerTask.toDouble(),
+                            )} pro Aufgabe',
+                            style: const TextStyle(
+                              fontSize: 19,
+                              color: AppColors.textMuted,
+                            ),
+                          ),
+                        ],
+                      ),
               ),
             ),
           if (gate.pause == null && widget.lesson.scored)
@@ -240,18 +244,29 @@ class _StartLessonSheetState extends ConsumerState<StartLessonSheet> {
 class _CountChip extends StatelessWidget {
   final int value;
   final bool selected;
+
+  /// A run this short is worth nothing: no stars, no bolts, no ranking. The
+  /// chip says so in its colour, so it is not the sentence underneath alone
+  /// that has to carry it - and the leftmost, easiest-to-hit option is
+  /// exactly the one that costs the reward.
+  final bool countsForNothing;
+
   final VoidCallback onTap;
 
   const _CountChip({
     required this.value,
     required this.selected,
+    required this.countsForNothing,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
+    // The warm accent, not the red one: choosing five is a legitimate way to
+    // practise, not a mistake.
+    final accent = countsForNothing ? AppColors.profile1 : AppColors.primary;
     return Material(
-      color: selected ? AppColors.primary : AppColors.background,
+      color: selected ? accent : AppColors.background,
       borderRadius: BorderRadius.circular(18),
       child: InkWell(
         onTap: onTap,
@@ -262,7 +277,9 @@ class _CountChip extends StatelessWidget {
           alignment: Alignment.center,
           decoration: BoxDecoration(
             border: Border.all(
-              color: selected ? AppColors.primary : AppColors.divider,
+              color: selected
+                  ? accent
+                  : (countsForNothing ? accent : AppColors.divider),
               width: 2,
             ),
             borderRadius: BorderRadius.circular(18),
@@ -272,7 +289,9 @@ class _CountChip extends StatelessWidget {
             style: TextStyle(
               fontSize: 32,
               fontWeight: FontWeight.w700,
-              color: selected ? Colors.white : AppColors.text,
+              color: selected
+                  ? Colors.white
+                  : (countsForNothing ? accent : AppColors.text),
             ),
           ),
         ),

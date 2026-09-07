@@ -52,7 +52,10 @@ antreten. Die App läuft vollständig offline, ohne Konten und ohne Netzwerk.
   Startdialog sagt, was „Zehnerübergang" bedeutet. Standardmäßig ist der Text
   eingeklappt, damit der Bildschirm fürs Kind ruhig bleibt.
 * **Umfang wählbar** — 5, 10, 20, 30 oder 50 Aufgaben pro Durchgang, damit die
-  App sowohl zum Abfragen als auch zum längeren Üben taugt. Es gilt jeweils das
+  App sowohl zum Abfragen als auch zum längeren Üben taugt. Die **5** ist im
+  Startdialog farblich abgesetzt: darunter zählt ein Durchgang nicht, und das
+  soll man an der Kachel sehen, nicht erst am Satz darunter. Warm, nicht rot —
+  fünf Aufgaben sind eine legitime Art zu üben, kein Fehler. Es gilt jeweils das
   Genaueste: **was zuletzt bei dieser Lektion gewählt wurde**, sonst die
   **Vorgabe des Profils**, sonst der **Standard für alle** (10). Die Vorgabe
   des Profils stellt das Kind in seinen eigenen Einstellungen ein oder ein

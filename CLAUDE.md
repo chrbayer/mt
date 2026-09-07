@@ -455,6 +455,17 @@ Startdialog, nicht in einem Hilfetext. Beide Regeln waren vorher richtig und
 stumm — drei leere Sterne nach fünf fehlerfreien Aufgaben, und eine Sperre,
 die nach dem Durchgang aus dem Nichts kam.
 
+Im Startdialog teilen sich **beide Zeilen einen Platz**: entweder was drei
+Blitze kosten oder dass dieser Durchgang zu kurz ist, um etwas wert zu sein.
+Die zwei gelten nie gleichzeitig — unter zehn Aufgaben gibt es keine Blitze zu
+holen —, und der gemeinsame Platz ist es, was den Dialog davon abhält, unter
+einem Finger auf dem Weg zum Knopf zu wachsen und zu schrumpfen.
+
+Er war dabei nicht nur unruhig, sondern zu hoch: mit der 5 ragte er um 63 px
+über ein 10-Zoll-Tablet hinaus. Der Layouttest maß nur die Vorauswahl 10 und
+sah es deshalb nie. Er wechselt jetzt die Auswahl durch und prüft dabei, dass
+sich der Dialog **nicht bewegt**.
+
 Die Restzeit nennt immer die **knappere** der beiden Grenzen: eine Strecke mit
 zwanzig freien Minuten nützt nichts, wenn der Tag noch fünf hat.
 

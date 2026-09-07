@@ -119,6 +119,28 @@ void main() {
       expect(find.textContaining('keine Sterne'), findsNothing);
     });
 
+    testWidgets('and the chip itself says it, in colour', (tester) async {
+      await openSheet(tester, 'add_100_carry');
+
+      // The warm accent, not the red one: five is a legitimate way to
+      // practise, and not the same as an error.
+      Color fillOf(String label) => tester
+          .widget<Material>(find.widgetWithText(Material, label).first)
+          .color!;
+
+      // Ten is preselected, so it wears the ordinary blue.
+      expect(fillOf('10'), AppColors.primary);
+      // Five stands out before it is even chosen.
+      final five = tester.widget<Text>(find.text('5'));
+      expect(five.style?.color, AppColors.profile1);
+
+      await tester.tap(find.widgetWithText(Material, '5').first);
+      await tester.pumpAndSettle();
+      expect(fillOf('5'), AppColors.profile1);
+      expect(fillOf('10'), AppColors.background,
+          reason: 'ten is no longer the chosen one');
+    });
+
     testWidgets('says so again where the empty stars turn up', (tester) async {
       tester.view.physicalSize = const Size(2400, 1500);
       tester.view.devicePixelRatio = 2.0;
