@@ -208,6 +208,12 @@ antreten. Die App läuft vollständig offline, ohne Konten und ohne Netzwerk.
   verschwinden nur vom Übungsbildschirm; erzielte Ergebnisse und
   Bestenlisteneinträge bleiben erhalten.
 
+Unten rechts auf dem Startbildschirm steht klein die **Versionsnummer** —
+für den Fall, dass man wissen will, welcher Stand auf einem Tablet liegt. Sie
+kommt aus `pubspec.yaml` über die Build-Skripte in die App; ein Build, der
+nicht über die Skripte lief, zeigt gar nichts an statt einer möglicherweise
+falschen Zahl.
+
 ## Wer darf was
 
 Kinder melden sich mit einem Tipp auf ihre Kachel an und dürfen an ihrem Profil

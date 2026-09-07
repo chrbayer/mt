@@ -6,6 +6,7 @@ import '../../providers.dart';
 import '../../theme/app_theme.dart';
 import '../admin/admin_screen.dart';
 import '../admin/pin_gate.dart';
+import '../common/version_label.dart';
 import '../duel/duel_screen.dart';
 import '../lessons/lesson_home_screen.dart';
 import '../stats/global_stats_screen.dart';
@@ -110,6 +111,12 @@ class ProfileSelectScreen extends ConsumerWidget {
                     ),
                   ),
                 ),
+              ),
+              // Bottom right, in the quietest corner there is: for a parent
+              // checking which build sits on this tablet.
+              const Align(
+                alignment: Alignment.centerRight,
+                child: VersionLabel(),
               ),
             ],
           ),

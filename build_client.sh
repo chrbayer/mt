@@ -29,7 +29,10 @@ done
 # Flutter defaults the Android versionCode to 1.
 PUBSPEC_VERSION=$(grep '^version:' "$DIR/pubspec.yaml" | sed 's/version: //' | tr -d '[:space:]')
 BUILD_NAME="${PUBSPEC_VERSION%%+*}"
-VERSION_ARGS=(--build-name="$BUILD_NAME")
+# The version also goes in as a compile-time constant, so the app can print
+# it on its start screen. --build-name alone only reaches the Android
+# manifest, which the Dart side cannot read without a plugin.
+VERSION_ARGS=(--build-name="$BUILD_NAME" --dart-define=MT_VERSION="$BUILD_NAME")
 if [[ "$PUBSPEC_VERSION" == *+* ]]; then
     BUILD_NUMBER="${PUBSPEC_VERSION##*+}"
     VERSION_ARGS+=(--build-number="$BUILD_NUMBER")

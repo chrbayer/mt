@@ -602,6 +602,18 @@ nur, wenn sie tatsächlich in der pubspec steht — die ganze Zeichenkette an
 `--build-name` zu hängen wäre falsch, dann stünde das `+N` im sichtbaren
 Versionsnamen.
 
+## Versionsnummer in der App
+
+`--build-name` landet nur im Android-Manifest, das die Dart-Seite ohne Plugin
+nicht lesen kann. Beide Build-Skripte geben die Nummer deshalb zusätzlich als
+`--dart-define=MT_VERSION` mit, und `appVersion` liest sie als
+`String.fromEnvironment`. Eine Zeile ist kein Plugin wert.
+
+Ohne Define ist die Konstante leer, und dann zeigt `VersionLabel` **gar
+nichts**. Eine leere Ecke ist ehrlich; eine erfundene oder veraltete Nummer
+wäre schlimmer als keine. Der Test passt sich an, wie er läuft, und deckt
+damit beide Wege ab — einmal ohne Define, einmal mit.
+
 ## Vor dem Abschluss
 
 ```bash
