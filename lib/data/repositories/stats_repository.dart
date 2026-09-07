@@ -205,22 +205,6 @@ class StatsRepository {
   static final String _unscored =
       unscoredLessonIds.map((id) => "'$id'").join(', ');
 
-  /// The same rule as [starsFor], expressed in SQL.
-  ///
-  /// A lesson that is not scored earns its stars for being finished: in the
-  /// first steps the achievement is getting through, not getting through
-  /// cleanly.
-  static final String _stars = '''
-      CASE
-        WHEN s.lesson_id IN ($_unscored) THEN $maxStars
-        WHEN s.task_count < $minTasksForAward THEN 0
-        WHEN s.wrong_attempts * 1.0 / s.task_count <= $threeStarErrorRate
-          THEN $maxStars
-        WHEN s.wrong_attempts * 1.0 / s.task_count <= $twoStarErrorRate
-          THEN 2
-        ELSE 1
-      END''';
-
   /// The three-bolt time of every timed lesson, as a SQL lookup. Generated
   /// from the catalogue for the same reason as [_unscored]: SQL cannot read
   /// it, and a second hand-written copy of 54 targets would drift.
@@ -255,7 +239,10 @@ class StatsRepository {
                  MIN($_score)                      AS best_score,
                  AVG($_score)                      AS average_ms,
                  SUM(s.wrong_attempts) * 1.0 / SUM(s.task_count) AS error_rate,
-                 MAX($_stars)                      AS best_stars,
+                 COALESCE(
+                   (SELECT ls.stars FROM lesson_stars ls
+                     WHERE ls.user_id = s.user_id
+                       AND ls.lesson_id = s.lesson_id), 0) AS best_stars,
                  MAX($_bolts)                      AS best_bolts,
                  MAX(s.finished_at_ms)             AS last_played
           FROM sessions s
@@ -263,7 +250,7 @@ class StatsRepository {
           GROUP BY s.lesson_id
           ''',
           variables: [Variable.withInt(userId)],
-          readsFrom: {_db.sessions},
+          readsFrom: {_db.sessions, _db.lessonStars},
         )
         .watch()
         .map((rows) => {
@@ -547,24 +534,35 @@ class StatsRepository {
             ]);
   }
 
-  /// Stars per child: the best run of every lesson, counted once.
+  /// Hands the stars of one group back, and only those.
   ///
-  /// Once per lesson on purpose - otherwise the total would reward repeating
-  /// the easiest lesson over trying a new one.
+  /// The runs stay untouched, so best times, the learning curve, the
+  /// leaderboards and the bolts are all exactly as they were - a parent who
+  /// wants a child to earn the stars again is not asking to erase the
+  /// history.
+  Future<void> resetStarsInGroup(int userId, LessonGroup group) async {
+    final ids = lessonsInGroup(group).map((l) => l.id).toList();
+    if (ids.isEmpty) return;
+    // Drift's own API, so the screens watching the totals hear about it.
+    await (_db.delete(_db.lessonStars)
+          ..where((row) => row.userId.equals(userId) & row.lessonId.isIn(ids)))
+        .go();
+  }
+
+  /// Stars per child: what every lesson is worth, added up.
+  ///
+  /// One row per lesson by construction, so repeating the easiest lesson can
+  /// never beat trying a new one - and a group a parent has reset is simply
+  /// gone from the sum.
   Stream<Map<int, int>> watchStarTotals() {
     return _db
         .customSelect(
           '''
-          SELECT best.user_id AS user_id, SUM(best.stars) AS stars
-          FROM (
-            SELECT s.user_id AS user_id, MAX($_stars) AS stars
-            FROM sessions s
-            WHERE s.completed = 1
-            GROUP BY s.user_id, s.lesson_id
-          ) AS best
-          GROUP BY best.user_id
+          SELECT user_id AS user_id, SUM(stars) AS stars
+          FROM lesson_stars
+          GROUP BY user_id
           ''',
-          readsFrom: {_db.sessions},
+          readsFrom: {_db.lessonStars},
         )
         .watch()
         .map((rows) => {

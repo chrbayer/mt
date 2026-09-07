@@ -137,6 +137,12 @@ antreten. Die App läuft vollständig offline, ohne Konten und ohne Netzwerk.
   als Zahl. Das sagt, was das Ziel ist — Sorgfalt hat eine Marke zu erreichen,
   Tempo ist die Zugabe.
 
+  **Sterne einer Gruppe zurückgeben**: im Elternbereich, pro Profil, damit
+  ein Kind sie neu verdienen kann. Zurückgesetzt werden **nur die Sterne** —
+  Bestzeiten, Blitze, Lernkurve und Bestenlisten bleiben, wie sie waren.
+  Genau deshalb werden die Sterne seit 2.3.0 einzeln gespeichert statt aus den
+  Zeiten errechnet; beim Update wird der erreichte Stand einmalig übernommen.
+
   Beide Stände richten sich **nur** danach, welche Bereiche freigeschaltet
   sind. Wer fertige Lektionen ausblendet, räumt die Liste auf und gibt keine
   Sterne zurück; das Maximum ändert sich nur, wenn Eltern eine Gruppe

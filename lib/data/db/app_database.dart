@@ -5,6 +5,9 @@ library;
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
 
+import '../../domain/lesson.dart';
+import '../../domain/scoring.dart';
+
 part 'app_database.g.dart';
 
 /// A child's profile. No password - a tap on the tile is the login.
@@ -73,6 +76,24 @@ class LessonPreferences extends Table {
   Set<Column> get primaryKey => {userId, lessonId};
 }
 
+/// Stars a child has earned per lesson.
+///
+/// Stored rather than derived from the runs, because a parent can hand the
+/// stars of a whole group back without touching the times behind them. Once
+/// the two can differ, only a stored value can say what was actually earned.
+class LessonStars extends Table {
+  IntColumn get userId =>
+      integer().references(Users, #id, onDelete: KeyAction.cascade)();
+  TextColumn get lessonId => text()();
+
+  /// The best a single run of this lesson was ever worth. Never goes down on
+  /// its own - only a parent's reset takes it away.
+  IntColumn get stars => integer()();
+
+  @override
+  Set<Column> get primaryKey => {userId, lessonId};
+}
+
 /// One practice run. Timestamps are epoch milliseconds so the raw SQL in the
 /// statistics repositories stays unambiguous.
 class Sessions extends Table {
@@ -119,14 +140,20 @@ class AppSettings extends Table {
   Set<Column> get primaryKey => {settingKey};
 }
 
-@DriftDatabase(
-    tables: [Users, Sessions, Attempts, AppSettings, LessonPreferences])
+@DriftDatabase(tables: [
+  Users,
+  Sessions,
+  Attempts,
+  AppSettings,
+  LessonPreferences,
+  LessonStars,
+])
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor])
       : super(executor ?? driftDatabase(name: 'mathe_trainer'));
 
   @override
-  int get schemaVersion => 7;
+  int get schemaVersion => 8;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -173,10 +200,45 @@ class AppDatabase extends _$AppDatabase {
           // v7 can leave finished lessons out of the catalogue. Only needed
           // when the rebuild above did not already run.
           if (from == 6) await m.addColumn(users, users.lessonFilter);
+          // v8 keeps the stars instead of working them out from the runs, so
+          // that a parent can hand them back without losing the times.
+          if (from < 8) {
+            await m.createTable(lessonStars);
+            await _carryStarsOver(m.database);
+          }
         },
         beforeOpen: (details) async {
           // Needed for the ON DELETE CASCADE above to actually fire.
           await customStatement('PRAGMA foreign_keys = ON');
         },
       );
+}
+
+/// Fills the star table once, from the runs that are already there.
+///
+/// Nobody may lose what they collected because the app changed how it keeps
+/// score. This is the same rule the statistics used to apply on the fly, run
+/// exactly once: the best a single completed run of each lesson was worth.
+///
+/// Written out here rather than reusing the repository's expression: that one
+/// stops existing after this migration, and a migration has to keep working
+/// against the schema of its own moment.
+Future<void> _carryStarsOver(DatabaseConnectionUser db) async {
+  final unscored = unscoredLessonIds.map((id) => "'$id'").join(', ');
+  await db.customStatement('''
+    INSERT INTO lesson_stars (user_id, lesson_id, stars)
+    SELECT s.user_id, s.lesson_id, MAX(
+      CASE
+        WHEN s.lesson_id IN ($unscored) THEN $maxStars
+        WHEN s.task_count < $minTasksForAward THEN 0
+        WHEN s.wrong_attempts * 1.0 / s.task_count <= $threeStarErrorRate
+          THEN $maxStars
+        WHEN s.wrong_attempts * 1.0 / s.task_count <= $twoStarErrorRate
+          THEN 2
+        ELSE 1
+      END)
+    FROM sessions s
+    WHERE s.completed = 1
+    GROUP BY s.user_id, s.lesson_id
+  ''');
 }

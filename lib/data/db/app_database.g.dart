@@ -2485,6 +2485,274 @@ class LessonPreferencesCompanion extends UpdateCompanion<LessonPreference> {
   }
 }
 
+class $LessonStarsTable extends LessonStars
+    with TableInfo<$LessonStarsTable, LessonStar> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $LessonStarsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
+  @override
+  late final GeneratedColumn<int> userId = GeneratedColumn<int>(
+    'user_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES users (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _lessonIdMeta = const VerificationMeta(
+    'lessonId',
+  );
+  @override
+  late final GeneratedColumn<String> lessonId = GeneratedColumn<String>(
+    'lesson_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _starsMeta = const VerificationMeta('stars');
+  @override
+  late final GeneratedColumn<int> stars = GeneratedColumn<int>(
+    'stars',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [userId, lessonId, stars];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'lesson_stars';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<LessonStar> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('user_id')) {
+      context.handle(
+        _userIdMeta,
+        userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_userIdMeta);
+    }
+    if (data.containsKey('lesson_id')) {
+      context.handle(
+        _lessonIdMeta,
+        lessonId.isAcceptableOrUnknown(data['lesson_id']!, _lessonIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_lessonIdMeta);
+    }
+    if (data.containsKey('stars')) {
+      context.handle(
+        _starsMeta,
+        stars.isAcceptableOrUnknown(data['stars']!, _starsMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_starsMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {userId, lessonId};
+  @override
+  LessonStar map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return LessonStar(
+      userId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}user_id'],
+      )!,
+      lessonId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}lesson_id'],
+      )!,
+      stars: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}stars'],
+      )!,
+    );
+  }
+
+  @override
+  $LessonStarsTable createAlias(String alias) {
+    return $LessonStarsTable(attachedDatabase, alias);
+  }
+}
+
+class LessonStar extends DataClass implements Insertable<LessonStar> {
+  final int userId;
+  final String lessonId;
+
+  /// The best a single run of this lesson was ever worth. Never goes down on
+  /// its own - only a parent's reset takes it away.
+  final int stars;
+  const LessonStar({
+    required this.userId,
+    required this.lessonId,
+    required this.stars,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['user_id'] = Variable<int>(userId);
+    map['lesson_id'] = Variable<String>(lessonId);
+    map['stars'] = Variable<int>(stars);
+    return map;
+  }
+
+  LessonStarsCompanion toCompanion(bool nullToAbsent) {
+    return LessonStarsCompanion(
+      userId: Value(userId),
+      lessonId: Value(lessonId),
+      stars: Value(stars),
+    );
+  }
+
+  factory LessonStar.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return LessonStar(
+      userId: serializer.fromJson<int>(json['userId']),
+      lessonId: serializer.fromJson<String>(json['lessonId']),
+      stars: serializer.fromJson<int>(json['stars']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'userId': serializer.toJson<int>(userId),
+      'lessonId': serializer.toJson<String>(lessonId),
+      'stars': serializer.toJson<int>(stars),
+    };
+  }
+
+  LessonStar copyWith({int? userId, String? lessonId, int? stars}) =>
+      LessonStar(
+        userId: userId ?? this.userId,
+        lessonId: lessonId ?? this.lessonId,
+        stars: stars ?? this.stars,
+      );
+  LessonStar copyWithCompanion(LessonStarsCompanion data) {
+    return LessonStar(
+      userId: data.userId.present ? data.userId.value : this.userId,
+      lessonId: data.lessonId.present ? data.lessonId.value : this.lessonId,
+      stars: data.stars.present ? data.stars.value : this.stars,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LessonStar(')
+          ..write('userId: $userId, ')
+          ..write('lessonId: $lessonId, ')
+          ..write('stars: $stars')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(userId, lessonId, stars);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is LessonStar &&
+          other.userId == this.userId &&
+          other.lessonId == this.lessonId &&
+          other.stars == this.stars);
+}
+
+class LessonStarsCompanion extends UpdateCompanion<LessonStar> {
+  final Value<int> userId;
+  final Value<String> lessonId;
+  final Value<int> stars;
+  final Value<int> rowid;
+  const LessonStarsCompanion({
+    this.userId = const Value.absent(),
+    this.lessonId = const Value.absent(),
+    this.stars = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  LessonStarsCompanion.insert({
+    required int userId,
+    required String lessonId,
+    required int stars,
+    this.rowid = const Value.absent(),
+  }) : userId = Value(userId),
+       lessonId = Value(lessonId),
+       stars = Value(stars);
+  static Insertable<LessonStar> custom({
+    Expression<int>? userId,
+    Expression<String>? lessonId,
+    Expression<int>? stars,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (userId != null) 'user_id': userId,
+      if (lessonId != null) 'lesson_id': lessonId,
+      if (stars != null) 'stars': stars,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  LessonStarsCompanion copyWith({
+    Value<int>? userId,
+    Value<String>? lessonId,
+    Value<int>? stars,
+    Value<int>? rowid,
+  }) {
+    return LessonStarsCompanion(
+      userId: userId ?? this.userId,
+      lessonId: lessonId ?? this.lessonId,
+      stars: stars ?? this.stars,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (userId.present) {
+      map['user_id'] = Variable<int>(userId.value);
+    }
+    if (lessonId.present) {
+      map['lesson_id'] = Variable<String>(lessonId.value);
+    }
+    if (stars.present) {
+      map['stars'] = Variable<int>(stars.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LessonStarsCompanion(')
+          ..write('userId: $userId, ')
+          ..write('lessonId: $lessonId, ')
+          ..write('stars: $stars, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -2494,6 +2762,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $AppSettingsTable appSettings = $AppSettingsTable(this);
   late final $LessonPreferencesTable lessonPreferences =
       $LessonPreferencesTable(this);
+  late final $LessonStarsTable lessonStars = $LessonStarsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -2504,6 +2773,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     attempts,
     appSettings,
     lessonPreferences,
+    lessonStars,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -2527,6 +2797,13 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         limitUpdateKind: UpdateKind.delete,
       ),
       result: [TableUpdate('lesson_preferences', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'users',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('lesson_stars', kind: UpdateKind.delete)],
     ),
   ]);
 }
@@ -2599,6 +2876,24 @@ final class $$UsersTableReferences
     final cache = $_typedResult.readTableOrNull(
       _lessonPreferencesRefsTable($_db),
     );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$LessonStarsTable, List<LessonStar>>
+  _lessonStarsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.lessonStars,
+    aliasName: 'users__id__lesson_stars__user_id',
+  );
+
+  $$LessonStarsTableProcessedTableManager get lessonStarsRefs {
+    final manager = $$LessonStarsTableTableManager(
+      $_db,
+      $_db.lessonStars,
+    ).filter((f) => f.userId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_lessonStarsRefsTable($_db));
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: cache),
     );
@@ -2714,6 +3009,31 @@ class $$UsersTableFilterComposer extends Composer<_$AppDatabase, $UsersTable> {
           }) => $$LessonPreferencesTableFilterComposer(
             $db: $db,
             $table: $db.lessonPreferences,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> lessonStarsRefs(
+    Expression<bool> Function($$LessonStarsTableFilterComposer f) f,
+  ) {
+    final $$LessonStarsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.lessonStars,
+      getReferencedColumn: (t) => t.userId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$LessonStarsTableFilterComposer(
+            $db: $db,
+            $table: $db.lessonStars,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -2907,6 +3227,31 @@ class $$UsersTableAnnotationComposer
         );
     return f(composer);
   }
+
+  Expression<T> lessonStarsRefs<T extends Object>(
+    Expression<T> Function($$LessonStarsTableAnnotationComposer a) f,
+  ) {
+    final $$LessonStarsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.lessonStars,
+      getReferencedColumn: (t) => t.userId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$LessonStarsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.lessonStars,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$UsersTableTableManager
@@ -2925,6 +3270,7 @@ class $$UsersTableTableManager
           PrefetchHooks Function({
             bool sessionsRefs,
             bool lessonPreferencesRefs,
+            bool lessonStarsRefs,
           })
         > {
   $$UsersTableTableManager(_$AppDatabase db, $UsersTable table)
@@ -3003,12 +3349,17 @@ class $$UsersTableTableManager
               )
               .toList(),
           prefetchHooksCallback:
-              ({sessionsRefs = false, lessonPreferencesRefs = false}) {
+              ({
+                sessionsRefs = false,
+                lessonPreferencesRefs = false,
+                lessonStarsRefs = false,
+              }) {
                 return PrefetchHooks(
                   db: db,
                   explicitlyWatchedTables: [
                     if (sessionsRefs) db.sessions,
                     if (lessonPreferencesRefs) db.lessonPreferences,
+                    if (lessonStarsRefs) db.lessonStars,
                   ],
                   addJoins: null,
                   getPrefetchedDataCallback: (items) async {
@@ -3051,6 +3402,27 @@ class $$UsersTableTableManager
                               ),
                           typedResults: items,
                         ),
+                      if (lessonStarsRefs)
+                        await $_getPrefetchedData<
+                          User,
+                          $UsersTable,
+                          LessonStar
+                        >(
+                          currentTable: table,
+                          referencedTable: $$UsersTableReferences
+                              ._lessonStarsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$UsersTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).lessonStarsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.userId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
                     ];
                   },
                 );
@@ -3071,7 +3443,11 @@ typedef $$UsersTableProcessedTableManager =
       $$UsersTableUpdateCompanionBuilder,
       (User, $$UsersTableReferences),
       User,
-      PrefetchHooks Function({bool sessionsRefs, bool lessonPreferencesRefs})
+      PrefetchHooks Function({
+        bool sessionsRefs,
+        bool lessonPreferencesRefs,
+        bool lessonStarsRefs,
+      })
     >;
 typedef $$SessionsTableCreateCompanionBuilder = SessionsCompanion Function({
   Value<int> id,
@@ -4414,6 +4790,283 @@ typedef $$LessonPreferencesTableProcessedTableManager =
       LessonPreference,
       PrefetchHooks Function({bool userId})
     >;
+typedef $$LessonStarsTableCreateCompanionBuilder =
+    LessonStarsCompanion Function({
+      required int userId,
+      required String lessonId,
+      required int stars,
+      Value<int> rowid,
+    });
+typedef $$LessonStarsTableUpdateCompanionBuilder =
+    LessonStarsCompanion Function({
+      Value<int> userId,
+      Value<String> lessonId,
+      Value<int> stars,
+      Value<int> rowid,
+    });
+
+final class $$LessonStarsTableReferences
+    extends BaseReferences<_$AppDatabase, $LessonStarsTable, LessonStar> {
+  $$LessonStarsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $UsersTable _userIdTable(_$AppDatabase db) =>
+      db.users.createAlias('lesson_stars__user_id__users__id');
+
+  $$UsersTableProcessedTableManager get userId {
+    final $_column = $_itemColumn<int>('user_id')!;
+
+    final manager = $$UsersTableTableManager(
+      $_db,
+      $_db.users,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_userIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$LessonStarsTableFilterComposer
+    extends Composer<_$AppDatabase, $LessonStarsTable> {
+  $$LessonStarsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get lessonId => $composableBuilder(
+    column: $table.lessonId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get stars => $composableBuilder(
+    column: $table.stars,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$UsersTableFilterComposer get userId {
+    final $$UsersTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.userId,
+      referencedTable: $db.users,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$UsersTableFilterComposer(
+            $db: $db,
+            $table: $db.users,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$LessonStarsTableOrderingComposer
+    extends Composer<_$AppDatabase, $LessonStarsTable> {
+  $$LessonStarsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get lessonId => $composableBuilder(
+    column: $table.lessonId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get stars => $composableBuilder(
+    column: $table.stars,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$UsersTableOrderingComposer get userId {
+    final $$UsersTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.userId,
+      referencedTable: $db.users,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$UsersTableOrderingComposer(
+            $db: $db,
+            $table: $db.users,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$LessonStarsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $LessonStarsTable> {
+  $$LessonStarsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get lessonId =>
+      $composableBuilder(column: $table.lessonId, builder: (column) => column);
+
+  GeneratedColumn<int> get stars =>
+      $composableBuilder(column: $table.stars, builder: (column) => column);
+
+  $$UsersTableAnnotationComposer get userId {
+    final $$UsersTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.userId,
+      referencedTable: $db.users,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$UsersTableAnnotationComposer(
+            $db: $db,
+            $table: $db.users,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$LessonStarsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $LessonStarsTable,
+          LessonStar,
+          $$LessonStarsTableFilterComposer,
+          $$LessonStarsTableOrderingComposer,
+          $$LessonStarsTableAnnotationComposer,
+          $$LessonStarsTableCreateCompanionBuilder,
+          $$LessonStarsTableUpdateCompanionBuilder,
+          (LessonStar, $$LessonStarsTableReferences),
+          LessonStar,
+          PrefetchHooks Function({bool userId})
+        > {
+  $$LessonStarsTableTableManager(_$AppDatabase db, $LessonStarsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$LessonStarsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$LessonStarsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$LessonStarsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> userId = const Value.absent(),
+                Value<String> lessonId = const Value.absent(),
+                Value<int> stars = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => LessonStarsCompanion(
+                userId: userId,
+                lessonId: lessonId,
+                stars: stars,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required int userId,
+                required String lessonId,
+                required int stars,
+                Value<int> rowid = const Value.absent(),
+              }) => LessonStarsCompanion.insert(
+                userId: userId,
+                lessonId: lessonId,
+                stars: stars,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$LessonStarsTable, LessonStar>(table),
+                  $$LessonStarsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({userId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (userId) {
+                      state = state.withJoin(
+                        currentTable: table,
+                        currentColumn: table.userId,
+                        referencedTable: $$LessonStarsTableReferences
+                            ._userIdTable(db),
+                        referencedColumn: $$LessonStarsTableReferences
+                            ._userIdTable(db)
+                            .id,
+                      ) as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$LessonStarsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $LessonStarsTable,
+      LessonStar,
+      $$LessonStarsTableFilterComposer,
+      $$LessonStarsTableOrderingComposer,
+      $$LessonStarsTableAnnotationComposer,
+      $$LessonStarsTableCreateCompanionBuilder,
+      $$LessonStarsTableUpdateCompanionBuilder,
+      (LessonStar, $$LessonStarsTableReferences),
+      LessonStar,
+      PrefetchHooks Function({bool userId})
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -4428,4 +5081,6 @@ class $AppDatabaseManager {
       $$AppSettingsTableTableManager(_db, _db.appSettings);
   $$LessonPreferencesTableTableManager get lessonPreferences =>
       $$LessonPreferencesTableTableManager(_db, _db.lessonPreferences);
+  $$LessonStarsTableTableManager get lessonStars =>
+      $$LessonStarsTableTableManager(_db, _db.lessonStars);
 }

@@ -8,6 +8,7 @@ import 'package:mathe_trainer/domain/task.dart';
 import 'package:mathe_trainer/features/admin/admin_screen.dart';
 import 'package:mathe_trainer/features/admin/global_settings_tab.dart';
 import 'package:mathe_trainer/features/admin/profile_settings_dialog.dart';
+import 'package:mathe_trainer/features/admin/reset_stars_dialog.dart';
 import 'package:mathe_trainer/features/leaderboard/leaderboard_screen.dart';
 import 'package:mathe_trainer/features/lessons/lesson_home_screen.dart';
 import 'package:mathe_trainer/features/practice/practice_screen.dart';
@@ -261,6 +262,33 @@ void main() {
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
       expect(find.text('Speichern'), findsOneWidget);
+    });
+
+    testWidgets('13c-sterne-zuruecksetzen passt auf ${size.key}',
+        (tester) async {
+      // One row per group, nine of them, each with a button - the tallest
+      // dialog in the app.
+      await pumpScreen(
+        tester,
+        Builder(
+          builder: (context) => TextButton(
+            onPressed: () => ResetStarsDialog.show(context, mia),
+            child: const Text('auf'),
+          ),
+        ),
+        size.value,
+      );
+      await tester.tap(find.text('auf'));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+
+      await tester.drag(
+        find.byType(SingleChildScrollView).first,
+        const Offset(0, -2000),
+      );
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      expect(find.text('Fertig'), findsOneWidget);
     });
 
     testWidgets('14-elternbereich-einstellungen passt auf ${size.key}',

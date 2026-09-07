@@ -10,6 +10,7 @@ import '../../providers.dart';
 import '../../theme/app_theme.dart';
 import '../common/minutes_choice.dart';
 import '../common/task_count_choice.dart';
+import 'reset_stars_dialog.dart';
 import '../lessons/lesson_example.dart';
 
 /// Everything a parent decides about one child: which lesson groups they are
@@ -154,6 +155,20 @@ class _ProfileSettingsDialogState
                 allowInherit: true,
                 onChanged: (minutes) =>
                     setState(() => _dailyMinutes = minutes),
+              ),
+              const Divider(height: 32),
+              Text('Sterne', style: Theme.of(context).textTheme.titleLarge),
+              const SizedBox(height: 4),
+              const Text(
+                'Sterne einer Gruppe zurückgeben, damit sie neu verdient '
+                'werden können. Die Zeiten bleiben dabei stehen.',
+                style: TextStyle(fontSize: 17, color: AppColors.textMuted),
+              ),
+              const SizedBox(height: 10),
+              OutlinedButton.icon(
+                icon: const Icon(Icons.star_outline, size: 26),
+                label: const Text('Sterne zurücksetzen …'),
+                onPressed: () => ResetStarsDialog.show(context, widget.user),
               ),
               const Divider(height: 32),
               Text('Fertige Lektionen ausblenden',

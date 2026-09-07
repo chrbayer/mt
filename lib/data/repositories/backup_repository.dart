@@ -49,6 +49,7 @@ class BackupRepository {
     final attempts = await _db.select(_db.attempts).get();
     final settings = await _db.select(_db.appSettings).get();
     final lessonPrefs = await _db.select(_db.lessonPreferences).get();
+    final stars = await _db.select(_db.lessonStars).get();
 
     return const JsonEncoder.withIndent('  ').convert({
       'format': _backupMarker,
@@ -105,6 +106,14 @@ class BackupRepository {
         for (final setting in settings)
           {'key': setting.settingKey, 'value': setting.settingValue}
       ],
+      'lessonStars': [
+        for (final row in stars)
+          {
+            'userId': row.userId,
+            'lessonId': row.lessonId,
+            'stars': row.stars,
+          },
+      ],
       'lessonPreferences': [
         for (final pref in lessonPrefs)
           {
@@ -151,10 +160,12 @@ class BackupRepository {
     final attempts = rows('attempts');
     final settings = rows('settings');
     final lessonPrefs = rows('lessonPreferences');
+    final stars = rows('lessonStars');
 
     await _db.transaction(() async {
       // Order matters: attempts hang off sessions, sessions off users.
       await _db.delete(_db.lessonPreferences).go();
+      await _db.delete(_db.lessonStars).go();
       await _db.delete(_db.attempts).go();
       await _db.delete(_db.sessions).go();
       await _db.delete(_db.users).go();
@@ -235,6 +246,15 @@ class BackupRepository {
                 userId: pref['userId'] as int,
                 lessonId: pref['lessonId'] as String,
                 taskCount: pref['taskCount'] as int,
+              ),
+            );
+      }
+      for (final row in stars) {
+        await _db.into(_db.lessonStars).insert(
+              LessonStarsCompanion.insert(
+                userId: row['userId'] as int,
+                lessonId: row['lessonId'] as String,
+                stars: row['stars'] as int,
               ),
             );
       }

@@ -176,6 +176,9 @@ void main() {
       await recordRun(SessionRepository(before),
           userId: id, lessonId: 'add_20_plain');
 
+      if (version < 8) {
+        await before.customStatement('DROP TABLE lesson_stars');
+      }
       if (version < 7) {
         await before
             .customStatement('ALTER TABLE users DROP COLUMN lesson_filter');
@@ -213,7 +216,7 @@ void main() {
       return file;
     }
 
-    for (final from in [1, 2, 3, 4, 5, 6]) {
+    for (final from in [1, 2, 3, 4, 5, 6, 7]) {
       test('a database from schema v$from keeps its data', () async {
         final file = await databaseAtVersion(from);
 
@@ -236,6 +239,13 @@ void main() {
         expect(user.dailyLimitMinutes, isNull);
         // Nothing was ever filtered away, so nothing is.
         expect(user.filter, LessonFilter.all);
+        // The stars were worked out from the runs before v8 and are carried
+        // over once: a clean run of ten is worth three, and nobody loses
+        // what they collected because the app changed how it keeps score.
+        final stars = await StatsRepository(after).watchLessonStats(1).first;
+        expect(stars['add_20_plain']!.bestStars, maxStars);
+        expect((await StatsRepository(after).watchStarTotals().first)[1],
+            maxStars);
         expect(await after.select(after.lessonPreferences).get(), isEmpty);
         expect(await after.select(after.sessions).get(), hasLength(1));
         expect(await after.select(after.attempts).get(), hasLength(10));
@@ -717,9 +727,12 @@ void main() {
       expect(totals[tom], 3);
     });
 
-    test('the SQL stars agree with the Dart ones', () async {
+    test('the stored stars agree with the Dart rule', () async {
       final mia =
           await users.createUser(name: 'Mia', avatar: '🦊', colorIndex: 0);
+      // Since v8 the stars are written by starsFor and read straight back,
+      // so this walks the whole way: run, store, read.
+      //
       // Scored lessons only: the first steps earn their stars for finishing,
       // which is exactly what the next test checks.
       final scored =
@@ -817,7 +830,9 @@ void main() {
       final byLesson = await stats.watchLessonStats(mia).first;
       expect(byLesson['add_100_carry']!.bestStars, 0);
       expect(byLesson['add_100_carry']!.bestBolts, 0);
-      expect((await stats.watchStarTotals().first)[mia], 0);
+      // No row at all rather than a zero: nothing was earned, so there is
+      // nothing to store.
+      expect((await stats.watchStarTotals().first)[mia] ?? 0, 0);
       expect((await stats.watchBoltTotals().first)[mia] ?? 0, 0);
 
       // Ten tasks of the same quality do count, and the short run neither

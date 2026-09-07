@@ -395,10 +395,35 @@ die Systemschrift zurück.
 ## Sterne
 
 Die Schwellen stehen in `domain/scoring.dart` (`threeStarErrorRate`,
-`twoStarErrorRate`, `maxStars`) und werden von der SQL-Fassung in
-`stats_repository.dart` (`_stars`) hineininterpoliert — zwei Kopien der Regel
-„was zählt als drei Sterne" würden auseinanderlaufen. Ein Test vergleicht beide
-Fassungen gegeneinander.
+`twoStarErrorRate`, `maxStars`). Seit die Sterne gespeichert werden, wendet
+**nur noch `starsFor`** sie an — die SQL-Fassung im Repository ist weg, und
+damit auch die Gefahr, dass zwei Kopien der Regel auseinanderlaufen. Die
+einzige verbliebene SQL-Fassung steht in der Migration auf v8 und läuft genau
+einmal.
+
+Die Sterne werden **gespeichert**, nicht mehr aus den Runden errechnet:
+`lesson_stars` (Kind × Lektion). Sobald ein Elternteil sie einer Gruppe
+zurückgeben kann, ohne die Zeiten anzurühren, können die beiden auseinander
+liegen — und dann kann nur ein gespeicherter Wert sagen, was tatsächlich
+verdient wurde. `SessionRepository._awardStars` schreibt nach jedem
+abgeschlossenen Lauf, **nur nach oben**: eine schlechte Runde nach einer guten
+nimmt nichts weg.
+
+`resetStarsInGroup` löscht die Zeilen einer Gruppe. Die Sitzungen bleiben, also
+bleiben Bestzeiten, Lernkurve, Bestenlisten **und Blitze** — Blitze hängen an
+der Zeit, und die Zeit ist ausdrücklich das, was erhalten bleiben soll.
+
+Beide Schreibwege gehen über **Drifts API**, nicht über `customStatement`: ein
+rohes Statement sagt Drift nicht, welche Tabelle es angefasst hat, und die
+zwischengespeicherten Streams zeigten danach weiter den alten Stand. Das war
+in der ersten Fassung genau der Fehler.
+
+Die Migration auf v8 füllt die Tabelle **einmalig** aus den vorhandenen
+Runden, mit derselben Regel, die die Statistik vorher laufend anwandte.
+Niemand darf verlieren, was er gesammelt hat, weil die App die Buchführung
+gewechselt hat. Der Ausdruck steht dort ausgeschrieben und nicht als Verweis
+auf das Repository: die Fassung dort verschwindet mit diesem Schritt, und eine
+Migration muss gegen das Schema ihres eigenen Moments funktionieren.
 
 Der Gesamtstand läuft über `lessonsInGroup`, **nicht** über das, was der
 Filter stehen lässt: fertige Lektionen auszublenden räumt die Liste auf und

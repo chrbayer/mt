@@ -1,5 +1,7 @@
 import 'package:drift/drift.dart';
 
+import '../../domain/lesson.dart';
+import '../../domain/scoring.dart';
 import '../../domain/task.dart';
 import '../db/app_database.dart';
 
@@ -66,7 +68,46 @@ class SessionRepository {
           taskCount: completed ? const Value.absent() : Value(results.length),
         ),
       );
+
+      if (completed) await _awardStars(sessionId, wrong, results.length);
     });
+  }
+
+  /// Writes down what this run was worth, keeping the best.
+  ///
+  /// The stars used to be worked out from the runs whenever they were needed.
+  /// Since a parent can hand them back without touching the times, the two
+  /// can differ, and only a stored value can say what was actually earned.
+  ///
+  /// Only ever upwards: a bad run after a good one takes nothing away.
+  Future<void> _awardStars(int sessionId, int wrong, int taskCount) async {
+    final session = await sessionById(sessionId);
+    if (session == null) return;
+    final lesson = lessonByIdOrNull(session.lessonId);
+    // A run of a lesson this version does not know cannot be scored, and
+    // guessing would be worse than leaving it alone.
+    if (lesson == null) return;
+
+    final earned = starsFor(wrong, taskCount, scored: lesson.scored);
+    if (earned <= 0) return;
+
+    // Through drift's own API rather than raw SQL: a customStatement does not
+    // tell drift which table it touched, so every watching stream would keep
+    // showing the old total until something else happened to invalidate it.
+    final held = await (_db.select(_db.lessonStars)
+          ..where((row) =>
+              row.userId.equals(session.userId) &
+              row.lessonId.equals(session.lessonId)))
+        .getSingleOrNull();
+    if (held != null && held.stars >= earned) return;
+
+    await _db.into(_db.lessonStars).insertOnConflictUpdate(
+          LessonStarsCompanion.insert(
+            userId: session.userId,
+            lessonId: session.lessonId,
+            stars: earned,
+          ),
+        );
   }
 
   /// The previous completed run of the same lesson, used on the result screen
