@@ -86,7 +86,10 @@ class _PracticeScreenState extends ConsumerState<PracticeScreen>
   /// out of every aborted run.
   bool _askingToAbort = false;
 
-  final FeedbackSounds _sounds = FeedbackSounds();
+  /// Shared with the whole app, not built here: three audio pipelines per run
+  /// is waste, and a screen that tore its players down while the next screen
+  /// built new ones is exactly what silenced the sound after the first run.
+  late final FeedbackSounds _sounds = ref.read(feedbackSoundsProvider);
 
   /// How many runs of this lesson may still earn something today. Resolved
   /// in [_prepare], where the providers are already held open, and used when
@@ -208,7 +211,6 @@ class _PracticeScreenState extends ConsumerState<PracticeScreen>
     _controller
       ?..removeListener(_onControllerChanged)
       ..dispose();
-    unawaited(_sounds.dispose());
     super.dispose();
   }
 

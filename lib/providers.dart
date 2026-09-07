@@ -16,6 +16,7 @@ import 'domain/lesson.dart';
 import 'domain/practice_limit.dart';
 import 'domain/task.dart';
 import 'domain/task_count.dart';
+import 'features/practice/feedback_sounds.dart';
 
 final databaseProvider = Provider<AppDatabase>((ref) {
   final db = AppDatabase();
@@ -196,6 +197,18 @@ final scoredRunsTodayProvider = StreamProvider.family<({int used, int left})?,
         dayStartMs: dayStartMs,
       )
       .map((used) => (used: used, left: limit - used < 0 ? 0 : limit - used));
+});
+
+/// The app's sounds, created once and kept.
+///
+/// One instance for the whole app rather than one per practice screen: three
+/// audio pipelines were being built and torn down on every run, for sounds
+/// that are 35 to 300 ms long. It is also the safer shape - the screen can no
+/// longer throw its players away while the next screen is building new ones.
+final feedbackSoundsProvider = Provider<FeedbackSounds>((ref) {
+  final sounds = FeedbackSounds();
+  ref.onDispose(sounds.dispose);
+  return sounds;
 });
 
 /// Whether one stored run was allowed to earn anything. Read on the result

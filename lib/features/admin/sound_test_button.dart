@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../providers.dart';
 import '../../theme/app_theme.dart';
-import '../practice/feedback_sounds.dart';
 
 /// Plays the click ten times and counts how many actually ran.
 ///
@@ -11,14 +12,14 @@ import '../practice/feedback_sounds.dart';
 /// here, where the first sounds play and later ones quietly stop coming.
 /// The platform's own error text is shown too; on a tablet there is no
 /// console to read it from.
-class SoundTestButton extends StatefulWidget {
+class SoundTestButton extends ConsumerStatefulWidget {
   const SoundTestButton({super.key});
 
   @override
-  State<SoundTestButton> createState() => _SoundTestButtonState();
+  ConsumerState<SoundTestButton> createState() => _SoundTestButtonState();
 }
 
-class _SoundTestButtonState extends State<SoundTestButton> {
+class _SoundTestButtonState extends ConsumerState<SoundTestButton> {
   bool _running = false;
   String? _error;
   ({int played, int expected})? _result;
@@ -30,13 +31,12 @@ class _SoundTestButtonState extends State<SoundTestButton> {
       _result = null;
     });
 
-    // Its own player, disposed straight after: the practice screen has one of
-    // its own, and borrowing that would tie this button to whether a run
-    // happens to be open.
-    final sounds = FeedbackSounds();
+    // The app's own instance, and deliberately not disposed here: it belongs
+    // to the whole app, and a second set of players existing alongside it was
+    // the fault this button was built to find.
+    final sounds = ref.read(feedbackSoundsProvider);
     final result = await sounds.selfTest();
     final error = sounds.lastError;
-    await sounds.dispose();
 
     if (!mounted) return;
     setState(() {

@@ -16,9 +16,18 @@ import 'package:flutter/foundation.dart';
 class FeedbackSounds {
   /// Kept warm: creating a player on the first wrong answer would delay the
   /// very sound that is supposed to be immediate.
-  final AudioPlayer _correct = AudioPlayer(playerId: 'mt-correct');
-  final AudioPlayer _wrong = AudioPlayer(playerId: 'mt-wrong');
-  final AudioPlayer _key = AudioPlayer(playerId: 'mt-key');
+  ///
+  /// **No fixed player ids.** They used to be 'mt-correct', 'mt-wrong' and
+  /// 'mt-key', which reads nicely in a log and cost the sound outright: the
+  /// practice screen built a FeedbackSounds per run and threw the old one
+  /// away without awaiting its dispose, so the next run registered players
+  /// under ids that were still being torn down. The reply to the second
+  /// registration never came, `warmUp` never returned, and everything after
+  /// it was silent. Measured on Linux: run 1 plays, run 2 hangs, run 3 plays,
+  /// run 4 hangs. The package hands out a uuid when it is not told otherwise.
+  final AudioPlayer _correct = AudioPlayer();
+  final AudioPlayer _wrong = AudioPlayer();
+  final AudioPlayer _key = AudioPlayer();
   bool _ready = false;
 
   FeedbackSounds() {

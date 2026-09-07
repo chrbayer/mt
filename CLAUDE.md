@@ -447,6 +447,41 @@ standardmäßig an.
 Die WAV-Dateien erzeugt `tool/make_sounds.py`. Wer sie ändern will, ändert die
 Noten dort und lässt das Skript neu laufen — nicht die Dateien bearbeiten.
 
+Die Töne gehören der **ganzen App**, nicht dem Übungsbildschirm:
+`feedbackSoundsProvider` hält genau eine `FeedbackSounds`. Vorher baute jeder
+Durchgang drei Audio-Pipelines auf und wieder ab — für Töne von 35 bis 300 ms.
+
+Und die Abspieler bekommen **keine festen IDs** mehr. Sie hießen
+`mt-correct`, `mt-wrong` und `mt-key`, was sich in einem Protokoll gut liest
+und den Ton gekostet hat: der Bildschirm warf seine `FeedbackSounds` beim
+Verlassen weg, ohne das `dispose` abzuwarten, und der nächste Durchgang
+meldete Abspieler unter IDs an, die gerade abgebaut wurden. Die Antwort auf
+die zweite Anmeldung kam nie, `warmUp` kehrte nie zurück, `_ready` blieb
+false — und alles danach war still. Unter Linux headless gemessen und
+deterministisch: Durchgang 1 spielt, 2 hängt, 3 spielt, 4 hängt. Ohne feste
+IDs vergibt das Paket eine uuid, und sechs Durchgänge hintereinander spielen
+5 von 5.
+
+**Warum es auf Android nie auffiel:** dort räumt das Plugin eine doppelt
+vergebene ID anders ab. Die Fehlerform „geht einmal, dann nie wieder" war auf
+beiden Plattformen dieselbe Ursache — sie hat sich nur auf einer gezeigt.
+
+## Wie man das debuggt
+
+Der Desktop-Build lässt sich **headless** fahren, ohne ein Fenster auf den
+Bildschirm zu bringen:
+
+```bash
+flutter build linux --debug -t lib/audio_probe.dart   # eigener Einstiegspunkt
+wlheadless-run -c weston -- ./build/linux/x64/debug/bundle/mathe_trainer
+```
+
+Braucht `weston` und `xwayland-run`. Ein eigener Einstiegspunkt statt der
+App ist der Trick: er braucht keine Eingaben, fährt die fragliche Abfolge
+selbst und schreibt das Ergebnis nach stdout. Für `log()` bitte `print` —
+`stdout.writeln` mit `flush()` wirft beim nächsten Schreiben „StreamSink is
+bound to a stream".
+
 `FeedbackSounds` schaltet bei jedem Abspieler den **`positionUpdater` ab**.
 Jeder `AudioPlayer` fragt sonst über einen `FramePositionUpdater` die
 Abspielposition **einmal pro Bild** ab, solange ein Ton läuft, und einmal

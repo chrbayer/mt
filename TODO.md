@@ -81,14 +81,10 @@ verwerfen.
 
 #20 erledigt (2.6.0) — Profil temporär im Elternbereich sperrbar machen
 
-#21 Ton unter Linux: die ersten Töne kommen, dann bleibt es still. Auf Android
-läuft es. Nicht gelöst durch stop() statt seek() (2.4.6) und nicht durch das
-Abschalten des Positions-Pollings (2.5.2). Nachgewiesen ist bisher nur, dass
-die native Seite trägt: ein C-Prüfprogramm, das die Abfolge von
-audioplayers_linux nachbaut (READY → PAUSED → PLAYING → EOS → Pause +
-Flush-Seek → PLAYING), spielt im Tipp-Takt achtmal fehlerfrei ab. Der Fehler
-sitzt also zwischen Dart-Wrapper und Plugin. Zum Weiterkommen fehlt ein Lauf
-der echten App auf Linux mit Protokoll — auf dem Rechner gibt es keinen
-headless-Compositor (kein Xvfb, kein weston/cage), und der Desktop-Build
-gehört auf den Bildschirm des Benutzers. Der Knopf "Ton testen" im
-Elternbereich zählt die tatsächlich gelaufenen Klicks und ist der Einstieg.
+#21 erledigt (2.6.1) — Ton unter Linux: die ersten Töne kommen, dann bleibt es
+still. Ursache waren feste Abspieler-IDs zusammen mit einem nicht abgewarteten
+dispose: der Übungsbildschirm baute pro Durchgang eine neue FeedbackSounds und
+meldete Abspieler unter IDs an, die gerade abgebaut wurden. warmUp kehrte nie
+zurück. Headless nachgestellt (weston + wlheadless-run) und deterministisch:
+Durchgang 1 spielt, 2 hängt, 3 spielt, 4 hängt. Behoben durch uuid-IDs und eine
+einzige, app-weite Instanz.
