@@ -95,6 +95,13 @@ Auf dem Weg dorthin nebenbei gefunden und behoben (2.6.1): feste
 Abspieler-IDs plus ein nicht abgewartetes dispose ließen warmUp bei jedem
 zweiten Durchgang hängen. Ein echter Fehler, aber nicht dieser.
 
-#22 click Geräusch ist jetzt unter Android spürbar später, als Hauptplattform nicht ideal
+#22 erledigt (2.6.3) — click Geräusch ist jetzt unter Android spürbar später, als Hauptplattform nicht ideal
 
+#23 erledigt (2.7.0) — Neue Übung: Punkt vor Strich Rechnung: a */ b +- c
+(Division ohne Rest, alles im Bereich unter 100). Eine Lektion in „Mal und
+Geteilt", beide Reihenfolgen (Punktrechnung vorn und hinten) gleich häufig.
+Ein Task trägt jetzt drei Operanden und zwei Rechenarten (Schema v12), damit
+Wiedervorlage und „schwere Aufgaben" den vollständigen Term speichern statt
+ihn falsch aufzuschreiben.
 
+#24 Aufgaben: Übungen mit vorgebener Anzahl, mindest Sterne und Blitze (maximale Versuche Begrenzung für Aufgaben ausgesetzt), Zeitziel (bis wann), Statistik, wie oft Zeitziel erreicht oder gerissen wurde), werden im Elternbereich konfiguriert.

@@ -309,10 +309,16 @@ class _HardTasks extends StatelessWidget {
   }
 
   /// Rebuilds the printed form from the stored operands.
+  ///
+  /// `byName` rather than the old add/sub guess: that guess printed every
+  /// multiplication as a subtraction, since it never considered `mul` or
+  /// `div` at all.
   String _render(HardTask hard) => Task(
         a: hard.a,
         b: hard.b,
-        op: hard.op == 'add' ? Operation.add : Operation.sub,
+        op: Operation.values.byName(hard.op),
         form: TaskForm.values.byName(hard.form),
+        c: hard.c,
+        op2: hard.op2 == null ? null : Operation.values.byName(hard.op2!),
       ).toString();
 }

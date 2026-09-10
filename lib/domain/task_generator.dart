@@ -388,6 +388,10 @@ Task? _sample(LessonSpec lesson, Operation op, Random random) {
     case TaskForm.clockPhrase:
       // Never reached: the spoken times are drilled as a pool, above.
       return null;
+    case TaskForm.chain:
+      // `op` here is whichever of mul/div the balanced sequence picked for
+      // this task - _sampleChain decides where it sits in the term.
+      return _sampleChain(op, random);
     case TaskForm.result:
     case TaskForm.gap:
     case TaskForm.partner:
@@ -513,6 +517,66 @@ Task? _sampleQuotient(LessonSpec lesson, Random random) {
   final limit = lesson.scale == FactorScale.table ? 100 : 999;
   if (dividend > limit) return null;
   return Task(a: dividend, b: divisor, op: Operation.div, form: lesson.form);
+}
+
+/// Punkt vor Strich: a point term (`·` or `:`, whichever [point] is) plus a
+/// stroke term (`+` or `−`), with the point one always worked out first - on
+/// either side of the stroke, both orders are drilled equally.
+///
+/// The point term is drawn first, in the small times table and never by 1:
+/// no rule about ordering two calculations is worth teaching through `· 1`.
+/// The stroke term's range then depends on the point term's value, so it is
+/// built backwards from it exactly like [_sampleQuotient] builds a division
+/// backwards from its answer - only here what stays inside 1..100 is the
+/// whole term, not just the point half of it.
+Task? _sampleChain(Operation point, Random random) {
+  final int p1;
+  final int p2;
+  final int value;
+
+  if (point == Operation.mul) {
+    final f1 = _between(random, 2, 10);
+    final f2 = _between(random, 2, 10);
+    value = f1 * f2;
+    // Capped well under 100, or the stroke term has no room left to add or
+    // subtract a second number and stay in range.
+    if (value > 90) return null;
+    (p1, p2) = (f1, f2);
+  } else {
+    final divisor = _between(random, 2, 10);
+    final quotient = _between(random, 2, 10);
+    final dividend = divisor * quotient;
+    if (dividend > 90) return null;
+    value = quotient;
+    (p1, p2) = (dividend, divisor);
+  }
+
+  final plus = random.nextBool();
+  final pointFirst = random.nextBool();
+
+  final int c;
+  if (plus) {
+    // Both orders read the same here: `a·b + c` and `c + a·b` need the same
+    // room for c, whichever side the point term is on.
+    if (value > 98) return null;
+    c = _between(random, 2, 100 - value);
+  } else if (pointFirst) {
+    // `a·b − c` must not go below 1.
+    if (value < 3) return null;
+    c = _between(random, 2, value - 1);
+  } else {
+    // `c − a·b` must not go below 1 either, and starting two above the
+    // point term keeps the answer off 1: `52 − 51` reads as a trick rather
+    // than as practice.
+    if (value > 98) return null;
+    c = _between(random, value + 2, 100);
+  }
+
+  final stroke = plus ? Operation.add : Operation.sub;
+  return pointFirst
+      ? Task(a: p1, b: p2, op: point, c: c, op2: stroke, form: TaskForm.chain)
+      : Task(
+          a: c, b: p1, op: stroke, c: p2, op2: point, form: TaskForm.chain);
 }
 
 /// Draws a sum or difference and returns it only if it satisfies the lesson's

@@ -169,7 +169,18 @@ void main() {
     test('the correct operation is used per lesson', () {
       for (final lesson in lessonCatalog) {
         final tasks = generateTasks(lesson: lesson, count: 40, seed: 5);
-        final ops = tasks.map((t) => t.op).toSet();
+        // A chain task carries two operations, and only one of `op`/`op2` -
+        // whichever is mul or div - is the one `lesson.op` governs; the
+        // other is the stroke half, which is not chosen by ArithmeticOp at
+        // all. So for this form the point operation is read off whichever
+        // field holds it, not off `op` alone.
+        final ops = lesson.form == TaskForm.chain
+            ? tasks
+                .map((t) => t.op == Operation.mul || t.op == Operation.div
+                    ? t.op
+                    : t.op2!)
+                .toSet()
+            : tasks.map((t) => t.op).toSet();
         switch (lesson.op) {
           case ArithmeticOp.add:
             expect(ops, {Operation.add}, reason: lesson.id);
@@ -357,6 +368,93 @@ void main() {
       const gap = Task(a: 24, b: 4, op: Operation.div, form: TaskForm.gap);
       expect(gap.render('4'), '24 : 4 = 6');
       expect(gap.expected, 4);
+    });
+
+    group('Punkt vor Strich', () {
+      final lesson = lessonById('punkt_vor_strich');
+
+      test('every number in the term stays inside 1..100', () {
+        for (final seed in seeds) {
+          for (final task
+              in generateTasks(lesson: lesson, count: 30, seed: seed)) {
+            final where = 'seed $seed: $task';
+            expect(task.a, inInclusiveRange(2, 100), reason: where);
+            expect(task.b, inInclusiveRange(2, 100), reason: where);
+            expect(task.c, isNotNull, reason: where);
+            expect(task.c!, inInclusiveRange(2, 100), reason: where);
+            expect(task.result, inInclusiveRange(1, 100), reason: where);
+          }
+        }
+      });
+
+      test('exactly one of the two operations is a point operation', () {
+        for (final seed in seeds) {
+          for (final task
+              in generateTasks(lesson: lesson, count: 30, seed: seed)) {
+            final where = 'seed $seed: $task';
+            const point = {Operation.mul, Operation.div};
+            const stroke = {Operation.add, Operation.sub};
+            expect(task.op2, isNotNull, reason: where);
+            final ops = {task.op, task.op2};
+            // One of the two is the point operation and the other the
+            // stroke one - never both the same kind, or there would be
+            // nothing to order.
+            expect(point.intersection(ops), hasLength(1), reason: where);
+            expect(stroke.intersection(ops), hasLength(1), reason: where);
+          }
+        }
+      });
+
+      test('a division in the term always comes out even', () {
+        for (final seed in seeds) {
+          for (final task
+              in generateTasks(lesson: lesson, count: 30, seed: seed)) {
+            final where = 'seed $seed: $task';
+            if (task.op == Operation.div) {
+              expect(task.a % task.b, 0, reason: where);
+            }
+            if (task.op2 == Operation.div) {
+              expect(task.b % task.c!, 0, reason: where);
+            }
+          }
+        }
+      });
+
+      test('both orders, both stroke signs and both point operations occur',
+          () {
+        var pointFirst = false;
+        var pointLast = false;
+        var plus = false;
+        var minus = false;
+        var mul = false;
+        var div = false;
+        for (final seed in seeds) {
+          for (final task
+              in generateTasks(lesson: lesson, count: 30, seed: seed)) {
+            final pointIsFirst =
+                task.op == Operation.mul || task.op == Operation.div;
+            if (pointIsFirst) {
+              pointFirst = true;
+              mul |= task.op == Operation.mul;
+              div |= task.op == Operation.div;
+              plus |= task.op2 == Operation.add;
+              minus |= task.op2 == Operation.sub;
+            } else {
+              pointLast = true;
+              mul |= task.op2 == Operation.mul;
+              div |= task.op2 == Operation.div;
+              plus |= task.op == Operation.add;
+              minus |= task.op == Operation.sub;
+            }
+          }
+        }
+        expect(pointFirst, isTrue);
+        expect(pointLast, isTrue);
+        expect(plus, isTrue);
+        expect(minus, isTrue);
+        expect(mul, isTrue);
+        expect(div, isTrue);
+      });
     });
 
     test('commutative pairs count as one calculation', () {
@@ -1072,13 +1170,14 @@ void main() {
   });
 
   group('lesson catalog', () {
-    test('has 75 lessons in nine groups with unique ids', () {
-      expect(lessonCatalog, hasLength(75));
+    test('has 76 lessons in nine groups with unique ids', () {
+      expect(lessonCatalog, hasLength(76));
       expect(lessonsInGroup(LessonGroup.firstSteps), hasLength(12));
       expect(lessonsInGroup(LessonGroup.everyday), hasLength(9));
       // Nine rows of the times table plus a mixed one.
       expect(lessonsInGroup(LessonGroup.timesTables), hasLength(10));
-      expect(lessonsInGroup(LessonGroup.timesAndDivision), hasLength(7));
+      // The seven it always had, plus Punkt vor Strich.
+      expect(lessonsInGroup(LessonGroup.timesAndDivision), hasLength(8));
       // Nine rows read backwards plus all of them mixed.
       expect(lessonsInGroup(LessonGroup.reverseTimesTables), hasLength(10));
       // Up to 10 nothing can cross the ten, so that group is shorter: the
@@ -1088,7 +1187,7 @@ void main() {
       expect(lessonsInGroup(LessonGroup.upTo100), hasLength(7));
       expect(lessonsInGroup(LessonGroup.upTo1000), hasLength(7));
       expect(lessonCatalog.first.id, 'count_pictures');
-      expect(lessonCatalog.map((l) => l.id).toSet(), hasLength(75));
+      expect(lessonCatalog.map((l) => l.id).toSet(), hasLength(76));
     });
 
     // The rule the numerals follow: a number belongs where an amount is meant

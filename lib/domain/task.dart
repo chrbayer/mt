@@ -7,6 +7,18 @@ import 'lesson.dart';
 /// resolved to one of these when the task is created).
 enum Operation { add, sub, mul, div }
 
+/// U+2212 MINUS SIGN reads better than a hyphen at large font sizes. The
+/// multiplication dot and the colon are what German primary schools write.
+///
+/// A free function rather than a [Task] getter: [TaskForm.chain] has two
+/// operations, and its `prefix` needs the symbol for the second one too.
+String symbolOf(Operation op) => switch (op) {
+      Operation.add => '+',
+      Operation.sub => '−',
+      Operation.mul => '·',
+      Operation.div => ':',
+    };
+
 /// Pictures for the counting lessons. Emoji rather than assets: instantly
 /// recognisable, nothing to ship, and every one of them is a thing a child
 /// can name out loud.
@@ -76,11 +88,22 @@ class Task {
   final Operation op;
   final TaskForm form;
 
+  /// The third operand of a [TaskForm.chain] task. Null for every other
+  /// form: two operands were enough for them.
+  final int? c;
+
+  /// The second operation of a [TaskForm.chain] task - always the opposite
+  /// kind from [op] (one of the two is multiplication or division, the other
+  /// addition or subtraction). Null for every other form.
+  final Operation? op2;
+
   const Task({
     required this.a,
     required this.b,
     required this.op,
     required this.form,
+    this.c,
+    this.op2,
   });
 
   /// Whether this form is an arithmetic task at all. Counting apples and
@@ -90,7 +113,8 @@ class Task {
         TaskForm.gap ||
         TaskForm.remainder ||
         TaskForm.money ||
-        TaskForm.change =>
+        TaskForm.change ||
+        TaskForm.chain =>
           true,
         TaskForm.partner ||
         TaskForm.clock ||
@@ -104,6 +128,26 @@ class Task {
           false,
       };
 
+  /// Applies one operation to two numbers. Shared by [result] and
+  /// [_chainResult] so the arithmetic itself is written down exactly once.
+  int _apply(Operation op, int x, int y) => switch (op) {
+        Operation.add => x + y,
+        Operation.sub => x - y,
+        Operation.mul => x * y,
+        Operation.div => x ~/ y,
+      };
+
+  /// Punkt vor Strich: the multiplication or division is worked out first,
+  /// whichever side of the term it sits on - `a` and `b` are always the
+  /// operands shown first and second, so which one carries the point
+  /// operation depends on whether [op] or [op2] is `mul`/`div`.
+  int get _chainResult {
+    final second = op2!;
+    return op == Operation.mul || op == Operation.div
+        ? _apply(second, _apply(op, a, b), c!) //  a · b + c
+        : _apply(op, a, _apply(second, b, c!)); //  a + b · c
+  }
+
   /// Result of the underlying calculation. For a division this is the whole
   /// part; see [remainder] for what is left over.
   ///
@@ -111,12 +155,8 @@ class Task {
   /// clock showing 9:45 would claim a "result" of 54.
   int get result {
     if (!_isCalculation) return expected;
-    return switch (op) {
-      Operation.add => a + b,
-      Operation.sub => a - b,
-      Operation.mul => a * b,
-      Operation.div => a ~/ b,
-    };
+    if (form == TaskForm.chain) return _chainResult;
+    return _apply(op, a, b);
   }
 
   /// What a division leaves over. Zero for every other operation.
@@ -135,7 +175,7 @@ class Task {
   /// The number the child has to type in - the first of two where a task
   /// asks for two.
   int get expected => switch (form) {
-        TaskForm.result || TaskForm.remainder => result,
+        TaskForm.result || TaskForm.remainder || TaskForm.chain => result,
         TaskForm.gap || TaskForm.partner => b,
         // Amounts are held in cents, so this is the euro part.
         TaskForm.money || TaskForm.change => result ~/ 100,
@@ -173,7 +213,8 @@ class Task {
         TaskForm.dice ||
         TaskForm.compare ||
         TaskForm.sequence ||
-        TaskForm.quantityAdd =>
+        TaskForm.quantityAdd ||
+        TaskForm.chain =>
           null,
       };
 
@@ -214,12 +255,7 @@ class Task {
 
   /// U+2212 MINUS SIGN reads better than a hyphen at large font sizes. The
   /// multiplication dot and the colon are what German primary schools write.
-  String get opSymbol => switch (op) {
-        Operation.add => '+',
-        Operation.sub => '−',
-        Operation.mul => '·',
-        Operation.div => ':',
-      };
+  String get opSymbol => symbolOf(op);
 
   /// Text shown left of the input box.
   String get prefix => switch (form) {
@@ -232,6 +268,10 @@ class Task {
         // This one used to sit in the list below and showed nothing at all:
         // a question, an empty box and no numbers to continue.
         TaskForm.sequence => sequenceNumbers.join(' '),
+        // Punkt vor Strich: the whole term, both operators included. Nothing
+        // else says which one binds first, so the term has to stand there
+        // and speak for itself.
+        TaskForm.chain => '$a $opSymbol $b ${symbolOf(op2!)} $c =',
         // These all draw their own picture; there is nothing to write.
         TaskForm.clock ||
         TaskForm.clockPhrase ||
@@ -269,6 +309,7 @@ class Task {
         TaskForm.sequence => '${sequenceNumbers.join(' ')} ?',
         TaskForm.quantityAdd =>
           '${picture * a} + ${picture * b}',
+        TaskForm.chain => '$prefix $answer',
       };
 
   /// The picture a counting or comparing task shows.
@@ -289,6 +330,10 @@ class Task {
   /// a few tasks. For the other forms the order does matter: `13 + ? = 81`
   /// and `68 + ? = 81` ask for different numbers.
   String get key {
+    // Unlike `result`, the order here is exactly what is being drilled: `3 ·
+    // 6 + 40` and `40 − 3 · 6` are different facts, not the same one shown
+    // two ways.
+    if (form == TaskForm.chain) return '$a:$b:$c:${op.name}:${op2!.name}';
     if ((op == Operation.add || op == Operation.mul) &&
         form == TaskForm.result) {
       final (low, high) = a <= b ? (a, b) : (b, a);
@@ -303,10 +348,12 @@ class Task {
       other.a == a &&
       other.b == b &&
       other.op == op &&
-      other.form == form;
+      other.form == form &&
+      other.c == c &&
+      other.op2 == op2;
 
   @override
-  int get hashCode => Object.hash(a, b, op, form);
+  int get hashCode => Object.hash(a, b, op, form, c, op2);
 
   @override
   String toString() => render('?');

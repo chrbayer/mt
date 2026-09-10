@@ -174,6 +174,11 @@ class HardTask {
   final int b;
   final String op;
   final String form;
+
+  /// The third operand and second operation of a Punkt-vor-Strich task.
+  /// Null for every other form.
+  final int? c;
+  final String? op2;
   final double averageMs;
   final int occurrences;
 
@@ -182,6 +187,8 @@ class HardTask {
     required this.b,
     required this.op,
     required this.form,
+    this.c,
+    this.op2,
     required this.averageMs,
     required this.occurrences,
   });
@@ -858,6 +865,8 @@ class StatsRepository {
              a.operand_b           AS operand_b,
              a.op                  AS op,
              a.form                AS form,
+             a.operand_c           AS operand_c,
+             a.op2                 AS op2,
              AVG(a.elapsed_ms)     AS average_ms,
              COUNT(*)              AS occurrences,
              AVG(a.wrong_attempts) AS average_wrong
@@ -865,7 +874,7 @@ class StatsRepository {
       JOIN sessions s ON s.id = a.session_id
       WHERE s.user_id = ?1 AND s.lesson_id = ?2 AND s.completed = 1
         AND s.deleted = 0
-      GROUP BY a.operand_a, a.operand_b, a.op, a.form
+      GROUP BY a.operand_a, a.operand_b, a.op, a.form, a.operand_c, a.op2
       HAVING average_wrong > 0 OR average_ms > (
         SELECT AVG(a2.elapsed_ms) * 1.4
         FROM attempts a2
@@ -891,6 +900,8 @@ class StatsRepository {
           b: row.read<int>('operand_b'),
           op: row.read<String>('op'),
           form: row.read<String>('form'),
+          c: row.read<int?>('operand_c'),
+          op2: row.read<String?>('op2'),
           averageMs: row.read<double>('average_ms'),
           occurrences: row.read<int>('occurrences'),
         )
@@ -985,13 +996,15 @@ class StatsRepository {
              a.operand_b          AS operand_b,
              a.op                 AS op,
              a.form               AS form,
+             a.operand_c          AS operand_c,
+             a.op2                AS op2,
              AVG(a.elapsed_ms)    AS average_ms,
              COUNT(*)             AS occurrences,
              AVG(a.wrong_attempts) AS average_wrong
       FROM attempts a
       JOIN sessions s ON s.id = a.session_id
       WHERE s.user_id = ?1 AND s.completed = 1 AND s.deleted = 0
-      GROUP BY a.operand_a, a.operand_b, a.op, a.form
+      GROUP BY a.operand_a, a.operand_b, a.op, a.form, a.operand_c, a.op2
       ORDER BY average_ms + $wrongAttemptPenaltyMs * average_wrong DESC
       LIMIT ?2
       ''',
@@ -1006,6 +1019,8 @@ class StatsRepository {
           b: row.read<int>('operand_b'),
           op: row.read<String>('op'),
           form: row.read<String>('form'),
+          c: row.read<int?>('operand_c'),
+          op2: row.read<String?>('op2'),
           averageMs: row.read<double>('average_ms'),
           occurrences: row.read<int>('occurrences'),
         )

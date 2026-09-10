@@ -1706,6 +1706,26 @@ class $AttemptsTable extends Attempts with TableInfo<$AttemptsTable, Attempt> {
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _operandCMeta = const VerificationMeta(
+    'operandC',
+  );
+  @override
+  late final GeneratedColumn<int> operandC = GeneratedColumn<int>(
+    'operand_c',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _op2Meta = const VerificationMeta('op2');
+  @override
+  late final GeneratedColumn<String> op2 = GeneratedColumn<String>(
+    'op2',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _expectedMeta = const VerificationMeta(
     'expected',
   );
@@ -1748,6 +1768,8 @@ class $AttemptsTable extends Attempts with TableInfo<$AttemptsTable, Attempt> {
     operandB,
     op,
     form,
+    operandC,
+    op2,
     expected,
     elapsedMs,
     wrongAttempts,
@@ -1811,6 +1833,18 @@ class $AttemptsTable extends Attempts with TableInfo<$AttemptsTable, Attempt> {
       );
     } else if (isInserting) {
       context.missing(_formMeta);
+    }
+    if (data.containsKey('operand_c')) {
+      context.handle(
+        _operandCMeta,
+        operandC.isAcceptableOrUnknown(data['operand_c']!, _operandCMeta),
+      );
+    }
+    if (data.containsKey('op2')) {
+      context.handle(
+        _op2Meta,
+        op2.isAcceptableOrUnknown(data['op2']!, _op2Meta),
+      );
     }
     if (data.containsKey('expected')) {
       context.handle(
@@ -1876,6 +1910,14 @@ class $AttemptsTable extends Attempts with TableInfo<$AttemptsTable, Attempt> {
         DriftSqlType.string,
         data['${effectivePrefix}form'],
       )!,
+      operandC: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}operand_c'],
+      ),
+      op2: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}op2'],
+      ),
       expected: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}expected'],
@@ -1905,6 +1947,13 @@ class Attempt extends DataClass implements Insertable<Attempt> {
   final int operandB;
   final String op;
   final String form;
+
+  /// The third operand and second operation of a Punkt-vor-Strich task
+  /// ([TaskForm.chain]). Null for every other form - two operands were the
+  /// whole task before this one, and null is the true reading of that, not
+  /// a missing value.
+  final int? operandC;
+  final String? op2;
   final int expected;
   final int elapsedMs;
   final int wrongAttempts;
@@ -1916,6 +1965,8 @@ class Attempt extends DataClass implements Insertable<Attempt> {
     required this.operandB,
     required this.op,
     required this.form,
+    this.operandC,
+    this.op2,
     required this.expected,
     required this.elapsedMs,
     required this.wrongAttempts,
@@ -1930,6 +1981,12 @@ class Attempt extends DataClass implements Insertable<Attempt> {
     map['operand_b'] = Variable<int>(operandB);
     map['op'] = Variable<String>(op);
     map['form'] = Variable<String>(form);
+    if (!nullToAbsent || operandC != null) {
+      map['operand_c'] = Variable<int>(operandC);
+    }
+    if (!nullToAbsent || op2 != null) {
+      map['op2'] = Variable<String>(op2);
+    }
     map['expected'] = Variable<int>(expected);
     map['elapsed_ms'] = Variable<int>(elapsedMs);
     map['wrong_attempts'] = Variable<int>(wrongAttempts);
@@ -1945,6 +2002,10 @@ class Attempt extends DataClass implements Insertable<Attempt> {
       operandB: Value(operandB),
       op: Value(op),
       form: Value(form),
+      operandC: operandC == null && nullToAbsent
+          ? const Value.absent()
+          : Value(operandC),
+      op2: op2 == null && nullToAbsent ? const Value.absent() : Value(op2),
       expected: Value(expected),
       elapsedMs: Value(elapsedMs),
       wrongAttempts: Value(wrongAttempts),
@@ -1964,6 +2025,8 @@ class Attempt extends DataClass implements Insertable<Attempt> {
       operandB: serializer.fromJson<int>(json['operandB']),
       op: serializer.fromJson<String>(json['op']),
       form: serializer.fromJson<String>(json['form']),
+      operandC: serializer.fromJson<int?>(json['operandC']),
+      op2: serializer.fromJson<String?>(json['op2']),
       expected: serializer.fromJson<int>(json['expected']),
       elapsedMs: serializer.fromJson<int>(json['elapsedMs']),
       wrongAttempts: serializer.fromJson<int>(json['wrongAttempts']),
@@ -1980,6 +2043,8 @@ class Attempt extends DataClass implements Insertable<Attempt> {
       'operandB': serializer.toJson<int>(operandB),
       'op': serializer.toJson<String>(op),
       'form': serializer.toJson<String>(form),
+      'operandC': serializer.toJson<int?>(operandC),
+      'op2': serializer.toJson<String?>(op2),
       'expected': serializer.toJson<int>(expected),
       'elapsedMs': serializer.toJson<int>(elapsedMs),
       'wrongAttempts': serializer.toJson<int>(wrongAttempts),
@@ -1994,6 +2059,8 @@ class Attempt extends DataClass implements Insertable<Attempt> {
     int? operandB,
     String? op,
     String? form,
+    Value<int?> operandC = const Value.absent(),
+    Value<String?> op2 = const Value.absent(),
     int? expected,
     int? elapsedMs,
     int? wrongAttempts,
@@ -2005,6 +2072,8 @@ class Attempt extends DataClass implements Insertable<Attempt> {
     operandB: operandB ?? this.operandB,
     op: op ?? this.op,
     form: form ?? this.form,
+    operandC: operandC.present ? operandC.value : this.operandC,
+    op2: op2.present ? op2.value : this.op2,
     expected: expected ?? this.expected,
     elapsedMs: elapsedMs ?? this.elapsedMs,
     wrongAttempts: wrongAttempts ?? this.wrongAttempts,
@@ -2018,6 +2087,8 @@ class Attempt extends DataClass implements Insertable<Attempt> {
       operandB: data.operandB.present ? data.operandB.value : this.operandB,
       op: data.op.present ? data.op.value : this.op,
       form: data.form.present ? data.form.value : this.form,
+      operandC: data.operandC.present ? data.operandC.value : this.operandC,
+      op2: data.op2.present ? data.op2.value : this.op2,
       expected: data.expected.present ? data.expected.value : this.expected,
       elapsedMs: data.elapsedMs.present ? data.elapsedMs.value : this.elapsedMs,
       wrongAttempts: data.wrongAttempts.present
@@ -2036,6 +2107,8 @@ class Attempt extends DataClass implements Insertable<Attempt> {
           ..write('operandB: $operandB, ')
           ..write('op: $op, ')
           ..write('form: $form, ')
+          ..write('operandC: $operandC, ')
+          ..write('op2: $op2, ')
           ..write('expected: $expected, ')
           ..write('elapsedMs: $elapsedMs, ')
           ..write('wrongAttempts: $wrongAttempts')
@@ -2052,6 +2125,8 @@ class Attempt extends DataClass implements Insertable<Attempt> {
     operandB,
     op,
     form,
+    operandC,
+    op2,
     expected,
     elapsedMs,
     wrongAttempts,
@@ -2067,6 +2142,8 @@ class Attempt extends DataClass implements Insertable<Attempt> {
           other.operandB == this.operandB &&
           other.op == this.op &&
           other.form == this.form &&
+          other.operandC == this.operandC &&
+          other.op2 == this.op2 &&
           other.expected == this.expected &&
           other.elapsedMs == this.elapsedMs &&
           other.wrongAttempts == this.wrongAttempts);
@@ -2080,6 +2157,8 @@ class AttemptsCompanion extends UpdateCompanion<Attempt> {
   final Value<int> operandB;
   final Value<String> op;
   final Value<String> form;
+  final Value<int?> operandC;
+  final Value<String?> op2;
   final Value<int> expected;
   final Value<int> elapsedMs;
   final Value<int> wrongAttempts;
@@ -2091,6 +2170,8 @@ class AttemptsCompanion extends UpdateCompanion<Attempt> {
     this.operandB = const Value.absent(),
     this.op = const Value.absent(),
     this.form = const Value.absent(),
+    this.operandC = const Value.absent(),
+    this.op2 = const Value.absent(),
     this.expected = const Value.absent(),
     this.elapsedMs = const Value.absent(),
     this.wrongAttempts = const Value.absent(),
@@ -2103,6 +2184,8 @@ class AttemptsCompanion extends UpdateCompanion<Attempt> {
     required int operandB,
     required String op,
     required String form,
+    this.operandC = const Value.absent(),
+    this.op2 = const Value.absent(),
     required int expected,
     required int elapsedMs,
     required int wrongAttempts,
@@ -2123,6 +2206,8 @@ class AttemptsCompanion extends UpdateCompanion<Attempt> {
     Expression<int>? operandB,
     Expression<String>? op,
     Expression<String>? form,
+    Expression<int>? operandC,
+    Expression<String>? op2,
     Expression<int>? expected,
     Expression<int>? elapsedMs,
     Expression<int>? wrongAttempts,
@@ -2135,6 +2220,8 @@ class AttemptsCompanion extends UpdateCompanion<Attempt> {
       if (operandB != null) 'operand_b': operandB,
       if (op != null) 'op': op,
       if (form != null) 'form': form,
+      if (operandC != null) 'operand_c': operandC,
+      if (op2 != null) 'op2': op2,
       if (expected != null) 'expected': expected,
       if (elapsedMs != null) 'elapsed_ms': elapsedMs,
       if (wrongAttempts != null) 'wrong_attempts': wrongAttempts,
@@ -2149,6 +2236,8 @@ class AttemptsCompanion extends UpdateCompanion<Attempt> {
     Value<int>? operandB,
     Value<String>? op,
     Value<String>? form,
+    Value<int?>? operandC,
+    Value<String?>? op2,
     Value<int>? expected,
     Value<int>? elapsedMs,
     Value<int>? wrongAttempts,
@@ -2161,6 +2250,8 @@ class AttemptsCompanion extends UpdateCompanion<Attempt> {
       operandB: operandB ?? this.operandB,
       op: op ?? this.op,
       form: form ?? this.form,
+      operandC: operandC ?? this.operandC,
+      op2: op2 ?? this.op2,
       expected: expected ?? this.expected,
       elapsedMs: elapsedMs ?? this.elapsedMs,
       wrongAttempts: wrongAttempts ?? this.wrongAttempts,
@@ -2191,6 +2282,12 @@ class AttemptsCompanion extends UpdateCompanion<Attempt> {
     if (form.present) {
       map['form'] = Variable<String>(form.value);
     }
+    if (operandC.present) {
+      map['operand_c'] = Variable<int>(operandC.value);
+    }
+    if (op2.present) {
+      map['op2'] = Variable<String>(op2.value);
+    }
     if (expected.present) {
       map['expected'] = Variable<int>(expected.value);
     }
@@ -2213,6 +2310,8 @@ class AttemptsCompanion extends UpdateCompanion<Attempt> {
           ..write('operandB: $operandB, ')
           ..write('op: $op, ')
           ..write('form: $form, ')
+          ..write('operandC: $operandC, ')
+          ..write('op2: $op2, ')
           ..write('expected: $expected, ')
           ..write('elapsedMs: $elapsedMs, ')
           ..write('wrongAttempts: $wrongAttempts')
@@ -4253,6 +4352,8 @@ typedef $$AttemptsTableCreateCompanionBuilder = AttemptsCompanion Function({
   required int operandB,
   required String op,
   required String form,
+  Value<int?> operandC,
+  Value<String?> op2,
   required int expected,
   required int elapsedMs,
   required int wrongAttempts,
@@ -4265,6 +4366,8 @@ typedef $$AttemptsTableUpdateCompanionBuilder = AttemptsCompanion Function({
   Value<int> operandB,
   Value<String> op,
   Value<String> form,
+  Value<int?> operandC,
+  Value<String?> op2,
   Value<int> expected,
   Value<int> elapsedMs,
   Value<int> wrongAttempts,
@@ -4328,6 +4431,16 @@ class $$AttemptsTableFilterComposer
 
   ColumnFilters<String> get form => $composableBuilder(
     column: $table.form,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get operandC => $composableBuilder(
+    column: $table.operandC,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get op2 => $composableBuilder(
+    column: $table.op2,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -4409,6 +4522,16 @@ class $$AttemptsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get operandC => $composableBuilder(
+    column: $table.operandC,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get op2 => $composableBuilder(
+    column: $table.op2,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<int> get expected => $composableBuilder(
     column: $table.expected,
     builder: (column) => ColumnOrderings(column),
@@ -4474,6 +4597,12 @@ class $$AttemptsTableAnnotationComposer
 
   GeneratedColumn<String> get form =>
       $composableBuilder(column: $table.form, builder: (column) => column);
+
+  GeneratedColumn<int> get operandC =>
+      $composableBuilder(column: $table.operandC, builder: (column) => column);
+
+  GeneratedColumn<String> get op2 =>
+      $composableBuilder(column: $table.op2, builder: (column) => column);
 
   GeneratedColumn<int> get expected =>
       $composableBuilder(column: $table.expected, builder: (column) => column);
@@ -4545,6 +4674,8 @@ class $$AttemptsTableTableManager
                 Value<int> operandB = const Value.absent(),
                 Value<String> op = const Value.absent(),
                 Value<String> form = const Value.absent(),
+                Value<int?> operandC = const Value.absent(),
+                Value<String?> op2 = const Value.absent(),
                 Value<int> expected = const Value.absent(),
                 Value<int> elapsedMs = const Value.absent(),
                 Value<int> wrongAttempts = const Value.absent(),
@@ -4556,6 +4687,8 @@ class $$AttemptsTableTableManager
                 operandB: operandB,
                 op: op,
                 form: form,
+                operandC: operandC,
+                op2: op2,
                 expected: expected,
                 elapsedMs: elapsedMs,
                 wrongAttempts: wrongAttempts,
@@ -4569,6 +4702,8 @@ class $$AttemptsTableTableManager
                 required int operandB,
                 required String op,
                 required String form,
+                Value<int?> operandC = const Value.absent(),
+                Value<String?> op2 = const Value.absent(),
                 required int expected,
                 required int elapsedMs,
                 required int wrongAttempts,
@@ -4580,6 +4715,8 @@ class $$AttemptsTableTableManager
                 operandB: operandB,
                 op: op,
                 form: form,
+                operandC: operandC,
+                op2: op2,
                 expected: expected,
                 elapsedMs: elapsedMs,
                 wrongAttempts: wrongAttempts,

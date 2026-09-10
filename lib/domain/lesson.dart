@@ -120,6 +120,10 @@ enum TaskForm {
 
   /// Two groups of pictures to add up: three bees and four bees.
   quantityAdd,
+
+  /// `a · b + c` - two operations in one term, and the point one (`·` or
+  /// `:`) is worked out first, whichever side of the term it sits on.
+  chain,
 }
 
 /// Immutable description of one lesson. Lessons are defined as compile-time
@@ -238,6 +242,8 @@ class LessonSpec {
       // Several taps per task, not one: laying out an amount is slower than
       // any other answer in the app.
       TaskForm.moneyCompose => 2.0,
+      // Two calculations instead of one, plus deciding which comes first.
+      TaskForm.chain => 1.5,
       _ => 1.0,
     };
 
@@ -556,6 +562,16 @@ const _timesAndDivisionLessons = [
     op: ArithmeticOp.mulDiv,
     carry: CarryMode.any,
     form: TaskForm.result,
+  ),
+  LessonSpec(
+    id: 'punkt_vor_strich',
+    title: 'Punkt vor Strich',
+    description: 'Mal und Geteilt kommen vor Plus und Minus - auch wenn sie '
+        'hinten stehen: bei 40 − 3 · 6 wird erst 3 · 6 gerechnet.',
+    group: LessonGroup.timesAndDivision,
+    op: ArithmeticOp.mulDiv,
+    carry: CarryMode.any,
+    form: TaskForm.chain,
   ),
 ];
 

@@ -112,6 +112,47 @@ void main() {
     expect((await SettingsRepository(db).load()).defaultTaskCount, 30);
   });
 
+  test('a chain task keeps its third operand and second operation', () async {
+    final mia =
+        await users.createUser(name: 'Mia', avatar: '🦊', colorIndex: 0);
+    final id = await sessions.startSession(
+      userId: mia,
+      lessonId: 'punkt_vor_strich',
+      taskCount: 1,
+      seed: 1,
+    );
+    await sessions.finishSession(
+      sessionId: id,
+      completed: true,
+      results: const [
+        TaskResult(
+          task: Task(
+            a: 40,
+            b: 3,
+            op: Operation.sub,
+            c: 6,
+            op2: Operation.mul,
+            form: TaskForm.chain,
+          ),
+          elapsedMs: 5000,
+          wrongAttempts: 0,
+        ),
+      ],
+    );
+
+    final json = await backup.export();
+    await db.delete(db.users).go();
+    await db.delete(db.appSettings).go();
+    await backup.import(json);
+
+    final attempt = (await db.select(db.attempts).get()).single;
+    expect(attempt.operandA, 40);
+    expect(attempt.operandB, 3);
+    expect(attempt.op, 'sub');
+    expect(attempt.operandC, 6);
+    expect(attempt.op2, 'mul');
+  });
+
   test('an import replaces, it does not merge', () async {
     await seedData();
     final json = await backup.export();
@@ -156,8 +197,32 @@ void main() {
           'createdAtMs': 1,
         }
       ],
-      'sessions': [],
-      'attempts': [],
+      'sessions': [
+        {
+          'id': 1,
+          'userId': 1,
+          'lessonId': 'add_100_plain',
+          'taskCount': 1,
+          'seed': 1,
+          'startedAtMs': 1,
+        }
+      ],
+      'attempts': [
+        // Written before Punkt vor Strich existed - no operandC or op2 key
+        // at all, not just a null one.
+        {
+          'id': 1,
+          'sessionId': 1,
+          'position': 0,
+          'operandA': 47,
+          'operandB': 38,
+          'op': 'add',
+          'form': 'result',
+          'expected': 85,
+          'elapsedMs': 4000,
+          'wrongAttempts': 0,
+        }
+      ],
       'settings': [],
     });
 
@@ -167,6 +232,12 @@ void main() {
     // The missing columns arrive at their defaults.
     expect(user.visibleGroups, LessonGroup.values);
     expect(user.reviewHardTasks, isTrue);
+
+    // Those tasks really had only two operands, and that must survive an
+    // import from before the third one existed.
+    final attempt = (await db.select(db.attempts).get()).single;
+    expect(attempt.operandC, isNull);
+    expect(attempt.op2, isNull);
   });
 
   test('an empty database exports and restores without complaint', () async {

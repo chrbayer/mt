@@ -101,6 +101,8 @@ class BackupRepository {
             'operandB': attempt.operandB,
             'op': attempt.op,
             'form': attempt.form,
+            'operandC': attempt.operandC,
+            'op2': attempt.op2,
             'expected': attempt.expected,
             'elapsedMs': attempt.elapsedMs,
             'wrongAttempts': attempt.wrongAttempts,
@@ -236,6 +238,10 @@ class BackupRepository {
                 operandB: attempt['operandB'] as int,
                 op: attempt['op'] as String,
                 form: attempt['form'] as String,
+                // Missing in backups from before Punkt vor Strich existed -
+                // those tasks really did have only two operands.
+                operandC: Value(attempt['operandC'] as int?),
+                op2: Value(attempt['op2'] as String?),
                 expected: attempt['expected'] as int,
                 elapsedMs: attempt['elapsedMs'] as int,
                 wrongAttempts: attempt['wrongAttempts'] as int,

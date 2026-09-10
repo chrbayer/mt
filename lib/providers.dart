@@ -357,6 +357,8 @@ final reviewTasksProvider = FutureProvider.family<List<Task>, ReviewKey>(
           b: task.b,
           op: Operation.values.byName(task.op),
           form: TaskForm.values.byName(task.form),
+          c: task.c,
+          op2: task.op2 == null ? null : Operation.values.byName(task.op2!),
         )
     ];
   },

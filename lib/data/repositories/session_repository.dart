@@ -67,6 +67,8 @@ class SessionRepository {
               operandB: results[i].task.b,
               op: results[i].task.op.name,
               form: results[i].task.form.name,
+              operandC: Value(results[i].task.c),
+              op2: Value(results[i].task.op2?.name),
               expected: results[i].task.expected,
               elapsedMs: results[i].elapsedMs,
               wrongAttempts: results[i].wrongAttempts,

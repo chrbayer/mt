@@ -157,6 +157,13 @@ class Attempts extends Table {
   IntColumn get operandB => integer()();
   TextColumn get op => text()();
   TextColumn get form => text()();
+
+  /// The third operand and second operation of a Punkt-vor-Strich task
+  /// ([TaskForm.chain]). Null for every other form - two operands were the
+  /// whole task before this one, and null is the true reading of that, not
+  /// a missing value.
+  IntColumn get operandC => integer().nullable()();
+  TextColumn get op2 => text().nullable()();
   IntColumn get expected => integer()();
   IntColumn get elapsedMs => integer()();
   IntColumn get wrongAttempts => integer()();
@@ -184,7 +191,7 @@ class AppDatabase extends _$AppDatabase {
       : super(executor ?? driftDatabase(name: 'mathe_trainer'));
 
   @override
-  int get schemaVersion => 11;
+  int get schemaVersion => 12;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -260,6 +267,13 @@ class AppDatabase extends _$AppDatabase {
           // column along.
           if (from < 11 && from >= 6) {
             await m.addColumn(users, users.locked);
+          }
+          // v12 lets a task carry three operands (Punkt vor Strich). Every
+          // task recorded before this had two - null is the truth there, not
+          // a gap.
+          if (from < 12) {
+            await m.addColumn(attempts, attempts.operandC);
+            await m.addColumn(attempts, attempts.op2);
           }
         },
         beforeOpen: (details) async {

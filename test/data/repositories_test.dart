@@ -176,6 +176,11 @@ void main() {
       await recordRun(SessionRepository(before),
           userId: id, lessonId: 'add_20_plain');
 
+      if (version < 12) {
+        await before
+            .customStatement('ALTER TABLE attempts DROP COLUMN operand_c');
+        await before.customStatement('ALTER TABLE attempts DROP COLUMN op2');
+      }
       if (version < 11) {
         await before.customStatement('ALTER TABLE users DROP COLUMN locked');
       }
@@ -227,7 +232,7 @@ void main() {
       return file;
     }
 
-    for (final from in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]) {
+    for (final from in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]) {
       test('a database from schema v$from keeps its data', () async {
         final file = await databaseAtVersion(from);
 
@@ -271,7 +276,12 @@ void main() {
             maxStars);
         expect(await after.select(after.lessonPreferences).get(), isEmpty);
         expect(await after.select(after.sessions).get(), hasLength(1));
-        expect(await after.select(after.attempts).get(), hasLength(10));
+        final attempts = await after.select(after.attempts).get();
+        expect(attempts, hasLength(10));
+        // Every task recorded before v12 had two operands, and that is
+        // still the truth about it - not a value nobody filled in.
+        expect(attempts.first.operandC, isNull);
+        expect(attempts.first.op2, isNull);
       });
     }
   });
