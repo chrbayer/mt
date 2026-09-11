@@ -232,8 +232,12 @@ void main() {
     expect(summary.users, 1);
     final user = (await users.allUsers()).single;
     // The missing columns arrive at their defaults.
-    expect(user.visibleGroups, LessonGroup.values);
     expect(user.reviewHardTasks, isTrue);
+    // Nothing was recorded about which groups that backup's version knew, so
+    // it knew all of them: restoring an old backup must never take a group
+    // away from a child who could see it when the backup was made.
+    expect(user.known, isEmpty);
+    expect(user.visibleGroups, LessonGroup.values);
 
     // Those tasks really had only two operands, and that must survive an
     // import from before the third one existed.

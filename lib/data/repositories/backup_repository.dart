@@ -65,6 +65,7 @@ class BackupRepository {
             'colorIndex': user.colorIndex,
             'createdAtMs': user.createdAtMs,
             'hiddenGroups': user.hiddenGroups,
+            'knownGroups': user.knownGroups,
             'reviewHardTasks': user.reviewHardTasks,
             'defaultTaskCount': user.defaultTaskCount,
             'practiceLimitMinutes': user.practiceLimitMinutes,
@@ -206,6 +207,11 @@ class BackupRepository {
                 createdAtMs: user['createdAtMs'] as int,
                 // Missing in backups from before these columns existed.
                 hiddenGroups: Value(user['hiddenGroups'] as String? ?? ''),
+                // Missing in a backup from before the column existed. Empty
+                // reads as "every group is known", which is what that
+                // backup meant - restoring one must never hide a group the
+                // child could see when it was made.
+                knownGroups: Value(user['knownGroups'] as String? ?? ''),
                 reviewHardTasks:
                     Value(user['reviewHardTasks'] as bool? ?? true),
                 defaultTaskCount: Value(user['defaultTaskCount'] as int?),

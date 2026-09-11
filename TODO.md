@@ -135,3 +135,12 @@ gestartet. Verborgen hat es sich dadurch, dass der einzige Weckruf an
 sprang genau dann um, wenn es am wenigsten nötig war. Jetzt kommt die Grenze
 aus `dayStartProvider` und wird beim Zurückkehren in den Vordergrund neu
 gestellt.
+
+#26 erledigt (2.8.3) — Neue Gruppen werden pro Profil nur noch dann
+automatisch sichtbar, wenn sie an eine schon aktive Gruppe grenzen. Dafür
+merkt sich `users.known_groups` (Schema v15), gegen welchen Katalog die
+Sichtbarkeit entschieden wurde — ohne das lässt sich „vom Elternteil
+angelassen" nicht von „gab es damals noch nicht" unterscheiden. Gemessen wird
+nur gegen bekannte Gruppen, damit bei zwei gleichzeitig ergänzten nicht die
+eine die andere mitzieht. Bestehende Profile sehen nach dem Update
+unverändert dasselbe.

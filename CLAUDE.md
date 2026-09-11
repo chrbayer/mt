@@ -26,10 +26,10 @@ Deshalb behielt `calc_to_six` beim Aufspalten in Plus/Minus/gemischt auch
 seine ID.
 
 Eine **neue Gruppe in der Mitte des Enums einzufügen ist sicher**:
-`hidden_groups` speichert Namen, keine Indizes, und ungenannte Gruppen gelten
-als sichtbar. „Einmaleins rückwärts" erscheint dadurch bei allen Kindern, statt
-bei denen mit gespeicherten Einstellungen stillschweigend zu fehlen. Die
-Reihenfolge im Enum ist zugleich die Reihenfolge im Katalog.
+gespeichert werden Namen, keine Indizes. Die Reihenfolge im Enum ist zugleich
+die Reihenfolge im Katalog — **und die Reihenfolge der Schwierigkeit**, woran
+die Sichtbarkeit einer neu ergänzten Gruppe hängt; siehe „Sichtbare
+Bereiche".
 
 `div_plain` hat beim Umzug in die neue Gruppe **seine ID behalten** und nur
 Titel und Beschreibung gewechselt — Gruppe und Titel sind frei, die ID nicht.
@@ -181,11 +181,38 @@ Bildschirm wäre ein Fehler und kein Erfolg.
 ## Sichtbare Bereiche
 
 `users.hidden_groups` speichert die **abgeschalteten** Gruppen als
-kommagetrennte Enum-Namen, nicht die freigeschalteten. So erscheint eine in
-einer späteren Version ergänzte Gruppe bei allen Kindern, statt stillschweigend
-unsichtbar zu bleiben. Unbekannte Namen werden beim Lesen übergangen
-(`UserVisibleGroups` in `user_repository.dart`), damit ein Downgrade die
-Einstellung nicht zerstört.
+kommagetrennte Enum-Namen, nicht die freigeschalteten — eine später ergänzte
+Gruppe soll nicht stillschweigend unsichtbar sein, bloß weil niemand sie
+einschalten konnte. Unbekannte Namen werden beim Lesen übergangen, damit ein
+Downgrade die Einstellung nicht zerstört.
+
+Daneben steht `users.known_groups`: die Gruppen, **gegen die** diese
+Einstellung entschieden wurde. Ohne sie deckt „nicht abgeschaltet" zwei
+verschiedene Dinge ab — eine Gruppe, die ein Elternteil angelassen hat, und
+eine, die es beim Entscheiden noch gar nicht gab.
+
+Die Regel steht in `domain/group_visibility.dart` und lautet: eine **bekannte**
+Gruppe ist an, solange sie nicht abgeschaltet wurde; eine **neue** nur, wenn
+sie an eine Gruppe **grenzt**, die das Kind schon hat. Das Enum läuft von den
+ersten Schritten bis über das Einmaleins hinaus, Nachbarn sind also auch
+Nachbarn in der Schwierigkeit. Wer in „Bis 20" arbeitet, soll „Bis 100"
+bekommen, sobald es dazukommt — und eben nicht das Einmaleins rückwärts, nur
+weil der Katalog irgendwo weit oben gewachsen ist.
+
+Gemessen wird **nur gegen bekannte** Gruppen, nie gegen eine andere neue.
+Sonst zöge bei zwei gleichzeitig ergänzten Gruppen die erste die zweite mit
+herein, und so eine Kette landet irgendwo, wo niemand hinwollte.
+
+`known_groups` wird bei jedem Speichern auf den **ganzen** Katalog gesetzt: wer
+gerade entschieden hat, hatte die vollständige Liste vor sich. Ein leeres Feld
+heißt „alles bekannt" — das ist es, was ein vor dieser Regel geschriebenes
+Profil sagt, und die einzig sichere Lesart: „nichts bekannt" hieße bei einer
+alten Sicherung, dem Kind den ganzen Katalog wegzunehmen.
+
+Die Migration auf v15 trägt bei allen vorhandenen Profilen den heutigen
+Katalog ein. Dadurch gilt heute keine Gruppe als neu, und **kein Kind sieht
+nach dem Update etwas anderes als vorher**; die Regel greift erst für das, was
+danach dazukommt.
 
 ## Datenbank
 

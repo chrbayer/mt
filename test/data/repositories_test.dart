@@ -9,6 +9,7 @@ import 'package:mathe_trainer/data/repositories/settings_repository.dart';
 import 'package:mathe_trainer/data/repositories/stats_repository.dart';
 import 'package:mathe_trainer/data/repositories/user_repository.dart';
 import 'package:drift/drift.dart' show Value;
+import 'package:mathe_trainer/domain/group_visibility.dart';
 import 'package:mathe_trainer/domain/lesson.dart';
 import 'package:mathe_trainer/domain/lesson_filter.dart';
 import 'package:mathe_trainer/domain/scoring.dart';
@@ -116,8 +117,7 @@ void main() {
       });
 
       final reloaded = (await users.findUser(mia))!;
-      // Everything not switched off, in catalogue order - including a group
-      // added in a later version, which nobody could have switched off.
+      // Everything not switched off, in catalogue order.
       expect(reloaded.visibleGroups, [
         LessonGroup.firstSteps,
         LessonGroup.upTo10,
@@ -135,6 +135,56 @@ void main() {
           await users.createUser(name: 'Mia', avatar: '🦊', colorIndex: 0);
       await users.setHiddenGroups(id, {LessonGroup.upTo1000});
       await users.setHiddenGroups(id, {});
+      expect((await users.findUser(id))!.visibleGroups, LessonGroup.values);
+    });
+
+    test('a group added later only comes along next to one the child has',
+        () async {
+      final id =
+          await users.createUser(name: 'Mia', avatar: '🦊', colorIndex: 0);
+      // A setting written by a version that did not have the times tables
+      // yet, with both of the neighbouring groups switched off.
+      await (db.update(db.users)..where((u) => u.id.equals(id))).write(
+        UsersCompanion(
+          hiddenGroups: const Value('upTo1000,reverseTimesTables'),
+          knownGroups: Value(groupNames(
+              LessonGroup.values.toSet()..remove(LessonGroup.timesTables))),
+        ),
+      );
+
+      // Nothing beside it is on, so it stays out rather than turning up on
+      // a first-grader's screen.
+      expect((await users.findUser(id))!.shows(LessonGroup.timesTables),
+          isFalse);
+
+      // Once a parent has looked at the list, the group is no longer new:
+      // leaving it on is now a decision like any other.
+      await users.setHiddenGroups(id, {LessonGroup.upTo1000});
+      final decided = (await users.findUser(id))!;
+      expect(decided.shows(LessonGroup.timesTables), isTrue);
+      expect(decided.known, LessonGroup.values.toSet());
+    });
+
+    test('a new group next to one that is on comes along by itself', () async {
+      final id =
+          await users.createUser(name: 'Mia', avatar: '🦊', colorIndex: 0);
+      await (db.update(db.users)..where((u) => u.id.equals(id))).write(
+        UsersCompanion(
+          knownGroups: Value(groupNames(
+              LessonGroup.values.toSet()..remove(LessonGroup.timesTables))),
+        ),
+      );
+      expect((await users.findUser(id))!.shows(LessonGroup.timesTables),
+          isTrue);
+    });
+
+    test('a profile from before the rule sees the whole catalogue', () async {
+      final id =
+          await users.createUser(name: 'Mia', avatar: '🦊', colorIndex: 0);
+      // Empty is what such a profile carries. Read as "knows nothing" it
+      // would leave the child with an empty screen.
+      await (db.update(db.users)..where((u) => u.id.equals(id)))
+          .write(const UsersCompanion(knownGroups: Value('')));
       expect((await users.findUser(id))!.visibleGroups, LessonGroup.values);
     });
 
@@ -176,6 +226,10 @@ void main() {
       await recordRun(SessionRepository(before),
           userId: id, lessonId: 'add_20_plain');
 
+      if (version < 15) {
+        await before
+            .customStatement('ALTER TABLE users DROP COLUMN known_groups');
+      }
       if (version < 14) {
         // v13 hung an hour of day and a weekday on every assignment.
         await before.customStatement('ALTER TABLE assignments '
@@ -186,13 +240,18 @@ void main() {
       if (version < 13) {
         await before.customStatement('DROP TABLE assignments');
       } else {
-        // A row in the old shape, so the rebuild in the v14 migration has
-        // something real to carry across.
+        // An assignment to carry across, in whatever shape its version had:
+        // up to v13 with the hour and weekday the deadline used to name,
+        // from v14 without them.
+        final oldShape = version < 14;
         await before.customStatement(
-          'INSERT INTO assignments (user_id, lesson_id, rhythm, due_minute, '
-          'due_weekday, runs, task_count, min_stars, min_bolts, '
+          'INSERT INTO assignments (user_id, lesson_id, rhythm, '
+          '${oldShape ? 'due_minute, due_weekday, ' : ''}'
+          'runs, task_count, min_stars, min_bolts, '
           'created_at_ms, ended_at_ms) '
-          "VALUES ($id, 'times_7', 'weekly', 1080, 5, 3, 20, 2, 1, 1000, NULL)",
+          "VALUES ($id, 'times_7', 'weekly', "
+          '${oldShape ? '1080, 5, ' : ''}'
+          '3, 20, 2, 1, 1000, NULL)',
         );
       }
       if (version < 12) {
@@ -251,7 +310,7 @@ void main() {
       return file;
     }
 
-    for (final from in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]) {
+    for (final from in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]) {
       test('a database from schema v$from keeps its data', () async {
         final file = await databaseAtVersion(from);
 
@@ -274,6 +333,10 @@ void main() {
         expect(user.dailyLimitMinutes, isNull);
         // Nothing was ever filtered away, so nothing is.
         expect(user.filter, LessonFilter.all);
+        // Every group this version has was decided against the catalogue as
+        // it stands, so none of it counts as new - a migration must not
+        // change what a child is offered.
+        expect(user.known, LessonGroup.values.toSet());
         // The daily cap on scored runs is new too: nobody decided about it,
         // so this profile follows the app-wide setting.
         expect(user.scoredRunsPerLesson, isNull);

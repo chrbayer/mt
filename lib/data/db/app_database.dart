@@ -5,6 +5,7 @@ library;
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
 
+import '../../domain/group_visibility.dart';
 import '../../domain/lesson.dart';
 import '../../domain/scoring.dart';
 
@@ -24,9 +25,19 @@ class Users extends Table {
 
   /// Lesson groups this child does not see, as a comma-separated list of
   /// [LessonGroup] names. Storing what is *hidden* rather than what is shown
-  /// means a group added in a later version appears for everyone instead of
-  /// silently staying invisible.
+  /// keeps a group added in a later version from silently staying invisible.
   TextColumn get hiddenGroups => text().withDefault(const Constant(''))();
+
+  /// The groups [hiddenGroups] was last decided against, same format.
+  ///
+  /// Without it "not hidden" covers two different things: a group a parent
+  /// left switched on, and a group that did not exist when they looked. The
+  /// second kind is new, and `domain/group_visibility.dart` only switches it
+  /// on where it borders something this child already has.
+  ///
+  /// Empty means every group is known - what a profile written before this
+  /// column says, and the only safe reading of it.
+  TextColumn get knownGroups => text().withDefault(const Constant(''))();
 
   /// Whether runs mix in calculations this child was slow or wrong on last
   /// time. On by default: practising what already works is the least useful
@@ -221,7 +232,7 @@ class AppDatabase extends _$AppDatabase {
       : super(executor ?? driftDatabase(name: 'mathe_trainer'));
 
   @override
-  int get schemaVersion => 14;
+  int get schemaVersion => 15;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -252,6 +263,7 @@ class AppDatabase extends _$AppDatabase {
                 users.lessonFilter,
                 users.scoredRunsPerLesson,
                 users.locked,
+                users.knownGroups,
               ]),
             );
             // A profile still carrying what v5 handed it never had a decision
@@ -320,6 +332,18 @@ class AppDatabase extends _$AppDatabase {
           // becomes missed in hindsight.
           if (from >= 13 && from < 14) {
             await m.alterTable(TableMigration(assignments));
+          }
+          // v15 records which groups a profile's visibility setting has
+          // actually seen, so a group added later can be told apart from one
+          // a parent left switched on. Everything already here was decided
+          // against the catalogue as it stands, so that is what it knows -
+          // nobody's catalogue changes because of this migration.
+          if (from < 15) {
+            // Only where the v6 rebuild above did not already bring it along.
+            if (from >= 6) await m.addColumn(users, users.knownGroups);
+            await m.database.customStatement(
+              "UPDATE users SET known_groups = '$allGroupNames'",
+            );
           }
         },
         beforeOpen: (details) async {

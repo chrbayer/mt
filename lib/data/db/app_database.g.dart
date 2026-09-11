@@ -77,6 +77,18 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
     requiredDuringInsert: false,
     defaultValue: const Constant(''),
   );
+  static const VerificationMeta _knownGroupsMeta = const VerificationMeta(
+    'knownGroups',
+  );
+  @override
+  late final GeneratedColumn<String> knownGroups = GeneratedColumn<String>(
+    'known_groups',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
   static const VerificationMeta _reviewHardTasksMeta = const VerificationMeta(
     'reviewHardTasks',
   );
@@ -178,6 +190,7 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
     colorIndex,
     createdAtMs,
     hiddenGroups,
+    knownGroups,
     reviewHardTasks,
     defaultTaskCount,
     practiceLimitMinutes,
@@ -243,6 +256,15 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
         hiddenGroups.isAcceptableOrUnknown(
           data['hidden_groups']!,
           _hiddenGroupsMeta,
+        ),
+      );
+    }
+    if (data.containsKey('known_groups')) {
+      context.handle(
+        _knownGroupsMeta,
+        knownGroups.isAcceptableOrUnknown(
+          data['known_groups']!,
+          _knownGroupsMeta,
         ),
       );
     }
@@ -348,6 +370,10 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
         DriftSqlType.string,
         data['${effectivePrefix}hidden_groups'],
       )!,
+      knownGroups: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}known_groups'],
+      )!,
       reviewHardTasks: attachedDatabase.typeMapping.read(
         DriftSqlType.bool,
         data['${effectivePrefix}review_hard_tasks'],
@@ -402,9 +428,19 @@ class User extends DataClass implements Insertable<User> {
 
   /// Lesson groups this child does not see, as a comma-separated list of
   /// [LessonGroup] names. Storing what is *hidden* rather than what is shown
-  /// means a group added in a later version appears for everyone instead of
-  /// silently staying invisible.
+  /// keeps a group added in a later version from silently staying invisible.
   final String hiddenGroups;
+
+  /// The groups [hiddenGroups] was last decided against, same format.
+  ///
+  /// Without it "not hidden" covers two different things: a group a parent
+  /// left switched on, and a group that did not exist when they looked. The
+  /// second kind is new, and `domain/group_visibility.dart` only switches it
+  /// on where it borders something this child already has.
+  ///
+  /// Empty means every group is known - what a profile written before this
+  /// column says, and the only safe reading of it.
+  final String knownGroups;
 
   /// Whether runs mix in calculations this child was slow or wrong on last
   /// time. On by default: practising what already works is the least useful
@@ -454,6 +490,7 @@ class User extends DataClass implements Insertable<User> {
     required this.colorIndex,
     required this.createdAtMs,
     required this.hiddenGroups,
+    required this.knownGroups,
     required this.reviewHardTasks,
     this.defaultTaskCount,
     this.practiceLimitMinutes,
@@ -472,6 +509,7 @@ class User extends DataClass implements Insertable<User> {
     map['color_index'] = Variable<int>(colorIndex);
     map['created_at_ms'] = Variable<int>(createdAtMs);
     map['hidden_groups'] = Variable<String>(hiddenGroups);
+    map['known_groups'] = Variable<String>(knownGroups);
     map['review_hard_tasks'] = Variable<bool>(reviewHardTasks);
     if (!nullToAbsent || defaultTaskCount != null) {
       map['default_task_count'] = Variable<int>(defaultTaskCount);
@@ -501,6 +539,7 @@ class User extends DataClass implements Insertable<User> {
       colorIndex: Value(colorIndex),
       createdAtMs: Value(createdAtMs),
       hiddenGroups: Value(hiddenGroups),
+      knownGroups: Value(knownGroups),
       reviewHardTasks: Value(reviewHardTasks),
       defaultTaskCount: defaultTaskCount == null && nullToAbsent
           ? const Value.absent()
@@ -534,6 +573,7 @@ class User extends DataClass implements Insertable<User> {
       colorIndex: serializer.fromJson<int>(json['colorIndex']),
       createdAtMs: serializer.fromJson<int>(json['createdAtMs']),
       hiddenGroups: serializer.fromJson<String>(json['hiddenGroups']),
+      knownGroups: serializer.fromJson<String>(json['knownGroups']),
       reviewHardTasks: serializer.fromJson<bool>(json['reviewHardTasks']),
       defaultTaskCount: serializer.fromJson<int?>(json['defaultTaskCount']),
       practiceLimitMinutes: serializer.fromJson<int?>(
@@ -558,6 +598,7 @@ class User extends DataClass implements Insertable<User> {
       'colorIndex': serializer.toJson<int>(colorIndex),
       'createdAtMs': serializer.toJson<int>(createdAtMs),
       'hiddenGroups': serializer.toJson<String>(hiddenGroups),
+      'knownGroups': serializer.toJson<String>(knownGroups),
       'reviewHardTasks': serializer.toJson<bool>(reviewHardTasks),
       'defaultTaskCount': serializer.toJson<int?>(defaultTaskCount),
       'practiceLimitMinutes': serializer.toJson<int?>(practiceLimitMinutes),
@@ -576,6 +617,7 @@ class User extends DataClass implements Insertable<User> {
     int? colorIndex,
     int? createdAtMs,
     String? hiddenGroups,
+    String? knownGroups,
     bool? reviewHardTasks,
     Value<int?> defaultTaskCount = const Value.absent(),
     Value<int?> practiceLimitMinutes = const Value.absent(),
@@ -591,6 +633,7 @@ class User extends DataClass implements Insertable<User> {
     colorIndex: colorIndex ?? this.colorIndex,
     createdAtMs: createdAtMs ?? this.createdAtMs,
     hiddenGroups: hiddenGroups ?? this.hiddenGroups,
+    knownGroups: knownGroups ?? this.knownGroups,
     reviewHardTasks: reviewHardTasks ?? this.reviewHardTasks,
     defaultTaskCount: defaultTaskCount.present
         ? defaultTaskCount.value
@@ -622,6 +665,9 @@ class User extends DataClass implements Insertable<User> {
       hiddenGroups: data.hiddenGroups.present
           ? data.hiddenGroups.value
           : this.hiddenGroups,
+      knownGroups: data.knownGroups.present
+          ? data.knownGroups.value
+          : this.knownGroups,
       reviewHardTasks: data.reviewHardTasks.present
           ? data.reviewHardTasks.value
           : this.reviewHardTasks,
@@ -656,6 +702,7 @@ class User extends DataClass implements Insertable<User> {
           ..write('colorIndex: $colorIndex, ')
           ..write('createdAtMs: $createdAtMs, ')
           ..write('hiddenGroups: $hiddenGroups, ')
+          ..write('knownGroups: $knownGroups, ')
           ..write('reviewHardTasks: $reviewHardTasks, ')
           ..write('defaultTaskCount: $defaultTaskCount, ')
           ..write('practiceLimitMinutes: $practiceLimitMinutes, ')
@@ -676,6 +723,7 @@ class User extends DataClass implements Insertable<User> {
     colorIndex,
     createdAtMs,
     hiddenGroups,
+    knownGroups,
     reviewHardTasks,
     defaultTaskCount,
     practiceLimitMinutes,
@@ -695,6 +743,7 @@ class User extends DataClass implements Insertable<User> {
           other.colorIndex == this.colorIndex &&
           other.createdAtMs == this.createdAtMs &&
           other.hiddenGroups == this.hiddenGroups &&
+          other.knownGroups == this.knownGroups &&
           other.reviewHardTasks == this.reviewHardTasks &&
           other.defaultTaskCount == this.defaultTaskCount &&
           other.practiceLimitMinutes == this.practiceLimitMinutes &&
@@ -712,6 +761,7 @@ class UsersCompanion extends UpdateCompanion<User> {
   final Value<int> colorIndex;
   final Value<int> createdAtMs;
   final Value<String> hiddenGroups;
+  final Value<String> knownGroups;
   final Value<bool> reviewHardTasks;
   final Value<int?> defaultTaskCount;
   final Value<int?> practiceLimitMinutes;
@@ -727,6 +777,7 @@ class UsersCompanion extends UpdateCompanion<User> {
     this.colorIndex = const Value.absent(),
     this.createdAtMs = const Value.absent(),
     this.hiddenGroups = const Value.absent(),
+    this.knownGroups = const Value.absent(),
     this.reviewHardTasks = const Value.absent(),
     this.defaultTaskCount = const Value.absent(),
     this.practiceLimitMinutes = const Value.absent(),
@@ -743,6 +794,7 @@ class UsersCompanion extends UpdateCompanion<User> {
     required int colorIndex,
     required int createdAtMs,
     this.hiddenGroups = const Value.absent(),
+    this.knownGroups = const Value.absent(),
     this.reviewHardTasks = const Value.absent(),
     this.defaultTaskCount = const Value.absent(),
     this.practiceLimitMinutes = const Value.absent(),
@@ -762,6 +814,7 @@ class UsersCompanion extends UpdateCompanion<User> {
     Expression<int>? colorIndex,
     Expression<int>? createdAtMs,
     Expression<String>? hiddenGroups,
+    Expression<String>? knownGroups,
     Expression<bool>? reviewHardTasks,
     Expression<int>? defaultTaskCount,
     Expression<int>? practiceLimitMinutes,
@@ -778,6 +831,7 @@ class UsersCompanion extends UpdateCompanion<User> {
       if (colorIndex != null) 'color_index': colorIndex,
       if (createdAtMs != null) 'created_at_ms': createdAtMs,
       if (hiddenGroups != null) 'hidden_groups': hiddenGroups,
+      if (knownGroups != null) 'known_groups': knownGroups,
       if (reviewHardTasks != null) 'review_hard_tasks': reviewHardTasks,
       if (defaultTaskCount != null) 'default_task_count': defaultTaskCount,
       if (practiceLimitMinutes != null)
@@ -798,6 +852,7 @@ class UsersCompanion extends UpdateCompanion<User> {
     Value<int>? colorIndex,
     Value<int>? createdAtMs,
     Value<String>? hiddenGroups,
+    Value<String>? knownGroups,
     Value<bool>? reviewHardTasks,
     Value<int?>? defaultTaskCount,
     Value<int?>? practiceLimitMinutes,
@@ -814,6 +869,7 @@ class UsersCompanion extends UpdateCompanion<User> {
       colorIndex: colorIndex ?? this.colorIndex,
       createdAtMs: createdAtMs ?? this.createdAtMs,
       hiddenGroups: hiddenGroups ?? this.hiddenGroups,
+      knownGroups: knownGroups ?? this.knownGroups,
       reviewHardTasks: reviewHardTasks ?? this.reviewHardTasks,
       defaultTaskCount: defaultTaskCount ?? this.defaultTaskCount,
       practiceLimitMinutes: practiceLimitMinutes ?? this.practiceLimitMinutes,
@@ -845,6 +901,9 @@ class UsersCompanion extends UpdateCompanion<User> {
     }
     if (hiddenGroups.present) {
       map['hidden_groups'] = Variable<String>(hiddenGroups.value);
+    }
+    if (knownGroups.present) {
+      map['known_groups'] = Variable<String>(knownGroups.value);
     }
     if (reviewHardTasks.present) {
       map['review_hard_tasks'] = Variable<bool>(reviewHardTasks.value);
@@ -882,6 +941,7 @@ class UsersCompanion extends UpdateCompanion<User> {
           ..write('colorIndex: $colorIndex, ')
           ..write('createdAtMs: $createdAtMs, ')
           ..write('hiddenGroups: $hiddenGroups, ')
+          ..write('knownGroups: $knownGroups, ')
           ..write('reviewHardTasks: $reviewHardTasks, ')
           ..write('defaultTaskCount: $defaultTaskCount, ')
           ..write('practiceLimitMinutes: $practiceLimitMinutes, ')
@@ -3759,6 +3819,7 @@ typedef $$UsersTableCreateCompanionBuilder = UsersCompanion Function({
   required int colorIndex,
   required int createdAtMs,
   Value<String> hiddenGroups,
+  Value<String> knownGroups,
   Value<bool> reviewHardTasks,
   Value<int?> defaultTaskCount,
   Value<int?> practiceLimitMinutes,
@@ -3775,6 +3836,7 @@ typedef $$UsersTableUpdateCompanionBuilder = UsersCompanion Function({
   Value<int> colorIndex,
   Value<int> createdAtMs,
   Value<String> hiddenGroups,
+  Value<String> knownGroups,
   Value<bool> reviewHardTasks,
   Value<int?> defaultTaskCount,
   Value<int?> practiceLimitMinutes,
@@ -3901,6 +3963,11 @@ class $$UsersTableFilterComposer extends Composer<_$AppDatabase, $UsersTable> {
 
   ColumnFilters<String> get hiddenGroups => $composableBuilder(
     column: $table.hiddenGroups,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get knownGroups => $composableBuilder(
+    column: $table.knownGroups,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -4084,6 +4151,11 @@ class $$UsersTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get knownGroups => $composableBuilder(
+    column: $table.knownGroups,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<bool> get reviewHardTasks => $composableBuilder(
     column: $table.reviewHardTasks,
     builder: (column) => ColumnOrderings(column),
@@ -4155,6 +4227,11 @@ class $$UsersTableAnnotationComposer
 
   GeneratedColumn<String> get hiddenGroups => $composableBuilder(
     column: $table.hiddenGroups,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get knownGroups => $composableBuilder(
+    column: $table.knownGroups,
     builder: (column) => column,
   );
 
@@ -4337,6 +4414,7 @@ class $$UsersTableTableManager
                 Value<int> colorIndex = const Value.absent(),
                 Value<int> createdAtMs = const Value.absent(),
                 Value<String> hiddenGroups = const Value.absent(),
+                Value<String> knownGroups = const Value.absent(),
                 Value<bool> reviewHardTasks = const Value.absent(),
                 Value<int?> defaultTaskCount = const Value.absent(),
                 Value<int?> practiceLimitMinutes = const Value.absent(),
@@ -4352,6 +4430,7 @@ class $$UsersTableTableManager
                 colorIndex: colorIndex,
                 createdAtMs: createdAtMs,
                 hiddenGroups: hiddenGroups,
+                knownGroups: knownGroups,
                 reviewHardTasks: reviewHardTasks,
                 defaultTaskCount: defaultTaskCount,
                 practiceLimitMinutes: practiceLimitMinutes,
@@ -4369,6 +4448,7 @@ class $$UsersTableTableManager
                 required int colorIndex,
                 required int createdAtMs,
                 Value<String> hiddenGroups = const Value.absent(),
+                Value<String> knownGroups = const Value.absent(),
                 Value<bool> reviewHardTasks = const Value.absent(),
                 Value<int?> defaultTaskCount = const Value.absent(),
                 Value<int?> practiceLimitMinutes = const Value.absent(),
@@ -4384,6 +4464,7 @@ class $$UsersTableTableManager
                 colorIndex: colorIndex,
                 createdAtMs: createdAtMs,
                 hiddenGroups: hiddenGroups,
+                knownGroups: knownGroups,
                 reviewHardTasks: reviewHardTasks,
                 defaultTaskCount: defaultTaskCount,
                 practiceLimitMinutes: practiceLimitMinutes,

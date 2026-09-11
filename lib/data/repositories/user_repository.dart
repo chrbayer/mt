@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 
+import '../../domain/group_visibility.dart' as groups;
 import '../../domain/lesson.dart';
 import '../../domain/lesson_filter.dart';
 import '../db/app_database.dart';
@@ -8,17 +9,20 @@ import '../db/app_database.dart';
 extension UserVisibleGroups on User {
   /// Groups this child does not see. Names that no longer exist are ignored,
   /// so a downgrade cannot corrupt the setting.
-  Set<LessonGroup> get hidden => {
-        for (final name in hiddenGroups.split(','))
-          for (final group in LessonGroup.values)
-            if (group.name == name) group,
-      };
+  Set<LessonGroup> get hidden => groups.groupsByName(hiddenGroups);
 
-  bool shows(LessonGroup group) => !hidden.contains(group);
+  /// The groups the stored decision was made against. Empty means all of
+  /// them - see [knownGroups].
+  Set<LessonGroup> get known => groups.groupsByName(knownGroups);
 
-  /// The groups to offer this child, in catalog order.
-  List<LessonGroup> get visibleGroups =>
-      LessonGroup.values.where(shows).toList(growable: false);
+  /// The groups to offer this child, in catalog order. A group added since
+  /// this profile was last looked at only comes along if it borders one the
+  /// child already has.
+  List<LessonGroup> get visibleGroups => List.unmodifiable(
+        groups.visibleGroups(hidden: hidden, known: known),
+      );
+
+  bool shows(LessonGroup group) => visibleGroups.contains(group);
 
   /// Which finished lessons this child's catalogue leaves out.
   LessonFilter get filter => lessonFilterByName(lessonFilter);
@@ -53,6 +57,9 @@ class UserRepository {
               avatar: avatar,
               colorIndex: colorIndex,
               createdAtMs: DateTime.now().millisecondsSinceEpoch,
+              // A fresh profile sees the whole catalogue, and it has seen all
+              // of it: nothing here is new to a decision made just now.
+              knownGroups: Value(groups.allGroupNames),
             ),
           );
 
@@ -125,13 +132,15 @@ class UserRepository {
 
   /// Hides or shows whole lesson groups for one child - a first-grader has no
   /// business being offered "Bis 1000".
-  Future<void> setHiddenGroups(int id, Set<LessonGroup> hidden) {
-    // Written in enum order so the stored string is stable and comparable.
-    final names =
-        LessonGroup.values.where(hidden.contains).map((g) => g.name).join(',');
-    return (_db.update(_db.users)..where((u) => u.id.equals(id)))
-        .write(UsersCompanion(hiddenGroups: Value(names)));
-  }
+  Future<void> setHiddenGroups(int id, Set<LessonGroup> hidden) =>
+      (_db.update(_db.users)..where((u) => u.id.equals(id))).write(
+        UsersCompanion(
+          hiddenGroups: Value(groups.groupNames(hidden)),
+          // Whoever just decided this had the whole catalogue in front of
+          // them, so from here on none of it is new to this profile.
+          knownGroups: Value(groups.allGroupNames),
+        ),
+      );
 
   /// Keeps the profile but throws away all results.
   Future<void> resetStatistics(int userId) =>
