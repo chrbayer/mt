@@ -178,6 +178,37 @@ class AppSettings extends Table {
   Set<Column> get primaryKey => {settingKey};
 }
 
+/// A parent-set goal: one lesson, one rhythm, a minimum length and quality,
+/// for one child. Never updated in place - see `domain/assignment.dart` for
+/// why - only its [endedAtMs] is ever written after creation.
+///
+/// Named `AssignmentRow` rather than the default `Assignment`: that name
+/// already belongs to the domain class this row is read into, and the two
+/// must not collide.
+@DataClassName('AssignmentRow')
+class Assignments extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get userId =>
+      integer().references(Users, #id, onDelete: KeyAction.cascade)();
+  TextColumn get lessonId => text()();
+
+  /// [AssignmentRhythm] name, not index - the same caution as
+  /// `hidden_groups` and `lesson_filter`: a reordered enum must not
+  /// silently turn one rhythm into another.
+  TextColumn get rhythm => text()();
+  IntColumn get dueMinute => integer()();
+
+  /// Only meaningful for a weekly rhythm; defaults to Sunday so a daily row
+  /// still has a well-defined value.
+  IntColumn get dueWeekday => integer().withDefault(const Constant(7))();
+  IntColumn get runs => integer()();
+  IntColumn get taskCount => integer()();
+  IntColumn get minStars => integer()();
+  IntColumn get minBolts => integer()();
+  IntColumn get createdAtMs => integer()();
+  IntColumn get endedAtMs => integer().nullable()();
+}
+
 @DriftDatabase(tables: [
   Users,
   Sessions,
@@ -185,13 +216,14 @@ class AppSettings extends Table {
   AppSettings,
   LessonPreferences,
   LessonStars,
+  Assignments,
 ])
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor])
       : super(executor ?? driftDatabase(name: 'mathe_trainer'));
 
   @override
-  int get schemaVersion => 12;
+  int get schemaVersion => 13;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -275,6 +307,10 @@ class AppDatabase extends _$AppDatabase {
             await m.addColumn(attempts, attempts.operandC);
             await m.addColumn(attempts, attempts.op2);
           }
+          // v13 lets a parent assign a lesson, a rhythm and a minimum length
+          // and quality. Nothing to carry over - there were no assignments
+          // before this.
+          if (from < 13) await m.createTable(assignments);
         },
         beforeOpen: (details) async {
           // Needed for the ON DELETE CASCADE above to actually fire.

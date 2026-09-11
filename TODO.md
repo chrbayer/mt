@@ -104,4 +104,17 @@ Ein Task trägt jetzt drei Operanden und zwei Rechenarten (Schema v12), damit
 Wiedervorlage und „schwere Aufgaben" den vollständigen Term speichern statt
 ihn falsch aufzuschreiben.
 
-#24 Aufgaben: Übungen mit vorgebener Anzahl, mindest Sterne und Blitze (maximale Versuche Begrenzung für Aufgaben ausgesetzt), Zeitziel (bis wann), Statistik, wie oft Zeitziel erreicht oder gerissen wurde), werden im Elternbereich konfiguriert.
+#24 erledigt (2.8.0) — Aufgaben: Ein Elternteil weist einem Kind eine Lektion
+zu, mit Rhythmus (täglich bis zu einer Uhrzeit, wöchentlich bis zu einem
+Wochentag), wie vielen Durchgängen zu wie vielen Rechnungen, und mit
+Mindeststernen und -blitzen. Der Tagesdeckel aus #16 wird dabei ausgesetzt,
+aber nur für die zugewiesene Lektion und nur, bis der laufende Zeitraum sein
+Ziel erreicht hat — sonst könnten drei missglückte Versuche die Wertung für
+den Tag aufbrauchen, bevor die Aufgabe je erfüllt wurde. Für das Kind erscheint
+eine offene Aufgabe als Karteikarte in einer eigenen Gruppe „Deine Aufgaben"
+ganz oben im Katalog, nach Frist sortiert; eine erfüllte Karte bleibt bis zum
+Ende des Zeitraums stehen, gedämpft und mit grünem Haken, aber weiter
+antippbar. Eine Aufgabe wird nie geändert, nur beendet und neu angelegt, damit
+„geschafft an 12 von 15 Tagen" eine stabile Messlatte behält; der
+Elternbereich zeigt genau diese Statistik samt einem Punktestreifen der
+letzten vierzehn Zeiträume.

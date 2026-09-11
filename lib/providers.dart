@@ -7,11 +7,13 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'data/db/app_database.dart';
+import 'data/repositories/assignment_repository.dart';
 import 'data/repositories/backup_repository.dart';
 import 'data/repositories/session_repository.dart';
 import 'data/repositories/settings_repository.dart';
 import 'data/repositories/stats_repository.dart';
 import 'data/repositories/user_repository.dart';
+import 'domain/assignment.dart';
 import 'domain/lesson.dart';
 import 'domain/practice_limit.dart';
 import 'domain/task.dart';
@@ -39,6 +41,9 @@ final statsRepositoryProvider =
 final settingsRepositoryProvider =
     Provider((ref) => SettingsRepository(ref.watch(databaseProvider)));
 
+final assignmentRepositoryProvider =
+    Provider((ref) => AssignmentRepository(ref.watch(databaseProvider)));
+
 /// Key for the per-lesson run length: one child, one lesson.
 typedef LessonKey = ({int userId, String lessonId});
 
@@ -48,8 +53,9 @@ final lessonTaskCountProvider = StreamProvider.family<int?, LessonKey>(
       .watchLessonTaskCount(key.userId, key.lessonId),
 );
 
-/// How long the next run of this lesson should be, with the three levels
-/// resolved: this lesson, then this child, then everyone.
+/// How long the next run of this lesson should be, with all four levels
+/// resolved: an open assignment for this lesson, then this lesson, then this
+/// child, then everyone.
 ///
 /// Loading until every level has answered - a made-up value would show one
 /// number and then jump to another.
@@ -57,16 +63,133 @@ final resolvedTaskCountProvider =
     Provider.family<AsyncValue<int>, LessonKey>((ref, key) {
   final global = ref.watch(preferencesProvider);
   final perLesson = ref.watch(lessonTaskCountProvider(key));
+  final assignment = ref.watch(assignmentForLessonProvider(key));
   final user = ref.watch(activeUserProvider);
 
-  if (!global.hasValue || !perLesson.hasValue) return const AsyncLoading();
+  if (!global.hasValue || !perLesson.hasValue || !assignment.hasValue) {
+    return const AsyncLoading();
+  }
   return AsyncData(
     resolveTaskCount(
+      forAssignment: assignment.value?.taskCount,
       forLesson: perLesson.value,
       forProfile: user?.defaultTaskCount,
       global: global.value!.defaultTaskCount,
     ),
   );
+});
+
+/// Every assignment still open for one child - the child screen's "Deine
+/// Aufgaben" and the profile tile's badge both read this.
+final openAssignmentsProvider = StreamProvider.family<List<Assignment>, int>(
+  (ref, userId) => ref
+      .watch(assignmentRepositoryProvider)
+      .watchAssignments(userId: userId, openOnly: true),
+);
+
+/// The one open assignment for this child and this lesson, or null. At most
+/// one is expected to matter at a time - an assignment is never edited, only
+/// ended and replaced.
+///
+/// Built on [openAssignmentsProvider]'s `.future` rather than awaiting the
+/// repository's stream directly: awaiting a drift stream's `.first` inside a
+/// widget test deadlocks, because nothing pumps it (the same trap
+/// `task_count_priority_test.dart` already works around). Going through a
+/// `StreamProvider` and its Riverpod-managed `.future` does not have that
+/// problem - `usersProvider.future` and `preferencesProvider.future` are read
+/// the same way elsewhere in this file.
+final assignmentForLessonProvider =
+    FutureProvider.family<Assignment?, LessonKey>((ref, key) async {
+  final assignments =
+      await ref.watch(openAssignmentsProvider(key.userId).future);
+  for (final a in assignments) {
+    if (a.lessonId == key.lessonId) return a;
+  }
+  return null;
+});
+
+/// Every assignment for one child, open or already ended, or for every child
+/// when [userId] is null - what the parent tab lists.
+final assignmentsProvider = StreamProvider.family<List<Assignment>, int?>(
+  (ref, userId) =>
+      ref.watch(assignmentRepositoryProvider).watchAssignments(userId: userId),
+);
+
+/// One assignment's progress: whether the period running right now has met
+/// its goal, and - for the parent tab - the same question for every closed
+/// period since it started.
+///
+/// Computed once from the whole run history of this child and this lesson,
+/// not once per period: the row set is already bounded to one child and one
+/// lesson (see [AssignmentRepository]), so asking the database once beats
+/// asking it once per period.
+class AssignmentStats {
+  final Assignment assignment;
+  final LessonSpec lesson;
+  final AssignmentPeriod currentPeriod;
+  final AssignmentProgress current;
+
+  /// Every closed period, oldest first, true where it was met.
+  final List<bool> closed;
+
+  const AssignmentStats({
+    required this.assignment,
+    required this.lesson,
+    required this.currentPeriod,
+    required this.current,
+    required this.closed,
+  });
+
+  int get closedMet => closed.where((met) => met).length;
+}
+
+/// Null when the assigned lesson is one this version no longer knows - an
+/// older backup, a dropped lesson - the same reason `lessonByIdOrNull`
+/// exists: nothing here can be measured against a lesson that is not there.
+final assignmentStatsProvider =
+    StreamProvider.family<AssignmentStats?, Assignment>((ref, a) {
+  final lesson = lessonByIdOrNull(a.lessonId);
+  if (lesson == null) return Stream.value(null);
+
+  final repo = ref.watch(assignmentRepositoryProvider);
+  final now = ref.watch(clockProvider)();
+  final currentPeriod = periodAt(a, now);
+
+  return repo.watchRunsFor(a, sinceMs: a.createdAtMs).map((rows) {
+    final runs = [for (final row in rows) row.facts];
+    final current = progressIn(
+      a: a,
+      lesson: lesson,
+      period: currentPeriod,
+      runs: runs,
+    );
+    final closed = [
+      for (final period in closedPeriods(a, now))
+        progressIn(a: a, lesson: lesson, period: period, runs: runs).met,
+    ];
+    return AssignmentStats(
+      assignment: a,
+      lesson: lesson,
+      currentPeriod: currentPeriod,
+      current: current,
+      closed: closed,
+    );
+  });
+});
+
+/// Whether the daily cap from #16 must step aside for this child and this
+/// lesson right now: there is an open assignment for it, and the period
+/// running now has not met its goal yet.
+///
+/// A future, not a stream, for the same reason [scoredRunLimitProvider] is:
+/// `PracticeScreen._prepare()` reads it once before a run starts and never
+/// re-judges it while the run is under way.
+final openAssignmentProvider =
+    FutureProvider.family<bool, LessonKey>((ref, key) async {
+  final a = await ref.watch(assignmentForLessonProvider(key).future);
+  if (a == null) return false;
+  final stats = await ref.watch(assignmentStatsProvider(a).future);
+  return stats != null && !stats.current.met;
 });
 
 final usersProvider = StreamProvider<List<User>>(

@@ -38,12 +38,23 @@ class SessionRepository {
   /// began - handed in rather than taken from SQL's `now` for the same reason
   /// the practice caps do it: the app has one clock, and a rule that turns
   /// over at midnight has to be testable at any time of day.
+  ///
+  /// [servesAssignment] suspends that cap - but only for this one run. It is
+  /// true exactly when this lesson has an open assignment whose current
+  /// period has not met its goal yet (#24): without this, three failed
+  /// attempts at the daily cap could use up the day's scoring slots before
+  /// the assignment itself was ever met, locking a child out of their own
+  /// goal until tomorrow. It does **not** reopen the cap in general - only
+  /// this lesson, and only until the assignment's period is satisfied; the
+  /// moment it is, `openAssignmentProvider` turns false again and #16's cap
+  /// applies exactly as before.
   Future<void> finishSession({
     required int sessionId,
     required List<TaskResult> results,
     required bool completed,
     int scoredRunLimit = 0,
     int dayStartMs = 0,
+    bool servesAssignment = false,
   }) async {
     final totalMs = results.fold<int>(0, (sum, r) => sum + r.elapsedMs);
     final wrong = results.fold<int>(0, (sum, r) => sum + r.wrongAttempts);
@@ -51,10 +62,11 @@ class SessionRepository {
     // An abandoned run never counted anyway, so it neither earns nor uses up
     // one of the day's scoring slots.
     final scored = completed &&
-        runStillCounts(
-          limit: scoredRunLimit,
-          scoredToday: await _scoredToday(sessionId, dayStartMs),
-        );
+        (servesAssignment ||
+            runStillCounts(
+              limit: scoredRunLimit,
+              scoredToday: await _scoredToday(sessionId, dayStartMs),
+            ));
 
     await _db.transaction(() async {
       await _db.batch((batch) {

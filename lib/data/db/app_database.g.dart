@@ -3080,6 +3080,710 @@ class LessonStarsCompanion extends UpdateCompanion<LessonStar> {
   }
 }
 
+class $AssignmentsTable extends Assignments
+    with TableInfo<$AssignmentsTable, AssignmentRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $AssignmentsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
+  @override
+  late final GeneratedColumn<int> userId = GeneratedColumn<int>(
+    'user_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES users (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _lessonIdMeta = const VerificationMeta(
+    'lessonId',
+  );
+  @override
+  late final GeneratedColumn<String> lessonId = GeneratedColumn<String>(
+    'lesson_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _rhythmMeta = const VerificationMeta('rhythm');
+  @override
+  late final GeneratedColumn<String> rhythm = GeneratedColumn<String>(
+    'rhythm',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _dueMinuteMeta = const VerificationMeta(
+    'dueMinute',
+  );
+  @override
+  late final GeneratedColumn<int> dueMinute = GeneratedColumn<int>(
+    'due_minute',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _dueWeekdayMeta = const VerificationMeta(
+    'dueWeekday',
+  );
+  @override
+  late final GeneratedColumn<int> dueWeekday = GeneratedColumn<int>(
+    'due_weekday',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(7),
+  );
+  static const VerificationMeta _runsMeta = const VerificationMeta('runs');
+  @override
+  late final GeneratedColumn<int> runs = GeneratedColumn<int>(
+    'runs',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _taskCountMeta = const VerificationMeta(
+    'taskCount',
+  );
+  @override
+  late final GeneratedColumn<int> taskCount = GeneratedColumn<int>(
+    'task_count',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _minStarsMeta = const VerificationMeta(
+    'minStars',
+  );
+  @override
+  late final GeneratedColumn<int> minStars = GeneratedColumn<int>(
+    'min_stars',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _minBoltsMeta = const VerificationMeta(
+    'minBolts',
+  );
+  @override
+  late final GeneratedColumn<int> minBolts = GeneratedColumn<int>(
+    'min_bolts',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMsMeta = const VerificationMeta(
+    'createdAtMs',
+  );
+  @override
+  late final GeneratedColumn<int> createdAtMs = GeneratedColumn<int>(
+    'created_at_ms',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _endedAtMsMeta = const VerificationMeta(
+    'endedAtMs',
+  );
+  @override
+  late final GeneratedColumn<int> endedAtMs = GeneratedColumn<int>(
+    'ended_at_ms',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    userId,
+    lessonId,
+    rhythm,
+    dueMinute,
+    dueWeekday,
+    runs,
+    taskCount,
+    minStars,
+    minBolts,
+    createdAtMs,
+    endedAtMs,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'assignments';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<AssignmentRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('user_id')) {
+      context.handle(
+        _userIdMeta,
+        userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_userIdMeta);
+    }
+    if (data.containsKey('lesson_id')) {
+      context.handle(
+        _lessonIdMeta,
+        lessonId.isAcceptableOrUnknown(data['lesson_id']!, _lessonIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_lessonIdMeta);
+    }
+    if (data.containsKey('rhythm')) {
+      context.handle(
+        _rhythmMeta,
+        rhythm.isAcceptableOrUnknown(data['rhythm']!, _rhythmMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_rhythmMeta);
+    }
+    if (data.containsKey('due_minute')) {
+      context.handle(
+        _dueMinuteMeta,
+        dueMinute.isAcceptableOrUnknown(data['due_minute']!, _dueMinuteMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_dueMinuteMeta);
+    }
+    if (data.containsKey('due_weekday')) {
+      context.handle(
+        _dueWeekdayMeta,
+        dueWeekday.isAcceptableOrUnknown(data['due_weekday']!, _dueWeekdayMeta),
+      );
+    }
+    if (data.containsKey('runs')) {
+      context.handle(
+        _runsMeta,
+        runs.isAcceptableOrUnknown(data['runs']!, _runsMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_runsMeta);
+    }
+    if (data.containsKey('task_count')) {
+      context.handle(
+        _taskCountMeta,
+        taskCount.isAcceptableOrUnknown(data['task_count']!, _taskCountMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_taskCountMeta);
+    }
+    if (data.containsKey('min_stars')) {
+      context.handle(
+        _minStarsMeta,
+        minStars.isAcceptableOrUnknown(data['min_stars']!, _minStarsMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_minStarsMeta);
+    }
+    if (data.containsKey('min_bolts')) {
+      context.handle(
+        _minBoltsMeta,
+        minBolts.isAcceptableOrUnknown(data['min_bolts']!, _minBoltsMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_minBoltsMeta);
+    }
+    if (data.containsKey('created_at_ms')) {
+      context.handle(
+        _createdAtMsMeta,
+        createdAtMs.isAcceptableOrUnknown(
+          data['created_at_ms']!,
+          _createdAtMsMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMsMeta);
+    }
+    if (data.containsKey('ended_at_ms')) {
+      context.handle(
+        _endedAtMsMeta,
+        endedAtMs.isAcceptableOrUnknown(data['ended_at_ms']!, _endedAtMsMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  AssignmentRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return AssignmentRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      userId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}user_id'],
+      )!,
+      lessonId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}lesson_id'],
+      )!,
+      rhythm: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}rhythm'],
+      )!,
+      dueMinute: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}due_minute'],
+      )!,
+      dueWeekday: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}due_weekday'],
+      )!,
+      runs: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}runs'],
+      )!,
+      taskCount: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}task_count'],
+      )!,
+      minStars: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}min_stars'],
+      )!,
+      minBolts: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}min_bolts'],
+      )!,
+      createdAtMs: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}created_at_ms'],
+      )!,
+      endedAtMs: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}ended_at_ms'],
+      ),
+    );
+  }
+
+  @override
+  $AssignmentsTable createAlias(String alias) {
+    return $AssignmentsTable(attachedDatabase, alias);
+  }
+}
+
+class AssignmentRow extends DataClass implements Insertable<AssignmentRow> {
+  final int id;
+  final int userId;
+  final String lessonId;
+
+  /// [AssignmentRhythm] name, not index - the same caution as
+  /// `hidden_groups` and `lesson_filter`: a reordered enum must not
+  /// silently turn one rhythm into another.
+  final String rhythm;
+  final int dueMinute;
+
+  /// Only meaningful for a weekly rhythm; defaults to Sunday so a daily row
+  /// still has a well-defined value.
+  final int dueWeekday;
+  final int runs;
+  final int taskCount;
+  final int minStars;
+  final int minBolts;
+  final int createdAtMs;
+  final int? endedAtMs;
+  const AssignmentRow({
+    required this.id,
+    required this.userId,
+    required this.lessonId,
+    required this.rhythm,
+    required this.dueMinute,
+    required this.dueWeekday,
+    required this.runs,
+    required this.taskCount,
+    required this.minStars,
+    required this.minBolts,
+    required this.createdAtMs,
+    this.endedAtMs,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['user_id'] = Variable<int>(userId);
+    map['lesson_id'] = Variable<String>(lessonId);
+    map['rhythm'] = Variable<String>(rhythm);
+    map['due_minute'] = Variable<int>(dueMinute);
+    map['due_weekday'] = Variable<int>(dueWeekday);
+    map['runs'] = Variable<int>(runs);
+    map['task_count'] = Variable<int>(taskCount);
+    map['min_stars'] = Variable<int>(minStars);
+    map['min_bolts'] = Variable<int>(minBolts);
+    map['created_at_ms'] = Variable<int>(createdAtMs);
+    if (!nullToAbsent || endedAtMs != null) {
+      map['ended_at_ms'] = Variable<int>(endedAtMs);
+    }
+    return map;
+  }
+
+  AssignmentsCompanion toCompanion(bool nullToAbsent) {
+    return AssignmentsCompanion(
+      id: Value(id),
+      userId: Value(userId),
+      lessonId: Value(lessonId),
+      rhythm: Value(rhythm),
+      dueMinute: Value(dueMinute),
+      dueWeekday: Value(dueWeekday),
+      runs: Value(runs),
+      taskCount: Value(taskCount),
+      minStars: Value(minStars),
+      minBolts: Value(minBolts),
+      createdAtMs: Value(createdAtMs),
+      endedAtMs: endedAtMs == null && nullToAbsent
+          ? const Value.absent()
+          : Value(endedAtMs),
+    );
+  }
+
+  factory AssignmentRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return AssignmentRow(
+      id: serializer.fromJson<int>(json['id']),
+      userId: serializer.fromJson<int>(json['userId']),
+      lessonId: serializer.fromJson<String>(json['lessonId']),
+      rhythm: serializer.fromJson<String>(json['rhythm']),
+      dueMinute: serializer.fromJson<int>(json['dueMinute']),
+      dueWeekday: serializer.fromJson<int>(json['dueWeekday']),
+      runs: serializer.fromJson<int>(json['runs']),
+      taskCount: serializer.fromJson<int>(json['taskCount']),
+      minStars: serializer.fromJson<int>(json['minStars']),
+      minBolts: serializer.fromJson<int>(json['minBolts']),
+      createdAtMs: serializer.fromJson<int>(json['createdAtMs']),
+      endedAtMs: serializer.fromJson<int?>(json['endedAtMs']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'userId': serializer.toJson<int>(userId),
+      'lessonId': serializer.toJson<String>(lessonId),
+      'rhythm': serializer.toJson<String>(rhythm),
+      'dueMinute': serializer.toJson<int>(dueMinute),
+      'dueWeekday': serializer.toJson<int>(dueWeekday),
+      'runs': serializer.toJson<int>(runs),
+      'taskCount': serializer.toJson<int>(taskCount),
+      'minStars': serializer.toJson<int>(minStars),
+      'minBolts': serializer.toJson<int>(minBolts),
+      'createdAtMs': serializer.toJson<int>(createdAtMs),
+      'endedAtMs': serializer.toJson<int?>(endedAtMs),
+    };
+  }
+
+  AssignmentRow copyWith({
+    int? id,
+    int? userId,
+    String? lessonId,
+    String? rhythm,
+    int? dueMinute,
+    int? dueWeekday,
+    int? runs,
+    int? taskCount,
+    int? minStars,
+    int? minBolts,
+    int? createdAtMs,
+    Value<int?> endedAtMs = const Value.absent(),
+  }) => AssignmentRow(
+    id: id ?? this.id,
+    userId: userId ?? this.userId,
+    lessonId: lessonId ?? this.lessonId,
+    rhythm: rhythm ?? this.rhythm,
+    dueMinute: dueMinute ?? this.dueMinute,
+    dueWeekday: dueWeekday ?? this.dueWeekday,
+    runs: runs ?? this.runs,
+    taskCount: taskCount ?? this.taskCount,
+    minStars: minStars ?? this.minStars,
+    minBolts: minBolts ?? this.minBolts,
+    createdAtMs: createdAtMs ?? this.createdAtMs,
+    endedAtMs: endedAtMs.present ? endedAtMs.value : this.endedAtMs,
+  );
+  AssignmentRow copyWithCompanion(AssignmentsCompanion data) {
+    return AssignmentRow(
+      id: data.id.present ? data.id.value : this.id,
+      userId: data.userId.present ? data.userId.value : this.userId,
+      lessonId: data.lessonId.present ? data.lessonId.value : this.lessonId,
+      rhythm: data.rhythm.present ? data.rhythm.value : this.rhythm,
+      dueMinute: data.dueMinute.present ? data.dueMinute.value : this.dueMinute,
+      dueWeekday: data.dueWeekday.present
+          ? data.dueWeekday.value
+          : this.dueWeekday,
+      runs: data.runs.present ? data.runs.value : this.runs,
+      taskCount: data.taskCount.present ? data.taskCount.value : this.taskCount,
+      minStars: data.minStars.present ? data.minStars.value : this.minStars,
+      minBolts: data.minBolts.present ? data.minBolts.value : this.minBolts,
+      createdAtMs: data.createdAtMs.present
+          ? data.createdAtMs.value
+          : this.createdAtMs,
+      endedAtMs: data.endedAtMs.present ? data.endedAtMs.value : this.endedAtMs,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AssignmentRow(')
+          ..write('id: $id, ')
+          ..write('userId: $userId, ')
+          ..write('lessonId: $lessonId, ')
+          ..write('rhythm: $rhythm, ')
+          ..write('dueMinute: $dueMinute, ')
+          ..write('dueWeekday: $dueWeekday, ')
+          ..write('runs: $runs, ')
+          ..write('taskCount: $taskCount, ')
+          ..write('minStars: $minStars, ')
+          ..write('minBolts: $minBolts, ')
+          ..write('createdAtMs: $createdAtMs, ')
+          ..write('endedAtMs: $endedAtMs')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    userId,
+    lessonId,
+    rhythm,
+    dueMinute,
+    dueWeekday,
+    runs,
+    taskCount,
+    minStars,
+    minBolts,
+    createdAtMs,
+    endedAtMs,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is AssignmentRow &&
+          other.id == this.id &&
+          other.userId == this.userId &&
+          other.lessonId == this.lessonId &&
+          other.rhythm == this.rhythm &&
+          other.dueMinute == this.dueMinute &&
+          other.dueWeekday == this.dueWeekday &&
+          other.runs == this.runs &&
+          other.taskCount == this.taskCount &&
+          other.minStars == this.minStars &&
+          other.minBolts == this.minBolts &&
+          other.createdAtMs == this.createdAtMs &&
+          other.endedAtMs == this.endedAtMs);
+}
+
+class AssignmentsCompanion extends UpdateCompanion<AssignmentRow> {
+  final Value<int> id;
+  final Value<int> userId;
+  final Value<String> lessonId;
+  final Value<String> rhythm;
+  final Value<int> dueMinute;
+  final Value<int> dueWeekday;
+  final Value<int> runs;
+  final Value<int> taskCount;
+  final Value<int> minStars;
+  final Value<int> minBolts;
+  final Value<int> createdAtMs;
+  final Value<int?> endedAtMs;
+  const AssignmentsCompanion({
+    this.id = const Value.absent(),
+    this.userId = const Value.absent(),
+    this.lessonId = const Value.absent(),
+    this.rhythm = const Value.absent(),
+    this.dueMinute = const Value.absent(),
+    this.dueWeekday = const Value.absent(),
+    this.runs = const Value.absent(),
+    this.taskCount = const Value.absent(),
+    this.minStars = const Value.absent(),
+    this.minBolts = const Value.absent(),
+    this.createdAtMs = const Value.absent(),
+    this.endedAtMs = const Value.absent(),
+  });
+  AssignmentsCompanion.insert({
+    this.id = const Value.absent(),
+    required int userId,
+    required String lessonId,
+    required String rhythm,
+    required int dueMinute,
+    this.dueWeekday = const Value.absent(),
+    required int runs,
+    required int taskCount,
+    required int minStars,
+    required int minBolts,
+    required int createdAtMs,
+    this.endedAtMs = const Value.absent(),
+  }) : userId = Value(userId),
+       lessonId = Value(lessonId),
+       rhythm = Value(rhythm),
+       dueMinute = Value(dueMinute),
+       runs = Value(runs),
+       taskCount = Value(taskCount),
+       minStars = Value(minStars),
+       minBolts = Value(minBolts),
+       createdAtMs = Value(createdAtMs);
+  static Insertable<AssignmentRow> custom({
+    Expression<int>? id,
+    Expression<int>? userId,
+    Expression<String>? lessonId,
+    Expression<String>? rhythm,
+    Expression<int>? dueMinute,
+    Expression<int>? dueWeekday,
+    Expression<int>? runs,
+    Expression<int>? taskCount,
+    Expression<int>? minStars,
+    Expression<int>? minBolts,
+    Expression<int>? createdAtMs,
+    Expression<int>? endedAtMs,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (userId != null) 'user_id': userId,
+      if (lessonId != null) 'lesson_id': lessonId,
+      if (rhythm != null) 'rhythm': rhythm,
+      if (dueMinute != null) 'due_minute': dueMinute,
+      if (dueWeekday != null) 'due_weekday': dueWeekday,
+      if (runs != null) 'runs': runs,
+      if (taskCount != null) 'task_count': taskCount,
+      if (minStars != null) 'min_stars': minStars,
+      if (minBolts != null) 'min_bolts': minBolts,
+      if (createdAtMs != null) 'created_at_ms': createdAtMs,
+      if (endedAtMs != null) 'ended_at_ms': endedAtMs,
+    });
+  }
+
+  AssignmentsCompanion copyWith({
+    Value<int>? id,
+    Value<int>? userId,
+    Value<String>? lessonId,
+    Value<String>? rhythm,
+    Value<int>? dueMinute,
+    Value<int>? dueWeekday,
+    Value<int>? runs,
+    Value<int>? taskCount,
+    Value<int>? minStars,
+    Value<int>? minBolts,
+    Value<int>? createdAtMs,
+    Value<int?>? endedAtMs,
+  }) {
+    return AssignmentsCompanion(
+      id: id ?? this.id,
+      userId: userId ?? this.userId,
+      lessonId: lessonId ?? this.lessonId,
+      rhythm: rhythm ?? this.rhythm,
+      dueMinute: dueMinute ?? this.dueMinute,
+      dueWeekday: dueWeekday ?? this.dueWeekday,
+      runs: runs ?? this.runs,
+      taskCount: taskCount ?? this.taskCount,
+      minStars: minStars ?? this.minStars,
+      minBolts: minBolts ?? this.minBolts,
+      createdAtMs: createdAtMs ?? this.createdAtMs,
+      endedAtMs: endedAtMs ?? this.endedAtMs,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (userId.present) {
+      map['user_id'] = Variable<int>(userId.value);
+    }
+    if (lessonId.present) {
+      map['lesson_id'] = Variable<String>(lessonId.value);
+    }
+    if (rhythm.present) {
+      map['rhythm'] = Variable<String>(rhythm.value);
+    }
+    if (dueMinute.present) {
+      map['due_minute'] = Variable<int>(dueMinute.value);
+    }
+    if (dueWeekday.present) {
+      map['due_weekday'] = Variable<int>(dueWeekday.value);
+    }
+    if (runs.present) {
+      map['runs'] = Variable<int>(runs.value);
+    }
+    if (taskCount.present) {
+      map['task_count'] = Variable<int>(taskCount.value);
+    }
+    if (minStars.present) {
+      map['min_stars'] = Variable<int>(minStars.value);
+    }
+    if (minBolts.present) {
+      map['min_bolts'] = Variable<int>(minBolts.value);
+    }
+    if (createdAtMs.present) {
+      map['created_at_ms'] = Variable<int>(createdAtMs.value);
+    }
+    if (endedAtMs.present) {
+      map['ended_at_ms'] = Variable<int>(endedAtMs.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AssignmentsCompanion(')
+          ..write('id: $id, ')
+          ..write('userId: $userId, ')
+          ..write('lessonId: $lessonId, ')
+          ..write('rhythm: $rhythm, ')
+          ..write('dueMinute: $dueMinute, ')
+          ..write('dueWeekday: $dueWeekday, ')
+          ..write('runs: $runs, ')
+          ..write('taskCount: $taskCount, ')
+          ..write('minStars: $minStars, ')
+          ..write('minBolts: $minBolts, ')
+          ..write('createdAtMs: $createdAtMs, ')
+          ..write('endedAtMs: $endedAtMs')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -3090,6 +3794,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $LessonPreferencesTable lessonPreferences =
       $LessonPreferencesTable(this);
   late final $LessonStarsTable lessonStars = $LessonStarsTable(this);
+  late final $AssignmentsTable assignments = $AssignmentsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -3101,6 +3806,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     appSettings,
     lessonPreferences,
     lessonStars,
+    assignments,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -3131,6 +3837,13 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         limitUpdateKind: UpdateKind.delete,
       ),
       result: [TableUpdate('lesson_stars', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'users',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('assignments', kind: UpdateKind.delete)],
     ),
   ]);
 }
@@ -3225,6 +3938,24 @@ final class $$UsersTableReferences
     ).filter((f) => f.userId.id.sqlEquals($_itemColumn<int>('id')!));
 
     final cache = $_typedResult.readTableOrNull(_lessonStarsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$AssignmentsTable, List<AssignmentRow>>
+  _assignmentsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.assignments,
+    aliasName: 'users__id__assignments__user_id',
+  );
+
+  $$AssignmentsTableProcessedTableManager get assignmentsRefs {
+    final manager = $$AssignmentsTableTableManager(
+      $_db,
+      $_db.assignments,
+    ).filter((f) => f.userId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_assignmentsRefsTable($_db));
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: cache),
     );
@@ -3375,6 +4106,31 @@ class $$UsersTableFilterComposer extends Composer<_$AppDatabase, $UsersTable> {
           }) => $$LessonStarsTableFilterComposer(
             $db: $db,
             $table: $db.lessonStars,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> assignmentsRefs(
+    Expression<bool> Function($$AssignmentsTableFilterComposer f) f,
+  ) {
+    final $$AssignmentsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.assignments,
+      getReferencedColumn: (t) => t.userId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AssignmentsTableFilterComposer(
+            $db: $db,
+            $table: $db.assignments,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -3611,6 +4367,31 @@ class $$UsersTableAnnotationComposer
     );
     return f(composer);
   }
+
+  Expression<T> assignmentsRefs<T extends Object>(
+    Expression<T> Function($$AssignmentsTableAnnotationComposer a) f,
+  ) {
+    final $$AssignmentsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.assignments,
+      getReferencedColumn: (t) => t.userId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AssignmentsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.assignments,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$UsersTableTableManager
@@ -3630,6 +4411,7 @@ class $$UsersTableTableManager
             bool sessionsRefs,
             bool lessonPreferencesRefs,
             bool lessonStarsRefs,
+            bool assignmentsRefs,
           })
         > {
   $$UsersTableTableManager(_$AppDatabase db, $UsersTable table)
@@ -3720,6 +4502,7 @@ class $$UsersTableTableManager
                 sessionsRefs = false,
                 lessonPreferencesRefs = false,
                 lessonStarsRefs = false,
+                assignmentsRefs = false,
               }) {
                 return PrefetchHooks(
                   db: db,
@@ -3727,6 +4510,7 @@ class $$UsersTableTableManager
                     if (sessionsRefs) db.sessions,
                     if (lessonPreferencesRefs) db.lessonPreferences,
                     if (lessonStarsRefs) db.lessonStars,
+                    if (assignmentsRefs) db.assignments,
                   ],
                   addJoins: null,
                   getPrefetchedDataCallback: (items) async {
@@ -3790,6 +4574,27 @@ class $$UsersTableTableManager
                               ),
                           typedResults: items,
                         ),
+                      if (assignmentsRefs)
+                        await $_getPrefetchedData<
+                          User,
+                          $UsersTable,
+                          AssignmentRow
+                        >(
+                          currentTable: table,
+                          referencedTable: $$UsersTableReferences
+                              ._assignmentsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$UsersTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).assignmentsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.userId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
                     ];
                   },
                 );
@@ -3814,6 +4619,7 @@ typedef $$UsersTableProcessedTableManager =
         bool sessionsRefs,
         bool lessonPreferencesRefs,
         bool lessonStarsRefs,
+        bool assignmentsRefs,
       })
     >;
 typedef $$SessionsTableCreateCompanionBuilder = SessionsCompanion Function({
@@ -5510,6 +6316,452 @@ typedef $$LessonStarsTableProcessedTableManager =
       LessonStar,
       PrefetchHooks Function({bool userId})
     >;
+typedef $$AssignmentsTableCreateCompanionBuilder =
+    AssignmentsCompanion Function({
+      Value<int> id,
+      required int userId,
+      required String lessonId,
+      required String rhythm,
+      required int dueMinute,
+      Value<int> dueWeekday,
+      required int runs,
+      required int taskCount,
+      required int minStars,
+      required int minBolts,
+      required int createdAtMs,
+      Value<int?> endedAtMs,
+    });
+typedef $$AssignmentsTableUpdateCompanionBuilder =
+    AssignmentsCompanion Function({
+      Value<int> id,
+      Value<int> userId,
+      Value<String> lessonId,
+      Value<String> rhythm,
+      Value<int> dueMinute,
+      Value<int> dueWeekday,
+      Value<int> runs,
+      Value<int> taskCount,
+      Value<int> minStars,
+      Value<int> minBolts,
+      Value<int> createdAtMs,
+      Value<int?> endedAtMs,
+    });
+
+final class $$AssignmentsTableReferences
+    extends BaseReferences<_$AppDatabase, $AssignmentsTable, AssignmentRow> {
+  $$AssignmentsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $UsersTable _userIdTable(_$AppDatabase db) =>
+      db.users.createAlias('assignments__user_id__users__id');
+
+  $$UsersTableProcessedTableManager get userId {
+    final $_column = $_itemColumn<int>('user_id')!;
+
+    final manager = $$UsersTableTableManager(
+      $_db,
+      $_db.users,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_userIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$AssignmentsTableFilterComposer
+    extends Composer<_$AppDatabase, $AssignmentsTable> {
+  $$AssignmentsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get lessonId => $composableBuilder(
+    column: $table.lessonId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get rhythm => $composableBuilder(
+    column: $table.rhythm,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get dueMinute => $composableBuilder(
+    column: $table.dueMinute,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get dueWeekday => $composableBuilder(
+    column: $table.dueWeekday,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get runs => $composableBuilder(
+    column: $table.runs,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get taskCount => $composableBuilder(
+    column: $table.taskCount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get minStars => $composableBuilder(
+    column: $table.minStars,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get minBolts => $composableBuilder(
+    column: $table.minBolts,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get createdAtMs => $composableBuilder(
+    column: $table.createdAtMs,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get endedAtMs => $composableBuilder(
+    column: $table.endedAtMs,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$UsersTableFilterComposer get userId {
+    final $$UsersTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.userId,
+      referencedTable: $db.users,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$UsersTableFilterComposer(
+            $db: $db,
+            $table: $db.users,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$AssignmentsTableOrderingComposer
+    extends Composer<_$AppDatabase, $AssignmentsTable> {
+  $$AssignmentsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get lessonId => $composableBuilder(
+    column: $table.lessonId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get rhythm => $composableBuilder(
+    column: $table.rhythm,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get dueMinute => $composableBuilder(
+    column: $table.dueMinute,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get dueWeekday => $composableBuilder(
+    column: $table.dueWeekday,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get runs => $composableBuilder(
+    column: $table.runs,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get taskCount => $composableBuilder(
+    column: $table.taskCount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get minStars => $composableBuilder(
+    column: $table.minStars,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get minBolts => $composableBuilder(
+    column: $table.minBolts,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get createdAtMs => $composableBuilder(
+    column: $table.createdAtMs,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get endedAtMs => $composableBuilder(
+    column: $table.endedAtMs,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$UsersTableOrderingComposer get userId {
+    final $$UsersTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.userId,
+      referencedTable: $db.users,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$UsersTableOrderingComposer(
+            $db: $db,
+            $table: $db.users,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$AssignmentsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $AssignmentsTable> {
+  $$AssignmentsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get lessonId =>
+      $composableBuilder(column: $table.lessonId, builder: (column) => column);
+
+  GeneratedColumn<String> get rhythm =>
+      $composableBuilder(column: $table.rhythm, builder: (column) => column);
+
+  GeneratedColumn<int> get dueMinute =>
+      $composableBuilder(column: $table.dueMinute, builder: (column) => column);
+
+  GeneratedColumn<int> get dueWeekday => $composableBuilder(
+    column: $table.dueWeekday,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get runs =>
+      $composableBuilder(column: $table.runs, builder: (column) => column);
+
+  GeneratedColumn<int> get taskCount =>
+      $composableBuilder(column: $table.taskCount, builder: (column) => column);
+
+  GeneratedColumn<int> get minStars =>
+      $composableBuilder(column: $table.minStars, builder: (column) => column);
+
+  GeneratedColumn<int> get minBolts =>
+      $composableBuilder(column: $table.minBolts, builder: (column) => column);
+
+  GeneratedColumn<int> get createdAtMs => $composableBuilder(
+    column: $table.createdAtMs,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get endedAtMs =>
+      $composableBuilder(column: $table.endedAtMs, builder: (column) => column);
+
+  $$UsersTableAnnotationComposer get userId {
+    final $$UsersTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.userId,
+      referencedTable: $db.users,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$UsersTableAnnotationComposer(
+            $db: $db,
+            $table: $db.users,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$AssignmentsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $AssignmentsTable,
+          AssignmentRow,
+          $$AssignmentsTableFilterComposer,
+          $$AssignmentsTableOrderingComposer,
+          $$AssignmentsTableAnnotationComposer,
+          $$AssignmentsTableCreateCompanionBuilder,
+          $$AssignmentsTableUpdateCompanionBuilder,
+          (AssignmentRow, $$AssignmentsTableReferences),
+          AssignmentRow,
+          PrefetchHooks Function({bool userId})
+        > {
+  $$AssignmentsTableTableManager(_$AppDatabase db, $AssignmentsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$AssignmentsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$AssignmentsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$AssignmentsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int> userId = const Value.absent(),
+                Value<String> lessonId = const Value.absent(),
+                Value<String> rhythm = const Value.absent(),
+                Value<int> dueMinute = const Value.absent(),
+                Value<int> dueWeekday = const Value.absent(),
+                Value<int> runs = const Value.absent(),
+                Value<int> taskCount = const Value.absent(),
+                Value<int> minStars = const Value.absent(),
+                Value<int> minBolts = const Value.absent(),
+                Value<int> createdAtMs = const Value.absent(),
+                Value<int?> endedAtMs = const Value.absent(),
+              }) => AssignmentsCompanion(
+                id: id,
+                userId: userId,
+                lessonId: lessonId,
+                rhythm: rhythm,
+                dueMinute: dueMinute,
+                dueWeekday: dueWeekday,
+                runs: runs,
+                taskCount: taskCount,
+                minStars: minStars,
+                minBolts: minBolts,
+                createdAtMs: createdAtMs,
+                endedAtMs: endedAtMs,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required int userId,
+                required String lessonId,
+                required String rhythm,
+                required int dueMinute,
+                Value<int> dueWeekday = const Value.absent(),
+                required int runs,
+                required int taskCount,
+                required int minStars,
+                required int minBolts,
+                required int createdAtMs,
+                Value<int?> endedAtMs = const Value.absent(),
+              }) => AssignmentsCompanion.insert(
+                id: id,
+                userId: userId,
+                lessonId: lessonId,
+                rhythm: rhythm,
+                dueMinute: dueMinute,
+                dueWeekday: dueWeekday,
+                runs: runs,
+                taskCount: taskCount,
+                minStars: minStars,
+                minBolts: minBolts,
+                createdAtMs: createdAtMs,
+                endedAtMs: endedAtMs,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$AssignmentsTable, AssignmentRow>(table),
+                  $$AssignmentsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({userId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (userId) {
+                      state = state.withJoin(
+                        currentTable: table,
+                        currentColumn: table.userId,
+                        referencedTable: $$AssignmentsTableReferences
+                            ._userIdTable(db),
+                        referencedColumn: $$AssignmentsTableReferences
+                            ._userIdTable(db)
+                            .id,
+                      ) as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$AssignmentsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $AssignmentsTable,
+      AssignmentRow,
+      $$AssignmentsTableFilterComposer,
+      $$AssignmentsTableOrderingComposer,
+      $$AssignmentsTableAnnotationComposer,
+      $$AssignmentsTableCreateCompanionBuilder,
+      $$AssignmentsTableUpdateCompanionBuilder,
+      (AssignmentRow, $$AssignmentsTableReferences),
+      AssignmentRow,
+      PrefetchHooks Function({bool userId})
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -5526,4 +6778,6 @@ class $AppDatabaseManager {
       $$LessonPreferencesTableTableManager(_db, _db.lessonPreferences);
   $$LessonStarsTableTableManager get lessonStars =>
       $$LessonStarsTableTableManager(_db, _db.lessonStars);
+  $$AssignmentsTableTableManager get assignments =>
+      $$AssignmentsTableTableManager(_db, _db.assignments);
 }

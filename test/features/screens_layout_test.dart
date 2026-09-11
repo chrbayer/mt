@@ -213,6 +213,42 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
+    // Scoped to the TabBar itself: the history tab's rows label a column
+    // "Aufgaben" too, and with four seeded sessions that is four more
+    // matches for the same text - ambiguous for a bare find.text.
+    final aufgabenTab = find.descendant(
+      of: find.byType(TabBar),
+      matching: find.text('Aufgaben'),
+    );
+
+    testWidgets('10d-elternbereich-aufgaben passt auf ${size.key}',
+        (tester) async {
+      // Four tabs, not three - the widest the bar has been yet.
+      await pumpScreen(tester, const AdminScreen(), size.value);
+      await tester.tap(aufgabenTab);
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      expect(find.text('Neue Aufgabe'), findsOneWidget);
+    });
+
+    testWidgets('10e-neue-aufgabe passt auf ${size.key}', (tester) async {
+      await pumpScreen(tester, const AdminScreen(), size.value);
+      await tester.tap(aufgabenTab);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Neue Aufgabe'));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+
+      // Scrolled to the bottom it must still not overflow.
+      await tester.drag(
+        find.byType(SingleChildScrollView).first,
+        const Offset(0, -2000),
+      );
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      expect(find.text('Anlegen'), findsOneWidget);
+    });
+
     testWidgets('09b-bestenlisten passt auf ${size.key}', (tester) async {
       await pumpScreen(tester, const GlobalStatsScreen(), size.value);
       await tester.tap(find.text('Bestenlisten'));

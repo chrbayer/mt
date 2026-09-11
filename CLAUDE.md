@@ -961,6 +961,100 @@ Braucht GStreamer-Entwicklungspakete (`gstreamer1-devel`,
 scheitert der Desktop-Build sonst mit „required package not found:
 gstreamer-1.0" und man sucht ihn im eigenen Code.
 
+## Aufgaben
+
+Eine **Aufgabe** (`domain/assignment.dart`) ist eine Lektion plus ein
+Rhythmus (täglich bis zu einer Uhrzeit, wöchentlich bis zu einem Wochentag)
+plus vier Vorgaben: wie viele Durchgänge, wie viele Rechnungen je Durchgang,
+wie viele Sterne und Blitze jeder davon mindestens bringen muss. `qualifies`
+prüft **mindestens**, nicht genau — ein längerer Durchgang ist mehr Arbeit,
+nicht weniger, und soll nicht an einer Obergrenze scheitern, die niemand
+verlangt hat.
+
+Eine Aufgabe wird **nie geändert**, nur beendet und neu angelegt.
+„Geschafft an 12 von 15 Tagen" ist nur wahr, solange sich die Messlatte
+nicht bewegt hat — eine Änderung mitten in der Statistik würde frühere und
+spätere Tage nach zwei verschiedenen Regeln zählen, ohne dass das irgendwo
+stünde. Ändern heißt deshalb: `endAssignment` auf die alte, `createAssignment`
+für die neue, jede mit ihrer eigenen Statistik.
+
+**Der Deckel aus #16 wird ausgesetzt**, aber nur für die zugewiesene Lektion
+und nur, solange der laufende Zeitraum sein Ziel noch nicht erreicht hat.
+`SessionRepository.finishSession` bekommt dafür `servesAssignment`: ist es
+wahr, zählt der Durchgang unabhängig vom Tagesdeckel. Ohne das könnten drei
+missglückte Versuche die Wertung für diesen Tag aufbrauchen, bevor die
+Aufgabe je erfüllt wurde — das Kind wäre für den Rest des Tages von seiner
+eigenen Aufgabe ausgesperrt. Sobald der Zeitraum erfüllt ist, meldet
+`openAssignmentProvider` wieder `false`, und der gewöhnliche Deckel greift
+wie zuvor. Das öffnet den Deckel **nicht** allgemein: eine andere Lektion
+desselben Kindes bleibt von der Aufgabe unberührt.
+
+Aus demselben Grund verzweigt die Wertung eines Durchgangs für die Aufgabe
+**nicht** über `sessions.scored`: `scored` hängt an der Frage, ob eine
+Aufgabe offen ist, und eine Aufgabe, die umgekehrt nur gewertete Durchgänge
+zählt, hinge vom eigenen Ergebnis ab. `qualifies` prüft daher unabhängig
+davon, ob der Durchgang tatsächlich stattgefunden hat.
+
+Für den Kinderbildschirm ist eine Aufgabe eine **Karteikarte wie im
+Katalog**, keine Liste: `AssignmentTile` in
+`lib/features/lessons/assignment_tile.dart` verwendet dasselbe Raster, denselben
+Rahmen und denselben Pastellton der Lektionsgruppe wie `_LessonTile` in
+`lesson_home_screen.dart` — es ist dieselbe Lektion, nur die Fußzeile sagt
+etwas anderes. Erledigt heißt **gedämpft, nicht gesperrt**: die Karte bleibt
+antippbar, denn diese App verbietet nie das Üben, dieselbe Linie wie beim
+Tagesdeckel selbst. Sie bleibt bis zum Ende des Zeitraums stehen — der Haken
+ist die Belohnung, eine verschwindende Karte wäre keine.
+
+Über **verpasste** Zeiträume steht auf dem Kinderbildschirm nichts. Die
+Statistik dazu ist für die Eltern (`assignments_tab.dart`, mit dem
+Punktestreifen der letzten vierzehn Zeiträume); „gestern nicht geschafft" auf
+der eigenen Kachel eines Kindes beschämt nur und ändert an der heutigen
+Aufgabe nichts.
+
+Die Aufgabenzahl bekommt mit einer offenen Aufgabe eine **vierte Ebene** über
+`resolveTaskCount`: Aufgabe vor Lektion vor Profil vor global. Solange eine
+Aufgabe offen ist, zeigt der Startdialog die Länge nicht mehr zur Auswahl,
+sondern als vorgegebene Zeile — die Länge ist dann kein Wunsch mehr, sondern
+das Ziel.
+
+`AssignmentStats` (in `providers.dart`) rechnet **einmal** aus der ganzen
+Lauf-Historie eines Kindes und einer Lektion, statt einmal je Zeitraum: die
+Zeilenmenge ist durch ein Kind und eine Lektion ohnehin schon klein, und die
+Datenbank einmal statt N-mal zu fragen ist billiger, ohne die Regel selbst zu
+duplizieren. Die Wertung läuft dabei bewusst **nicht** in SQL — `starsFor` und
+`boltsFor` bleiben, was sie seit v8 und seit den Blitzen sind: eine
+Dart-Fassung (dazu bei den Blitzen eine geprüfte SQL-Fassung für die
+Bestenlisten), aber keine dritte für Aufgaben.
+
+## Punkt vor Strich
+
+`TaskForm.chain` (nachgetragen aus 2.7.0) zeigt drei Operanden in
+**Anzeigereihenfolge**: `Task.prefix` schreibt schlicht
+`'$a $opSymbol $b ${symbolOf(op2!)} $c ='` hin, ohne Rücksicht darauf, welches
+der beiden Zeichen die Vorfahrt hat — der ganze Term muss für sich selbst
+sprechen, denn nichts sonst auf dem Bildschirm sagt, was zuerst gerechnet
+wird.
+
+Die Vorrangregel steht dagegen an **einer** Stelle, in `Task._chainResult`:
+`op2` ist immer die andere Sorte als `op` — eines der beiden ist `mul` oder
+`div`, das andere `add` oder `sub` —, und unabhängig davon, ob das
+Punkt-Zeichen als erstes oder zweites Zeichen im Term steht, wird immer zuerst
+die Multiplikation oder Division ausgewertet: `_apply(second, _apply(op, a,
+b), c)`, wenn `op` selbst schon die Punktrechnung ist (`a · b op2 c`), sonst
+`_apply(op, a, _apply(second, b, c))` (`a op b · c`).
+
+`_sampleChain` in `task_generator.dart` zieht **beide Reihenfolgen**, und für
+beide auch beide Vorzeichen: das Punkt-Glied kann vorn oder hinten stehen,
+und das Strich-Glied kann `+` oder `−` sein — macht `a·b + c`, `c + a·b`,
+`a·b − c` und `c − a·b`, alle vier ungefähr gleich oft. Genau die letzte Form
+ist das Beispiel aus der Lektionsbeschreibung: „bei 40 − 3 · 6 wird erst
+3 · 6 gerechnet."
+
+**Kein Operand ist je 1**: Faktoren und Divisor/Quotient der Punktrechnung
+werden aus `2..10` gezogen, das Strich-Glied `c` ebenfalls nie unter 2 — bei
+drei Zahlen in einem Term wäre eine „1" ohnehin kein Rechnen mehr, sondern
+eine Ausnahme, die den Blick vom eigentlichen Vorrang ablenkt.
+
 ## Vor dem Abschluss
 
 ```bash

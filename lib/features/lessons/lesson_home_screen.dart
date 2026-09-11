@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/repositories/stats_repository.dart';
 import '../../data/repositories/user_repository.dart';
+import '../../domain/assignment.dart';
 import '../../domain/lesson.dart';
 import '../../domain/lesson_filter.dart';
 import '../../domain/practice_limit.dart';
@@ -14,6 +15,7 @@ import '../practice/practice_screen.dart';
 import '../profiles/profile_badge.dart';
 import '../settings/settings_screen.dart';
 import '../stats/stats_screen.dart';
+import 'assignment_tile.dart';
 import 'lesson_example.dart';
 import 'pause_notice.dart';
 import 'recommendation.dart';
@@ -36,6 +38,12 @@ class LessonHomeScreen extends ConsumerWidget {
     final stats = ref.watch(lessonStatsProvider(user.id)).value ?? const {};
     final allowance = ref.watch(practiceAllowanceProvider).value ??
         PracticeAllowance.unlimited;
+    final assignments =
+        ref.watch(openAssignmentsProvider(user.id)).value ?? const [];
+    // Lessons already carrying a card above: suggesting one of them a line
+    // further down would be a contradiction, whether its card is still open
+    // or already ticked off.
+    final assignedLessonIds = {for (final a in assignments) a.lessonId};
 
     /// The lessons of a group after the child's filter has had its say.
     List<LessonSpec> offered(LessonGroup group) => [
@@ -165,21 +173,27 @@ class LessonHomeScreen extends ConsumerWidget {
           : ListView(
               padding: const EdgeInsets.fromLTRB(32, 8, 32, 32),
               children: [
-                // Above the recommendation, so the break is the first thing
-                // read - suggesting a lesson that cannot be started would be
-                // a small cruelty.
+                // Above the recommendation and above the break notice: an
+                // assignment answers "what now?" better than either, and a
+                // finished card is the reward for finishing it.
+                if (assignments.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 28),
+                    child: _AssignmentGroup(assignments: assignments),
+                  ),
                 if (!allowance.allowed)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 16),
                     child: PauseNotice(allowance: allowance, compact: true),
                   ),
                 _RecommendationCard(
-                  // A lesson the child has filtered away must not be
-                  // suggested a line later.
+                  // A lesson the child has filtered away, or that already
+                  // has a card above, must not be suggested a line later.
                   recommendation: recommendLesson(
                     candidates: [
                       for (final group in user.visibleGroups)
-                        ...offered(group),
+                        for (final lesson in offered(group))
+                          if (!assignedLessonIds.contains(lesson.id)) lesson,
                     ],
                     stats: stats,
                   ),
@@ -382,6 +396,58 @@ class _RecommendationCard extends ConsumerWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// "Deine Aufgaben": the same grid the catalogue groups use, sorted by
+/// deadline - the soonest first, and a met one sunk to the end regardless of
+/// its own deadline, since "what's next?" is not what a finished card
+/// answers any more.
+class _AssignmentGroup extends ConsumerWidget {
+  final List<Assignment> assignments;
+
+  const _AssignmentGroup({required this.assignments});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final now = ref.watch(clockProvider)();
+
+    // Both watched here, once, so the sort and the tile below draw on the
+    // same numbers - asking twice would risk the two disagreeing for a
+    // frame.
+    final entries = [
+      for (final a in assignments)
+        (
+          assignment: a,
+          met: ref.watch(assignmentStatsProvider(a)).value?.current.met ??
+              false,
+          dueMs: periodAt(a, now).dueMs,
+        ),
+    ]..sort((x, y) {
+        if (x.met != y.met) return x.met ? 1 : -1;
+        return x.dueMs.compareTo(y.dueMs);
+      });
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Deine Aufgaben',
+            style: Theme.of(context).textTheme.headlineLarge),
+        const SizedBox(height: 12),
+        GridView.count(
+          crossAxisCount: 4,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          mainAxisSpacing: 16,
+          crossAxisSpacing: 16,
+          childAspectRatio: 1.4,
+          children: [
+            for (final entry in entries)
+              AssignmentTile(assignment: entry.assignment),
+          ],
+        ),
+      ],
     );
   }
 }

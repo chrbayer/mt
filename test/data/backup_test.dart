@@ -3,10 +3,12 @@ import 'dart:convert';
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mathe_trainer/data/db/app_database.dart';
+import 'package:mathe_trainer/data/repositories/assignment_repository.dart';
 import 'package:mathe_trainer/data/repositories/backup_repository.dart';
 import 'package:mathe_trainer/data/repositories/session_repository.dart';
 import 'package:mathe_trainer/data/repositories/settings_repository.dart';
 import 'package:mathe_trainer/data/repositories/user_repository.dart';
+import 'package:mathe_trainer/domain/assignment.dart';
 import 'package:mathe_trainer/domain/lesson.dart';
 import 'package:mathe_trainer/domain/task.dart';
 
@@ -245,5 +247,81 @@ void main() {
     final summary = await backup.import(json);
     expect(summary.users, 0);
     expect(await users.allUsers(), isEmpty);
+  });
+
+  test('an assignment survives export and import, open and ended', () async {
+    final mia = await users.createUser(name: 'Mia', avatar: '🦊', colorIndex: 0);
+    final assignments = AssignmentRepository(db);
+    final openId = await assignments.createAssignment(
+      userId: mia,
+      lessonId: 'times_7',
+      rhythm: AssignmentRhythm.weekly,
+      dueMinute: 18 * 60,
+      dueWeekday: DateTime.friday,
+      runs: 3,
+      taskCount: 20,
+      minStars: 2,
+      minBolts: 1,
+    );
+    final endedId = await assignments.createAssignment(
+      userId: mia,
+      lessonId: 'add_100_plain',
+      rhythm: AssignmentRhythm.daily,
+      dueMinute: 17 * 60,
+      runs: 1,
+      taskCount: 10,
+      minStars: 0,
+      minBolts: 0,
+    );
+    await assignments.endAssignment(endedId, 1234567);
+
+    final json = await backup.export();
+    await db.delete(db.users).go();
+    await db.delete(db.appSettings).go();
+    await backup.import(json);
+
+    final restored = await assignments.watchAssignments(userId: mia).first;
+    final open = restored.firstWhere((a) => a.lessonId == 'times_7');
+    expect(open.rhythm, AssignmentRhythm.weekly);
+    expect(open.dueMinute, 18 * 60);
+    expect(open.dueWeekday, DateTime.friday);
+    expect(open.runs, 3);
+    expect(open.taskCount, 20);
+    expect(open.minStars, 2);
+    expect(open.minBolts, 1);
+    expect(open.isOpen, isTrue);
+    expect(open.id, openId);
+
+    final ended = restored.firstWhere((a) => a.lessonId == 'add_100_plain');
+    expect(ended.isOpen, isFalse);
+    expect(ended.endedAtMs, 1234567);
+  });
+
+  test('a backup from before assignments existed still restores', () async {
+    final old = jsonEncode({
+      'format': 'mathe_trainer_backup',
+      'schemaVersion': 12,
+      'exportedAtMs': DateTime(2026, 1, 1).millisecondsSinceEpoch,
+      'users': [
+        {
+          'id': 1,
+          'name': 'Mia',
+          'avatar': '🦊',
+          'colorIndex': 0,
+          'createdAtMs': 1,
+        }
+      ],
+      'sessions': <Object?>[],
+      'attempts': <Object?>[],
+      'settings': <Object?>[],
+      // No 'assignments' key at all.
+    });
+
+    final summary = await backup.import(old);
+    expect(summary.users, 1);
+    expect(
+      await AssignmentRepository(db).watchAssignments().first,
+      isEmpty,
+    );
   });
 }

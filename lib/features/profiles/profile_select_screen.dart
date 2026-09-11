@@ -160,7 +160,7 @@ class ProfileSelectScreen extends ConsumerWidget {
 const double _tileWidth = 260;
 const double _tileHeight = 240;
 
-class _ProfileTile extends StatelessWidget {
+class _ProfileTile extends ConsumerWidget {
   final User user;
   final VoidCallback onTap;
 
@@ -175,7 +175,7 @@ class _ProfileTile extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     // A locked profile keeps its own colour, only muted: it is still Mia's
     // tile, and greying it into anonymity would say "gone" rather than
     // "later".
@@ -183,6 +183,11 @@ class _ProfileTile extends StatelessWidget {
     final color = locked
         ? AppColors.textMuted
         : AppColors.profileColor(user.colorIndex);
+    // "Why should I practise today?" gets asked before the login, not after -
+    // the badge only counts, it never says which lesson or whether it is
+    // still open.
+    final assignments = ref.watch(openAssignmentsProvider(user.id)).value;
+    final assignmentCount = assignments?.length ?? 0;
     return SizedBox(
       width: _tileWidth,
       height: _tileHeight,
@@ -222,6 +227,19 @@ class _ProfileTile extends StatelessWidget {
                           ),
                         ),
                       ),
+                      if (!locked && assignmentCount > 0) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          assignmentCount == 1
+                              ? '1 Aufgabe'
+                              : '$assignmentCount Aufgaben',
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: color,
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),

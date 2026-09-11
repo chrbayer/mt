@@ -60,7 +60,17 @@ class _StartLessonSheetState extends ConsumerState<StartLessonSheet> {
             .watch(resolvedTaskCountProvider(
                 (userId: user.id, lessonId: widget.lesson.id)))
             .value;
-    final count = _selected ?? stored;
+    // While an assignment is open for this lesson the length is not a choice
+    // at all - it is the goal - so the chips below give way to a single line
+    // naming it.
+    final assignment = user == null
+        ? null
+        : ref
+            .watch(assignmentForLessonProvider(
+                (userId: user.id, lessonId: widget.lesson.id)))
+            .value;
+    final count =
+        assignment != null ? assignment.taskCount : (_selected ?? stored);
 
     // Checked here rather than on the tile: a child should still be able to
     // look at a lesson and its ranking during the break. The binding check
@@ -126,25 +136,36 @@ class _StartLessonSheetState extends ConsumerState<StartLessonSheet> {
               ),
             ),
           const SizedBox(height: 26),
-          const Text('Wie viele Aufgaben?', style: TextStyle(fontSize: 22)),
-          const SizedBox(height: 12),
-          Wrap(
-            spacing: 14,
-            runSpacing: 12,
-            children: [
-              for (final option in selectableTaskCounts)
-                Padding(
-                  padding: EdgeInsets.zero,
-                  child: _CountChip(
-                    value: option,
-                    selected: count != null && option == count,
-                    countsForNothing: widget.lesson.scored &&
-                        option < minTasksForAward,
-                    onTap: () => setState(() => _selected = option),
+          if (assignment != null)
+            Text(
+              'Für deine Aufgabe: ${assignment.taskCount} Rechnungen',
+              style: const TextStyle(
+                fontSize: 20,
+                color: AppColors.primary,
+                fontWeight: FontWeight.w600,
+              ),
+            )
+          else ...[
+            const Text('Wie viele Aufgaben?', style: TextStyle(fontSize: 22)),
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 14,
+              runSpacing: 12,
+              children: [
+                for (final option in selectableTaskCounts)
+                  Padding(
+                    padding: EdgeInsets.zero,
+                    child: _CountChip(
+                      value: option,
+                      selected: count != null && option == count,
+                      countsForNothing: widget.lesson.scored &&
+                          option < minTasksForAward,
+                      onTap: () => setState(() => _selected = option),
+                    ),
                   ),
-                ),
-            ],
-          ),
+              ],
+            ),
+          ],
           // One line, one slot: what three bolts take, or that this run is
           // too short to be worth any, or that this lesson has already
           // counted as often today as it may. Never two at once, and sharing

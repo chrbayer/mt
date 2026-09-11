@@ -96,6 +96,13 @@ class _PracticeScreenState extends ConsumerState<PracticeScreen>
   /// the run is stored. Zero means no cap.
   int _scoredRunLimit = 0;
 
+  /// Whether this lesson has an open assignment (#24) whose current period
+  /// has not been met yet. Read in [_prepare] alongside [_scoredRunLimit]
+  /// and used the same way: it suspends the daily cap for this one run, so
+  /// three failed attempts cannot use up today's scoring slots before the
+  /// assignment itself was ever satisfied.
+  bool _servesAssignment = false;
+
   /// Set when the practice cap was already reached as this screen opened.
   /// Then no run is generated at all and the break is shown instead.
   PracticeAllowance? _blocked;
@@ -153,6 +160,21 @@ class _PracticeScreenState extends ConsumerState<PracticeScreen>
         _scoredRunLimit = await ref.read(capProvider.future);
       } finally {
         capSubscription.close();
+      }
+      if (!mounted) return;
+
+      // Same idea, for the assignment cap suspension: read once, before the
+      // run starts, and carried to the end of it rather than re-judged while
+      // it is under way.
+      final assignmentProvider = openAssignmentProvider(
+        (userId: user.id, lessonId: widget.lesson.id),
+      );
+      final assignmentSubscription =
+          ref.listenManual(assignmentProvider, (_, _) {});
+      try {
+        _servesAssignment = await ref.read(assignmentProvider.future);
+      } finally {
+        assignmentSubscription.close();
       }
       if (!mounted) return;
     }
@@ -309,6 +331,7 @@ class _PracticeScreenState extends ConsumerState<PracticeScreen>
             completed: true,
             scoredRunLimit: _scoredRunLimit,
             dayStartMs: _dayStartMs(),
+            servesAssignment: _servesAssignment,
           );
     }
     if (!mounted) return;

@@ -176,6 +176,9 @@ void main() {
       await recordRun(SessionRepository(before),
           userId: id, lessonId: 'add_20_plain');
 
+      if (version < 13) {
+        await before.customStatement('DROP TABLE assignments');
+      }
       if (version < 12) {
         await before
             .customStatement('ALTER TABLE attempts DROP COLUMN operand_c');
@@ -232,7 +235,7 @@ void main() {
       return file;
     }
 
-    for (final from in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]) {
+    for (final from in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]) {
       test('a database from schema v$from keeps its data', () async {
         final file = await databaseAtVersion(from);
 
@@ -282,6 +285,9 @@ void main() {
         // still the truth about it - not a value nobody filled in.
         expect(attempts.first.operandC, isNull);
         expect(attempts.first.op2, isNull);
+        // There were no assignments before v13 - the empty table is the
+        // whole migration.
+        expect(await after.select(after.assignments).get(), isEmpty);
       });
     }
   });

@@ -50,6 +50,7 @@ class BackupRepository {
     final settings = await _db.select(_db.appSettings).get();
     final lessonPrefs = await _db.select(_db.lessonPreferences).get();
     final stars = await _db.select(_db.lessonStars).get();
+    final assignments = await _db.select(_db.assignments).get();
 
     return const JsonEncoder.withIndent('  ').convert({
       'format': _backupMarker,
@@ -128,6 +129,23 @@ class BackupRepository {
             'taskCount': pref.taskCount,
           }
       ],
+      'assignments': [
+        for (final row in assignments)
+          {
+            'id': row.id,
+            'userId': row.userId,
+            'lessonId': row.lessonId,
+            'rhythm': row.rhythm,
+            'dueMinute': row.dueMinute,
+            'dueWeekday': row.dueWeekday,
+            'runs': row.runs,
+            'taskCount': row.taskCount,
+            'minStars': row.minStars,
+            'minBolts': row.minBolts,
+            'createdAtMs': row.createdAtMs,
+            'endedAtMs': row.endedAtMs,
+          }
+      ],
     });
   }
 
@@ -167,11 +185,14 @@ class BackupRepository {
     final settings = rows('settings');
     final lessonPrefs = rows('lessonPreferences');
     final stars = rows('lessonStars');
+    final assignments = rows('assignments');
 
     await _db.transaction(() async {
-      // Order matters: attempts hang off sessions, sessions off users.
+      // Order matters: attempts hang off sessions, sessions and assignments
+      // off users.
       await _db.delete(_db.lessonPreferences).go();
       await _db.delete(_db.lessonStars).go();
+      await _db.delete(_db.assignments).go();
       await _db.delete(_db.attempts).go();
       await _db.delete(_db.sessions).go();
       await _db.delete(_db.users).go();
@@ -271,6 +292,26 @@ class BackupRepository {
                 userId: row['userId'] as int,
                 lessonId: row['lessonId'] as String,
                 stars: row['stars'] as int,
+              ),
+            );
+      }
+      for (final row in assignments) {
+        await _db.into(_db.assignments).insert(
+              AssignmentsCompanion.insert(
+                id: Value(row['id'] as int),
+                userId: row['userId'] as int,
+                lessonId: row['lessonId'] as String,
+                rhythm: row['rhythm'] as String,
+                dueMinute: row['dueMinute'] as int,
+                // Missing in a backup from before assignments existed - a
+                // row that old never had one to begin with.
+                dueWeekday: Value(row['dueWeekday'] as int? ?? 7),
+                runs: row['runs'] as int,
+                taskCount: row['taskCount'] as int,
+                minStars: row['minStars'] as int,
+                minBolts: row['minBolts'] as int,
+                createdAtMs: row['createdAtMs'] as int,
+                endedAtMs: Value(row['endedAtMs'] as int?),
               ),
             );
       }
