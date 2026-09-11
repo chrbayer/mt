@@ -144,3 +144,14 @@ angelassen" nicht von „gab es damals noch nicht" unterscheiden. Gemessen wird
 nur gegen bekannte Gruppen, damit bei zwei gleichzeitig ergänzten nicht die
 eine die andere mitzieht. Bestehende Profile sehen nach dem Update
 unverändert dasselbe.
+
+#27 erledigt (2.9.0) — Die Profilverwaltung war unübersichtlich geworden: neun
+Abschnitte in einem Dialog-Scroll mit „Speichern" darunter, und vier
+beschriftete Knöpfe in jeder Zeile. Jetzt öffnet ein Tipp auf die Zeile einen
+eigenen Bildschirm mit App-Bar — Kreuz links, „Speichern" mit Haken rechts,
+beides immer sichtbar. Die Zurück-Geste fragt, wenn etwas ungespeichert ist,
+und schweigt sonst. Die Sperre steht als eigener Block ganz oben, gesperrte
+Profile erscheinen in der Liste gedämpft und mit Schloss. Üben und Zeit
+stehen im Querformat nebeneinander, darunter fällt es auf eine Spalte zurück.
+Umbenennen, Zurücksetzen und Löschen sind aus der Zeile in den Block
+„Aufräumen" am Fuß des Bildschirms gewandert.

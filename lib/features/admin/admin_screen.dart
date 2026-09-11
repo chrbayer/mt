@@ -14,7 +14,7 @@ import 'assignments_tab.dart';
 import 'backup_actions.dart';
 import 'global_settings_tab.dart';
 import 'pin_gate.dart';
-import 'profile_settings_dialog.dart';
+import 'profile_settings_screen.dart';
 import 'today_summary.dart';
 
 /// The parent area behind the PIN: what was practised when and how well, plus
@@ -357,34 +357,6 @@ class _Cell extends StatelessWidget {
 class _ManagementTab extends ConsumerWidget {
   const _ManagementTab();
 
-  Future<void> _confirm(
-    BuildContext context,
-    WidgetRef ref, {
-    required String title,
-    required String message,
-    required Future<void> Function() action,
-  }) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(title),
-        content: Text(message, style: const TextStyle(fontSize: 20)),
-        actions: [
-          OutlinedButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('Abbrechen'),
-          ),
-          FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: AppColors.wrong),
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: const Text('Löschen'),
-          ),
-        ],
-      ),
-    );
-    if (confirmed ?? false) await action();
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final users = ref.watch(usersProvider).value ?? const <User>[];
@@ -405,9 +377,9 @@ class _ManagementTab extends ConsumerWidget {
         ),
         const SizedBox(height: 4),
         const Text(
-          'Namen vergeben, Profile löschen und festlegen, welche Bereiche ein '
-          'Kind überhaupt sieht. Bild und Farbe darf jedes Kind selbst auf '
-          'dem Startbildschirm ändern.',
+          'Ein Tipp auf ein Kind öffnet alles, was zu ihm gehört: Bereiche, '
+          'Zeiten, Sperre, Umbenennen und Löschen. Bild und Farbe darf jedes '
+          'Kind selbst auf dem Startbildschirm ändern.',
           style: TextStyle(fontSize: 17, color: AppColors.textMuted),
         ),
         const SizedBox(height: 14),
@@ -416,26 +388,7 @@ class _ManagementTab extends ConsumerWidget {
             padding: const EdgeInsets.only(bottom: 10),
             child: _ManagementRow(
               user: user,
-              onGroups: () => ProfileSettingsDialog.show(context, user),
-              onRename: () =>
-                  ProfileEditorDialog.show(context, user: user),
-              onReset: () => _confirm(
-                context,
-                ref,
-                title: 'Ergebnisse von ${user.name} löschen?',
-                message: 'Bestzeiten, Lernkurve und Verlauf gehen verloren. '
-                    'Das Profil selbst bleibt bestehen.',
-                action: () =>
-                    ref.read(userRepositoryProvider).resetStatistics(user.id),
-              ),
-              onDelete: () => _confirm(
-                context,
-                ref,
-                title: '${user.name} löschen?',
-                message: 'Profil und alle Ergebnisse werden entfernt.',
-                action: () =>
-                    ref.read(userRepositoryProvider).deleteUser(user.id),
-              ),
+              onOpen: () => ProfileSettingsScreen.show(context, user),
             ),
           ),
         const Divider(height: 48),
@@ -465,102 +418,97 @@ class _ManagementTab extends ConsumerWidget {
 
 class _ManagementRow extends StatelessWidget {
   final User user;
-  final VoidCallback onGroups;
-  final VoidCallback onRename;
-  final VoidCallback onReset;
-  final VoidCallback onDelete;
+  final VoidCallback onOpen;
 
-  const _ManagementRow({
-    required this.user,
-    required this.onGroups,
-    required this.onRename,
-    required this.onReset,
-    required this.onDelete,
-  });
+  const _ManagementRow({required this.user, required this.onOpen});
 
   @override
   Widget build(BuildContext context) {
     final color = AppColors.profileColor(user.colorIndex);
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        border: Border.all(color: AppColors.divider, width: 1.5),
+    // A card, not a row of buttons. Four labelled ones sat here and were six
+    // pixels from overflowing on a 10" tablet - and "Löschen" was one slip of
+    // the thumb from "Einstellungen". Everything about a child now lives one
+    // tap away, in one place.
+    return Material(
+      color: AppColors.surface,
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        onTap: onOpen,
         borderRadius: BorderRadius.circular(16),
-      ),
-      child: Row(
-        children: [
-          Text(user.avatar, style: const TextStyle(fontSize: 34)),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          decoration: BoxDecoration(
+            border: Border.all(color: AppColors.divider, width: 1.5),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          // Dimmed while locked, and the tile keeps its own colour underneath
+          // - the same wording the child's profile tile uses. Muted says
+          // "paused", grey would say "gone".
+          child: Opacity(
+            opacity: user.locked ? 0.55 : 1,
+            child: Row(
               children: [
-                Text(
-                  user.name,
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.w700,
-                    color: color,
+                Text(user.avatar, style: const TextStyle(fontSize: 34)),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Flexible(
+                            child: Text(
+                              user.name,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.w700,
+                                color: color,
+                              ),
+                            ),
+                          ),
+                          if (user.locked) ...[
+                            const SizedBox(width: 10),
+                            const Icon(Icons.lock,
+                                size: 22, color: AppColors.wrong),
+                          ],
+                        ],
+                      ),
+                      Text(
+                        _summary(user),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          color: AppColors.textMuted,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                Text(
-                  _groupSummary(user),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    color: AppColors.textMuted,
-                  ),
-                ),
+                const Icon(Icons.chevron_right,
+                    size: 32, color: AppColors.textMuted),
               ],
             ),
           ),
-          // Wrapped, not a plain row: four labelled buttons are 6 px too wide
-          // on a 10" tablet, and a fifth one would break it again.
-          Wrap(
-            alignment: WrapAlignment.end,
-            spacing: 4,
-            children: [
-              TextButton.icon(
-                icon: const Icon(Icons.tune, size: 24),
-                label: const Text('Einstellungen',
-                    style: TextStyle(fontSize: 18)),
-                onPressed: onGroups,
-              ),
-              TextButton.icon(
-                icon: const Icon(Icons.edit_outlined, size: 24),
-                label:
-                    const Text('Umbenennen', style: TextStyle(fontSize: 18)),
-                onPressed: onRename,
-              ),
-              TextButton.icon(
-                icon: const Icon(Icons.restart_alt, size: 24),
-                label: const Text('Zurücksetzen',
-                    style: TextStyle(fontSize: 18)),
-                onPressed: onReset,
-              ),
-              TextButton.icon(
-                style: TextButton.styleFrom(foregroundColor: AppColors.wrong),
-                icon: const Icon(Icons.delete_outline, size: 24),
-                label: const Text('Löschen', style: TextStyle(fontSize: 18)),
-                onPressed: onDelete,
-              ),
-            ],
-          ),
-        ],
+        ),
       ),
     );
   }
 
-  /// What this child is offered, at a glance.
-  static String _groupSummary(User user) {
-    final visible = user.visibleGroups;
-    final review = user.reviewHardTasks ? '' : ' · ohne Wiederholung';
-    if (visible.isEmpty) return 'Kein Bereich freigeschaltet$review';
-    if (visible.length == LessonGroup.values.length) {
-      return 'Alle Bereiche$review';
-    }
-    return '${visible.map(groupTitle).join(', ')}$review';
+  /// What this child is offered, at a glance. Short on purpose: the full list
+  /// of group names ran off the end of the row and told nobody anything.
+  static String _summary(User user) {
+    final groups = switch (user.visibleGroups.length) {
+      0 => 'Kein Bereich freigeschaltet',
+      final n when n == LessonGroup.values.length => 'Alle Bereiche',
+      final n => '$n von ${LessonGroup.values.length} Bereichen',
+    };
+    return [
+      if (user.locked) 'Gesperrt',
+      groups,
+      if (!user.reviewHardTasks) 'ohne Wiederholung',
+    ].join(' · ');
   }
 }

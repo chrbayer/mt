@@ -7,7 +7,7 @@ import 'package:mathe_trainer/domain/lesson.dart';
 import 'package:mathe_trainer/domain/task.dart';
 import 'package:mathe_trainer/features/admin/admin_screen.dart';
 import 'package:mathe_trainer/features/admin/global_settings_tab.dart';
-import 'package:mathe_trainer/features/admin/profile_settings_dialog.dart';
+import 'package:mathe_trainer/features/admin/profile_settings_screen.dart';
 import 'package:mathe_trainer/features/admin/reset_stars_dialog.dart';
 import 'package:mathe_trainer/features/leaderboard/leaderboard_screen.dart';
 import 'package:mathe_trainer/features/lessons/lesson_home_screen.dart';
@@ -281,7 +281,7 @@ void main() {
         tester,
         Builder(
           builder: (context) => TextButton(
-            onPressed: () => ProfileSettingsDialog.show(context, mia),
+            onPressed: () => ProfileSettingsScreen.show(context, mia),
             child: const Text('auf'),
           ),
         ),
@@ -292,12 +292,10 @@ void main() {
       expect(tester.takeException(), isNull);
 
       // Scrolled to the bottom it must still not overflow.
-      await tester.drag(
-        find.byType(SingleChildScrollView).first,
-        const Offset(0, -2000),
-      );
+      await tester.drag(find.byType(ListView).first, const Offset(0, -2000));
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
+      // And the save button is still there, because it never scrolled away.
       expect(find.text('Speichern'), findsOneWidget);
     });
 
@@ -347,11 +345,12 @@ void main() {
       expect(find.text('Aufgaben pro Durchgang für alle'), findsOneWidget);
     });
 
-    testWidgets('12-bereiche-dialog passt auf ${size.key}', (tester) async {
+    testWidgets('12-bereiche passt auf ${size.key}', (tester) async {
       await pumpScreen(tester, const AdminScreen(), size.value);
       await tester.tap(find.text('Verwaltung'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Einstellungen').first);
+      // The whole row is the way in; it carries no buttons of its own.
+      await tester.tap(find.text('Mia'));
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
 
@@ -461,4 +460,36 @@ void main() {
       expect(box.left, greaterThanOrEqualTo(0));
     });
   }
+
+  testWidgets('13c-profileinstellungen bleibt auf einem schmalen Gerät '
+      'bedienbar', (tester) async {
+    // Below the two-column width the settings fall back into one column.
+    // Its own size rather than one from the loop above: this test is about
+    // that fallback, and on a tablet it would never be taken.
+    await pumpScreen(
+      tester,
+      Builder(
+        builder: (context) => TextButton(
+          onPressed: () => ProfileSettingsScreen.show(context, mia),
+          child: const Text('auf'),
+        ),
+      ),
+      const Size(820, 420),
+    );
+    await tester.tap(find.text('auf'));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    expect(find.text('ÜBEN'), findsOneWidget);
+    // The app bar holds it, however narrow the screen is.
+    expect(find.text('Speichern'), findsOneWidget);
+
+    // The second half is below the first one now, not beside it.
+    await tester.dragUntilVisible(
+      find.text('ZEIT UND WERTUNG'),
+      find.byType(ListView).first,
+      const Offset(0, -300),
+    );
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+  });
 }

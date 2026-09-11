@@ -314,6 +314,51 @@ Elternbereich.
 `TaskCountExplanation` kennt beide Ebenen: „sonst diese hier" muss auf den
 richtigen Regler zeigen, und welcher das ist, hängt vom Bildschirm ab.
 
+## Profilverwaltung: ein Kind, ein Ort
+
+Alles zu einem Kind liegt hinter **einem** Tipp auf seine Zeile:
+`ProfileSettingsScreen`. Die Zeile selbst trägt keine Knöpfe mehr. Vorher
+waren es vier beschriftete, und im Code stand bereits, dass sie auf einem
+10-Zoll-Tablet sechs Pixel vom Überlaufen entfernt sind — ein fünfter wäre
+nicht mehr hineingegangen. „Löschen" lag dabei einen Fehlgriff neben
+„Einstellungen".
+
+Ein **Bildschirm, kein Dialog**, und das ist der Kern. Der Dialog hatte neun
+Abschnitte in einem Scroll und „Speichern" darunter; sichtbar waren etwa
+drei. Der übliche Weg hinaus war deshalb die Zurück-Geste — und die warf
+alles weg, ohne ein Wort. Eine App-Bar hält Kreuz und Speichern-Knopf im
+Blick, egal wie weit man gescrollt hat.
+
+`PopScope` fängt die Zurück-Geste ab, und zwar **nur wenn sich etwas geändert
+hat**. Ein Dialog nach jedem Blick in die Einstellungen bringt einem bei, ihn
+ungelesen wegzutippen — womit man wieder da wäre, wo man angefangen hat.
+
+Der Haken trägt **zusätzlich die Beschriftung „Speichern"**. Ein nackter
+Haken in der Ecke ist eine Konvention, und wer gerade eine Zeitgrenze
+verstellt hat, soll sie nicht kennen müssen.
+
+Die **Sperre steht ganz oben**, als eigener Block mit eigenem Rahmen. Sie ist
+das Einzige, wonach man in Eile greift; vorher lag sie zwischen Tagesgrenze
+und Sternen mitten im Scroll. In der Liste sind gesperrte Profile **gedämpft**
+und tragen ein Schloss — dieselbe Sprache wie die Profilkachel des Kindes:
+gedämpft heißt Pause, grau hieße weg. Die Reihenfolge der Liste bleibt dabei
+unverändert; nach oben sortiert würden sich die Zeilen unter dem Finger neu
+ordnen, sobald man eine Sperre umlegt.
+
+Ab `_twoColumnWidth` (900) stehen **zwei Spalten**: „Üben" links, „Zeit und
+Wertung" rechts. Im Querformat ist die Breite da und die Höhe knapp, also
+halbiert das die Scrollstrecke. Darunter fällt es auf eine Spalte zurück, und
+ein eigener Layouttest fährt genau diesen Zweig — sonst würde er nie gebaut.
+
+Der Block **„Aufräumen"** steht bewusst ganz unten und sagt dazu, dass seine
+Knöpfe sofort wirken und nicht auf „Speichern" warten. Umbenennen, Sterne
+zurückgeben, Ergebnisse löschen, Profil löschen: das sind Taten, keine
+Einstellungen, und sie gehören weit weg von den Schaltern darüber.
+
+`confirmDestructive` in `features/admin/confirm_dialog.dart` stellt jede
+dieser Fragen. Der Elternbereich fragt sie ein halbes Dutzend Mal, und sie
+sollen alle gleich aussehen und gleich klingen.
+
 ## Elternbereich
 
 Die PIN (`SettingsRepository.setAdminPin` / `checkAdminPin`) schützt vor einem

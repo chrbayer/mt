@@ -184,6 +184,14 @@ void main() {
       await enterPin(tester, '4711');
     }
 
+    /// The Android back button, as the platform actually sends it - the way
+    /// out a parent takes without thinking, and the one that used to throw
+    /// away everything they had just set.
+    Future<void> simulateBack(WidgetTester tester) async {
+      await tester.binding.handlePopRoute();
+      await tester.pumpAndSettle();
+    }
+
     testWidgets('the history lists runs and marks the abandoned ones',
         (tester) async {
       await run(mia, 'add_20_plain');
@@ -264,24 +272,27 @@ void main() {
       expect(find.text('Übungsverlauf'), findsOneWidget);
     });
 
-    testWidgets('a profile can be locked and unlocked again', (tester) async {
-      await openAdmin(tester);
+    /// Opens Mia's settings. The whole row is the way in - it carries no
+    /// buttons of its own any more.
+    Future<void> openSettings(WidgetTester tester) async {
       await tester.tap(find.text('Verwaltung'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Einstellungen').first);
+      await tester.tap(find.text('Mia'));
       await tester.pumpAndSettle();
-      expect(find.text('Einstellungen für Mia'), findsOneWidget);
+    }
 
-      // The dialog scrolls, so the switch has to be brought into view first.
+    testWidgets('a profile can be locked and unlocked again', (tester) async {
+      await openAdmin(tester);
+      await openSettings(tester);
+      // The lock sits in the first block, above everything else: it is what
+      // a parent reaches for in a hurry.
       final lock = find.widgetWithText(
           SwitchListTile, 'Profil vorübergehend sperren');
-      await tester.ensureVisible(lock);
-      await tester.pumpAndSettle();
+      expect(lock, findsOneWidget);
+
       await tester.tap(lock);
       await tester.pump();
-      // The dialog scrolls, and the button is below the fold.
-      await tester.ensureVisible(find.text('Speichern'));
-      await tester.pumpAndSettle();
+      // No scrolling to reach it: the app bar keeps it in sight.
       await tester.tap(find.text('Speichern'));
       await tester.pumpAndSettle();
 
@@ -297,9 +308,16 @@ void main() {
       await run(tom, 'mix_100');
       await openAdmin(tester);
 
-      await tester.tap(find.text('Verwaltung'));
+      await openSettings(tester);
+      // "Aufräumen" sits at the foot of the screen, deliberately far from
+      // the settings above it.
+      await tester.dragUntilVisible(
+        find.text('Ergebnisse löschen'),
+        find.byType(ListView).first,
+        const Offset(0, -300),
+      );
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Zurücksetzen').first);
+      await tester.tap(find.text('Ergebnisse löschen'));
       await tester.pumpAndSettle();
       expect(find.text('Ergebnisse von Mia löschen?'), findsOneWidget);
       await tester.tap(find.widgetWithText(FilledButton, 'Löschen'));
@@ -319,11 +337,10 @@ void main() {
 
       expect(find.text('Alle Bereiche'), findsNWidgets(2));
 
-      await tester.tap(find.text('Einstellungen').first);
+      await tester.tap(find.text('Mia'));
       await tester.pumpAndSettle();
-      expect(find.text('Einstellungen für Mia'), findsOneWidget);
 
-      // The dialog scrolls, so each switch has to be brought into view first.
+      // The screen scrolls, so each switch has to be brought into view first.
       for (final group in ['Bis 1000', 'Einmaleins']) {
         final tile = find.widgetWithText(SwitchListTile, group);
         await tester.ensureVisible(tile);
@@ -353,13 +370,14 @@ void main() {
       expect((await container.read(userRepositoryProvider).findUser(mia))!
           .reviewHardTasks, isTrue);
 
-      await tester.tap(find.text('Einstellungen').first);
+      await tester.tap(find.text('Mia'));
       await tester.pumpAndSettle();
-      await tester.tap(
-          find.widgetWithText(SwitchListTile, 'Schwere Aufgaben wiederholen'));
+      final review =
+          find.widgetWithText(SwitchListTile, 'Schwere Aufgaben wiederholen');
+      await tester.ensureVisible(review);
+      await tester.pumpAndSettle();
+      await tester.tap(review);
       await tester.pump();
-      await tester.ensureVisible(find.text('Speichern'));
-      await tester.pumpAndSettle();
       await tester.tap(find.text('Speichern'));
       await tester.pumpAndSettle();
 
@@ -370,25 +388,53 @@ void main() {
       expect(find.textContaining('ohne Wiederholung'), findsOneWidget);
     });
 
-    testWidgets('cancelling the dialog changes nothing', (tester) async {
+    testWidgets('leaving by the cross asks before throwing changes away',
+        (tester) async {
       await openAdmin(tester);
-      await tester.tap(find.text('Verwaltung'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Einstellungen').first);
-      await tester.pumpAndSettle();
+      await openSettings(tester);
 
       final tile = find.widgetWithText(SwitchListTile, 'Bis 1000');
       await tester.ensureVisible(tile);
       await tester.pumpAndSettle();
       await tester.tap(tile);
       await tester.pump();
-      await tester.ensureVisible(find.text('Abbrechen'));
+
+      await tester.tap(find.byIcon(Icons.close));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Abbrechen'));
+      expect(find.text('Änderungen verwerfen?'), findsOneWidget);
+
+      // Thinking better of it leaves the screen open and the change intact.
+      await tester.tap(find.widgetWithText(OutlinedButton, 'Abbrechen'));
+      await tester.pumpAndSettle();
+      expect(tile, findsOneWidget);
+
+      await tester.tap(find.byIcon(Icons.close));
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(FilledButton, 'Verwerfen'));
       await tester.pumpAndSettle();
 
       expect((await container.read(userRepositoryProvider).findUser(mia))!
           .hidden, isEmpty);
+    });
+
+    testWidgets('the back gesture asks too, and only when something changed',
+        (tester) async {
+      await openAdmin(tester);
+      await openSettings(tester);
+
+      // Nothing touched yet: going back must not interrupt with a question
+      // nobody needs to answer.
+      await simulateBack(tester);
+      expect(find.text('Änderungen verwerfen?'), findsNothing);
+      expect(find.text('Verwaltung'), findsOneWidget);
+
+      await openSettings(tester);
+      await tester.tap(
+          find.widgetWithText(SwitchListTile, 'Profil vorübergehend sperren'));
+      await tester.pump();
+      // This is the way out that used to lose the changes without a word.
+      await simulateBack(tester);
+      expect(find.text('Änderungen verwerfen?'), findsOneWidget);
     });
 
     testWidgets('switching everything off is flagged in the dialog',
@@ -396,7 +442,7 @@ void main() {
       await openAdmin(tester);
       await tester.tap(find.text('Verwaltung'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Einstellungen').first);
+      await tester.tap(find.text('Mia'));
       await tester.pumpAndSettle();
 
       for (final group in LessonGroup.values) {
@@ -406,8 +452,6 @@ void main() {
         await tester.tap(tile);
         await tester.pump();
       }
-      await tester.ensureVisible(find.text('Speichern'));
-      await tester.pumpAndSettle();
       expect(find.textContaining('kann das Kind nicht üben'), findsOneWidget);
     });
 
