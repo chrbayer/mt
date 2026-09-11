@@ -10,16 +10,6 @@ import '../../providers.dart';
 import '../../theme/app_theme.dart';
 import '../common/amount_choice.dart';
 
-const List<String> _weekdayLabels = [
-  'Montag',
-  'Dienstag',
-  'Mittwoch',
-  'Donnerstag',
-  'Freitag',
-  'Samstag',
-  'Sonntag',
-];
-
 /// How many qualifying runs an assignment may ask for. A handful of options,
 /// not a free number - one clean run is already a real goal, and asking for
 /// more than ten in one period is asking for a different kind of app.
@@ -45,8 +35,6 @@ class _AssignmentEditorState extends ConsumerState<AssignmentEditor> {
   int? _userId;
   String? _lessonId;
   AssignmentRhythm _rhythm = AssignmentRhythm.daily;
-  TimeOfDay _dueTime = const TimeOfDay(hour: 18, minute: 0);
-  int _dueWeekday = DateTime.sunday;
   int _runs = 1;
   int _taskCount = fallbackTaskCount;
   int _minStars = 0;
@@ -155,39 +143,16 @@ class _AssignmentEditorState extends ConsumerState<AssignmentEditor> {
                 onSelectionChanged: (selection) =>
                     setState(() => _rhythm = selection.first),
               ),
-              const SizedBox(height: 12),
-              Wrap(
-                crossAxisAlignment: WrapCrossAlignment.center,
-                spacing: 12,
-                runSpacing: 8,
-                children: [
-                  const Text('fällig bis', style: TextStyle(fontSize: 18)),
-                  OutlinedButton(
-                    onPressed: () async {
-                      final picked = await showTimePicker(
-                        context: context,
-                        initialTime: _dueTime,
-                      );
-                      if (picked != null) setState(() => _dueTime = picked);
-                    },
-                    child: Text(_dueTime.format(context)),
-                  ),
-                  if (_rhythm == AssignmentRhythm.weekly)
-                    DropdownButton<int>(
-                      value: _dueWeekday,
-                      items: [
-                        for (var day = DateTime.monday;
-                            day <= DateTime.sunday;
-                            day++)
-                          DropdownMenuItem(
-                            value: day,
-                            child: Text(_weekdayLabels[day - 1]),
-                          ),
-                      ],
-                      onChanged: (day) =>
-                          setState(() => _dueWeekday = day ?? _dueWeekday),
-                    ),
-                ],
+              const SizedBox(height: 8),
+              // No hour to pick: the rhythm is the whole deadline. A finer
+              // setting was precision nobody acted on, and a child does not
+              // watch the clock.
+              Text(
+                _rhythm == AssignmentRhythm.daily
+                    ? 'Fällig am Ende des Tages.'
+                    : 'Fällig am Ende der Woche, also Sonntagabend.',
+                style: const TextStyle(
+                    fontSize: 17, color: AppColors.textMuted),
               ),
               const Divider(height: 32),
               const Text('Durchgänge', style: TextStyle(fontSize: 20)),
@@ -261,9 +226,6 @@ class _AssignmentEditorState extends ConsumerState<AssignmentEditor> {
                                   userId: _userId!,
                                   lessonId: _lessonId!,
                                   rhythm: _rhythm,
-                                  dueMinute:
-                                      _dueTime.hour * 60 + _dueTime.minute,
-                                  dueWeekday: _dueWeekday,
                                   runs: _runs,
                                   taskCount: _taskCount,
                                   minStars: _minStars,

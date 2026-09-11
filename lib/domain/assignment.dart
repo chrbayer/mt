@@ -5,8 +5,14 @@ library;
 import 'lesson.dart';
 import 'scoring.dart';
 
-/// How often the goal renews. Daily runs to a time of day, weekly to a
-/// weekday and a time of day.
+/// How often the goal renews, and that is the whole deadline: a day, or a
+/// week that ends on Sunday night.
+///
+/// Deliberately no time of day. A child does not watch the clock, and "noch
+/// bis 18:00" on a card is pressure without a purpose - what a parent
+/// actually means is "heute" or "diese Woche". It also makes the deadline
+/// and the end of the period the same instant, so a period is closed exactly
+/// when it is over.
 enum AssignmentRhythm { daily, weekly }
 
 /// Reads a stored rhythm name back. An unknown name - a downgrade, or a
@@ -32,13 +38,6 @@ class Assignment {
   final String lessonId;
   final AssignmentRhythm rhythm;
 
-  /// Minutes since midnight the goal is due by.
-  final int dueMinute;
-
-  /// [DateTime.monday]..[DateTime.sunday]. Only meaningful for
-  /// [AssignmentRhythm.weekly].
-  final int dueWeekday;
-
   /// How many qualifying runs the period needs.
   final int runs;
 
@@ -62,8 +61,6 @@ class Assignment {
     required this.userId,
     required this.lessonId,
     required this.rhythm,
-    required this.dueMinute,
-    required this.dueWeekday,
     required this.runs,
     required this.taskCount,
     required this.minStars,
@@ -86,8 +83,6 @@ class Assignment {
       other.userId == userId &&
       other.lessonId == lessonId &&
       other.rhythm == rhythm &&
-      other.dueMinute == dueMinute &&
-      other.dueWeekday == dueWeekday &&
       other.runs == runs &&
       other.taskCount == taskCount &&
       other.minStars == minStars &&
@@ -96,8 +91,8 @@ class Assignment {
       other.endedAtMs == endedAtMs;
 
   @override
-  int get hashCode => Object.hash(id, userId, lessonId, rhythm, dueMinute,
-      dueWeekday, runs, taskCount, minStars, minBolts, createdAtMs, endedAtMs);
+  int get hashCode => Object.hash(id, userId, lessonId, rhythm, runs,
+      taskCount, minStars, minBolts, createdAtMs, endedAtMs);
 }
 
 /// One rhythm period with its own deadline: one calendar day for
@@ -110,33 +105,37 @@ class AssignmentPeriod {
   const AssignmentPeriod({required this.startMs, required this.dueMs});
 }
 
-/// The period [now] falls into, and the deadline within it.
+/// The period [now] falls into. Its deadline is its own last instant: the
+/// calendar day for [AssignmentRhythm.daily], the calendar week from Monday
+/// to Sunday night for [AssignmentRhythm.weekly].
 ///
-/// Daily: the calendar day, due at [Assignment.dueMinute] on that same day.
-/// Weekly: the calendar week starting Monday 00:00, due at
-/// [Assignment.dueMinute] on [Assignment.dueWeekday] of that week.
+/// Built with `DateTime(year, month, day)` rather than by adding
+/// milliseconds, so the boundaries stay on real local midnights across a
+/// daylight-saving change.
 AssignmentPeriod periodAt(Assignment a, DateTime now) {
-  switch (a.rhythm) {
-    case AssignmentRhythm.daily:
-      final day = DateTime(now.year, now.month, now.day);
-      return AssignmentPeriod(
-        startMs: day.millisecondsSinceEpoch,
-        dueMs:
-            day.add(Duration(minutes: a.dueMinute)).millisecondsSinceEpoch,
-      );
-    case AssignmentRhythm.weekly:
-      final today = DateTime(now.year, now.month, now.day);
-      // DateTime.weekday is 1 (Monday) .. 7 (Sunday), so this always lands
-      // on this week's Monday, even when today already is one.
-      final monday = today.subtract(Duration(days: today.weekday - 1));
-      final due = monday
-          .add(Duration(days: a.dueWeekday - 1))
-          .add(Duration(minutes: a.dueMinute));
-      return AssignmentPeriod(
-        startMs: monday.millisecondsSinceEpoch,
-        dueMs: due.millisecondsSinceEpoch,
-      );
-  }
+  final today = DateTime(now.year, now.month, now.day);
+  final (start, nextStart) = switch (a.rhythm) {
+    AssignmentRhythm.daily => (
+        today,
+        DateTime(today.year, today.month, today.day + 1),
+      ),
+    // DateTime.weekday runs 1 (Monday) .. 7 (Sunday), so this always lands
+    // on this week's Monday, even when today already is one.
+    AssignmentRhythm.weekly => () {
+        final monday =
+            DateTime(today.year, today.month, today.day - (today.weekday - 1));
+        return (
+          monday,
+          DateTime(monday.year, monday.month, monday.day + 7),
+        );
+      }(),
+  };
+  return AssignmentPeriod(
+    startMs: start.millisecondsSinceEpoch,
+    // The last millisecond that still belongs to this period: a run finished
+    // at the stroke of midnight belongs to the next one, not this one.
+    dueMs: nextStart.millisecondsSinceEpoch - 1,
+  );
 }
 
 /// The raw facts of one completed run that [qualifies] and [progressIn]
@@ -149,9 +148,13 @@ typedef RunFacts = ({
   int wrongAttempts,
 });
 
-/// Every period whose deadline has already passed and that fell within this
-/// assignment's lifetime: created before its due time, and - if the
-/// assignment has since ended - due before it ended.
+/// Every period that is over and that fell within this assignment's
+/// lifetime: created before the period ended, and - if the assignment has
+/// since ended - over before it ended.
+///
+/// Since the deadline *is* the end of the period, "closed" and "missed its
+/// deadline" are now the same question. Under an hour-of-day deadline they
+/// were not, and a day whose time had passed still counted as running.
 ///
 /// Oldest first. Bounded by [Assignment.createdAtMs] on one end and by
 /// walking backward from [now] on the other, with a generous but finite
@@ -229,23 +232,10 @@ AssignmentProgress progressIn({
   );
 }
 
-const List<String> _weekdayShortNames = [
-  'Mo',
-  'Di',
-  'Mi',
-  'Do',
-  'Fr',
-  'Sa',
-  'So',
-];
-
-/// "bis 18:00" for a daily assignment, "bis So" for a weekly one - short
-/// enough for a card's footer, and closer to how a child reads a deadline
-/// than a full date would be. Shared by the child's card and the parent
-/// tab, so the two never say it two different ways.
-String formatDueTime(Assignment a) {
-  final hour = (a.dueMinute ~/ 60).toString().padLeft(2, '0');
-  final minute = (a.dueMinute % 60).toString().padLeft(2, '0');
-  if (a.rhythm == AssignmentRhythm.daily) return 'bis $hour:$minute';
-  return 'bis ${_weekdayShortNames[a.dueWeekday - 1]}';
-}
+/// The deadline as a child reads it: "heute" or "bis Sonntag".
+///
+/// This is also what tells the two rhythms apart on a card, so it is the one
+/// place the wording lives - the card and the parent tab must never say it
+/// two different ways.
+String formatDeadline(Assignment a) =>
+    a.rhythm == AssignmentRhythm.daily ? 'heute' : 'bis Sonntag';

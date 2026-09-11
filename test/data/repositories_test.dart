@@ -176,8 +176,24 @@ void main() {
       await recordRun(SessionRepository(before),
           userId: id, lessonId: 'add_20_plain');
 
+      if (version < 14) {
+        // v13 hung an hour of day and a weekday on every assignment.
+        await before.customStatement('ALTER TABLE assignments '
+            'ADD COLUMN due_minute INTEGER NOT NULL DEFAULT 1080');
+        await before.customStatement('ALTER TABLE assignments '
+            'ADD COLUMN due_weekday INTEGER NOT NULL DEFAULT 7');
+      }
       if (version < 13) {
         await before.customStatement('DROP TABLE assignments');
+      } else {
+        // A row in the old shape, so the rebuild in the v14 migration has
+        // something real to carry across.
+        await before.customStatement(
+          'INSERT INTO assignments (user_id, lesson_id, rhythm, due_minute, '
+          'due_weekday, runs, task_count, min_stars, min_bolts, '
+          'created_at_ms, ended_at_ms) '
+          "VALUES ($id, 'times_7', 'weekly', 1080, 5, 3, 20, 2, 1, 1000, NULL)",
+        );
       }
       if (version < 12) {
         await before
@@ -235,7 +251,7 @@ void main() {
       return file;
     }
 
-    for (final from in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]) {
+    for (final from in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]) {
       test('a database from schema v$from keeps its data', () async {
         final file = await databaseAtVersion(from);
 
@@ -285,9 +301,22 @@ void main() {
         // still the truth about it - not a value nobody filled in.
         expect(attempts.first.operandC, isNull);
         expect(attempts.first.op2, isNull);
-        // There were no assignments before v13 - the empty table is the
-        // whole migration.
-        expect(await after.select(after.assignments).get(), isEmpty);
+        final assignments = await after.select(after.assignments).get();
+        if (from < 13) {
+          // There were no assignments before v13 - the empty table is the
+          // whole migration.
+          expect(assignments, isEmpty);
+        } else {
+          // v14 drops the hour and the weekday and keeps everything else.
+          // Nobody loses an assignment because the deadline got coarser.
+          expect(assignments.single.lessonId, 'times_7');
+          expect(assignments.single.rhythm, 'weekly');
+          expect(assignments.single.runs, 3);
+          expect(assignments.single.taskCount, 20);
+          expect(assignments.single.minStars, 2);
+          expect(assignments.single.minBolts, 1);
+          expect(assignments.single.endedAtMs, isNull);
+        }
       });
     }
   });

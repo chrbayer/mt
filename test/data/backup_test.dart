@@ -256,8 +256,6 @@ void main() {
       userId: mia,
       lessonId: 'times_7',
       rhythm: AssignmentRhythm.weekly,
-      dueMinute: 18 * 60,
-      dueWeekday: DateTime.friday,
       runs: 3,
       taskCount: 20,
       minStars: 2,
@@ -267,7 +265,6 @@ void main() {
       userId: mia,
       lessonId: 'add_100_plain',
       rhythm: AssignmentRhythm.daily,
-      dueMinute: 17 * 60,
       runs: 1,
       taskCount: 10,
       minStars: 0,
@@ -283,8 +280,6 @@ void main() {
     final restored = await assignments.watchAssignments(userId: mia).first;
     final open = restored.firstWhere((a) => a.lessonId == 'times_7');
     expect(open.rhythm, AssignmentRhythm.weekly);
-    expect(open.dueMinute, 18 * 60);
-    expect(open.dueWeekday, DateTime.friday);
     expect(open.runs, 3);
     expect(open.taskCount, 20);
     expect(open.minStars, 2);

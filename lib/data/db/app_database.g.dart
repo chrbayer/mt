@@ -3131,29 +3131,6 @@ class $AssignmentsTable extends Assignments
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _dueMinuteMeta = const VerificationMeta(
-    'dueMinute',
-  );
-  @override
-  late final GeneratedColumn<int> dueMinute = GeneratedColumn<int>(
-    'due_minute',
-    aliasedName,
-    false,
-    type: DriftSqlType.int,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _dueWeekdayMeta = const VerificationMeta(
-    'dueWeekday',
-  );
-  @override
-  late final GeneratedColumn<int> dueWeekday = GeneratedColumn<int>(
-    'due_weekday',
-    aliasedName,
-    false,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-    defaultValue: const Constant(7),
-  );
   static const VerificationMeta _runsMeta = const VerificationMeta('runs');
   @override
   late final GeneratedColumn<int> runs = GeneratedColumn<int>(
@@ -3224,8 +3201,6 @@ class $AssignmentsTable extends Assignments
     userId,
     lessonId,
     rhythm,
-    dueMinute,
-    dueWeekday,
     runs,
     taskCount,
     minStars,
@@ -3271,20 +3246,6 @@ class $AssignmentsTable extends Assignments
       );
     } else if (isInserting) {
       context.missing(_rhythmMeta);
-    }
-    if (data.containsKey('due_minute')) {
-      context.handle(
-        _dueMinuteMeta,
-        dueMinute.isAcceptableOrUnknown(data['due_minute']!, _dueMinuteMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_dueMinuteMeta);
-    }
-    if (data.containsKey('due_weekday')) {
-      context.handle(
-        _dueWeekdayMeta,
-        dueWeekday.isAcceptableOrUnknown(data['due_weekday']!, _dueWeekdayMeta),
-      );
     }
     if (data.containsKey('runs')) {
       context.handle(
@@ -3360,14 +3321,6 @@ class $AssignmentsTable extends Assignments
         DriftSqlType.string,
         data['${effectivePrefix}rhythm'],
       )!,
-      dueMinute: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}due_minute'],
-      )!,
-      dueWeekday: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}due_weekday'],
-      )!,
       runs: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}runs'],
@@ -3409,12 +3362,10 @@ class AssignmentRow extends DataClass implements Insertable<AssignmentRow> {
   /// [AssignmentRhythm] name, not index - the same caution as
   /// `hidden_groups` and `lesson_filter`: a reordered enum must not
   /// silently turn one rhythm into another.
+  /// The rhythm is the whole deadline - a day, or a week ending Sunday
+  /// night. v13 also held an hour and a weekday here; see the migration to
+  /// v14 for why they went.
   final String rhythm;
-  final int dueMinute;
-
-  /// Only meaningful for a weekly rhythm; defaults to Sunday so a daily row
-  /// still has a well-defined value.
-  final int dueWeekday;
   final int runs;
   final int taskCount;
   final int minStars;
@@ -3426,8 +3377,6 @@ class AssignmentRow extends DataClass implements Insertable<AssignmentRow> {
     required this.userId,
     required this.lessonId,
     required this.rhythm,
-    required this.dueMinute,
-    required this.dueWeekday,
     required this.runs,
     required this.taskCount,
     required this.minStars,
@@ -3442,8 +3391,6 @@ class AssignmentRow extends DataClass implements Insertable<AssignmentRow> {
     map['user_id'] = Variable<int>(userId);
     map['lesson_id'] = Variable<String>(lessonId);
     map['rhythm'] = Variable<String>(rhythm);
-    map['due_minute'] = Variable<int>(dueMinute);
-    map['due_weekday'] = Variable<int>(dueWeekday);
     map['runs'] = Variable<int>(runs);
     map['task_count'] = Variable<int>(taskCount);
     map['min_stars'] = Variable<int>(minStars);
@@ -3461,8 +3408,6 @@ class AssignmentRow extends DataClass implements Insertable<AssignmentRow> {
       userId: Value(userId),
       lessonId: Value(lessonId),
       rhythm: Value(rhythm),
-      dueMinute: Value(dueMinute),
-      dueWeekday: Value(dueWeekday),
       runs: Value(runs),
       taskCount: Value(taskCount),
       minStars: Value(minStars),
@@ -3484,8 +3429,6 @@ class AssignmentRow extends DataClass implements Insertable<AssignmentRow> {
       userId: serializer.fromJson<int>(json['userId']),
       lessonId: serializer.fromJson<String>(json['lessonId']),
       rhythm: serializer.fromJson<String>(json['rhythm']),
-      dueMinute: serializer.fromJson<int>(json['dueMinute']),
-      dueWeekday: serializer.fromJson<int>(json['dueWeekday']),
       runs: serializer.fromJson<int>(json['runs']),
       taskCount: serializer.fromJson<int>(json['taskCount']),
       minStars: serializer.fromJson<int>(json['minStars']),
@@ -3502,8 +3445,6 @@ class AssignmentRow extends DataClass implements Insertable<AssignmentRow> {
       'userId': serializer.toJson<int>(userId),
       'lessonId': serializer.toJson<String>(lessonId),
       'rhythm': serializer.toJson<String>(rhythm),
-      'dueMinute': serializer.toJson<int>(dueMinute),
-      'dueWeekday': serializer.toJson<int>(dueWeekday),
       'runs': serializer.toJson<int>(runs),
       'taskCount': serializer.toJson<int>(taskCount),
       'minStars': serializer.toJson<int>(minStars),
@@ -3518,8 +3459,6 @@ class AssignmentRow extends DataClass implements Insertable<AssignmentRow> {
     int? userId,
     String? lessonId,
     String? rhythm,
-    int? dueMinute,
-    int? dueWeekday,
     int? runs,
     int? taskCount,
     int? minStars,
@@ -3531,8 +3470,6 @@ class AssignmentRow extends DataClass implements Insertable<AssignmentRow> {
     userId: userId ?? this.userId,
     lessonId: lessonId ?? this.lessonId,
     rhythm: rhythm ?? this.rhythm,
-    dueMinute: dueMinute ?? this.dueMinute,
-    dueWeekday: dueWeekday ?? this.dueWeekday,
     runs: runs ?? this.runs,
     taskCount: taskCount ?? this.taskCount,
     minStars: minStars ?? this.minStars,
@@ -3546,10 +3483,6 @@ class AssignmentRow extends DataClass implements Insertable<AssignmentRow> {
       userId: data.userId.present ? data.userId.value : this.userId,
       lessonId: data.lessonId.present ? data.lessonId.value : this.lessonId,
       rhythm: data.rhythm.present ? data.rhythm.value : this.rhythm,
-      dueMinute: data.dueMinute.present ? data.dueMinute.value : this.dueMinute,
-      dueWeekday: data.dueWeekday.present
-          ? data.dueWeekday.value
-          : this.dueWeekday,
       runs: data.runs.present ? data.runs.value : this.runs,
       taskCount: data.taskCount.present ? data.taskCount.value : this.taskCount,
       minStars: data.minStars.present ? data.minStars.value : this.minStars,
@@ -3568,8 +3501,6 @@ class AssignmentRow extends DataClass implements Insertable<AssignmentRow> {
           ..write('userId: $userId, ')
           ..write('lessonId: $lessonId, ')
           ..write('rhythm: $rhythm, ')
-          ..write('dueMinute: $dueMinute, ')
-          ..write('dueWeekday: $dueWeekday, ')
           ..write('runs: $runs, ')
           ..write('taskCount: $taskCount, ')
           ..write('minStars: $minStars, ')
@@ -3586,8 +3517,6 @@ class AssignmentRow extends DataClass implements Insertable<AssignmentRow> {
     userId,
     lessonId,
     rhythm,
-    dueMinute,
-    dueWeekday,
     runs,
     taskCount,
     minStars,
@@ -3603,8 +3532,6 @@ class AssignmentRow extends DataClass implements Insertable<AssignmentRow> {
           other.userId == this.userId &&
           other.lessonId == this.lessonId &&
           other.rhythm == this.rhythm &&
-          other.dueMinute == this.dueMinute &&
-          other.dueWeekday == this.dueWeekday &&
           other.runs == this.runs &&
           other.taskCount == this.taskCount &&
           other.minStars == this.minStars &&
@@ -3618,8 +3545,6 @@ class AssignmentsCompanion extends UpdateCompanion<AssignmentRow> {
   final Value<int> userId;
   final Value<String> lessonId;
   final Value<String> rhythm;
-  final Value<int> dueMinute;
-  final Value<int> dueWeekday;
   final Value<int> runs;
   final Value<int> taskCount;
   final Value<int> minStars;
@@ -3631,8 +3556,6 @@ class AssignmentsCompanion extends UpdateCompanion<AssignmentRow> {
     this.userId = const Value.absent(),
     this.lessonId = const Value.absent(),
     this.rhythm = const Value.absent(),
-    this.dueMinute = const Value.absent(),
-    this.dueWeekday = const Value.absent(),
     this.runs = const Value.absent(),
     this.taskCount = const Value.absent(),
     this.minStars = const Value.absent(),
@@ -3645,8 +3568,6 @@ class AssignmentsCompanion extends UpdateCompanion<AssignmentRow> {
     required int userId,
     required String lessonId,
     required String rhythm,
-    required int dueMinute,
-    this.dueWeekday = const Value.absent(),
     required int runs,
     required int taskCount,
     required int minStars,
@@ -3656,7 +3577,6 @@ class AssignmentsCompanion extends UpdateCompanion<AssignmentRow> {
   }) : userId = Value(userId),
        lessonId = Value(lessonId),
        rhythm = Value(rhythm),
-       dueMinute = Value(dueMinute),
        runs = Value(runs),
        taskCount = Value(taskCount),
        minStars = Value(minStars),
@@ -3667,8 +3587,6 @@ class AssignmentsCompanion extends UpdateCompanion<AssignmentRow> {
     Expression<int>? userId,
     Expression<String>? lessonId,
     Expression<String>? rhythm,
-    Expression<int>? dueMinute,
-    Expression<int>? dueWeekday,
     Expression<int>? runs,
     Expression<int>? taskCount,
     Expression<int>? minStars,
@@ -3681,8 +3599,6 @@ class AssignmentsCompanion extends UpdateCompanion<AssignmentRow> {
       if (userId != null) 'user_id': userId,
       if (lessonId != null) 'lesson_id': lessonId,
       if (rhythm != null) 'rhythm': rhythm,
-      if (dueMinute != null) 'due_minute': dueMinute,
-      if (dueWeekday != null) 'due_weekday': dueWeekday,
       if (runs != null) 'runs': runs,
       if (taskCount != null) 'task_count': taskCount,
       if (minStars != null) 'min_stars': minStars,
@@ -3697,8 +3613,6 @@ class AssignmentsCompanion extends UpdateCompanion<AssignmentRow> {
     Value<int>? userId,
     Value<String>? lessonId,
     Value<String>? rhythm,
-    Value<int>? dueMinute,
-    Value<int>? dueWeekday,
     Value<int>? runs,
     Value<int>? taskCount,
     Value<int>? minStars,
@@ -3711,8 +3625,6 @@ class AssignmentsCompanion extends UpdateCompanion<AssignmentRow> {
       userId: userId ?? this.userId,
       lessonId: lessonId ?? this.lessonId,
       rhythm: rhythm ?? this.rhythm,
-      dueMinute: dueMinute ?? this.dueMinute,
-      dueWeekday: dueWeekday ?? this.dueWeekday,
       runs: runs ?? this.runs,
       taskCount: taskCount ?? this.taskCount,
       minStars: minStars ?? this.minStars,
@@ -3736,12 +3648,6 @@ class AssignmentsCompanion extends UpdateCompanion<AssignmentRow> {
     }
     if (rhythm.present) {
       map['rhythm'] = Variable<String>(rhythm.value);
-    }
-    if (dueMinute.present) {
-      map['due_minute'] = Variable<int>(dueMinute.value);
-    }
-    if (dueWeekday.present) {
-      map['due_weekday'] = Variable<int>(dueWeekday.value);
     }
     if (runs.present) {
       map['runs'] = Variable<int>(runs.value);
@@ -3771,8 +3677,6 @@ class AssignmentsCompanion extends UpdateCompanion<AssignmentRow> {
           ..write('userId: $userId, ')
           ..write('lessonId: $lessonId, ')
           ..write('rhythm: $rhythm, ')
-          ..write('dueMinute: $dueMinute, ')
-          ..write('dueWeekday: $dueWeekday, ')
           ..write('runs: $runs, ')
           ..write('taskCount: $taskCount, ')
           ..write('minStars: $minStars, ')
@@ -6322,8 +6226,6 @@ typedef $$AssignmentsTableCreateCompanionBuilder =
       required int userId,
       required String lessonId,
       required String rhythm,
-      required int dueMinute,
-      Value<int> dueWeekday,
       required int runs,
       required int taskCount,
       required int minStars,
@@ -6337,8 +6239,6 @@ typedef $$AssignmentsTableUpdateCompanionBuilder =
       Value<int> userId,
       Value<String> lessonId,
       Value<String> rhythm,
-      Value<int> dueMinute,
-      Value<int> dueWeekday,
       Value<int> runs,
       Value<int> taskCount,
       Value<int> minStars,
@@ -6390,16 +6290,6 @@ class $$AssignmentsTableFilterComposer
 
   ColumnFilters<String> get rhythm => $composableBuilder(
     column: $table.rhythm,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<int> get dueMinute => $composableBuilder(
-    column: $table.dueMinute,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<int> get dueWeekday => $composableBuilder(
-    column: $table.dueWeekday,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -6481,16 +6371,6 @@ class $$AssignmentsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<int> get dueMinute => $composableBuilder(
-    column: $table.dueMinute,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<int> get dueWeekday => $composableBuilder(
-    column: $table.dueWeekday,
-    builder: (column) => ColumnOrderings(column),
-  );
-
   ColumnOrderings<int> get runs => $composableBuilder(
     column: $table.runs,
     builder: (column) => ColumnOrderings(column),
@@ -6562,14 +6442,6 @@ class $$AssignmentsTableAnnotationComposer
 
   GeneratedColumn<String> get rhythm =>
       $composableBuilder(column: $table.rhythm, builder: (column) => column);
-
-  GeneratedColumn<int> get dueMinute =>
-      $composableBuilder(column: $table.dueMinute, builder: (column) => column);
-
-  GeneratedColumn<int> get dueWeekday => $composableBuilder(
-    column: $table.dueWeekday,
-    builder: (column) => column,
-  );
 
   GeneratedColumn<int> get runs =>
       $composableBuilder(column: $table.runs, builder: (column) => column);
@@ -6647,8 +6519,6 @@ class $$AssignmentsTableTableManager
                 Value<int> userId = const Value.absent(),
                 Value<String> lessonId = const Value.absent(),
                 Value<String> rhythm = const Value.absent(),
-                Value<int> dueMinute = const Value.absent(),
-                Value<int> dueWeekday = const Value.absent(),
                 Value<int> runs = const Value.absent(),
                 Value<int> taskCount = const Value.absent(),
                 Value<int> minStars = const Value.absent(),
@@ -6660,8 +6530,6 @@ class $$AssignmentsTableTableManager
                 userId: userId,
                 lessonId: lessonId,
                 rhythm: rhythm,
-                dueMinute: dueMinute,
-                dueWeekday: dueWeekday,
                 runs: runs,
                 taskCount: taskCount,
                 minStars: minStars,
@@ -6675,8 +6543,6 @@ class $$AssignmentsTableTableManager
                 required int userId,
                 required String lessonId,
                 required String rhythm,
-                required int dueMinute,
-                Value<int> dueWeekday = const Value.absent(),
                 required int runs,
                 required int taskCount,
                 required int minStars,
@@ -6688,8 +6554,6 @@ class $$AssignmentsTableTableManager
                 userId: userId,
                 lessonId: lessonId,
                 rhythm: rhythm,
-                dueMinute: dueMinute,
-                dueWeekday: dueWeekday,
                 runs: runs,
                 taskCount: taskCount,
                 minStars: minStars,

@@ -35,17 +35,9 @@ void main() {
     await db.close();
   });
 
-  /// Due comfortably later today, whatever time the test happens to run at -
-  /// these tests are not about the deadline itself, only about what is done
-  /// against it.
-  int dueSoon({int inMinutes = 5}) {
-    final now = DateTime.now();
-    return now.hour * 60 + now.minute + inMinutes;
-  }
-
   Future<int> assign(
     String lessonId, {
-    int dueMinute = -1,
+    AssignmentRhythm rhythm = AssignmentRhythm.daily,
     int runs = 1,
     int taskCount = 10,
     int minStars = 0,
@@ -54,8 +46,7 @@ void main() {
       container.read(assignmentRepositoryProvider).createAssignment(
             userId: mia.id,
             lessonId: lessonId,
-            rhythm: AssignmentRhythm.daily,
-            dueMinute: dueMinute < 0 ? dueSoon() : dueMinute,
+            rhythm: rhythm,
             runs: runs,
             taskCount: taskCount,
             minStars: minStars,
@@ -135,9 +126,9 @@ void main() {
     expect(find.textContaining('0/1'), findsOneWidget);
   });
 
-  testWidgets('cards sort by how soon they are due', (tester) async {
-    await assign('add_100_plain', dueMinute: dueSoon(inMinutes: 120));
-    await assign('add_100_carry', dueMinute: dueSoon(inMinutes: 10));
+  testWidgets('the daily card comes before the weekly one', (tester) async {
+    await assign('add_100_plain', rhythm: AssignmentRhythm.weekly);
+    await assign('add_100_carry');
     await pump(tester);
 
     final tiles = tester
@@ -147,12 +138,28 @@ void main() {
         ['add_100_carry', 'add_100_plain']);
   });
 
+  testWidgets('two cards due the same day keep the older one in front',
+      (tester) async {
+    // Both are due at the end of today, so the deadline cannot separate
+    // them. The one that has been standing longer goes first.
+    final first = await assign('add_100_plain');
+    final second = await assign('add_100_carry');
+    expect(first, lessThan(second));
+    await pump(tester);
+
+    final tiles = tester
+        .widgetList<AssignmentTile>(find.byType(AssignmentTile))
+        .toList();
+    expect(tiles.map((t) => t.assignment.lessonId).toList(),
+        ['add_100_plain', 'add_100_carry']);
+  });
+
   testWidgets('a met card sinks below an open one, whatever its own deadline',
       (tester) async {
     // Due sooner, but already met - it must still fall behind the open one.
-    await assign('add_100_carry', dueMinute: dueSoon(inMinutes: 10));
+    await assign('add_100_carry');
     await finishRun('add_100_carry');
-    await assign('add_100_plain', dueMinute: dueSoon(inMinutes: 120));
+    await assign('add_100_plain', rhythm: AssignmentRhythm.weekly);
     await pump(tester);
 
     final tiles = tester

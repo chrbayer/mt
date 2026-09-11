@@ -9,7 +9,6 @@ void main() {
   final lesson = lessonById('add_100_plain');
 
   Assignment daily({
-    int dueMinute = 18 * 60,
     int runs = 1,
     int taskCount = 10,
     int minStars = 0,
@@ -22,8 +21,6 @@ void main() {
         userId: 1,
         lessonId: lesson.id,
         rhythm: AssignmentRhythm.daily,
-        dueMinute: dueMinute,
-        dueWeekday: 7,
         runs: runs,
         taskCount: taskCount,
         minStars: minStars,
@@ -33,8 +30,6 @@ void main() {
       );
 
   Assignment weekly({
-    int dueMinute = 18 * 60,
-    int dueWeekday = DateTime.friday,
     required int createdAtMs,
     int? endedAtMs,
   }) =>
@@ -43,8 +38,6 @@ void main() {
         userId: 1,
         lessonId: lesson.id,
         rhythm: AssignmentRhythm.weekly,
-        dueMinute: dueMinute,
-        dueWeekday: dueWeekday,
         runs: 1,
         taskCount: 10,
         minStars: 0,
@@ -54,84 +47,97 @@ void main() {
       );
 
   group('periodAt', () {
-    test('a daily period is the calendar day, due at its own minute', () {
-      final a = daily(dueMinute: 18 * 60, createdAtMs: 0);
+    test('a daily period is the calendar day, due at its very end', () {
+      final a = daily(createdAtMs: 0);
       final now = DateTime(2026, 3, 10, 9, 30);
       final period = periodAt(a, now);
       expect(period.startMs, DateTime(2026, 3, 10).millisecondsSinceEpoch);
+      // The last millisecond before the next day begins: a run finished on
+      // the stroke of midnight belongs to tomorrow.
       expect(
         period.dueMs,
-        DateTime(2026, 3, 10, 18).millisecondsSinceEpoch,
+        DateTime(2026, 3, 11).millisecondsSinceEpoch - 1,
       );
     });
 
-    test('a weekly period starts Monday and is due on its weekday', () {
-      final a = weekly(dueWeekday: DateTime.friday, createdAtMs: 0);
+    test('a weekly period runs Monday to the end of Sunday', () {
+      final a = weekly(createdAtMs: 0);
       // Wednesday, 2026-03-11.
       final now = DateTime(2026, 3, 11);
       final period = periodAt(a, now);
-      // Monday of that week is 2026-03-09.
+      // Monday of that week is 2026-03-09, the next one 2026-03-16.
       expect(period.startMs, DateTime(2026, 3, 9).millisecondsSinceEpoch);
       expect(
         period.dueMs,
-        DateTime(2026, 3, 13, 18).millisecondsSinceEpoch,
+        DateTime(2026, 3, 16).millisecondsSinceEpoch - 1,
       );
     });
 
     test('a Monday itself still starts its own week', () {
-      final a = weekly(dueWeekday: DateTime.friday, createdAtMs: 0);
+      final a = weekly(createdAtMs: 0);
       final now = DateTime(2026, 3, 9, 7);
       expect(
         periodAt(a, now).startMs,
         DateTime(2026, 3, 9).millisecondsSinceEpoch,
       );
     });
+
+    test('the periods of consecutive days do not overlap or leave a gap', () {
+      final a = daily(createdAtMs: 0);
+      final first = periodAt(a, DateTime(2026, 3, 10, 8));
+      final second = periodAt(a, DateTime(2026, 3, 11, 8));
+      expect(second.startMs, first.dueMs + 1);
+    });
   });
 
   group('closedPeriods', () {
-    test('the first period is missing when created after its due time', () {
-      // Created at 19:00 on the 10th - today's 18:00 deadline had already
-      // passed, so today never belonged to this assignment.
+    test('the day an assignment was created still counts', () {
+      // Created at 19:00 on the 10th. The deadline is the end of that day,
+      // so the child still had the evening: the 10th belongs to it.
       final a = daily(
-        dueMinute: 18 * 60,
         createdAtMs: DateTime(2026, 3, 10, 19).millisecondsSinceEpoch,
       );
       final now = DateTime(2026, 3, 13, 9);
       final closed = closedPeriods(a, now);
+      expect(closed.every((p) => p.dueMs >= a.createdAtMs), isTrue);
+      // The 10th, 11th and 12th; today is still running and is not here.
+      expect(closed.length, 3);
       expect(
-        closed.every((p) => p.dueMs >= a.createdAtMs),
-        isTrue,
+        closed.first.startMs,
+        DateTime(2026, 3, 10).millisecondsSinceEpoch,
       );
+    });
+
+    test('a day that ended before the assignment existed never counts', () {
+      final a = daily(
+        createdAtMs: DateTime(2026, 3, 10, 19).millisecondsSinceEpoch,
+      );
+      final closed = closedPeriods(a, DateTime(2026, 3, 13, 9));
       expect(
-        closed.any((p) =>
-            p.dueMs == DateTime(2026, 3, 10, 18).millisecondsSinceEpoch),
+        closed.any(
+            (p) => p.startMs == DateTime(2026, 3, 9).millisecondsSinceEpoch),
         isFalse,
       );
-      // The 11th and 12th did fall inside its lifetime.
-      expect(closed.length, 2);
     });
 
     test('nothing after ended counts any more', () {
       final a = daily(
-        dueMinute: 18 * 60,
         createdAtMs: DateTime(2026, 3, 1).millisecondsSinceEpoch,
         endedAtMs: DateTime(2026, 3, 5, 18).millisecondsSinceEpoch,
       );
-      // Asked long after the end - only the days up to and including the 5th
-      // may show up.
+      // Asked long after the end. The 5th was ended mid-day, so that day's
+      // deadline falls after the end and the 4th is the last one left.
       final now = DateTime(2026, 3, 20);
       final closed = closedPeriods(a, now);
       expect(closed.every((p) => p.dueMs <= a.endedAtMs!), isTrue);
       expect(
-        closed.any((p) =>
-            p.dueMs == DateTime(2026, 3, 5, 18).millisecondsSinceEpoch),
-        isTrue,
+        closed.last.startMs,
+        DateTime(2026, 3, 4).millisecondsSinceEpoch,
       );
     });
 
     test('closed periods come oldest first', () {
       final a = daily(
-        dueMinute: 12 * 60,
         createdAtMs: DateTime(2026, 3, 1).millisecondsSinceEpoch,
       );
       final now = DateTime(2026, 3, 5);
@@ -295,15 +301,13 @@ void main() {
     });
   });
 
-  group('formatDueTime', () {
-    test('a daily assignment names the time', () {
-      final a = daily(dueMinute: 9 * 60 + 5, createdAtMs: 0);
-      expect(formatDueTime(a), 'bis 09:05');
+  group('formatDeadline', () {
+    test('a daily assignment is due today', () {
+      expect(formatDeadline(daily(createdAtMs: 0)), 'heute');
     });
 
-    test('a weekly assignment names the weekday', () {
-      final a = weekly(dueWeekday: DateTime.sunday, createdAtMs: 0);
-      expect(formatDueTime(a), 'bis So');
+    test('a weekly assignment is due on Sunday', () {
+      expect(formatDeadline(weekly(createdAtMs: 0)), 'bis Sonntag');
     });
   });
 

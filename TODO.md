@@ -104,10 +104,10 @@ Ein Task trägt jetzt drei Operanden und zwei Rechenarten (Schema v12), damit
 Wiedervorlage und „schwere Aufgaben" den vollständigen Term speichern statt
 ihn falsch aufzuschreiben.
 
-#24 erledigt (2.8.0) — Aufgaben: Ein Elternteil weist einem Kind eine Lektion
-zu, mit Rhythmus (täglich bis zu einer Uhrzeit, wöchentlich bis zu einem
-Wochentag), wie vielen Durchgängen zu wie vielen Rechnungen, und mit
-Mindeststernen und -blitzen. Der Tagesdeckel aus #16 wird dabei ausgesetzt,
+#24 erledigt (2.8.0, Frist vereinfacht in 2.8.1) — Aufgaben: Ein Elternteil
+weist einem Kind eine Lektion zu, mit Rhythmus (täglich oder wöchentlich, die
+Woche endet Sonntagabend), wie vielen Durchgängen zu wie vielen Rechnungen,
+und mit Mindeststernen und -blitzen. Der Tagesdeckel aus #16 wird dabei ausgesetzt,
 aber nur für die zugewiesene Lektion und nur, bis der laufende Zeitraum sein
 Ziel erreicht hat — sonst könnten drei missglückte Versuche die Wertung für
 den Tag aufbrauchen, bevor die Aufgabe je erfüllt wurde. Für das Kind erscheint
@@ -118,3 +118,10 @@ antippbar. Eine Aufgabe wird nie geändert, nur beendet und neu angelegt, damit
 „geschafft an 12 von 15 Tagen" eine stabile Messlatte behält; der
 Elternbereich zeigt genau diese Statistik samt einem Punktestreifen der
 letzten vierzehn Zeiträume.
+
+Nachtrag 2.8.1: Die Uhrzeit als Frist ist wieder weg (Schema v14). Ein Kind
+schaut nicht auf die Uhr, und „noch bis 18:00" war Druck ohne Zweck; gemeint
+ist ohnehin „heute" oder „diese Woche". Nebenbei fiel damit eine
+Ungereimtheit weg: mit einer Uhrzeit galt ein Tag, dessen Frist um 18 Uhr
+verstrichen war, um 20 Uhr noch als laufend. Jetzt ist die Frist das Ende des
+Zeitraums, und beides ist dieselbe Frage.

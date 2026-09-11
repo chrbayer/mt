@@ -964,12 +964,21 @@ gstreamer-1.0" und man sucht ihn im eigenen Code.
 ## Aufgaben
 
 Eine **Aufgabe** (`domain/assignment.dart`) ist eine Lektion plus ein
-Rhythmus (täglich bis zu einer Uhrzeit, wöchentlich bis zu einem Wochentag)
-plus vier Vorgaben: wie viele Durchgänge, wie viele Rechnungen je Durchgang,
-wie viele Sterne und Blitze jeder davon mindestens bringen muss. `qualifies`
-prüft **mindestens**, nicht genau — ein längerer Durchgang ist mehr Arbeit,
-nicht weniger, und soll nicht an einer Obergrenze scheitern, die niemand
-verlangt hat.
+Rhythmus plus vier Vorgaben: wie viele Durchgänge, wie viele Rechnungen je
+Durchgang, wie viele Sterne und Blitze jeder davon mindestens bringen muss.
+
+Der **Rhythmus ist die ganze Frist**: ein Tag, oder eine Woche, die
+Sonntagabend endet. Keine Uhrzeit. Ein Kind schaut nicht auf die Uhr, „noch
+bis 18:00" auf einer Kachel ist Druck ohne Zweck, und gemeint ist ohnehin
+„heute" oder „diese Woche". 2.8.0 hatte die Uhrzeit noch, und sie kostete
+mehr, als sie wert war: Zeitraumende und Frist fielen auseinander, so dass ein
+Tag, dessen 18 Uhr vorbei war, um 20 Uhr weiter als laufend galt. Seit die
+Frist das Ende des Zeitraums **ist**, sind „abgeschlossen" und „Frist
+verstrichen" dieselbe Frage (v14 hat die beiden Spalten entfernt).
+
+`qualifies` prüft **mindestens**, nicht genau — ein längerer Durchgang ist
+mehr Arbeit, nicht weniger, und soll nicht an einer Obergrenze scheitern, die
+niemand verlangt hat.
 
 Eine Aufgabe wird **nie geändert**, nur beendet und neu angelegt.
 „Geschafft an 12 von 15 Tagen" ist nur wahr, solange sich die Messlatte
@@ -1010,6 +1019,11 @@ Statistik dazu ist für die Eltern (`assignments_tab.dart`, mit dem
 Punktestreifen der letzten vierzehn Zeiträume); „gestern nicht geschafft" auf
 der eigenen Kachel eines Kindes beschämt nur und ändert an der heutigen
 Aufgabe nichts.
+
+Weil alle Tagesaufgaben dieselbe Frist haben, kann die Frist sie auf dem
+Kinderbildschirm nicht auseinanderhalten. Sortiert wird deshalb nach Frist,
+dann nach Alter: die länger stehende zuerst. Ohne den zweiten Schlüssel
+wechselte die Reihenfolge von Aufbau zu Aufbau.
 
 Die Aufgabenzahl bekommt mit einer offenen Aufgabe eine **vierte Ebene** über
 `resolveTaskCount`: Aufgabe vor Lektion vor Profil vor global. Solange eine

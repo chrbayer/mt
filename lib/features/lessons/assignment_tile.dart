@@ -128,7 +128,7 @@ class _AssignmentFooter extends StatelessWidget {
         Expanded(
           child: Text(
             '${stats.current.qualifyingRuns}/${a.runs} · '
-            '${formatDueTime(a)}',
+            '${formatDeadline(a)}',
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(fontSize: 15, color: AppColors.textMuted),

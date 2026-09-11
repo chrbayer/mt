@@ -426,7 +426,11 @@ class _AssignmentGroup extends ConsumerWidget {
         ),
     ]..sort((x, y) {
         if (x.met != y.met) return x.met ? 1 : -1;
-        return x.dueMs.compareTo(y.dueMs);
+        if (x.dueMs != y.dueMs) return x.dueMs.compareTo(y.dueMs);
+        // Two daily assignments are due at the same instant, so the deadline
+        // cannot separate them. The one that has been standing longer goes
+        // first - anything else would let the order shuffle about.
+        return x.assignment.createdAtMs.compareTo(y.assignment.createdAtMs);
       });
 
     return Column(

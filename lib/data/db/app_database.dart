@@ -195,12 +195,10 @@ class Assignments extends Table {
   /// [AssignmentRhythm] name, not index - the same caution as
   /// `hidden_groups` and `lesson_filter`: a reordered enum must not
   /// silently turn one rhythm into another.
+  /// The rhythm is the whole deadline - a day, or a week ending Sunday
+  /// night. v13 also held an hour and a weekday here; see the migration to
+  /// v14 for why they went.
   TextColumn get rhythm => text()();
-  IntColumn get dueMinute => integer()();
-
-  /// Only meaningful for a weekly rhythm; defaults to Sunday so a daily row
-  /// still has a well-defined value.
-  IntColumn get dueWeekday => integer().withDefault(const Constant(7))();
   IntColumn get runs => integer()();
   IntColumn get taskCount => integer()();
   IntColumn get minStars => integer()();
@@ -223,7 +221,7 @@ class AppDatabase extends _$AppDatabase {
       : super(executor ?? driftDatabase(name: 'mathe_trainer'));
 
   @override
-  int get schemaVersion => 13;
+  int get schemaVersion => 14;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -311,6 +309,18 @@ class AppDatabase extends _$AppDatabase {
           // and quality. Nothing to carry over - there were no assignments
           // before this.
           if (from < 13) await m.createTable(assignments);
+          // v14 drops the hour-of-day and weekday an assignment used to be
+          // due at. A day or a week is the whole deadline now: a child does
+          // not watch the clock, and the finer setting was precision nobody
+          // acted on. Rebuilding the table copies every column that is still
+          // declared and leaves those two behind.
+          //
+          // Nothing is lost by it. The end of a day lies after any time that
+          // could have been set, so no assignment already in the database
+          // becomes missed in hindsight.
+          if (from >= 13 && from < 14) {
+            await m.alterTable(TableMigration(assignments));
+          }
         },
         beforeOpen: (details) async {
           // Needed for the ON DELETE CASCADE above to actually fire.

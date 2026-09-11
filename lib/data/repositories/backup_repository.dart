@@ -136,8 +136,6 @@ class BackupRepository {
             'userId': row.userId,
             'lessonId': row.lessonId,
             'rhythm': row.rhythm,
-            'dueMinute': row.dueMinute,
-            'dueWeekday': row.dueWeekday,
             'runs': row.runs,
             'taskCount': row.taskCount,
             'minStars': row.minStars,
@@ -302,10 +300,10 @@ class BackupRepository {
                 userId: row['userId'] as int,
                 lessonId: row['lessonId'] as String,
                 rhythm: row['rhythm'] as String,
-                dueMinute: row['dueMinute'] as int,
-                // Missing in a backup from before assignments existed - a
-                // row that old never had one to begin with.
-                dueWeekday: Value(row['dueWeekday'] as int? ?? 7),
+                // A 2.8.0 backup still carries `dueMinute` and `dueWeekday`.
+                // They are read past rather than rejected: the rhythm alone
+                // is the deadline now, and an hour nobody acts on is nothing
+                // to restore.
                 runs: row['runs'] as int,
                 taskCount: row['taskCount'] as int,
                 minStars: row['minStars'] as int,

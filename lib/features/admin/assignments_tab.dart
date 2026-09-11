@@ -176,7 +176,7 @@ class _AssignmentRow extends ConsumerWidget {
             ),
             const SizedBox(height: 6),
             Text(
-              '$rhythmWord · ${formatDueTime(assignment)} '
+              '$rhythmWord '
               '· ${assignment.runs}× ${assignment.taskCount} Rechnungen'
               '${assignment.minStars > 0 ? " · mind. ${assignment.minStars} ★" : ""}'
               '${assignment.minBolts > 0 ? " · mind. ${assignment.minBolts} ⚡" : ""}',
