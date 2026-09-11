@@ -785,6 +785,29 @@ kann. Die Tagesgrenze selbst wird als `dayStartMs` in die Abfrage gereicht
 statt in SQL aus `now` gebildet — die App hat **eine** Uhr, und eine Regel,
 die um Mitternacht umspringt, muss zu jeder Tageszeit prüfbar sein.
 
+Diese Grenze kommt aus `dayStartProvider` und wird **nirgends sonst
+ausgerechnet**. Jede Stelle, die „heute" zählt, hat sie sich vorher selbst aus
+`clockProvider` gebildet — und damit genau einmal, beim Bau des Providers.
+Auf einem Tablet wird die App nicht neu gestartet: sie wird abends
+weggelegt und nachmittags wieder aufgenommen. Die Grenze stand dann noch auf
+gestern, und die Übungszeit von gestern zählte gegen das heutige Tageslimit.
+Über ein paar Tage sperrte das Profil sich selbst.
+
+Verborgen hat es sich dadurch, dass der einzige Weckruf der App an
+`breakUntil` hing, und das ist nur gesetzt, **während gesperrt ist**. Der Tag
+sprang also genau dann um, wenn es am wenigsten nötig war, und sonst nie.
+
+`refreshDay` stellt die Frage neu, und zwar beim **Zurückkehren in den
+Vordergrund** (`app.dart`) — die eine Stelle, an der eine durchlebte Nacht
+verlässlich auffällt. Der Pausenwecker macht es zusätzlich mit, denn wenn der
+Weckruf Mitternacht ist, hat sich der Tag geändert.
+
+Einen **eigenen Timer bis Mitternacht** hat `dayStartProvider` bewusst nicht:
+ein schwebender Weckruf hält jeden Widget-Test wach, und das kostete beim
+ersten Versuch fünfzehn Tests. Aus demselben Grund darf die Frage auch nicht
+in `PracticeScreen._prepare()` gestellt werden — der Bildschirm darunter
+beobachtet die Erlaubnis, und der ausgelöste Neuaufbau kam nie zur Ruhe.
+
 `clockProvider` liefert die Uhrzeit. Die Übungsgrenze ist die einzige Regel,
 die sich **ohne Zutun** ändert, und ohne steuerbare Uhr ließe sich weder
 prüfen, dass die Pause sperrt, noch dass sie sich von selbst wieder öffnet.

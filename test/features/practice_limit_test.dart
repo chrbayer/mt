@@ -3,6 +3,7 @@ import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mathe_trainer/app.dart';
 import 'package:mathe_trainer/data/db/app_database.dart';
 import 'package:mathe_trainer/domain/lesson.dart';
 import 'package:mathe_trainer/domain/practice_limit.dart';
@@ -252,6 +253,52 @@ void main() {
     await pump(tester, const LessonHomeScreen());
 
     expect(find.byType(PauseNotice), findsNothing);
+  });
+
+  testWidgets('a night passing while the app keeps running starts the '
+      'daily total again', (tester) async {
+    await setLimit(daily: 30);
+    // Yesterday evening: most of the day gone, but not all of it, so the
+    // screen builds its allowance while practice is still allowed. That is
+    // the case the old code never re-examined - the only wake-up it had
+    // fired while a child was already blocked.
+    await practise(minutes: 25, endedMinutesAgo: 5);
+    await pump(tester, const LessonHomeScreen());
+    expect(find.byType(PauseNotice), findsNothing);
+
+    // The tablet is put down and picked up the next afternoon. The app is
+    // never restarted in between, which is the whole point of the bug: the
+    // day boundary has to be asked again rather than remembered.
+    clock = clock.add(const Duration(hours: 21));
+    await practise(minutes: 10, endedMinutesAgo: 60);
+    container.invalidate(dayStartProvider);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    // Yesterday's 25 and today's 10 would be over the cap together. Ten on
+    // their own are not, and ten is all that was practised today.
+    expect(find.byType(PauseNotice), findsNothing);
+  });
+
+  testWidgets('coming back to the foreground asks what day it is',
+      (tester) async {
+    tester.view.physicalSize = const Size(2400, 1500);
+    tester.view.devicePixelRatio = 2.0;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(UncontrolledProviderScope(
+      container: container,
+      child: const MatheTrainerApp(),
+    ));
+    await tester.pump();
+    final before = container.read(dayStartProvider);
+
+    clock = clock.add(const Duration(days: 1));
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await tester.pump();
+
+    // Without this the boundary would still be yesterday's, and everything
+    // counted against "today" with it.
+    expect(container.read(dayStartProvider), greaterThan(before));
   });
 
   testWidgets('with the cap lifted the same run may start', (tester) async {

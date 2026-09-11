@@ -284,6 +284,37 @@ final boltTotalsProvider = StreamProvider<Map<int, int>>(
 /// passing of time alone, without anybody touching the app.
 final clockProvider = Provider<DateTime Function()>((ref) => DateTime.now);
 
+/// Start of the current day in epoch milliseconds: the one boundary every
+/// rule that counts "today" reads.
+///
+/// Cached until something invalidates it, and [refreshDay] is what does -
+/// from the app coming back to the foreground, and from the one binding
+/// check in `PracticeScreen._prepare()`.
+///
+/// It used to be worked out inside each of those rules, once, from
+/// [clockProvider]. That froze it on whatever day the provider was first
+/// built. On a tablet the app lives for days, so practice from Monday kept
+/// counting towards Tuesday's total and the daily cap locked a child out
+/// over time they had not spent that day. What hid it was that the only
+/// wake-up in the app fired while a child was **already blocked** - so the
+/// day rolled over exactly when it was least needed, and never otherwise.
+///
+/// Deliberately no timer of its own. A pending alarm keeps the app and every
+/// widget test awake, which is why the break alarm below is only ever set
+/// when there is something to wake up for.
+final dayStartProvider = Provider<int>((ref) {
+  final now = ref.watch(clockProvider)();
+  return DateTime(now.year, now.month, now.day).millisecondsSinceEpoch;
+});
+
+/// Re-reads the day boundary, and with it everything counted against it.
+///
+/// Called from the one place that reliably marks the passing of a night:
+/// the app coming back to the foreground. Invalidating it from inside a run
+/// being prepared looked tempting and was worse than the bug - the screen
+/// under it watches the allowance, so the rebuild it set off never settled.
+void refreshDay(WidgetRef ref) => ref.invalidate(dayStartProvider);
+
 /// How many runs of one lesson may still earn something today, for one
 /// child: their own cap where they have one, the app-wide one where not.
 ///
@@ -309,9 +340,7 @@ final scoredRunsTodayProvider = StreamProvider.family<({int used, int left})?,
     yield null;
     return;
   }
-  final today = ref.watch(clockProvider)();
-  final dayStartMs =
-      DateTime(today.year, today.month, today.day).millisecondsSinceEpoch;
+  final dayStartMs = ref.watch(dayStartProvider);
   yield* ref
       .watch(statsRepositoryProvider)
       .watchScoredRunsToday(
@@ -371,17 +400,18 @@ final practiceAllowanceForProvider =
   }
 
   final now = ref.watch(clockProvider);
-  final today = now();
   final stretches = ref.watch(statsRepositoryProvider).watchPracticeStretch(
         userId: user.id,
         breakMinutes: limits.breakMinutes,
-        dayStartMs:
-            DateTime(today.year, today.month, today.day).millisecondsSinceEpoch,
+        // From dayStartProvider, which moves on by itself: worked out here
+        // it stayed frozen on the day this provider was first built.
+        dayStartMs: ref.watch(dayStartProvider),
       );
 
   // Waking up at the end of a break rebuilds the whole provider rather than
-  // re-judging the old numbers: when the wake-up is midnight, the day itself
-  // has changed and the query has to be asked again.
+  // re-judging the old numbers. Midnight is not this alarm's job - that is
+  // what dayStartProvider is for, and it wakes up whether or not anybody is
+  // currently blocked.
   //
   // An explicit Timer, not an await inside the generator - only this one
   // really stops once nobody is listening, and a pending alarm keeps both the
@@ -406,7 +436,13 @@ final practiceAllowanceForProvider =
       final left = until.difference(now());
       alarm = Timer(
         left.isNegative ? Duration.zero : left + const Duration(seconds: 1),
-        ref.invalidateSelf,
+        () {
+          // The day boundary first: when this alarm is midnight, the day
+          // itself has changed, and re-running only this provider would ask
+          // the same question against yesterday's boundary.
+          ref.invalidate(dayStartProvider);
+          ref.invalidateSelf();
+        },
       );
     }
     return allowance;

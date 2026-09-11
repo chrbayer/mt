@@ -125,3 +125,13 @@ ist ohnehin „heute" oder „diese Woche". Nebenbei fiel damit eine
 Ungereimtheit weg: mit einer Uhrzeit galt ein Tag, dessen Frist um 18 Uhr
 verstrichen war, um 20 Uhr noch als laufend. Jetzt ist die Frist das Ende des
 Zeitraums, und beides ist dieselbe Frage.
+
+#25 erledigt (2.8.2) — Ein Profil sperrte sich über Tage selbst: die
+Übungszeit von gestern zählte gegen das heutige Tageslimit. Die Tagesgrenze
+wurde in jeder Regel einzeln aus `clockProvider` gebildet, also genau einmal
+beim Bau des Providers, und auf einem Tablet wird die App nicht neu
+gestartet. Verborgen hat es sich dadurch, dass der einzige Weckruf an
+`breakUntil` hing und damit nur lief, während ohnehin gesperrt war — der Tag
+sprang genau dann um, wenn es am wenigsten nötig war. Jetzt kommt die Grenze
+aus `dayStartProvider` und wird beim Zurückkehren in den Vordergrund neu
+gestellt.
