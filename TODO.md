@@ -195,3 +195,11 @@ gerechnet über DateTime, damit die Zeitumstellung keinen Tag verschiebt. Der
 Aufräumknopf für abgebrochene Durchgänge folgt beiden Filtern und entfernt
 genau die Zeilen, die auf dem Bildschirm stehen; die Rückfrage nennt Kind und
 Zeitraum.
+
+#33 erledigt (2.10.1) — Gruppentitel wurden neben dem Lektionstitel
+kleingeschrieben, also „uhrzeit und geld" statt „Uhrzeit und Geld". Im
+Deutschen ist ein Gruppentitel ein Name; die Kleinschreibung stand an drei
+Stellen (Übungsverlauf, Aufgabenliste, Statistiktabelle) und ist überall weg.
+Beim Durchsehen der übrigen Texte im Aufgabenbereich: „Mindestens Sterne"
+und „Mindestens Blitze" heißen jetzt „Mindeststerne" und „Mindestblitze", der
+Platzhalter der Lektionsauswahl „Bitte auswählen" statt „auswählen".

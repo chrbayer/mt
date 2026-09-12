@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mathe_trainer/data/db/app_database.dart';
 import 'package:mathe_trainer/domain/assignment.dart';
 import 'package:mathe_trainer/domain/task.dart';
+import 'package:mathe_trainer/features/admin/assignments_tab.dart';
 import 'package:mathe_trainer/features/lessons/assignment_tile.dart';
 import 'package:mathe_trainer/domain/lesson.dart';
 import 'package:mathe_trainer/features/lessons/lesson_home_screen.dart';
@@ -96,6 +97,33 @@ void main() {
     );
     await tester.pumpAndSettle();
   }
+
+  testWidgets('the parent list writes the group the way the catalogue does',
+      (tester) async {
+    // German capitalises its nouns, and a group title is a name. The three
+    // places that print one beside a lesson title used to lowercase it, so
+    // "Uhrzeit und Geld" arrived as "uhrzeit und geld".
+    await assign('money_add');
+
+    tester.view.physicalSize = const Size(1600, 1000);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: MaterialApp(
+          theme: buildAppTheme(),
+          home: const Scaffold(body: AssignmentsTab()),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text('Geld zusammenzählen · ${groupTitle(LessonGroup.everyday)}'),
+      findsOneWidget,
+    );
+  });
 
   testWidgets('an assignment shows up as a card in "Deine Aufgaben"',
       (tester) async {

@@ -199,7 +199,7 @@ void main() {
       await run(tom, 'mix_100', completed: false);
       await openAdmin(tester);
 
-      expect(find.text('Plus ohne Zehnerübergang  ·  bis 20'), findsOneWidget);
+      expect(find.text('Plus ohne Zehnerübergang  ·  Bis 20'), findsOneWidget);
       expect(find.textContaining('abgebrochen nach'), findsOneWidget);
       expect(find.text('Mia'), findsWidgets);
       expect(find.text('Tom'), findsWidgets);
@@ -213,8 +213,8 @@ void main() {
       await tester.tap(find.text('🦊  Mia'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Plus ohne Zehnerübergang  ·  bis 20'), findsOneWidget);
-      expect(find.text('Plus und Minus gemischt  ·  bis 100'), findsNothing);
+      expect(find.text('Plus ohne Zehnerübergang  ·  Bis 20'), findsOneWidget);
+      expect(find.text('Plus und Minus gemischt  ·  Bis 100'), findsNothing);
     });
 
     testWidgets('the history can be narrowed to the last seven days',
@@ -234,20 +234,20 @@ void main() {
       await openAdmin(tester);
 
       // Both are there until the log is narrowed.
-      expect(find.text('Plus ohne Zehnerübergang  ·  bis 20'), findsOneWidget);
+      expect(find.text('Plus ohne Zehnerübergang  ·  Bis 20'), findsOneWidget);
 
       await tester.tap(find.text('7 Tage'));
       await tester.pumpAndSettle();
-      expect(find.text('Plus ohne Zehnerübergang  ·  bis 20'), findsNothing);
-      expect(find.text('Plus und Minus gemischt  ·  bis 100'), findsOneWidget);
+      expect(find.text('Plus ohne Zehnerübergang  ·  Bis 20'), findsNothing);
+      expect(find.text('Plus und Minus gemischt  ·  Bis 100'), findsOneWidget);
 
       // And the two filters narrow independently.
       await tester.tap(find.text('🐧  Tom'));
       await tester.pumpAndSettle();
-      expect(find.text('Plus und Minus gemischt  ·  bis 100'), findsOneWidget);
+      expect(find.text('Plus und Minus gemischt  ·  Bis 100'), findsOneWidget);
       await tester.tap(find.text('🦊  Mia'));
       await tester.pumpAndSettle();
-      expect(find.text('Plus und Minus gemischt  ·  bis 100'), findsNothing);
+      expect(find.text('Plus und Minus gemischt  ·  Bis 100'), findsNothing);
     });
 
     testWidgets('tidying up says whose runs and from when', (tester) async {
@@ -292,7 +292,7 @@ void main() {
 
       // The finished run stays, the abandoned one is gone from the list, and
       // the button with it - there is nothing left to tidy.
-      expect(find.text('Plus ohne Zehnerübergang  ·  bis 20'), findsOneWidget);
+      expect(find.text('Plus ohne Zehnerübergang  ·  Bis 20'), findsOneWidget);
       expect(find.textContaining('aufräumen'), findsNothing);
     });
 

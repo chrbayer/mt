@@ -177,7 +177,7 @@ class _LessonTable extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          groupTitle(lesson.group).toLowerCase(),
+                          groupTitle(lesson.group),
                           style: const TextStyle(
                             fontSize: 15,
                             color: AppColors.textMuted,

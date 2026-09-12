@@ -317,8 +317,7 @@ class _HistoryRow extends StatelessWidget {
             child: Text(
               lesson == null
                   ? entry.lessonId
-                  : '${lesson.title}  ·  '
-                      '${groupTitle(lesson.group).toLowerCase()}',
+                  : '${lesson.title}  ·  ${groupTitle(lesson.group)}',
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(fontSize: 19),

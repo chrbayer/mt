@@ -86,7 +86,7 @@ class _AssignmentEditorState extends ConsumerState<AssignmentEditor> {
               DropdownButtonFormField<String>(
                 initialValue: _lessonId,
                 isExpanded: true,
-                hint: const Text('auswählen'),
+                hint: const Text('Bitte auswählen'),
                 items: [
                   for (final group in LessonGroup.values)
                     if (lessonsInGroup(group).isNotEmpty) ...[
@@ -178,7 +178,7 @@ class _AssignmentEditorState extends ConsumerState<AssignmentEditor> {
               // would never actually require anything.
               if (lesson == null || lesson.scored) ...[
                 const SizedBox(height: 16),
-                const Text('Mindestens Sterne',
+                const Text('Mindeststerne',
                     style: TextStyle(fontSize: 20)),
                 const SizedBox(height: 8),
                 AmountChoice(
@@ -190,7 +190,7 @@ class _AssignmentEditorState extends ConsumerState<AssignmentEditor> {
                       setState(() => _minStars = v ?? _minStars),
                 ),
                 const SizedBox(height: 16),
-                const Text('Mindestens Blitze',
+                const Text('Mindestblitze',
                     style: TextStyle(fontSize: 20)),
                 const SizedBox(height: 8),
                 AmountChoice(

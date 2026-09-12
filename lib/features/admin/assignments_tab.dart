@@ -145,8 +145,7 @@ class _AssignmentRow extends ConsumerWidget {
                   child: Text(
                     lesson == null
                         ? assignment.lessonId
-                        : '${lesson.title} · '
-                            '${groupTitle(lesson.group).toLowerCase()}',
+                        : '${lesson.title} · ${groupTitle(lesson.group)}',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
