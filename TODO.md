@@ -203,3 +203,9 @@ Stellen (Übungsverlauf, Aufgabenliste, Statistiktabelle) und ist überall weg.
 Beim Durchsehen der übrigen Texte im Aufgabenbereich: „Mindestens Sterne"
 und „Mindestens Blitze" heißen jetzt „Mindeststerne" und „Mindestblitze", der
 Platzhalter der Lektionsauswahl „Bitte auswählen" statt „auswählen".
+
+#34 erledigt (2.10.2) — Am Ende eines Durchgangs war nicht zu erkennen, was
+die Aufgabe überhaupt verlangt hatte. Der Ergebnisbildschirm zeigt jetzt die
+geforderten Sterne und Blitze in denselben Symbolen wie die verdienten, dazu
+den Stand („zählt für deine Aufgabe: 1 von 3") oder den grünen Haken, wenn
+sie erfüllt ist.

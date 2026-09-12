@@ -1188,6 +1188,17 @@ antippbar, denn diese App verbietet nie das Üben, dieselbe Linie wie beim
 Tagesdeckel selbst. Sie bleibt bis zum Ende des Zeitraums stehen — der Haken
 ist die Belohnung, eine verschwindende Karte wäre keine.
 
+Am **Ende eines Durchgangs** zeigt `AssignmentGoalHint` die geforderten
+Sterne und Blitze in denselben Symbolen wie die verdienten darüber — das ist
+der Vergleich, um den es dort geht. Vorher stand dort nur, was herauskam, und
+wer mit zwei Sternen dastand, konnte nicht erkennen, ob das die Aufgabe
+erfüllt oder um einen verfehlt hat. Die Zeile teilt sich den Platz mit
+„zählt heute nicht" und „zu kurz" und steht von den dreien vorn: die beiden
+anderen können bei offener Aufgabe ohnehin nicht auftreten, denn der Deckel
+ist ausgesetzt und eine Aufgabe verlangt nie weniger als zehn Rechnungen. Ob
+der Durchgang gezählt hat, entscheidet `qualifies` aus der Fachlogik, nicht
+eine zweite Rechnung im Widget.
+
 Über **verpasste** Zeiträume steht auf dem Kinderbildschirm nichts. Die
 Statistik dazu ist für die Eltern (`assignments_tab.dart`, mit dem
 Punktestreifen der letzten vierzehn Zeiträume); „gestern nicht geschafft" auf

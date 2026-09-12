@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 
+import '../../domain/assignment.dart';
 import '../../domain/practice_limit.dart';
 import '../../domain/scoring.dart';
 import '../../theme/app_theme.dart';
+import 'star_row.dart';
 
 /// Says that a run this short earns nothing.
 ///
@@ -131,6 +133,84 @@ class RemainingTimeHint extends StatelessWidget {
             ),
           ),
         ),
+      ],
+    );
+  }
+}
+
+/// What the assignment this run belongs to asked for, and whether this run
+/// delivered it.
+///
+/// The result screen shows what was **earned** in letters the size of a
+/// hand. What it never showed was what was **wanted** - so a child who came
+/// away with two stars had no way of telling whether that finished their
+/// assignment or missed it by one. The bar is drawn here in the same symbols
+/// as the reward, because that is the comparison being made.
+class AssignmentGoalHint extends StatelessWidget {
+  final Assignment assignment;
+
+  /// Whether this run cleared the bar. Worked out with `qualifies` from the
+  /// domain, never re-derived here.
+  final bool qualified;
+
+  /// Qualifying runs in the period so far, this one included.
+  final int done;
+
+  /// Whether [done] has reached what the assignment asks.
+  final bool met;
+
+  final double fontSize;
+
+  const AssignmentGoalHint({
+    super.key,
+    required this.assignment,
+    required this.qualified,
+    required this.done,
+    required this.met,
+    this.fontSize = 18,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final (icon, colour, words) = met
+        ? (Icons.check_circle, AppColors.correct, 'Aufgabe geschafft!')
+        : qualified
+            ? (
+                Icons.check_circle_outline,
+                AppColors.correct,
+                'Zählt für deine Aufgabe: $done von ${assignment.runs}',
+              )
+            : (
+                Icons.info_outline,
+                AppColors.profile1,
+                'Das reicht für deine Aufgabe noch nicht:',
+              );
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(icon, size: fontSize * 1.2, color: colour),
+        const SizedBox(width: 8),
+        Flexible(
+          child: Text(
+            words,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(fontSize: fontSize, color: colour),
+          ),
+        ),
+        // The bar itself, in the symbols it is measured in. Dropped once the
+        // goal is met: then the answer is the tick, not the arithmetic.
+        if (!met) ...[
+          if (assignment.minStars > 0) ...[
+            const SizedBox(width: 10),
+            StarRow(earned: assignment.minStars, size: fontSize * 1.25),
+          ],
+          if (assignment.minBolts > 0) ...[
+            const SizedBox(width: 6),
+            BoltRow(earned: assignment.minBolts, size: fontSize * 1.25),
+          ],
+        ],
       ],
     );
   }

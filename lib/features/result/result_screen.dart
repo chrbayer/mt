@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/db/app_database.dart';
+import '../../domain/assignment.dart';
 import '../../domain/lesson.dart';
 import '../../domain/scoring.dart';
 import '../../providers.dart';
@@ -73,6 +74,41 @@ class ResultScreen extends ConsumerWidget {
     // Only when the cap is what stopped it - an abandoned run is not scored
     // either, and it does not reach this screen with something to explain.
     final usedUpToday = capToday?.used;
+
+    // What the assignment behind this run asked for, if there is one. The
+    // screen shows what was earned in letters the size of a hand; without
+    // this it never showed what was wanted, so two stars left a child
+    // guessing whether that finished the assignment or missed it by one.
+    final assignment = user == null
+        ? null
+        : ref
+            .watch(assignmentForLessonProvider(
+              (userId: user.id, lessonId: lesson.id),
+            ))
+            .value;
+    final assignmentStats = assignment == null
+        ? null
+        : ref.watch(assignmentStatsProvider(assignment)).value;
+    final goal = assignmentStats == null
+        ? null
+        : (
+            assignment: assignment!,
+            // Judged by the domain rule, never re-derived here.
+            qualified: qualifies(
+              a: assignment,
+              lesson: lesson,
+              run: (
+                finishedAtMs:
+                    ref.watch(clockProvider)().millisecondsSinceEpoch,
+                taskCount: taskCount,
+                totalMs: totalMs,
+                wrongAttempts: wrongAttempts,
+              ),
+              dueMs: assignmentStats.currentPeriod.dueMs,
+            ),
+            done: assignmentStats.current.qualifyingRuns,
+            met: assignmentStats.current.met,
+          );
 
     return Scaffold(
       body: SafeArea(
@@ -210,7 +246,24 @@ class ResultScreen extends ConsumerWidget {
               // worth more than the air. One line at most, so the two share
               // the slot - and "did not count today" outranks "too short",
               // because it is the one the child could not have foreseen.
-              if (usedUpToday != null) ...[
+              // The assignment comes first of the three: it is the only one
+              // the child was working towards, and the other two cannot
+              // apply while one is open anyway - the cap is suspended, and
+              // an assignment never asks for fewer than ten tasks.
+              if (goal != null) ...[
+                const SizedBox(height: 10),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 40),
+                  child: AssignmentGoalHint(
+                    assignment: goal.assignment,
+                    qualified: goal.qualified,
+                    done: goal.done,
+                    met: goal.met,
+                    fontSize: 17,
+                  ),
+                ),
+                const SizedBox(height: 6),
+              ] else if (usedUpToday != null) ...[
                 const SizedBox(height: 10),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 40),

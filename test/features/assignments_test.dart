@@ -6,6 +6,9 @@ import 'package:mathe_trainer/data/db/app_database.dart';
 import 'package:mathe_trainer/domain/assignment.dart';
 import 'package:mathe_trainer/domain/task.dart';
 import 'package:mathe_trainer/features/admin/assignments_tab.dart';
+import 'package:mathe_trainer/features/common/run_hints.dart';
+import 'package:mathe_trainer/features/common/star_row.dart';
+import 'package:mathe_trainer/features/result/result_screen.dart';
 import 'package:mathe_trainer/features/lessons/assignment_tile.dart';
 import 'package:mathe_trainer/domain/lesson.dart';
 import 'package:mathe_trainer/features/lessons/lesson_home_screen.dart';
@@ -97,6 +100,108 @@ void main() {
     );
     await tester.pumpAndSettle();
   }
+
+  /// The result screen for a run of [lessonId] that took [wrong] retries.
+  Future<void> pumpResult(
+    WidgetTester tester,
+    String lessonId, {
+    int wrong = 0,
+    int taskCount = 10,
+    int msPerTask = 3000,
+  }) async {
+    tester.view.physicalSize = const Size(1600, 1000);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: MaterialApp(
+          theme: buildAppTheme(),
+          home: ResultScreen(
+            lesson: lessonById(lessonId),
+            sessionId: null,
+            taskCount: taskCount,
+            totalMs: taskCount * msPerTask,
+            wrongAttempts: wrong,
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+  }
+
+  group('what the result screen says about the assignment', () {
+    testWidgets('a run that misses the bar shows what the bar was',
+        (tester) async {
+      await assign('add_100_plain', minStars: 3, minBolts: 2);
+      // Six retries over ten tasks is worth one star, not three.
+      await pumpResult(tester, 'add_100_plain', wrong: 6);
+
+      expect(find.textContaining('reicht für deine Aufgabe noch nicht'),
+          findsOneWidget);
+      // The bar itself, drawn in the symbols it is measured in: three stars
+      // wanted next to the one that was earned.
+      final rows = tester.widgetList<StarRow>(find.byType(StarRow));
+      expect(rows.any((r) => r.earned == 3), isTrue);
+      expect(tester.widgetList<BoltRow>(find.byType(BoltRow))
+          .any((r) => r.earned == 2), isTrue);
+    });
+
+    testWidgets('a run that clears it says how far along it is',
+        (tester) async {
+      await assign('add_100_plain', runs: 3, minStars: 2);
+      await finishRun('add_100_plain');
+      await pumpResult(tester, 'add_100_plain');
+
+      expect(find.textContaining('Zählt für deine Aufgabe: 1 von 3'),
+          findsOneWidget);
+    });
+
+    testWidgets('and the last one says it is done', (tester) async {
+      await assign('add_100_plain', minStars: 2);
+      await finishRun('add_100_plain');
+      await pumpResult(tester, 'add_100_plain');
+
+      expect(find.text('Aufgabe geschafft!'), findsOneWidget);
+    });
+
+    testWidgets('and the line fits on a 10" tablet', (tester) async {
+      // The column on that screen cannot grow: the hint takes the space the
+      // gap below it would have had, and nothing more.
+      await assign('add_100_plain', runs: 3, minStars: 3, minBolts: 3);
+      tester.view.physicalSize = const Size(1280, 800);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: MaterialApp(
+            theme: buildAppTheme(),
+            home: ResultScreen(
+              lesson: lessonById('add_100_plain'),
+              sessionId: null,
+              taskCount: 10,
+              totalMs: 30000,
+              wrongAttempts: 6,
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+      expect(find.byType(AssignmentGoalHint), findsOneWidget);
+    });
+
+    testWidgets('a lesson without an assignment says nothing about one',
+        (tester) async {
+      await pumpResult(tester, 'add_100_plain');
+
+      expect(find.byType(AssignmentGoalHint), findsNothing);
+    });
+  });
 
   testWidgets('the parent list writes the group the way the catalogue does',
       (tester) async {
