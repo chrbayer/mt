@@ -1180,6 +1180,22 @@ nichts**. Eine leere Ecke ist ehrlich; eine erfundene oder veraltete Nummer
 wäre schlimmer als keine. Der Test passt sich an, wie er läuft, und deckt
 damit beide Wege ab — einmal ohne Define, einmal mit.
 
+## Warum drei Pakete veraltet bleiben
+
+`flutter pub outdated` meldet dauerhaft ein paar Rückstände. Der größte Teil
+davon ist nur `pubspec.lock`, den hebt `flutter pub upgrade` an. Drei hängen
+dagegen von oben fest und lassen sich hier nicht bewegen:
+
+* `material_color_utilities` und `test_api` liefert das **Flutter-SDK** in
+  genau der Version mit, gegen die es gebaut ist — sie ziehen erst mit einem
+  Flutter-Update nach.
+* `cli_util` begrenzt **`drift_dev`**, auch in seiner neuesten Fassung.
+
+Das ist kein Versäumnis und braucht keinen Versuch. Wer `flutter pub upgrade`
+laufen lässt: danach `dart run build_runner build`, `flutter analyze` und
+`flutter test` — und die Version anheben, denn ein anderer Build darf nicht
+denselben `versionCode` behaupten wie der vorige (siehe „Versionierung").
+
 ## Linux-Build
 
 Der Desktop-Build wird **nicht** von `build_android.sh` mitgebaut. Wer eine
