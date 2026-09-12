@@ -260,7 +260,11 @@ List<AssignmentPeriod> closedPeriods(Assignment a, DateTime now) {
   if (!a.repeats) {
     final period = periodAt(a, now);
     final overdue = now.millisecondsSinceEpoch > period.dueMs;
-    return overdue && period.dueMs >= a.createdAtMs ? [period] : const [];
+    // No `createdAtMs` guard here, unlike the repeating case below. That
+    // guard keeps a standing rule from being blamed for days before it
+    // existed; a single assignment names its day on purpose, and a parent
+    // writing yesterday's plan down today means yesterday.
+    return overdue ? [period] : const [];
   }
 
   final step = a.rhythm == AssignmentRhythm.daily

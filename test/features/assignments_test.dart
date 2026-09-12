@@ -388,6 +388,41 @@ void main() {
         ['add_100_plain', 'money_add']);
   });
 
+  testWidgets('a single assignment gets a verdict, not a tally',
+      (tester) async {
+    // "Geschafft an 0 von 1 Tagen" plus one dot is a repetition statistic
+    // for something that happened once.
+    final yesterday = DateTime.now().subtract(const Duration(days: 1));
+    await container.read(assignmentRepositoryProvider).createAssignment(
+          userId: mia.id,
+          lessonIds: const ['add_100_plain'],
+          rhythm: AssignmentRhythm.daily,
+          repeats: false,
+          onDayMs: yesterday.millisecondsSinceEpoch,
+          runs: 1,
+          taskCount: 10,
+          minStars: 0,
+          minBolts: 0,
+        );
+
+    tester.view.physicalSize = const Size(1600, 1000);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: MaterialApp(
+          theme: buildAppTheme(),
+          home: const Scaffold(body: AssignmentsTab()),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Verpasst'), findsOneWidget);
+    expect(find.textContaining('von 1 Tagen'), findsNothing);
+  });
+
   group('changing an assignment', () {
     Future<void> pumpTab(WidgetTester tester) async {
       tester.view.physicalSize = const Size(1600, 1000);

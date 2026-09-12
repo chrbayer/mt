@@ -275,3 +275,11 @@ Elternbereich ist nach dem Tag sortiert, zu dem eine Aufgabe gehört, nicht
 nach dem Zeitpunkt der Eingabe — sonst liest sich ein Plan nicht als Plan.
 Und eine vergangene einmalige Aufgabe sagt nur dann „noch offen", wenn sie
 wirklich nachgezogen wird; sonst steht dort der Tag, an dem sie war.
+
+#42 erledigt (2.13.2) — Eine einmalige Aufgabe bekam im Elternbereich die
+Wiederholungsstatistik der wiederkehrenden: „Geschafft an 0 von 1 Tagen" und
+ein einzelner Punkt. Sie hat einen Zeitraum, also gibt es ein Urteil statt
+einer Zählung: geschafft, verpasst, verpasst und später nachgeholt, oder
+steht noch aus. Dabei fiel auf, dass ein bewusst rückdatierter Tag durch die
+Regel fiel, die eine wiederkehrende Aufgabe vor Tagen schützt, die es vor ihr
+gab — für eine einmalige gilt sie nicht, ihr Tag ist gewählt.

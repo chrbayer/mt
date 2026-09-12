@@ -214,35 +214,55 @@ class _AssignmentRow extends ConsumerWidget {
                     progress: stats.progressOf(lesson.id),
                     runs: assignment.runs,
                     showTitle: lessons.length > 1,
-                    closedMet: stats.closedMetByLesson[lesson.id] ?? 0,
-                    closedTotal: stats.closed.length,
+                    // A tally over periods is a statement about repetition.
+                    // A single assignment has one period, and "davor 0 von 1
+                    // Tagen" would be counting a thing that happened once.
+                    closedMet: assignment.repeats
+                        ? stats.closedMetByLesson[lesson.id] ?? 0
+                        : 0,
+                    closedTotal:
+                        assignment.repeats ? stats.closed.length : 0,
                     periodWord: periodWord,
                   ),
               const SizedBox(height: 4),
-              Row(
-                children: [
-                  Text(
-                    stats.closed.isEmpty
-                        ? 'Noch kein abgeschlossener Zeitraum'
-                        : 'Geschafft an ${stats.closedMet} von '
-                            '${stats.closed.length} $periodWord',
-                    style: const TextStyle(
-                        fontSize: 15, color: AppColors.textMuted),
-                  ),
-                  const SizedBox(width: 10),
-                  // The last fourteen closed periods as a strip of dots -
-                  // "how often" at a glance, without a table to read.
-                  for (final met in _lastFourteen(stats.closed))
-                    Padding(
-                      padding: const EdgeInsets.only(right: 3),
-                      child: Icon(
-                        Icons.circle,
-                        size: 10,
-                        color: met ? AppColors.correct : AppColors.divider,
-                      ),
+              if (assignment.repeats)
+                Row(
+                  children: [
+                    Text(
+                      stats.closed.isEmpty
+                          ? 'Noch kein abgeschlossener Zeitraum'
+                          : 'Geschafft an ${stats.closedMet} von '
+                              '${stats.closed.length} $periodWord',
+                      style: const TextStyle(
+                          fontSize: 15, color: AppColors.textMuted),
                     ),
-                ],
-              ),
+                    const SizedBox(width: 10),
+                    // The last fourteen closed periods as a strip of dots -
+                    // "how often" at a glance, without a table to read.
+                    for (final met in _lastFourteen(stats.closed))
+                      Padding(
+                        padding: const EdgeInsets.only(right: 3),
+                        child: Icon(
+                          Icons.circle,
+                          size: 10,
+                          color: met ? AppColors.correct : AppColors.divider,
+                        ),
+                      ),
+                  ],
+                )
+              else
+                // One period, so one verdict - and it says whether anything
+                // was made up afterwards, because that is the only thing a
+                // carried-over assignment adds.
+                Text(
+                  _singleVerdict(assignment, stats),
+                  style: TextStyle(
+                    fontSize: 15,
+                    color: stats.closed.isEmpty || stats.closed.single
+                        ? AppColors.textMuted
+                        : AppColors.profile1,
+                  ),
+                ),
             ],
           ],
         ),
@@ -329,4 +349,16 @@ class _LessonLine extends StatelessWidget {
       ),
     );
   }
+}
+
+/// How a single assignment ended up, in one line.
+///
+/// The dot strip and "an X von Y Tagen" belong to a repeating one. Here
+/// there is exactly one period, so there is exactly one thing to say.
+String _singleVerdict(Assignment a, AssignmentStats stats) {
+  if (stats.closed.isEmpty) {
+    return stats.met ? 'Geschafft' : 'Steht noch aus';
+  }
+  if (stats.closed.single) return 'Geschafft';
+  return stats.settled ? 'Verpasst, später nachgeholt' : 'Verpasst';
 }
