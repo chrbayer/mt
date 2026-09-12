@@ -1,0 +1,6 @@
+Aufgaben lassen sich planen: täglich, wöchentlich oder für einen bestimmten
+Tag, auf Wunsch mit Nachziehen, wenn etwas liegen bleibt.
+
+Der Übungsverlauf im Elternbereich lässt sich nach Zeitraum eingrenzen,
+gelöschte Durchgänge lassen sich zurückholen, und der Elternbereich erinnert
+daran, wann zuletzt gesichert wurde.

@@ -1,0 +1,53 @@
+Kopfrechnen üben auf dem Tablet, für Kinder ab der ersten Klasse. Die App
+misst die Zeit bis zur richtigen Lösung und macht daraus eine Lernkurve und
+Bestenlisten, in denen mehrere Kinder auf demselben Gerät gegeneinander
+antreten.
+
+Sie läuft vollständig offline. Kein Konto, keine Werbung, keine Analyse, keine
+Internetberechtigung.
+
+<b>76 Lektionen in neun Gruppen</b>
+
+Erste Schritte, Bis 10, Bis 20, Bis 100, Bis 1000, Einmaleins, Einmaleins
+rückwärts, Mal und Geteilt, Uhrzeit und Geld. Ab 20 bietet jede Gruppe Plus
+und Minus mit und ohne Zehnerübergang, Aufgaben mit Platzhalter und eine
+gemischte Lektion.
+
+Die Ersten Schritte kommen ohne Lesen aus: Bilder zählen, Würfelpunkte
+ablesen, zwei Häufchen vergleichen, die Zahlenreihe vorwärts und rückwärts.
+
+<b>Sterne für Sorgfalt, Blitze für Tempo</b>
+
+Zwei getrennte Achsen, mit Absicht. Sterne richten sich nach der Fehlerquote,
+Blitze nach der Zeit pro Aufgabe. Wer sauber rechnet, bekommt seine Sterne
+auch langsam.
+
+<b>Was Eltern einstellen können</b>
+
+Hinter einer PIN: welche Bereiche ein Kind überhaupt sieht, wie lange am Stück
+und wie lange am Tag geübt werden darf, wie viele Durchgänge einer Übung am
+Tag noch zählen, und ob schwere Aufgaben wiederholt werden.
+
+Dazu Aufgaben: eine Übung zuweisen, täglich oder wöchentlich, oder als Plan
+für einen bestimmten Tag. Mit Mindestanforderung an Sterne und Blitze, und
+auf Wunsch ziehen unerledigte nach.
+
+<b>Für mehrere Kinder</b>
+
+Jedes Kind hat ein eigenes Profil mit Bild und Farbe. Ergebnisse, Sterne und
+Zeiten bleiben getrennt. Im Duell rechnen zwei Kinder dieselben Aufgaben
+nacheinander auf demselben Tablet.
+
+<b>Gedacht fürs Querformat</b>
+
+Große Ziffern, eine eigene Zifferntastatur, keine Systemtastatur während der
+Übung, keine Ablenkung. Rückmeldung auf drei Kanälen: Farbe, Ton und
+Vibration.
+
+<b>Deine Daten bleiben bei dir</b>
+
+Alles steht in einer Datenbank auf dem Gerät. Eine Sicherung erzeugt die App
+nur auf ausdrücklichen Wunsch und übergibt sie dem Teilen-Dialog von Android;
+wohin sie geht, entscheidest du.
+
+Die Oberfläche ist auf Deutsch.

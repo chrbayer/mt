@@ -23,10 +23,21 @@ void main() {
   late ProviderContainer container;
   late User mia;
 
+  /// What the app thinks the time is. Real by default - almost everything
+  /// here is about "today" and works on any day - but a test whose answer
+  /// depends on the **weekday** has to say which one it means.
+  late DateTime Function() clock;
+
   setUp(() async {
     db = AppDatabase(NativeDatabase.memory());
+    clock = DateTime.now;
     container = ProviderContainer(
-      overrides: [databaseProvider.overrideWithValue(db)],
+      overrides: [
+        databaseProvider.overrideWithValue(db),
+        // Indirect on purpose: a test may move the clock after the container
+        // is built, and before anything has read it.
+        clockProvider.overrideWithValue(() => clock()),
+      ],
     );
     final users = container.read(userRepositoryProvider);
     mia = (await users.findUser(
@@ -568,6 +579,11 @@ void main() {
   });
 
   testWidgets('the daily card comes before the weekly one', (tester) async {
+    // A Wednesday, and it has to be one: on a Sunday the two run out at the
+    // same moment, and then it is the older card that goes first - which is
+    // the next test, not this one. With the real clock this failed once a
+    // week.
+    clock = () => DateTime(2026, 9, 16, 10);
     await assign('add_100_plain', rhythm: AssignmentRhythm.weekly);
     await assign('add_100_carry');
     await pump(tester);

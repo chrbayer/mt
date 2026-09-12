@@ -283,3 +283,23 @@ einer Zählung: geschafft, verpasst, verpasst und später nachgeholt, oder
 steht noch aus. Dabei fiel auf, dass ein bewusst rückdatierter Tag durch die
 Regel fiel, die eine wiederkehrende Aufgabe vor Tagen schützt, die es vor ihr
 gab — für eine einmalige gilt sie nicht, ihr Tag ist gewählt.
+
+#43 erledigt (2.13.3) — Alles vorbereitet, was F-Droid aus dem Repository
+liest: Titel, Kurz- und Langbeschreibung auf Deutsch und Englisch, ein
+Änderungshinweis, ein 512er-Icon und zehn Screenshots, alle unter
+`fastlane/metadata/android/`. Die Bilder entstehen aus der App selbst
+(`tool/screenshots_test.dart`), nicht aus einem Emulator, und mit der echten
+Roboto — mit DejaVu brach die Statistiktabelle „Zehnerübergang" mitten im
+Wort um, ein Fehler, den es auf dem Gerät nicht gibt. Die Übungshistorie in
+den Bildern kommt aus dem echten Aufgabengenerator und ist über drei Wochen
+verteilt: mit einem gemeinsamen Satz Zahlen stand in jeder Tabellenzeile
+dasselbe, und mit einheitlichem Zeitstempel zeichnete die Lernkurve ein Kind,
+das langsamer wird. Dazu die Versionen von 1.11.0 an nachträglich getaggt —
+eine Build-Recipe zeigt auf einen Tag, nicht auf einen Branch.
+
+#44 erledigt (2.13.3) — Ein Test lief eine Woche lang richtig und sonntags
+falsch: „die Tageskarte steht vor der Wochenkarte" gilt nur, solange die
+Woche später endet als der Tag. Am Sonntag laufen beide im selben Moment ab,
+und dann entscheidet das Alter — was der Test daneben ohnehin prüft. Der Test
+stellt die Uhr jetzt selbst auf einen Mittwoch, statt sich auf den Kalender
+zu verlassen.

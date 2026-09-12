@@ -1,0 +1,5 @@
+Assignments can now be planned: daily, weekly, or for one named day, and
+unfinished ones can be carried over.
+
+The parent area's practice log can be narrowed by time, deleted runs can be
+brought back, and the parent area says when the last backup was made.

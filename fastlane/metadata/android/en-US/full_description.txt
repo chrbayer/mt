@@ -1,0 +1,36 @@
+Mental arithmetic practice on a tablet, for children from their first school
+year. The app measures the time to the correct answer and turns it into a
+learning curve and leaderboards, where several children on the same device
+compete with each other.
+
+<b>The interface is in German only.</b>
+
+It runs entirely offline. No account, no ads, no analytics, and no internet
+permission at all.
+
+<b>76 lessons in nine groups</b>
+
+Counting and comparing pictures for the youngest, then addition and
+subtraction up to 10, 20, 100 and 1000 - with and without carrying - the
+times tables forwards and backwards, division with and without a remainder,
+order of operations, telling the time and handling money.
+
+<b>Stars for care, lightning bolts for speed</b>
+
+Two separate axes on purpose. Stars follow the error rate, bolts the time per
+task. A child who works carefully earns the stars even slowly.
+
+<b>What parents can set</b>
+
+Behind a PIN: which groups a child is offered at all, how long they may
+practise in one stretch and per day, how many runs of one lesson still count
+towards records in a day, and whether difficult tasks are woven back in.
+
+Assignments too: give a child a lesson, daily or weekly, or as a plan for one
+named day, with a minimum of stars and bolts to reach.
+
+<b>Your data stays with you</b>
+
+Everything lives in a database on the device. A backup is written only when
+you ask for one, and handed to Android's share sheet - where it goes is your
+choice.

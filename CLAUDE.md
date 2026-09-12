@@ -1347,6 +1347,13 @@ duplizieren. Die Wertung läuft dabei bewusst **nicht** in SQL — `starsFor` un
 Dart-Fassung (dazu bei den Blitzen eine geprüfte SQL-Fassung für die
 Bestenlisten), aber keine dritte für Aufgaben.
 
+Ein Test über Aufgaben, dessen Antwort vom **Wochentag** abhängt, muss die
+Uhr selbst stellen. `assignments_test.dart` hält dafür eine austauschbare
+`clock`, die `clockProvider` überschreibt. „Die Tageskarte steht vor der
+Wochenkarte" war sonst sechs Tage die Woche wahr und sonntags falsch, weil
+beide dann im selben Moment ablaufen und das Alter entscheidet. Ein Test, der
+einmal die Woche umkippt, liest sich beim nächsten Mal als echter Fehler.
+
 ## Punkt vor Strich
 
 `TaskForm.chain` (nachgetragen aus 2.7.0) zeigt drei Operanden in

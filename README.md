@@ -382,6 +382,31 @@ Statistiken gegen eine In-Memory-Datenbank, die Timing-Regeln des
 Übungs-Controllers sowie einen kompletten Durchgang durch die echte
 Oberfläche.
 
+## Store-Texte und Screenshots
+
+Unter `fastlane/metadata/android/` liegen Titel, Beschreibungen, Änderungs-
+hinweise und Bilder in der Form, die F-Droid direkt aus dem Repository liest.
+
+Die Screenshots stammen aus der App selbst, nicht aus einem Emulator:
+
+```bash
+flutter test tool/screenshots_test.dart --update-goldens
+```
+
+Der Lauf meldet einen Fehler, und das ist erwartet — die Tonwiedergabe
+findet in einem Widget-Test kein Plugin. Die Bilder werden trotzdem alle
+geschrieben.
+
+Das Store-Icon daneben kommt wie alle anderen aus der SVG:
+
+```bash
+rsvg-convert -w 512 -h 512 assets/icon/icon.svg \
+  -o fastlane/metadata/android/de-DE/images/icon.png
+```
+
+Die englische Fassung trägt dieselben Bilder: die Oberfläche gibt es nur auf
+Deutsch, und das steht auch in der englischen Beschreibung.
+
 ## Lizenz
 
 GNU General Public License, Version 3 oder später — der volle Text steht in
