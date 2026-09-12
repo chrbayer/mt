@@ -216,3 +216,11 @@ Kind und Lektion bleiben fest, die machen eine andere Aufgabe daraus. Der
 Erledigt-Status zieht automatisch nach, weil an einer Aufgabe nichts
 eingefroren ist — eine höher gehängte Latte nimmt den grünen Haken von heute
 also wieder weg, eine tiefer gehängte gibt ihn zurück.
+
+#36 erledigt (2.11.0) — Eine Aufgabe kann mehrere Übungen umfassen, gewählt
+über eine Mehrfachauswahl. Erledigt ist sie, wenn jede davon erfüllt ist;
+gemessen wird jede für sich. Beim Ändern sind schon geschaffte Übungen
+gedämpft und abgehakt, aber weiter abwählbar, und mindestens eine muss stehen
+bleiben. Für das Kind ändert sich nichts: jede Übung ist ihre eigene
+Karteikarte wie bisher. Schema v16 benennt die Spalte auf eine Liste um, eine
+einzelne ID ist bereits eine gültige einelementige Liste.

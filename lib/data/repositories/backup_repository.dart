@@ -135,7 +135,7 @@ class BackupRepository {
           {
             'id': row.id,
             'userId': row.userId,
-            'lessonId': row.lessonId,
+            'lessonIds': row.lessonIds,
             'rhythm': row.rhythm,
             'runs': row.runs,
             'taskCount': row.taskCount,
@@ -304,7 +304,11 @@ class BackupRepository {
               AssignmentsCompanion.insert(
                 id: Value(row['id'] as int),
                 userId: row['userId'] as int,
-                lessonId: row['lessonId'] as String,
+                // Up to 2.10.3 a single id was written as 'lessonId'. One id
+                // is a valid one-element list, so an older backup carries
+                // straight over.
+                lessonIds:
+                    (row['lessonIds'] ?? row['lessonId']) as String,
                 rhythm: row['rhythm'] as String,
                 // A 2.8.0 backup still carries `dueMinute` and `dueWeekday`.
                 // They are read past rather than rejected: the rhythm alone

@@ -110,7 +110,9 @@ class _AssignmentRow extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final stats = ref.watch(assignmentStatsProvider(assignment)).value;
-    final lesson = stats?.lesson ?? lessonByIdOrNull(assignment.lessonId);
+    final lessons = [
+      for (final id in assignment.lessonIds) ?lessonByIdOrNull(id),
+    ];
     final ended = !assignment.isOpen;
     // The rhythm shows up twice in this row, once as its own word and once
     // as the unit the statistic counts in.
@@ -147,9 +149,12 @@ class _AssignmentRow extends ConsumerWidget {
                 ],
                 Expanded(
                   child: Text(
-                    lesson == null
-                        ? assignment.lessonId
-                        : '${lesson.title} · ${groupTitle(lesson.group)}',
+                    lessons.isEmpty
+                        ? assignment.lessonIds.join(', ')
+                        : lessons.length == 1
+                            ? '${lessons.single.title} · '
+                                '${groupTitle(lessons.single.group)}'
+                            : '${lessons.length} Übungen',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
@@ -194,12 +199,17 @@ class _AssignmentRow extends ConsumerWidget {
             ),
             if (stats != null) ...[
               const SizedBox(height: 8),
+              // One line per lesson, each with its own count: every lesson
+              // of an assignment is measured on its own, and the assignment
+              // is done when all of them are.
               if (!ended)
-                Text(
-                  'Dieser Zeitraum: ${stats.current.qualifyingRuns}/'
-                  '${assignment.runs} Durchgänge',
-                  style: const TextStyle(fontSize: 16),
-                ),
+                for (final lesson in lessons)
+                  _LessonLine(
+                    lesson: lesson,
+                    progress: stats.progressOf(lesson.id),
+                    runs: assignment.runs,
+                    showTitle: lessons.length > 1,
+                  ),
               const SizedBox(height: 4),
               Row(
                 children: [
@@ -234,4 +244,55 @@ class _AssignmentRow extends ConsumerWidget {
 
   List<bool> _lastFourteen(List<bool> closed) =>
       closed.length <= 14 ? closed : closed.sublist(closed.length - 14);
+}
+
+/// Where one lesson of an assignment stands in the period running now.
+class _LessonLine extends StatelessWidget {
+  final LessonSpec lesson;
+  final AssignmentProgress? progress;
+  final int runs;
+
+  /// With a single lesson the heading above already names it, so repeating
+  /// it here would only take the room the numbers need.
+  final bool showTitle;
+
+  const _LessonLine({
+    required this.lesson,
+    required this.progress,
+    required this.runs,
+    required this.showTitle,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final done = progress?.met ?? false;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 2),
+      child: Row(
+        children: [
+          Icon(
+            done ? Icons.check_circle : Icons.radio_button_unchecked,
+            size: 18,
+            color: done ? AppColors.correct : AppColors.divider,
+          ),
+          const SizedBox(width: 8),
+          if (showTitle) ...[
+            Flexible(
+              child: Text(
+                lesson.title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(fontSize: 16),
+              ),
+            ),
+            const SizedBox(width: 8),
+          ],
+          Text(
+            '${progress?.qualifyingRuns ?? 0}/$runs',
+            style: const TextStyle(fontSize: 16, color: AppColors.textMuted),
+          ),
+        ],
+      ),
+    );
+  }
 }

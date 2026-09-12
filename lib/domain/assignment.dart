@@ -35,7 +35,15 @@ AssignmentRhythm rhythmByName(String name) {
 class Assignment {
   final int id;
   final int userId;
-  final String lessonId;
+
+  /// The lessons this assignment covers, in catalogue order.
+  ///
+  /// Every one of them has to be practised to the bar, [runs] times, inside
+  /// a period - the assignment is done when all of them are. For the child
+  /// that changes nothing: each lesson is its own card, exactly as it was
+  /// when an assignment could only name one.
+  final List<String> lessonIds;
+
   final AssignmentRhythm rhythm;
 
   /// How many qualifying runs the period needs.
@@ -59,7 +67,7 @@ class Assignment {
   const Assignment({
     required this.id,
     required this.userId,
-    required this.lessonId,
+    required this.lessonIds,
     required this.rhythm,
     required this.runs,
     required this.taskCount,
@@ -81,7 +89,7 @@ class Assignment {
       other is Assignment &&
       other.id == id &&
       other.userId == userId &&
-      other.lessonId == lessonId &&
+      _sameLessons(other.lessonIds, lessonIds) &&
       other.rhythm == rhythm &&
       other.runs == runs &&
       other.taskCount == taskCount &&
@@ -91,8 +99,34 @@ class Assignment {
       other.endedAtMs == endedAtMs;
 
   @override
-  int get hashCode => Object.hash(id, userId, lessonId, rhythm, runs,
-      taskCount, minStars, minBolts, createdAtMs, endedAtMs);
+  int get hashCode => Object.hash(id, userId, Object.hashAll(lessonIds),
+      rhythm, runs, taskCount, minStars, minBolts, createdAtMs, endedAtMs);
+
+  static bool _sameLessons(List<String> a, List<String> b) {
+    if (a.length != b.length) return false;
+    for (var i = 0; i < a.length; i++) {
+      if (a[i] != b[i]) return false;
+    }
+    return true;
+  }
+}
+
+/// Reads the stored list of lesson ids. Ids the catalogue no longer has are
+/// skipped, the same caution every stored name gets - a backup from a newer
+/// version must not take the whole assignment down with it.
+List<String> lessonIdsByName(String stored) => [
+      for (final lesson in lessonCatalog)
+        if (stored.split(',').contains(lesson.id)) lesson.id,
+    ];
+
+/// Writes them back, always in catalogue order so two equal assignments
+/// compare equal and the stored string is stable.
+String lessonIdsToStored(Iterable<String> ids) {
+  final wanted = ids.toSet();
+  return [
+    for (final lesson in lessonCatalog)
+      if (wanted.contains(lesson.id)) lesson.id,
+  ].join(',');
 }
 
 /// One rhythm period with its own deadline: one calendar day for
@@ -208,7 +242,8 @@ bool qualifies({
 }
 
 /// How many of [runs] qualify within [period], and whether that reaches
-/// [Assignment.runs].
+/// [Assignment.runs]. Held per lesson: an assignment is done when every
+/// lesson it names is.
 class AssignmentProgress {
   final int qualifyingRuns;
   final bool met;
@@ -231,6 +266,34 @@ AssignmentProgress progressIn({
     met: qualifying >= a.runs,
   );
 }
+
+/// The same for every lesson the assignment names, keyed by lesson id.
+///
+/// [runsByLesson] holds only the runs of that lesson; a lesson the catalogue
+/// no longer knows is left out rather than guessed at.
+Map<String, AssignmentProgress> progressByLesson({
+  required Assignment a,
+  required AssignmentPeriod period,
+  required Map<String, List<RunFacts>> runsByLesson,
+}) =>
+    {
+      for (final id in a.lessonIds)
+        if (lessonByIdOrNull(id) case final lesson?)
+          id: progressIn(
+            a: a,
+            lesson: lesson,
+            period: period,
+            runs: runsByLesson[id] ?? const [],
+          ),
+    };
+
+/// Whether every lesson of the assignment has had its say.
+///
+/// Empty counts as not done: an assignment without a single lesson left in
+/// the catalogue has nothing to show for itself, and calling that "geschafft"
+/// would be a green tick for nothing.
+bool allLessonsMet(Map<String, AssignmentProgress> byLesson) =>
+    byLesson.isNotEmpty && byLesson.values.every((p) => p.met);
 
 /// The deadline as a child reads it: "heute" or "bis Sonntag".
 ///

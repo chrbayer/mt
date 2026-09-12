@@ -41,6 +41,7 @@ void main() {
 
   Future<int> assign(
     String lessonId, {
+    List<String>? lessonIds,
     AssignmentRhythm rhythm = AssignmentRhythm.daily,
     int runs = 1,
     int taskCount = 10,
@@ -49,7 +50,7 @@ void main() {
   }) =>
       container.read(assignmentRepositoryProvider).createAssignment(
             userId: mia.id,
-            lessonId: lessonId,
+            lessonIds: lessonIds ?? [lessonId],
             rhythm: rhythm,
             runs: runs,
             taskCount: taskCount,
@@ -203,6 +204,46 @@ void main() {
     });
   });
 
+  group('an assignment over several lessons', () {
+    testWidgets('gives the child one card per lesson', (tester) async {
+      await assign('add_100_plain',
+          lessonIds: ['add_100_plain', 'money_add']);
+      await pump(tester);
+
+      final tiles = tester
+          .widgetList<AssignmentTile>(find.byType(AssignmentTile))
+          .toList();
+      expect(tiles.map((t) => t.lesson.id),
+          ['add_100_plain', 'money_add']);
+      // Nothing about the card changed: each one is its own, with its own
+      // count, exactly as when an assignment could only name one lesson.
+      expect(find.textContaining('0/1'), findsNWidgets(2));
+    });
+
+    testWidgets('is only done when every lesson is', (tester) async {
+      await assign('add_100_plain',
+          lessonIds: ['add_100_plain', 'money_add']);
+      await finishRun('add_100_plain');
+      await pump(tester);
+
+      // One ticked off, one still open.
+      expect(find.text('geschafft'), findsOneWidget);
+      expect(find.textContaining('0/1'), findsOneWidget);
+
+      await finishRun('money_add');
+      await pump(tester);
+      expect(find.text('geschafft'), findsNWidgets(2));
+    });
+
+    test('the stored list keeps catalogue order, whatever went in', () {
+      expect(lessonIdsToStored(['money_add', 'add_100_plain']),
+          'add_100_plain,money_add');
+      // An id this version no longer has is skipped rather than kept.
+      expect(lessonIdsByName('add_100_plain,bruchrechnen'),
+          ['add_100_plain']);
+    });
+  });
+
   group('changing an assignment', () {
     Future<void> pumpTab(WidgetTester tester) async {
       tester.view.physicalSize = const Size(1600, 1000);
@@ -231,6 +272,7 @@ void main() {
       // frozen, so the same run is judged again - and no longer clears it.
       await container.read(assignmentRepositoryProvider).updateAssignment(
             id,
+            lessonIds: const ['add_100_plain'],
             rhythm: AssignmentRhythm.daily,
             runs: 1,
             taskCount: 10,
@@ -250,6 +292,7 @@ void main() {
 
       await container.read(assignmentRepositoryProvider).updateAssignment(
             id,
+            lessonIds: const ['add_100_plain'],
             rhythm: AssignmentRhythm.daily,
             runs: 1,
             taskCount: 10,
@@ -353,7 +396,7 @@ void main() {
     final tiles = tester
         .widgetList<AssignmentTile>(find.byType(AssignmentTile))
         .toList();
-    expect(tiles.map((t) => t.assignment.lessonId).toList(),
+    expect(tiles.map((t) => t.lesson.id).toList(),
         ['add_100_carry', 'add_100_plain']);
   });
 
@@ -369,7 +412,7 @@ void main() {
     final tiles = tester
         .widgetList<AssignmentTile>(find.byType(AssignmentTile))
         .toList();
-    expect(tiles.map((t) => t.assignment.lessonId).toList(),
+    expect(tiles.map((t) => t.lesson.id).toList(),
         ['add_100_plain', 'add_100_carry']);
   });
 
@@ -384,7 +427,7 @@ void main() {
     final tiles = tester
         .widgetList<AssignmentTile>(find.byType(AssignmentTile))
         .toList();
-    expect(tiles.map((t) => t.assignment.lessonId).toList(),
+    expect(tiles.map((t) => t.lesson.id).toList(),
         ['add_100_plain', 'add_100_carry']);
   });
 

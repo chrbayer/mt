@@ -64,7 +64,7 @@ class AssignmentRepository {
 
   Future<int> createAssignment({
     required int userId,
-    required String lessonId,
+    required List<String> lessonIds,
     required AssignmentRhythm rhythm,
     required int runs,
     required int taskCount,
@@ -74,7 +74,7 @@ class AssignmentRepository {
       _db.into(_db.assignments).insert(
             AssignmentsCompanion.insert(
               userId: userId,
-              lessonId: lessonId,
+              lessonIds: lessonIdsToStored(lessonIds),
               rhythm: rhythm.name,
               runs: runs,
               taskCount: taskCount,
@@ -95,6 +95,7 @@ class AssignmentRepository {
   /// would leave two different answers standing side by side.
   Future<void> updateAssignment(
     int id, {
+    required List<String> lessonIds,
     required AssignmentRhythm rhythm,
     required int runs,
     required int taskCount,
@@ -103,6 +104,7 @@ class AssignmentRepository {
   }) =>
       (_db.update(_db.assignments)..where((a) => a.id.equals(id))).write(
         AssignmentsCompanion(
+          lessonIds: Value(lessonIdsToStored(lessonIds)),
           rhythm: Value(rhythm.name),
           runs: Value(runs),
           taskCount: Value(taskCount),
@@ -120,38 +122,48 @@ class AssignmentRepository {
   Future<void> deleteAssignment(int id) =>
       (_db.delete(_db.assignments)..where((a) => a.id.equals(id))).go();
 
-  /// Completed, non-deleted runs of [a]'s child and lesson, finished at or
-  /// after [sinceMs]. No upper bound - `qualifies` and `progressIn` already
-  /// know a period's deadline, and asking once for the whole stretch beats
-  /// asking once per period.
-  Stream<List<AssignmentRun>> watchRunsFor(
+  /// Completed, non-deleted runs of [a]'s child, for every lesson it names,
+  /// finished at or after [sinceMs] - grouped by lesson, because each lesson
+  /// of an assignment is measured on its own.
+  ///
+  /// One query for all of them rather than one per lesson: the row set is
+  /// already small, and asking N times would multiply the subscriptions for
+  /// nothing. No upper bound either - `qualifies` and `progressIn` know a
+  /// period's deadline, and asking once for the whole stretch beats asking
+  /// once per period.
+  Stream<Map<String, List<AssignmentRun>>> watchRunsFor(
     Assignment a, {
     required int sinceMs,
   }) {
     return (_db.select(_db.sessions)
           ..where((s) =>
               s.userId.equals(a.userId) &
-              s.lessonId.equals(a.lessonId) &
+              s.lessonId.isIn(a.lessonIds) &
               s.completed.equals(true) &
               s.deleted.equals(false) &
               s.finishedAtMs.isBiggerOrEqualValue(sinceMs)))
         .watch()
-        .map((rows) => [
-              for (final row in rows)
-                AssignmentRun(
-                  // completed = true always carries a finish time.
-                  finishedAtMs: row.finishedAtMs!,
-                  taskCount: row.taskCount,
-                  totalMs: row.totalMs,
-                  wrongAttempts: row.wrongAttempts,
-                ),
-            ]);
+        .map((rows) {
+      final byLesson = <String, List<AssignmentRun>>{
+        for (final id in a.lessonIds) id: <AssignmentRun>[],
+      };
+      for (final row in rows) {
+        byLesson[row.lessonId]?.add(AssignmentRun(
+          // completed = true always carries a finish time.
+          finishedAtMs: row.finishedAtMs!,
+          taskCount: row.taskCount,
+          totalMs: row.totalMs,
+          wrongAttempts: row.wrongAttempts,
+        ));
+      }
+      return byLesson;
+    });
   }
 
   Assignment _fromRow(AssignmentRow row) => Assignment(
         id: row.id,
         userId: row.userId,
-        lessonId: row.lessonId,
+        lessonIds: lessonIdsByName(row.lessonIds),
         rhythm: rhythmByName(row.rhythm),
         runs: row.runs,
         taskCount: row.taskCount,

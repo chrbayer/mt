@@ -201,7 +201,10 @@ class Assignments extends Table {
   IntColumn get id => integer().autoIncrement()();
   IntColumn get userId =>
       integer().references(Users, #id, onDelete: KeyAction.cascade)();
-  TextColumn get lessonId => text()();
+  /// The lessons this assignment covers, as a comma-separated list of
+  /// [LessonSpec] ids - the same shape `hidden_groups` uses, and safe for
+  /// the same reason: an id never contains a comma.
+  TextColumn get lessonIds => text()();
 
   /// [AssignmentRhythm] name, not index - the same caution as
   /// `hidden_groups` and `lesson_filter`: a reordered enum must not
@@ -232,7 +235,7 @@ class AppDatabase extends _$AppDatabase {
       : super(executor ?? driftDatabase(name: 'mathe_trainer'));
 
   @override
-  int get schemaVersion => 15;
+  int get schemaVersion => 16;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -321,17 +324,32 @@ class AppDatabase extends _$AppDatabase {
           // and quality. Nothing to carry over - there were no assignments
           // before this.
           if (from < 13) await m.createTable(assignments);
-          // v14 drops the hour-of-day and weekday an assignment used to be
-          // due at. A day or a week is the whole deadline now: a child does
-          // not watch the clock, and the finer setting was precision nobody
-          // acted on. Rebuilding the table copies every column that is still
-          // declared and leaves those two behind.
+          // Two steps in one rebuild, because a rebuild always takes the
+          // table as it looks **now** - the same trap the v6 rebuild above
+          // warns about. Doing v14 on its own would look for `lesson_ids`
+          // in a table that still calls it `lesson_id`.
           //
-          // Nothing is lost by it. The end of a day lies after any time that
-          // could have been set, so no assignment already in the database
-          // becomes missed in hindsight.
-          if (from >= 13 && from < 14) {
-            await m.alterTable(TableMigration(assignments));
+          // v14 drops the hour-of-day and weekday an assignment used to be
+          // due at: a day or a week is the whole deadline now, a child does
+          // not watch the clock, and the finer setting was precision nobody
+          // acted on. Nothing is lost by it - the end of a day lies after
+          // any time that could have been set, so no assignment becomes
+          // missed in hindsight.
+          //
+          // v16 lets one assignment cover several lessons. The column is
+          // renamed rather than added to: a single id is already a valid
+          // one-element list, so every row carries straight over and no
+          // assignment changes meaning.
+          if (from >= 13 && from < 16) {
+            await m.alterTable(
+              TableMigration(
+                assignments,
+                columnTransformer: {
+                  assignments.lessonIds:
+                      const CustomExpression<String>('lesson_id'),
+                },
+              ),
+            );
           }
           // v15 records which groups a profile's visibility setting has
           // actually seen, so a group added later can be told apart from one

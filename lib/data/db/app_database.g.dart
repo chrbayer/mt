@@ -3171,12 +3171,12 @@ class $AssignmentsTable extends Assignments
       'REFERENCES users (id) ON DELETE CASCADE',
     ),
   );
-  static const VerificationMeta _lessonIdMeta = const VerificationMeta(
-    'lessonId',
+  static const VerificationMeta _lessonIdsMeta = const VerificationMeta(
+    'lessonIds',
   );
   @override
-  late final GeneratedColumn<String> lessonId = GeneratedColumn<String>(
-    'lesson_id',
+  late final GeneratedColumn<String> lessonIds = GeneratedColumn<String>(
+    'lesson_ids',
     aliasedName,
     false,
     type: DriftSqlType.string,
@@ -3259,7 +3259,7 @@ class $AssignmentsTable extends Assignments
   List<GeneratedColumn> get $columns => [
     id,
     userId,
-    lessonId,
+    lessonIds,
     rhythm,
     runs,
     taskCount,
@@ -3291,13 +3291,13 @@ class $AssignmentsTable extends Assignments
     } else if (isInserting) {
       context.missing(_userIdMeta);
     }
-    if (data.containsKey('lesson_id')) {
+    if (data.containsKey('lesson_ids')) {
       context.handle(
-        _lessonIdMeta,
-        lessonId.isAcceptableOrUnknown(data['lesson_id']!, _lessonIdMeta),
+        _lessonIdsMeta,
+        lessonIds.isAcceptableOrUnknown(data['lesson_ids']!, _lessonIdsMeta),
       );
     } else if (isInserting) {
-      context.missing(_lessonIdMeta);
+      context.missing(_lessonIdsMeta);
     }
     if (data.containsKey('rhythm')) {
       context.handle(
@@ -3373,9 +3373,9 @@ class $AssignmentsTable extends Assignments
         DriftSqlType.int,
         data['${effectivePrefix}user_id'],
       )!,
-      lessonId: attachedDatabase.typeMapping.read(
+      lessonIds: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
-        data['${effectivePrefix}lesson_id'],
+        data['${effectivePrefix}lesson_ids'],
       )!,
       rhythm: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
@@ -3417,7 +3417,11 @@ class $AssignmentsTable extends Assignments
 class AssignmentRow extends DataClass implements Insertable<AssignmentRow> {
   final int id;
   final int userId;
-  final String lessonId;
+
+  /// The lessons this assignment covers, as a comma-separated list of
+  /// [LessonSpec] ids - the same shape `hidden_groups` uses, and safe for
+  /// the same reason: an id never contains a comma.
+  final String lessonIds;
 
   /// [AssignmentRhythm] name, not index - the same caution as
   /// `hidden_groups` and `lesson_filter`: a reordered enum must not
@@ -3435,7 +3439,7 @@ class AssignmentRow extends DataClass implements Insertable<AssignmentRow> {
   const AssignmentRow({
     required this.id,
     required this.userId,
-    required this.lessonId,
+    required this.lessonIds,
     required this.rhythm,
     required this.runs,
     required this.taskCount,
@@ -3449,7 +3453,7 @@ class AssignmentRow extends DataClass implements Insertable<AssignmentRow> {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
     map['user_id'] = Variable<int>(userId);
-    map['lesson_id'] = Variable<String>(lessonId);
+    map['lesson_ids'] = Variable<String>(lessonIds);
     map['rhythm'] = Variable<String>(rhythm);
     map['runs'] = Variable<int>(runs);
     map['task_count'] = Variable<int>(taskCount);
@@ -3466,7 +3470,7 @@ class AssignmentRow extends DataClass implements Insertable<AssignmentRow> {
     return AssignmentsCompanion(
       id: Value(id),
       userId: Value(userId),
-      lessonId: Value(lessonId),
+      lessonIds: Value(lessonIds),
       rhythm: Value(rhythm),
       runs: Value(runs),
       taskCount: Value(taskCount),
@@ -3487,7 +3491,7 @@ class AssignmentRow extends DataClass implements Insertable<AssignmentRow> {
     return AssignmentRow(
       id: serializer.fromJson<int>(json['id']),
       userId: serializer.fromJson<int>(json['userId']),
-      lessonId: serializer.fromJson<String>(json['lessonId']),
+      lessonIds: serializer.fromJson<String>(json['lessonIds']),
       rhythm: serializer.fromJson<String>(json['rhythm']),
       runs: serializer.fromJson<int>(json['runs']),
       taskCount: serializer.fromJson<int>(json['taskCount']),
@@ -3503,7 +3507,7 @@ class AssignmentRow extends DataClass implements Insertable<AssignmentRow> {
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
       'userId': serializer.toJson<int>(userId),
-      'lessonId': serializer.toJson<String>(lessonId),
+      'lessonIds': serializer.toJson<String>(lessonIds),
       'rhythm': serializer.toJson<String>(rhythm),
       'runs': serializer.toJson<int>(runs),
       'taskCount': serializer.toJson<int>(taskCount),
@@ -3517,7 +3521,7 @@ class AssignmentRow extends DataClass implements Insertable<AssignmentRow> {
   AssignmentRow copyWith({
     int? id,
     int? userId,
-    String? lessonId,
+    String? lessonIds,
     String? rhythm,
     int? runs,
     int? taskCount,
@@ -3528,7 +3532,7 @@ class AssignmentRow extends DataClass implements Insertable<AssignmentRow> {
   }) => AssignmentRow(
     id: id ?? this.id,
     userId: userId ?? this.userId,
-    lessonId: lessonId ?? this.lessonId,
+    lessonIds: lessonIds ?? this.lessonIds,
     rhythm: rhythm ?? this.rhythm,
     runs: runs ?? this.runs,
     taskCount: taskCount ?? this.taskCount,
@@ -3541,7 +3545,7 @@ class AssignmentRow extends DataClass implements Insertable<AssignmentRow> {
     return AssignmentRow(
       id: data.id.present ? data.id.value : this.id,
       userId: data.userId.present ? data.userId.value : this.userId,
-      lessonId: data.lessonId.present ? data.lessonId.value : this.lessonId,
+      lessonIds: data.lessonIds.present ? data.lessonIds.value : this.lessonIds,
       rhythm: data.rhythm.present ? data.rhythm.value : this.rhythm,
       runs: data.runs.present ? data.runs.value : this.runs,
       taskCount: data.taskCount.present ? data.taskCount.value : this.taskCount,
@@ -3559,7 +3563,7 @@ class AssignmentRow extends DataClass implements Insertable<AssignmentRow> {
     return (StringBuffer('AssignmentRow(')
           ..write('id: $id, ')
           ..write('userId: $userId, ')
-          ..write('lessonId: $lessonId, ')
+          ..write('lessonIds: $lessonIds, ')
           ..write('rhythm: $rhythm, ')
           ..write('runs: $runs, ')
           ..write('taskCount: $taskCount, ')
@@ -3575,7 +3579,7 @@ class AssignmentRow extends DataClass implements Insertable<AssignmentRow> {
   int get hashCode => Object.hash(
     id,
     userId,
-    lessonId,
+    lessonIds,
     rhythm,
     runs,
     taskCount,
@@ -3590,7 +3594,7 @@ class AssignmentRow extends DataClass implements Insertable<AssignmentRow> {
       (other is AssignmentRow &&
           other.id == this.id &&
           other.userId == this.userId &&
-          other.lessonId == this.lessonId &&
+          other.lessonIds == this.lessonIds &&
           other.rhythm == this.rhythm &&
           other.runs == this.runs &&
           other.taskCount == this.taskCount &&
@@ -3603,7 +3607,7 @@ class AssignmentRow extends DataClass implements Insertable<AssignmentRow> {
 class AssignmentsCompanion extends UpdateCompanion<AssignmentRow> {
   final Value<int> id;
   final Value<int> userId;
-  final Value<String> lessonId;
+  final Value<String> lessonIds;
   final Value<String> rhythm;
   final Value<int> runs;
   final Value<int> taskCount;
@@ -3614,7 +3618,7 @@ class AssignmentsCompanion extends UpdateCompanion<AssignmentRow> {
   const AssignmentsCompanion({
     this.id = const Value.absent(),
     this.userId = const Value.absent(),
-    this.lessonId = const Value.absent(),
+    this.lessonIds = const Value.absent(),
     this.rhythm = const Value.absent(),
     this.runs = const Value.absent(),
     this.taskCount = const Value.absent(),
@@ -3626,7 +3630,7 @@ class AssignmentsCompanion extends UpdateCompanion<AssignmentRow> {
   AssignmentsCompanion.insert({
     this.id = const Value.absent(),
     required int userId,
-    required String lessonId,
+    required String lessonIds,
     required String rhythm,
     required int runs,
     required int taskCount,
@@ -3635,7 +3639,7 @@ class AssignmentsCompanion extends UpdateCompanion<AssignmentRow> {
     required int createdAtMs,
     this.endedAtMs = const Value.absent(),
   }) : userId = Value(userId),
-       lessonId = Value(lessonId),
+       lessonIds = Value(lessonIds),
        rhythm = Value(rhythm),
        runs = Value(runs),
        taskCount = Value(taskCount),
@@ -3645,7 +3649,7 @@ class AssignmentsCompanion extends UpdateCompanion<AssignmentRow> {
   static Insertable<AssignmentRow> custom({
     Expression<int>? id,
     Expression<int>? userId,
-    Expression<String>? lessonId,
+    Expression<String>? lessonIds,
     Expression<String>? rhythm,
     Expression<int>? runs,
     Expression<int>? taskCount,
@@ -3657,7 +3661,7 @@ class AssignmentsCompanion extends UpdateCompanion<AssignmentRow> {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (userId != null) 'user_id': userId,
-      if (lessonId != null) 'lesson_id': lessonId,
+      if (lessonIds != null) 'lesson_ids': lessonIds,
       if (rhythm != null) 'rhythm': rhythm,
       if (runs != null) 'runs': runs,
       if (taskCount != null) 'task_count': taskCount,
@@ -3671,7 +3675,7 @@ class AssignmentsCompanion extends UpdateCompanion<AssignmentRow> {
   AssignmentsCompanion copyWith({
     Value<int>? id,
     Value<int>? userId,
-    Value<String>? lessonId,
+    Value<String>? lessonIds,
     Value<String>? rhythm,
     Value<int>? runs,
     Value<int>? taskCount,
@@ -3683,7 +3687,7 @@ class AssignmentsCompanion extends UpdateCompanion<AssignmentRow> {
     return AssignmentsCompanion(
       id: id ?? this.id,
       userId: userId ?? this.userId,
-      lessonId: lessonId ?? this.lessonId,
+      lessonIds: lessonIds ?? this.lessonIds,
       rhythm: rhythm ?? this.rhythm,
       runs: runs ?? this.runs,
       taskCount: taskCount ?? this.taskCount,
@@ -3703,8 +3707,8 @@ class AssignmentsCompanion extends UpdateCompanion<AssignmentRow> {
     if (userId.present) {
       map['user_id'] = Variable<int>(userId.value);
     }
-    if (lessonId.present) {
-      map['lesson_id'] = Variable<String>(lessonId.value);
+    if (lessonIds.present) {
+      map['lesson_ids'] = Variable<String>(lessonIds.value);
     }
     if (rhythm.present) {
       map['rhythm'] = Variable<String>(rhythm.value);
@@ -3735,7 +3739,7 @@ class AssignmentsCompanion extends UpdateCompanion<AssignmentRow> {
     return (StringBuffer('AssignmentsCompanion(')
           ..write('id: $id, ')
           ..write('userId: $userId, ')
-          ..write('lessonId: $lessonId, ')
+          ..write('lessonIds: $lessonIds, ')
           ..write('rhythm: $rhythm, ')
           ..write('runs: $runs, ')
           ..write('taskCount: $taskCount, ')
@@ -6305,7 +6309,7 @@ typedef $$AssignmentsTableCreateCompanionBuilder =
     AssignmentsCompanion Function({
       Value<int> id,
       required int userId,
-      required String lessonId,
+      required String lessonIds,
       required String rhythm,
       required int runs,
       required int taskCount,
@@ -6318,7 +6322,7 @@ typedef $$AssignmentsTableUpdateCompanionBuilder =
     AssignmentsCompanion Function({
       Value<int> id,
       Value<int> userId,
-      Value<String> lessonId,
+      Value<String> lessonIds,
       Value<String> rhythm,
       Value<int> runs,
       Value<int> taskCount,
@@ -6364,8 +6368,8 @@ class $$AssignmentsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get lessonId => $composableBuilder(
-    column: $table.lessonId,
+  ColumnFilters<String> get lessonIds => $composableBuilder(
+    column: $table.lessonIds,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -6442,8 +6446,8 @@ class $$AssignmentsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get lessonId => $composableBuilder(
-    column: $table.lessonId,
+  ColumnOrderings<String> get lessonIds => $composableBuilder(
+    column: $table.lessonIds,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -6518,8 +6522,8 @@ class $$AssignmentsTableAnnotationComposer
   GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
 
-  GeneratedColumn<String> get lessonId =>
-      $composableBuilder(column: $table.lessonId, builder: (column) => column);
+  GeneratedColumn<String> get lessonIds =>
+      $composableBuilder(column: $table.lessonIds, builder: (column) => column);
 
   GeneratedColumn<String> get rhythm =>
       $composableBuilder(column: $table.rhythm, builder: (column) => column);
@@ -6598,7 +6602,7 @@ class $$AssignmentsTableTableManager
               ({
                 Value<int> id = const Value.absent(),
                 Value<int> userId = const Value.absent(),
-                Value<String> lessonId = const Value.absent(),
+                Value<String> lessonIds = const Value.absent(),
                 Value<String> rhythm = const Value.absent(),
                 Value<int> runs = const Value.absent(),
                 Value<int> taskCount = const Value.absent(),
@@ -6609,7 +6613,7 @@ class $$AssignmentsTableTableManager
               }) => AssignmentsCompanion(
                 id: id,
                 userId: userId,
-                lessonId: lessonId,
+                lessonIds: lessonIds,
                 rhythm: rhythm,
                 runs: runs,
                 taskCount: taskCount,
@@ -6622,7 +6626,7 @@ class $$AssignmentsTableTableManager
               ({
                 Value<int> id = const Value.absent(),
                 required int userId,
-                required String lessonId,
+                required String lessonIds,
                 required String rhythm,
                 required int runs,
                 required int taskCount,
@@ -6633,7 +6637,7 @@ class $$AssignmentsTableTableManager
               }) => AssignmentsCompanion.insert(
                 id: id,
                 userId: userId,
-                lessonId: lessonId,
+                lessonIds: lessonIds,
                 rhythm: rhythm,
                 runs: runs,
                 taskCount: taskCount,

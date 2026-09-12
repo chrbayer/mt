@@ -258,7 +258,7 @@ void main() {
     final assignments = AssignmentRepository(db);
     final openId = await assignments.createAssignment(
       userId: mia,
-      lessonId: 'times_7',
+      lessonIds: ['times_7'],
       rhythm: AssignmentRhythm.weekly,
       runs: 3,
       taskCount: 20,
@@ -267,7 +267,7 @@ void main() {
     );
     final endedId = await assignments.createAssignment(
       userId: mia,
-      lessonId: 'add_100_plain',
+      lessonIds: ['add_100_plain'],
       rhythm: AssignmentRhythm.daily,
       runs: 1,
       taskCount: 10,
@@ -282,7 +282,7 @@ void main() {
     await backup.import(json);
 
     final restored = await assignments.watchAssignments(userId: mia).first;
-    final open = restored.firstWhere((a) => a.lessonId == 'times_7');
+    final open = restored.firstWhere((a) => a.lessonIds.contains('times_7'));
     expect(open.rhythm, AssignmentRhythm.weekly);
     expect(open.runs, 3);
     expect(open.taskCount, 20);
@@ -291,7 +291,7 @@ void main() {
     expect(open.isOpen, isTrue);
     expect(open.id, openId);
 
-    final ended = restored.firstWhere((a) => a.lessonId == 'add_100_plain');
+    final ended = restored.firstWhere((a) => a.lessonIds.contains('add_100_plain'));
     expect(ended.isOpen, isFalse);
     expect(ended.endedAtMs, 1234567);
   });

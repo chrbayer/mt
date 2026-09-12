@@ -227,6 +227,12 @@ void main() {
       await recordRun(SessionRepository(before),
           userId: id, lessonId: 'add_20_plain');
 
+      if (version < 16) {
+        // Up to v15 an assignment named exactly one lesson, in a column
+        // called lesson_id.
+        await before.customStatement(
+            'ALTER TABLE assignments RENAME COLUMN lesson_ids TO lesson_id');
+      }
       if (version < 15) {
         await before
             .customStatement('ALTER TABLE users DROP COLUMN known_groups');
@@ -245,8 +251,9 @@ void main() {
         // up to v13 with the hour and weekday the deadline used to name,
         // from v14 without them.
         final oldShape = version < 14;
+        final lessonColumn = version < 16 ? 'lesson_id' : 'lesson_ids';
         await before.customStatement(
-          'INSERT INTO assignments (user_id, lesson_id, rhythm, '
+          'INSERT INTO assignments (user_id, $lessonColumn, rhythm, '
           '${oldShape ? 'due_minute, due_weekday, ' : ''}'
           'runs, task_count, min_stars, min_bolts, '
           'created_at_ms, ended_at_ms) '
@@ -311,7 +318,7 @@ void main() {
       return file;
     }
 
-    for (final from in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]) {
+    for (final from in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]) {
       test('a database from schema v$from keeps its data', () async {
         final file = await databaseAtVersion(from);
 
@@ -371,9 +378,10 @@ void main() {
           // whole migration.
           expect(assignments, isEmpty);
         } else {
-          // v14 drops the hour and the weekday and keeps everything else.
-          // Nobody loses an assignment because the deadline got coarser.
-          expect(assignments.single.lessonId, 'times_7');
+          // v14 drops the hour and the weekday, v16 renames the lesson
+          // column to a list - and a single id is already a valid
+          // one-element list, so the assignment carries straight over.
+          expect(assignments.single.lessonIds, 'times_7');
           expect(assignments.single.rhythm, 'weekly');
           expect(assignments.single.runs, 3);
           expect(assignments.single.taskCount, 20);

@@ -52,7 +52,9 @@ class LessonHomeScreen extends ConsumerWidget {
     // Lessons already carrying a card above: suggesting one of them a line
     // further down would be a contradiction, whether its card is still open
     // or already ticked off.
-    final assignedLessonIds = {for (final a in assignments) a.lessonId};
+    final assignedLessonIds = {
+      for (final a in assignments) ...a.lessonIds,
+    };
     final compactBar = MediaQuery.sizeOf(context).width < _compactBarWidth;
 
     /// The lessons of a group after the child's filter has had its say.
@@ -444,24 +446,39 @@ class _AssignmentGroup extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final now = ref.watch(clockProvider)();
 
-    // Both watched here, once, so the sort and the tile below draw on the
-    // same numbers - asking twice would risk the two disagreeing for a
-    // frame.
+    // One card per lesson, not per assignment: an assignment can name
+    // several, and for the child each of them is its own card - exactly as
+    // it looked when an assignment could only hold one.
+    //
+    // Watched here, once, so the sort and the tile below draw on the same
+    // numbers; asking twice would risk the two disagreeing for a frame.
     final entries = [
       for (final a in assignments)
-        (
-          assignment: a,
-          met: ref.watch(assignmentStatsProvider(a)).value?.current.met ??
-              false,
-          dueMs: periodAt(a, now).dueMs,
-        ),
+        for (final lesson in [
+          for (final id in a.lessonIds) ?lessonByIdOrNull(id),
+        ])
+          (
+            assignment: a,
+            lesson: lesson,
+            met: ref
+                    .watch(assignmentStatsProvider(a))
+                    .value
+                    ?.progressOf(lesson.id)
+                    ?.met ??
+                false,
+            dueMs: periodAt(a, now).dueMs,
+          ),
     ]..sort((x, y) {
         if (x.met != y.met) return x.met ? 1 : -1;
         if (x.dueMs != y.dueMs) return x.dueMs.compareTo(y.dueMs);
         // Two daily assignments are due at the same instant, so the deadline
         // cannot separate them. The one that has been standing longer goes
-        // first - anything else would let the order shuffle about.
-        return x.assignment.createdAtMs.compareTo(y.assignment.createdAtMs);
+        // first, and within one assignment the catalogue's own order -
+        // anything else would let the cards shuffle about.
+        final byAge =
+            x.assignment.createdAtMs.compareTo(y.assignment.createdAtMs);
+        if (byAge != 0) return byAge;
+        return x.lesson.group.index.compareTo(y.lesson.group.index);
       });
 
     return Column(
@@ -480,7 +497,10 @@ class _AssignmentGroup extends ConsumerWidget {
             childAspectRatio: 1.4,
             children: [
               for (final entry in entries)
-                AssignmentTile(assignment: entry.assignment),
+                AssignmentTile(
+                  assignment: entry.assignment,
+                  lesson: entry.lesson,
+                ),
             ],
           ),
         ),

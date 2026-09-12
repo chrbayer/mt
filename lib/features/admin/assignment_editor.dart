@@ -41,7 +41,7 @@ class AssignmentEditor extends ConsumerStatefulWidget {
 
 class _AssignmentEditorState extends ConsumerState<AssignmentEditor> {
   late int? _userId = widget.existing?.userId;
-  late String? _lessonId = widget.existing?.lessonId;
+  late final Set<String> _lessonIds = {...?widget.existing?.lessonIds};
   late AssignmentRhythm _rhythm =
       widget.existing?.rhythm ?? AssignmentRhythm.daily;
   late int _runs = widget.existing?.runs ?? 1;
@@ -54,7 +54,26 @@ class _AssignmentEditorState extends ConsumerState<AssignmentEditor> {
   @override
   Widget build(BuildContext context) {
     final users = ref.watch(usersProvider).value ?? const <User>[];
-    final lesson = _lessonId == null ? null : lessonByIdOrNull(_lessonId!);
+    // Which of the chosen lessons the child has already finished in the
+    // period running now - shown ticked and dimmed in the picker, so a
+    // parent adding a lesson can see what is already behind them.
+    final done = widget.existing == null
+        ? const <String>{}
+        : {
+            for (final entry in (ref
+                        .watch(assignmentStatsProvider(widget.existing!))
+                        .value
+                        ?.current ??
+                    const <String, AssignmentProgress>{})
+                .entries)
+              if (entry.value.met) entry.key,
+          };
+    // No bolts are earned where nothing is timed, so a bolt requirement
+    // would be a wish nobody can fail to grant. One unscored lesson among
+    // them is enough to take the row away - the bar has to be reachable for
+    // every lesson the assignment names.
+    final anyUnscored = _lessonIds
+        .any((id) => lessonByIdOrNull(id)?.scored == false);
     // Options start at minTasksForAward: below it a run earns no stars and
     // no bolts at all, so "mindestens 2 Sterne" would be a goal nobody could
     // ever reach.
@@ -103,51 +122,63 @@ class _AssignmentEditorState extends ConsumerState<AssignmentEditor> {
                   ],
                 ),
               const SizedBox(height: 20),
-              const Text('Lektion', style: TextStyle(fontSize: 20)),
+              const Text('Übungen', style: TextStyle(fontSize: 20)),
+              const SizedBox(height: 4),
+              const Text(
+                'Mehrere sind möglich. Jede davon muss erfüllt werden, '
+                'damit die Aufgabe erledigt ist.',
+                style: TextStyle(fontSize: 17, color: AppColors.textMuted),
+              ),
               const SizedBox(height: 8),
-              if (_editing)
-                _Fixed(lesson == null
-                    ? _lessonId!
-                    : '${lesson.title} · ${groupTitle(lesson.group)}')
-              else
-              DropdownButtonFormField<String>(
-                initialValue: _lessonId,
-                isExpanded: true,
-                hint: const Text('Bitte auswählen'),
-                items: [
-                  for (final group in LessonGroup.values)
-                    if (lessonsInGroup(group).isNotEmpty) ...[
-                      DropdownMenuItem<String>(
-                        enabled: false,
-                        value: '_group_${group.name}',
-                        child: Text(
-                          groupTitle(group),
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.textMuted,
+              // Its own scroller with a fixed height: seventy-odd lessons do
+              // not belong in a dialog that already scrolls, and a dropdown
+              // cannot hold a multiple choice.
+              Container(
+                height: 240,
+                decoration: BoxDecoration(
+                  border: Border.all(color: AppColors.divider, width: 1.5),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: ListView(
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  children: [
+                    for (final group in LessonGroup.values)
+                      if (lessonsInGroup(group).isNotEmpty) ...[
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 10, 16, 2),
+                          child: Text(
+                            groupTitle(group),
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.textMuted,
+                            ),
                           ),
                         ),
-                      ),
-                      for (final option in lessonsInGroup(group))
-                        DropdownMenuItem<String>(
-                          value: option.id,
-                          child: Text('   ${option.title}'),
-                        ),
-                    ],
-                ],
-                onChanged: (id) {
-                  if (id == null || id.startsWith('_group_')) return;
-                  setState(() {
-                    _lessonId = id;
-                    // A first-steps lesson is not timed, so it has no bolts
-                    // to earn and a bolt requirement would be a wish nobody
-                    // can fail to grant. Its stars do mean something - they
-                    // follow the error rate like everywhere else - so that
-                    // requirement stays.
-                    if (lessonByIdOrNull(id)?.scored == false) _minBolts = 0;
-                  });
-                },
+                        for (final option in lessonsInGroup(group))
+                          _LessonChoice(
+                            lesson: option,
+                            selected: _lessonIds.contains(option.id),
+                            done: done.contains(option.id),
+                            onChanged: (on) => setState(() {
+                              if (on) {
+                                _lessonIds.add(option.id);
+                              } else {
+                                _lessonIds.remove(option.id);
+                              }
+                            }),
+                          ),
+                      ],
+                  ],
+                ),
               ),
+              if (_lessonIds.isEmpty)
+                const Padding(
+                  padding: EdgeInsets.only(top: 6),
+                  child: Text(
+                    'Ohne eine einzige Übung gibt es nichts aufzugeben.',
+                    style: TextStyle(fontSize: 17, color: AppColors.wrong),
+                  ),
+                ),
               const SizedBox(height: 20),
               const Text('Rhythmus', style: TextStyle(fontSize: 20)),
               const SizedBox(height: 8),
@@ -198,12 +229,12 @@ class _AssignmentEditorState extends ConsumerState<AssignmentEditor> {
                 labelFor: (v) => '$v',
                 onChanged: (v) => setState(() => _taskCount = v ?? _taskCount),
               ),
-              // Both rows are hidden for the first steps (scored == false):
-              // nothing is timed there, so there are no bolts to ask for
-              // (LessonSpec.targetMsPerTask), and its stars are awarded for
-              // finishing regardless of how it went, so a star requirement
-              // would never actually require anything.
-              if (lesson == null || lesson.scored) ...[
+              // Stars mean something everywhere, so that row always stands.
+              // Bolts do not: nothing is timed in the first steps, so a bolt
+              // requirement there would be a wish nobody can fail to grant -
+              // and one such lesson among several is enough, because the bar
+              // has to be reachable for every lesson the assignment names.
+              ...[
                 const SizedBox(height: 16),
                 const Text('Mindeststerne',
                     style: TextStyle(fontSize: 20)),
@@ -216,18 +247,20 @@ class _AssignmentEditorState extends ConsumerState<AssignmentEditor> {
                   onChanged: (v) =>
                       setState(() => _minStars = v ?? _minStars),
                 ),
-                const SizedBox(height: 16),
-                const Text('Mindestblitze',
-                    style: TextStyle(fontSize: 20)),
-                const SizedBox(height: 8),
-                AmountChoice(
-                  value: _minBolts,
-                  options: const [0, 1, 2, 3],
-                  zeroLabel: 'keine Vorgabe',
-                  labelFor: (v) => '$v ⚡',
-                  onChanged: (v) =>
-                      setState(() => _minBolts = v ?? _minBolts),
-                ),
+                if (!anyUnscored) ...[
+                  const SizedBox(height: 16),
+                  const Text('Mindestblitze',
+                      style: TextStyle(fontSize: 20)),
+                  const SizedBox(height: 8),
+                  AmountChoice(
+                    value: _minBolts,
+                    options: const [0, 1, 2, 3],
+                    zeroLabel: 'keine Vorgabe',
+                    labelFor: (v) => '$v ⚡',
+                    onChanged: (v) =>
+                        setState(() => _minBolts = v ?? _minBolts),
+                  ),
+                ],
               ],
               const SizedBox(height: 24),
               Row(
@@ -239,30 +272,35 @@ class _AssignmentEditorState extends ConsumerState<AssignmentEditor> {
                   ),
                   const SizedBox(width: 16),
                   FilledButton(
-                    onPressed: _userId == null || _lessonId == null
+                    // At least one lesson has to be left standing, whichever
+                    // way one got here.
+                    onPressed: _userId == null || _lessonIds.isEmpty
                         ? null
                         : () async {
                             final navigator = Navigator.of(context);
                             final repository =
                                 ref.read(assignmentRepositoryProvider);
+                            final chosen = _lessonIds.toList();
+                            final bolts = anyUnscored ? 0 : _minBolts;
                             if (_editing) {
                               await repository.updateAssignment(
                                 widget.existing!.id,
+                                lessonIds: chosen,
                                 rhythm: _rhythm,
                                 runs: _runs,
                                 taskCount: _taskCount,
                                 minStars: _minStars,
-                                minBolts: _minBolts,
+                                minBolts: bolts,
                               );
                             } else {
                               await repository.createAssignment(
                                 userId: _userId!,
-                                lessonId: _lessonId!,
+                                lessonIds: chosen,
                                 rhythm: _rhythm,
                                 runs: _runs,
                                 taskCount: _taskCount,
                                 minStars: _minStars,
-                                minBolts: _minBolts,
+                                minBolts: bolts,
                               );
                             }
                             navigator.pop();
@@ -290,5 +328,54 @@ class _Fixed extends StatelessWidget {
   Widget build(BuildContext context) => Text(
         text,
         style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w600),
+      );
+}
+
+/// One lesson in the picker: a checkbox, and a tick where the child has
+/// already finished it in the period running now.
+///
+/// Done means dimmed and ticked, not disabled: a parent may well want to
+/// take a finished lesson back out, and a row that refuses to be touched
+/// would not say why.
+class _LessonChoice extends StatelessWidget {
+  final LessonSpec lesson;
+  final bool selected;
+  final bool done;
+  final ValueChanged<bool> onChanged;
+
+  const _LessonChoice({
+    required this.lesson,
+    required this.selected,
+    required this.done,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) => CheckboxListTile(
+        value: selected,
+        onChanged: (on) => onChanged(on ?? false),
+        dense: true,
+        controlAffinity: ListTileControlAffinity.leading,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+        title: Opacity(
+          opacity: done ? 0.5 : 1,
+          child: Row(
+            children: [
+              Flexible(
+                child: Text(
+                  lesson.title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontSize: 17),
+                ),
+              ),
+              if (done) ...[
+                const SizedBox(width: 8),
+                const Icon(Icons.check_circle,
+                    size: 18, color: AppColors.correct),
+              ],
+            ],
+          ),
+        ),
       );
 }

@@ -104,7 +104,7 @@ final assignmentForLessonProvider =
   final assignments =
       await ref.watch(openAssignmentsProvider(key.userId).future);
   for (final a in assignments) {
-    if (a.lessonId == key.lessonId) return a;
+    if (a.lessonIds.contains(key.lessonId)) return a;
   }
   return null;
 });
@@ -116,32 +116,42 @@ final assignmentsProvider = StreamProvider.family<List<Assignment>, int?>(
       ref.watch(assignmentRepositoryProvider).watchAssignments(userId: userId),
 );
 
-/// One assignment's progress: whether the period running right now has met
-/// its goal, and - for the parent tab - the same question for every closed
-/// period since it started.
+/// One assignment's progress: where the period running right now stands for
+/// each of its lessons, and - for the parent tab - whether every closed
+/// period since it started was met.
 ///
-/// Computed once from the whole run history of this child and this lesson,
-/// not once per period: the row set is already bounded to one child and one
-/// lesson (see [AssignmentRepository]), so asking the database once beats
-/// asking it once per period.
+/// Computed once from the whole run history of this child and these lessons,
+/// not once per period and not once per lesson: the row set is already small
+/// (see [AssignmentRepository]), so asking the database once beats asking it
+/// N times.
 class AssignmentStats {
   final Assignment assignment;
-  final LessonSpec lesson;
-  final AssignmentPeriod currentPeriod;
-  final AssignmentProgress current;
 
-  /// Every closed period, oldest first, true where it was met.
+  /// The lessons the catalogue still knows, in the assignment's own order.
+  final List<LessonSpec> lessons;
+
+  final AssignmentPeriod currentPeriod;
+
+  /// Where the running period stands, per lesson id.
+  final Map<String, AssignmentProgress> current;
+
+  /// Every closed period, oldest first, true where **every** lesson was met.
   final List<bool> closed;
 
   const AssignmentStats({
     required this.assignment,
-    required this.lesson,
+    required this.lessons,
     required this.currentPeriod,
     required this.current,
     required this.closed,
   });
 
+  /// Whether the running period is done - every lesson, not just one.
+  bool get met => allLessonsMet(current);
+
   int get closedMet => closed.where((met) => met).length;
+
+  AssignmentProgress? progressOf(String lessonId) => current[lessonId];
 }
 
 /// Null when the assigned lesson is one this version no longer knows - an
@@ -149,31 +159,40 @@ class AssignmentStats {
 /// exists: nothing here can be measured against a lesson that is not there.
 final assignmentStatsProvider =
     StreamProvider.family<AssignmentStats?, Assignment>((ref, a) {
-  final lesson = lessonByIdOrNull(a.lessonId);
-  if (lesson == null) return Stream.value(null);
+  final lessons = [
+    for (final id in a.lessonIds) ?lessonByIdOrNull(id),
+  ];
+  // Not one lesson of it is in this catalogue - an older backup, a lesson
+  // dropped in an update. Nothing here can be measured, and guessing would
+  // be worse than saying so.
+  if (lessons.isEmpty) return Stream.value(null);
 
   final repo = ref.watch(assignmentRepositoryProvider);
   final now = ref.watch(clockProvider)();
   final currentPeriod = periodAt(a, now);
 
   return repo.watchRunsFor(a, sinceMs: a.createdAtMs).map((rows) {
-    final runs = [for (final row in rows) row.facts];
-    final current = progressIn(
-      a: a,
-      lesson: lesson,
-      period: currentPeriod,
-      runs: runs,
-    );
-    final closed = [
-      for (final period in closedPeriods(a, now))
-        progressIn(a: a, lesson: lesson, period: period, runs: runs).met,
-    ];
+    final byLesson = {
+      for (final entry in rows.entries)
+        entry.key: [for (final row in entry.value) row.facts],
+    };
     return AssignmentStats(
       assignment: a,
-      lesson: lesson,
+      lessons: lessons,
       currentPeriod: currentPeriod,
-      current: current,
-      closed: closed,
+      current: progressByLesson(
+        a: a,
+        period: currentPeriod,
+        runsByLesson: byLesson,
+      ),
+      closed: [
+        for (final period in closedPeriods(a, now))
+          allLessonsMet(progressByLesson(
+            a: a,
+            period: period,
+            runsByLesson: byLesson,
+          )),
+      ],
     );
   });
 });
@@ -190,7 +209,10 @@ final openAssignmentProvider =
   final a = await ref.watch(assignmentForLessonProvider(key).future);
   if (a == null) return false;
   final stats = await ref.watch(assignmentStatsProvider(a).future);
-  return stats != null && !stats.current.met;
+  // This lesson's own share of the assignment, not the assignment as a
+  // whole: the cap steps aside for the lesson still being worked at.
+  final progress = stats?.progressOf(key.lessonId);
+  return progress != null && !progress.met;
 });
 
 final usersProvider = StreamProvider<List<User>>(

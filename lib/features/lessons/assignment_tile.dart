@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../domain/assignment.dart';
+import '../../domain/lesson.dart';
 import '../../providers.dart';
 import '../../theme/app_theme.dart';
 import '../common/star_row.dart';
 import 'lesson_example.dart';
 import 'start_lesson_sheet.dart';
 
-/// A card for one open assignment - the same catalogue tile as
+/// A card for one lesson of one open assignment - the same catalogue tile as
 /// [LessonHomeScreen]'s `_LessonTile`, right down to the grid, the radius,
 /// the border and the lesson group's own pastel: it is the same lesson,
 /// after all, and only the footer says something different.
@@ -19,17 +20,26 @@ import 'start_lesson_sheet.dart';
 class AssignmentTile extends ConsumerWidget {
   final Assignment assignment;
 
-  const AssignmentTile({super.key, required this.assignment});
+  /// Which of the assignment's lessons this card is for. An assignment can
+  /// name several, and each of them is its own card - for the child nothing
+  /// changed when assignments learned to hold more than one.
+  final LessonSpec lesson;
+
+  const AssignmentTile({
+    super.key,
+    required this.assignment,
+    required this.lesson,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final stats = ref.watch(assignmentStatsProvider(assignment)).value;
-    // The assigned lesson vanished from the catalogue (an older backup, a
-    // dropped lesson) - nothing to draw and nothing to measure against.
-    if (stats == null) return const SizedBox.shrink();
+    final progress = stats?.progressOf(lesson.id);
+    // The lesson vanished from the catalogue (an older backup, a dropped
+    // lesson) - nothing to draw and nothing to measure against.
+    if (progress == null) return const SizedBox.shrink();
 
-    final lesson = stats.lesson;
-    final met = stats.current.met;
+    final met = progress.met;
     final tint = AppColors.groupTint(lesson.group.index);
     final edge = AppColors.groupEdge(lesson.group.index);
 
@@ -83,7 +93,10 @@ class AssignmentTile extends ConsumerWidget {
                     ),
                   ),
                 ),
-                _AssignmentFooter(stats: stats),
+                _AssignmentFooter(
+                  assignment: assignment,
+                  progress: progress,
+                ),
               ],
             ),
           ),
@@ -94,23 +107,24 @@ class AssignmentTile extends ConsumerWidget {
 }
 
 class _AssignmentFooter extends StatelessWidget {
-  final AssignmentStats stats;
+  final Assignment assignment;
+  final AssignmentProgress progress;
 
-  const _AssignmentFooter({required this.stats});
+  const _AssignmentFooter({required this.assignment, required this.progress});
 
   @override
   Widget build(BuildContext context) {
     // The card stays up for the rest of the period once its goal is met -
     // the tick is the reward, and a card that vanished would not be one. So
     // this is the only thing the footer says from then on.
-    if (stats.current.met) {
+    if (progress.met) {
       return const Text(
         'geschafft',
         style: TextStyle(fontSize: 17, color: AppColors.textMuted),
       );
     }
 
-    final a = stats.assignment;
+    final a = assignment;
     return Row(
       children: [
         // Requirements reuse the same star and bolt rows the rest of the app
@@ -127,8 +141,7 @@ class _AssignmentFooter extends StatelessWidget {
         ],
         Expanded(
           child: Text(
-            '${stats.current.qualifyingRuns}/${a.runs} · '
-            '${formatDeadline(a)}',
+            '${progress.qualifyingRuns}/${a.runs} · ${formatDeadline(a)}',
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(fontSize: 15, color: AppColors.textMuted),

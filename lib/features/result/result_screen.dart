@@ -106,8 +106,10 @@ class ResultScreen extends ConsumerWidget {
               ),
               dueMs: assignmentStats.currentPeriod.dueMs,
             ),
-            done: assignmentStats.current.qualifyingRuns,
-            met: assignmentStats.current.met,
+            // This lesson's own share of the assignment: an assignment can
+            // name several, and the child has just finished one of them.
+            done: assignmentStats.progressOf(lesson.id)?.qualifyingRuns ?? 0,
+            met: assignmentStats.progressOf(lesson.id)?.met ?? false,
           );
 
     return Scaffold(

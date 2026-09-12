@@ -19,7 +19,7 @@ void main() {
       Assignment(
         id: 1,
         userId: 1,
-        lessonId: lesson.id,
+        lessonIds: [lesson.id],
         rhythm: AssignmentRhythm.daily,
         runs: runs,
         taskCount: taskCount,
@@ -36,7 +36,7 @@ void main() {
       Assignment(
         id: 2,
         userId: 1,
-        lessonId: lesson.id,
+        lessonIds: [lesson.id],
         rhythm: AssignmentRhythm.weekly,
         runs: 1,
         taskCount: 10,
