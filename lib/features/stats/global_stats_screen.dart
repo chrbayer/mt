@@ -7,6 +7,7 @@ import '../../domain/lesson.dart';
 import '../../domain/scoring.dart';
 import '../../providers.dart';
 import '../../theme/app_theme.dart';
+import '../common/load_failure.dart';
 import '../common/star_row.dart';
 import '../leaderboard/leaderboard_screen.dart';
 
@@ -50,7 +51,7 @@ class _OverviewTab extends ConsumerWidget {
 
     return summaries.when(
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, _) => Center(child: Text('Fehler: $error')),
+      error: (error, _) => LoadFailure(detail: error),
       data: (list) => list.isEmpty
           ? const Center(
               child: Text(
@@ -107,7 +108,7 @@ class _LeaderboardsTab extends ConsumerWidget {
 
     return boards.when(
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, _) => Center(child: Text('Fehler: $error')),
+      error: (error, _) => LoadFailure(detail: error),
       data: (list) => list.isEmpty
           ? const Center(
               child: Padding(

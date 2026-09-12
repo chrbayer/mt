@@ -8,6 +8,7 @@ import 'package:share_plus/share_plus.dart';
 
 import '../../data/repositories/backup_repository.dart';
 import '../../providers.dart';
+import '../../domain/scoring.dart';
 import '../../theme/app_theme.dart';
 
 /// Save and restore the whole database.
@@ -40,13 +41,21 @@ class _BackupActionsState extends ConsumerState<BackupActions> {
       final file = File('${directory.path}/$_fileName');
       await file.writeAsString(json);
 
-      await SharePlus.instance.share(
+      final result = await SharePlus.instance.share(
         ShareParams(
           files: [XFile(file.path, mimeType: 'application/json')],
           fileNameOverrides: [_fileName],
           subject: 'Mathe-Trainer Sicherung',
         ),
       );
+      // Only once it really went somewhere. A share sheet that was opened
+      // and closed again has saved nothing, and a date that lied about it
+      // would be worse than no date at all.
+      if (result.status == ShareResultStatus.success) {
+        await ref.read(settingsRepositoryProvider).setLastBackup(
+              DateTime.now().millisecondsSinceEpoch,
+            );
+      }
     } catch (error) {
       _tell('Sicherung fehlgeschlagen: $error');
     } finally {
@@ -127,6 +136,11 @@ class _BackupActionsState extends ConsumerState<BackupActions> {
           'alles mit.',
           style: TextStyle(fontSize: 17, color: AppColors.textMuted),
         ),
+        const SizedBox(height: 10),
+        BackupAgeNotice(
+          lastBackupMs: ref.watch(preferencesProvider).value?.lastBackupMs,
+          now: ref.watch(clockProvider)(),
+        ),
         const SizedBox(height: 14),
         Wrap(
           spacing: 12,
@@ -143,6 +157,65 @@ class _BackupActionsState extends ConsumerState<BackupActions> {
               onPressed: _busy ? null : _import,
             ),
           ],
+        ),
+      ],
+    );
+  }
+}
+
+/// When the last backup was made, and a nudge once it is a while ago.
+///
+/// Everything this app knows lives on one tablet: no cloud, no second copy.
+/// The export has been there all along and nothing ever mentioned it, so the
+/// only thing between a year of results and a broken device was a parent who
+/// happened to think of it.
+class BackupAgeNotice extends StatelessWidget {
+  final int? lastBackupMs;
+  final DateTime now;
+
+  /// After this long the line turns into a nudge. Four weeks is about a
+  /// month of practice - enough to be worth keeping, not so soon that the
+  /// warning becomes wallpaper.
+  static const int nudgeAfterDays = 28;
+
+  const BackupAgeNotice({
+    super.key,
+    required this.lastBackupMs,
+    required this.now,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final last = lastBackupMs;
+    final days = last == null
+        ? null
+        : DateTime(now.year, now.month, now.day)
+            .difference(DateTime.fromMillisecondsSinceEpoch(last))
+            .inDays;
+    final overdue = days == null || days >= nudgeAfterDays;
+
+    return Row(
+      children: [
+        Icon(
+          overdue ? Icons.warning_amber_rounded : Icons.check_circle_outline,
+          size: 22,
+          color: overdue ? AppColors.profile1 : AppColors.correct,
+        ),
+        const SizedBox(width: 8),
+        Flexible(
+          child: Text(
+            last == null
+                ? 'Noch nie gesichert.'
+                : 'Zuletzt gesichert: '
+                    '${formatRelativeDay(
+                    DateTime.fromMillisecondsSinceEpoch(last),
+                    now: now,
+                  )}.${overdue ? ' Das ist eine Weile her.' : ''}',
+            style: TextStyle(
+              fontSize: 17,
+              color: overdue ? AppColors.profile1 : AppColors.textMuted,
+            ),
+          ),
         ),
       ],
     );

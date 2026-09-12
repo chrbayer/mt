@@ -1030,6 +1030,32 @@ etwas anderes, als stillschweigend weiter zu greifen. Die Rückfrage sagt
 deshalb beides ausdrücklich, „von Mia aus den letzten 7 Tagen", statt es in
 die Knopfbeschriftung zu quetschen.
 
+## Sicherung erinnert an sich selbst
+
+`app_settings.last_backup_ms` hält fest, wann zuletzt wirklich eine Sicherung
+herausgegangen ist — **erst wenn das Teilen erfolgreich war**, denn ein
+geöffnetes und wieder geschlossenes Teilen-Blatt hat nichts gesichert, und ein
+Datum, das das behauptet, ist schlimmer als keins. `BackupAgeNotice` zeigt es
+im Elternbereich und wird nach vier Wochen zur Ermahnung.
+
+Der Grund steht schon über dem Knopf: alles, was diese App weiß, liegt auf
+einem Tablet. Keine Wolke, keine zweite Kopie. Der Export gab es von Anfang
+an, nur hat ihn nie jemand vorgeschlagen — zwischen einem Jahr Ergebnisse und
+einem kaputten Gerät stand allein ein Elternteil, das von selbst daran dachte.
+
+## Rückgängig gibt es, weil nie etwas gelöscht wird
+
+`deleteSession` und `deleteIncompleteSessions` setzen nur die Marke
+`sessions.deleted`. Genau deshalb kostet ein „Rückgängig" fast nichts:
+`restoreSessions` nimmt die Marke zurück und rechnet die Sterne der
+betroffenen Kind-Lektion-Paare neu — ein zurückkehrender Lauf hebt sie
+genauso, wie sein Verschwinden sie gesenkt hat. `deleteIncompleteSessions`
+gibt dafür die **IDs** zurück statt einer Anzahl.
+
+Angeboten wird es als SnackBar direkt nach der Tat. Ohne den Weg zurück war
+ein Fehlgriff im Elternbereich endgültig, und die Zeile, die dabei verschwand,
+war jemandes Nachmittag.
+
 ## Löschen, ohne die Zeit zurückzugeben
 
 `deleteSession` **markiert** (`sessions.deleted`), es löscht nicht. Die Zeile

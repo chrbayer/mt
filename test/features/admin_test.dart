@@ -265,6 +265,38 @@ void main() {
           findsOneWidget);
     });
 
+    testWidgets('a deletion can be taken back right away', (tester) async {
+      await run(mia, 'add_20_plain');
+      await openAdmin(tester);
+
+      await tester.tap(find.byTooltip('Durchgang löschen'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Löschen'));
+      await tester.pumpAndSettle();
+      expect(find.text('Plus ohne Zehnerübergang  ·  Bis 20'), findsNothing);
+
+      // Nothing was ever erased, so the way back is one tap.
+      expect(find.text('Rückgängig'), findsOneWidget);
+      await tester.tap(find.text('Rückgängig'));
+      await tester.pumpAndSettle();
+      expect(find.text('Plus ohne Zehnerübergang  ·  Bis 20'), findsOneWidget);
+    });
+
+    testWidgets('and so can tidying up the abandoned ones', (tester) async {
+      await run(mia, 'add_20_plain', completed: false);
+      await openAdmin(tester);
+
+      await tester.tap(find.textContaining('aufräumen'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(FilledButton, 'Aufräumen'));
+      await tester.pumpAndSettle();
+      expect(find.textContaining('abgebrochen nach'), findsNothing);
+
+      await tester.tap(find.text('Rückgängig'));
+      await tester.pumpAndSettle();
+      expect(find.textContaining('abgebrochen nach'), findsOneWidget);
+    });
+
     testWidgets('a single run can be deleted from the log', (tester) async {
       await run(mia, 'add_20_plain');
       await openAdmin(tester);
@@ -502,6 +534,29 @@ void main() {
         await tester.pump();
       }
       expect(find.textContaining('kann das Kind nicht üben'), findsOneWidget);
+    });
+
+    testWidgets('the parent area says when the last backup was',
+        (tester) async {
+      await openAdmin(tester);
+      await tester.tap(find.text('Verwaltung'));
+      await tester.pumpAndSettle();
+
+      // Never backed up: everything this app knows lives on one tablet, and
+      // nothing used to mention that.
+      await tester.dragUntilVisible(
+        find.text('Noch nie gesichert.'),
+        find.byType(ListView).first,
+        const Offset(0, -300),
+      );
+      expect(find.text('Noch nie gesichert.'), findsOneWidget);
+
+      await container
+          .read(settingsRepositoryProvider)
+          .setLastBackup(DateTime.now().millisecondsSinceEpoch);
+      await tester.pumpAndSettle();
+      expect(find.textContaining('Zuletzt gesichert: heute'), findsOneWidget);
+      expect(find.textContaining('eine Weile her'), findsNothing);
     });
 
     testWidgets('changing the PIN asks for a new one right away',

@@ -938,6 +938,23 @@ class StatsRepository {
     await _recountStars(session.userId, session.lessonId);
   }
 
+  /// Puts marked runs back into the record.
+  ///
+  /// Nothing was ever erased - `deleted` is a mark, so undoing it is a
+  /// matter of clearing the mark. The stars are worked out again afterwards
+  /// for every child and lesson touched: a run coming back can raise them
+  /// the same way losing it lowered them.
+  Future<void> restoreSessions(List<int> ids) async {
+    if (ids.isEmpty) return;
+    final rows = await (_db.select(_db.sessions)..where((s) => s.id.isIn(ids)))
+        .get();
+    await (_db.update(_db.sessions)..where((s) => s.id.isIn(ids)))
+        .write(const SessionsCompanion(deleted: Value(false)));
+    for (final pair in {for (final row in rows) (row.userId, row.lessonId)}) {
+      await _recountStars(pair.$1, pair.$2);
+    }
+  }
+
   /// Takes every abandoned run out of the record, for one child or for all,
   /// and only back to [sinceMs] where one is given.
   ///
@@ -950,17 +967,25 @@ class StatsRepository {
   /// showing**. Tidying the list one is looking at is a different act from
   /// silently tidying every child's whole history, and a button that did the
   /// second would be a trap.
-  Future<int> deleteIncompleteSessions({int? userId, int? sinceMs}) async {
-    final query = _db.update(_db.sessions)
-      ..where((s) =>
-          s.completed.equals(false) &
-          s.deleted.equals(false) &
-          (userId == null ? const Constant(true) : s.userId.equals(userId)) &
-          (sinceMs == null
-              ? const Constant(true)
-              : coalesce([s.finishedAtMs, s.startedAtMs])
-                  .isBiggerOrEqualValue(sinceMs)));
-    return query.write(const SessionsCompanion(deleted: Value(true)));
+  /// Returns the ids it marked, so the caller can offer to undo it - the
+  /// rows are only marked, never erased.
+  Future<List<int>> deleteIncompleteSessions({
+    int? userId,
+    int? sinceMs,
+  }) async {
+    Expression<bool> matching($SessionsTable s) =>
+        s.completed.equals(false) &
+        s.deleted.equals(false) &
+        (userId == null ? const Constant(true) : s.userId.equals(userId)) &
+        (sinceMs == null
+            ? const Constant(true)
+            : coalesce([s.finishedAtMs, s.startedAtMs])
+                .isBiggerOrEqualValue(sinceMs));
+
+    final rows = await (_db.select(_db.sessions)..where(matching)).get();
+    await (_db.update(_db.sessions)..where(matching))
+        .write(const SessionsCompanion(deleted: Value(true)));
+    return [for (final row in rows) row.id];
   }
 
   /// Rebuilds the stored stars of one lesson from the runs that are left.

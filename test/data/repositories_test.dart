@@ -801,7 +801,7 @@ void main() {
       final removed = await stats.deleteIncompleteSessions(
         sinceMs: historySince(HistoryRange.week, DateTime.now()),
       );
-      expect(removed, 1);
+      expect(removed, hasLength(1));
       expect((await stats.watchHistory().first).map((h) => h.sessionId),
           [old]);
       expect(recent, isNot(old));

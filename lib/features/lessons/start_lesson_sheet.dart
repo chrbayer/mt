@@ -137,13 +137,33 @@ class _StartLessonSheetState extends ConsumerState<StartLessonSheet> {
             ),
           const SizedBox(height: 26),
           if (assignment != null)
-            Text(
-              'Für deine Aufgabe: ${assignment.taskCount} Rechnungen',
-              style: const TextStyle(
-                fontSize: 20,
-                color: AppColors.primary,
-                fontWeight: FontWeight.w600,
-              ),
+            // The length **and** the bar: the result screen shows what was
+            // wanted once it is too late to aim for it, and this is the
+            // place where a child can still do something about it.
+            Row(
+              children: [
+                Flexible(
+                  child: Text(
+                    'Für deine Aufgabe: '
+                    '${assignment.taskCount} Rechnungen',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 20,
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                if (assignment.minStars > 0) ...[
+                  const SizedBox(width: 12),
+                  StarRow(earned: assignment.minStars, size: 24),
+                ],
+                if (assignment.minBolts > 0) ...[
+                  const SizedBox(width: 6),
+                  BoltRow(earned: assignment.minBolts, size: 24),
+                ],
+              ],
             )
           else ...[
             const Text('Wie viele Aufgaben?', style: TextStyle(fontSize: 22)),

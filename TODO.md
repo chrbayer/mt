@@ -224,3 +224,20 @@ gedämpft und abgehakt, aber weiter abwählbar, und mindestens eine muss stehen
 bleiben. Für das Kind ändert sich nichts: jede Übung ist ihre eigene
 Karteikarte wie bisher. Schema v16 benennt die Spalte auf eine Liste um, eine
 einzelne ID ist bereits eine gültige einelementige Liste.
+
+#37 erledigt (2.12.0) — Aus einer Durchsicht des ganzen Projekts:
+
+* Der Elternbereich zeigt, wann zuletzt gesichert wurde, und mahnt nach vier
+  Wochen. Vorher erinnerte nichts daran, obwohl alles auf einem Tablet liegt.
+* Gelöschte Durchgänge lassen sich direkt danach zurückholen. Sie werden
+  ohnehin nur markiert, es fehlte allein der Weg zurück.
+* Der Startdialog nennt jetzt auch die geforderten Sterne und Blitze, nicht
+  erst der Ergebnisbildschirm. Die Marke auf der Profilkachel zählt nur noch
+  offene Aufgaben und sagt „alles geschafft", wenn nichts mehr aussteht.
+* Rohe Ausnahmetexte stehen nicht mehr auf Kinderbildschirmen; im
+  Elternbereich bleibt die technische Zeile, dort kann jemand etwas damit
+  anfangen. Nach einem Duell meldet sich die App wieder ab.
+
+Nachgemessen und in Ordnung: bis 130 % System-Schriftgröße bricht kein
+Bildschirm, und Duell-Durchgänge werden je Kind gespeichert und zählen auf
+die Übungszeit.

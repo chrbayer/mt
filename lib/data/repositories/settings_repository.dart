@@ -30,6 +30,14 @@ class AppPreferences {
   /// without their own setting. Zero means no cap.
   final int scoredRunsPerLesson;
 
+  /// When a backup was last written, or null if never.
+  ///
+  /// Everything this app knows lives on one tablet. There is no cloud and
+  /// no second copy, so the only thing standing between a year of results
+  /// and a broken device is a parent who thought of it - and nothing ever
+  /// reminded them.
+  final int? lastBackupMs;
+
   const AppPreferences({
     this.showClock = false,
     this.haptics = true,
@@ -37,6 +45,7 @@ class AppPreferences {
     this.defaultTaskCount = fallbackTaskCount,
     this.limits = const PracticeLimits(),
     this.scoredRunsPerLesson = defaultScoredRunsPerLesson,
+    this.lastBackupMs,
   });
 
   AppPreferences copyWith({
@@ -46,6 +55,7 @@ class AppPreferences {
     int? defaultTaskCount,
     PracticeLimits? limits,
     int? scoredRunsPerLesson,
+    int? lastBackupMs,
   }) =>
       AppPreferences(
         showClock: showClock ?? this.showClock,
@@ -54,6 +64,7 @@ class AppPreferences {
         defaultTaskCount: defaultTaskCount ?? this.defaultTaskCount,
         limits: limits ?? this.limits,
         scoredRunsPerLesson: scoredRunsPerLesson ?? this.scoredRunsPerLesson,
+        lastBackupMs: lastBackupMs ?? this.lastBackupMs,
       );
 }
 
@@ -70,6 +81,7 @@ class SettingsRepository {
   static const _breakMinutes = 'break_minutes';
   static const _dailyMinutes = 'daily_limit_minutes';
   static const _scoredRuns = 'scored_runs_per_lesson';
+  static const _lastBackup = 'last_backup_ms';
   static const _pinSalt = 'admin_pin_salt';
   static const _pinHash = 'admin_pin_hash';
 
@@ -102,8 +114,13 @@ class SettingsRepository {
       ),
       scoredRunsPerLesson: int.tryParse(map[_scoredRuns] ?? '') ??
           defaults.scoredRunsPerLesson,
+      lastBackupMs: int.tryParse(map[_lastBackup] ?? ''),
     );
   }
+
+  /// Written when a backup was actually handed over, not when the dialog
+  /// opened: a share sheet that was closed again has saved nothing.
+  Future<void> setLastBackup(int atMs) => _put(_lastBackup, '$atMs');
 
   Future<void> setShowClock(bool value) => _put(_showClock, value ? '1' : '0');
 

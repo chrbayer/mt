@@ -7,6 +7,7 @@ import '../../domain/scoring.dart';
 import '../../domain/task.dart';
 import '../../providers.dart';
 import '../../theme/app_theme.dart';
+import '../common/load_failure.dart';
 import '../common/star_row.dart';
 import 'progress_chart.dart';
 
@@ -79,7 +80,7 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
                                   (userId: user.id, lessonId: selected)))
                               .when(
                                 loading: () => const SizedBox.shrink(),
-                                error: (e, _) => Text('$e'),
+                                error: (_, _) => const LoadFailure(),
                                 data: (points) =>
                                     ProgressChart(points: points),
                               ),
@@ -94,7 +95,7 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
                           flex: 2,
                           child: ref.watch(hardestTasksProvider(user.id)).when(
                                 loading: () => const SizedBox.shrink(),
-                                error: (e, _) => Text('$e'),
+                                error: (_, _) => const LoadFailure(),
                                 data: (tasks) => _HardTasks(tasks: tasks),
                               ),
                         ),

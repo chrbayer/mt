@@ -8,6 +8,7 @@ import '../../domain/lesson.dart';
 import '../../domain/scoring.dart';
 import '../../providers.dart';
 import '../../theme/app_theme.dart';
+import '../common/load_failure.dart';
 import '../../data/repositories/user_repository.dart';
 import '../common/star_row.dart';
 import '../profiles/profile_editor.dart';
@@ -171,7 +172,7 @@ class _HistoryTabState extends ConsumerState<_HistoryTab> {
         Expanded(
           child: history.when(
             loading: () => const Center(child: CircularProgressIndicator()),
-            error: (error, _) => Center(child: Text('Fehler: $error')),
+            error: (error, _) => LoadFailure(detail: error),
             data: (entries) => entries.isEmpty
                 ? const Center(
                     child: Text(
@@ -221,7 +222,28 @@ class _HistoryTabState extends ConsumerState<_HistoryTab> {
     );
     if (confirmed ?? false) {
       await ref.read(statsRepositoryProvider).deleteSession(entry.sessionId);
+      _offerUndo('Durchgang gelöscht.', [entry.sessionId]);
     }
+  }
+
+  /// Nothing is ever erased - `deleted` is a mark - so undoing it costs one
+  /// line. Without a way back a slip in here was final, and the row that
+  /// went was somebody's afternoon.
+  void _offerUndo(String what, List<int> ids) {
+    if (!mounted || ids.isEmpty) return;
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(what, style: const TextStyle(fontSize: 18)),
+          duration: const Duration(seconds: 8),
+          action: SnackBarAction(
+            label: 'Rückgängig',
+            onPressed: () =>
+                ref.read(statsRepositoryProvider).restoreSessions(ids),
+          ),
+        ),
+      );
   }
 
   String _filterName(List<User> users) =>
@@ -261,10 +283,17 @@ class _HistoryTabState extends ConsumerState<_HistoryTab> {
     );
     if (confirmed ?? false) {
       // Both filters, so this removes exactly the rows that were on screen.
-      await ref.read(statsRepositoryProvider).deleteIncompleteSessions(
-            userId: _filter,
-            sinceMs: historySince(_range, ref.read(clockProvider)()),
-          );
+      final removed =
+          await ref.read(statsRepositoryProvider).deleteIncompleteSessions(
+                userId: _filter,
+                sinceMs: historySince(_range, ref.read(clockProvider)()),
+              );
+      _offerUndo(
+        removed.length == 1
+            ? 'Ein abgebrochener Durchgang aufgeräumt.'
+            : '${removed.length} abgebrochene Durchgänge aufgeräumt.',
+        removed,
+      );
     }
   }
 }

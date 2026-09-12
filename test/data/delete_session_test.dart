@@ -141,7 +141,7 @@ void main() {
       await run(completed: false);
       await run(completed: false);
 
-      expect(await stats.deleteIncompleteSessions(), 2);
+      expect(await stats.deleteIncompleteSessions(), hasLength(2));
       expect((await stats.watchHistory().first).map((h) => h.sessionId),
           [kept]);
     });
@@ -158,7 +158,7 @@ void main() {
         results: const [],
       );
 
-      expect(await stats.deleteIncompleteSessions(userId: mia), 1);
+      expect(await stats.deleteIncompleteSessions(userId: mia), hasLength(1));
       expect((await stats.watchHistory().first).map((h) => h.sessionId),
           [tomsRun]);
     });
@@ -172,10 +172,28 @@ void main() {
       expect(await practisedToday(), before);
     });
 
+    test('and can be undone, stars and all', () async {
+      final id = await run(lessonId: 'add_100_carry');
+      expect((await stats.watchLessonStats(mia).first)['add_100_carry']!
+          .bestStars, maxStars);
+
+      await stats.deleteSession(id);
+      expect((await stats.watchLessonStats(mia).first)['add_100_carry'],
+          isNull);
+
+      // Nothing was ever erased, so putting it back is a matter of clearing
+      // the mark - and the stars come back with it.
+      await stats.restoreSessions([id]);
+      expect((await stats.watchHistory().first).map((h) => h.sessionId),
+          contains(id));
+      expect((await stats.watchLessonStats(mia).first)['add_100_carry']!
+          .bestStars, maxStars);
+    });
+
     test('tidying twice tidies nothing the second time', () async {
       await run(completed: false);
-      expect(await stats.deleteIncompleteSessions(), 1);
-      expect(await stats.deleteIncompleteSessions(), 0);
+      expect(await stats.deleteIncompleteSessions(), hasLength(1));
+      expect(await stats.deleteIncompleteSessions(), isEmpty);
     });
   });
 }

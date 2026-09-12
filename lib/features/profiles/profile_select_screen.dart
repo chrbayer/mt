@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/db/app_database.dart';
 import '../../providers.dart';
 import '../../theme/app_theme.dart';
+import '../common/load_failure.dart';
 import '../admin/admin_screen.dart';
 import '../admin/pin_gate.dart';
 import '../common/version_label.dart';
@@ -98,7 +99,7 @@ class ProfileSelectScreen extends ConsumerWidget {
       ),
       body: users.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(child: Text('Fehler: $error')),
+        error: (_, _) => const LoadFailure(),
         data: (list) => Padding(
           padding: const EdgeInsets.fromLTRB(32, 8, 32, 32),
           child: Column(
@@ -183,11 +184,17 @@ class _ProfileTile extends ConsumerWidget {
     final color = locked
         ? AppColors.textMuted
         : AppColors.profileColor(user.colorIndex);
-    // "Why should I practise today?" gets asked before the login, not after -
-    // the badge only counts, it never says which lesson or whether it is
-    // still open.
-    final assignments = ref.watch(openAssignmentsProvider(user.id)).value;
-    final assignmentCount = assignments?.length ?? 0;
+    // "Why should I practise today?" gets asked before the login, not after.
+    // Counted are the ones still to do - a badge that kept saying "1
+    // Aufgabe" after a child had finished it was asking for work that was
+    // already done.
+    final assignments =
+        ref.watch(openAssignmentsProvider(user.id)).value ?? const [];
+    final todo = assignments
+        .where((a) => !(ref.watch(assignmentStatsProvider(a)).value?.met ??
+            false))
+        .length;
+    final allDone = assignments.isNotEmpty && todo == 0;
     return SizedBox(
       width: _tileWidth,
       height: _tileHeight,
@@ -227,16 +234,18 @@ class _ProfileTile extends ConsumerWidget {
                           ),
                         ),
                       ),
-                      if (!locked && assignmentCount > 0) ...[
+                      if (!locked && (todo > 0 || allDone)) ...[
                         const SizedBox(height: 4),
                         Text(
-                          assignmentCount == 1
-                              ? '1 Aufgabe'
-                              : '$assignmentCount Aufgaben',
+                          allDone
+                              ? 'alles geschafft'
+                              : todo == 1
+                                  ? '1 Aufgabe'
+                                  : '$todo Aufgaben',
                           style: TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w600,
-                            color: color,
+                            color: allDone ? AppColors.correct : color,
                           ),
                         ),
                       ],

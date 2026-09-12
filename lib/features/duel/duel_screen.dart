@@ -197,6 +197,19 @@ class _DuelSetupScreenState extends ConsumerState<DuelSetupScreen> {
   }
 
   Future<void> _start(List<User> players, LessonSpec lesson) async {
+    try {
+      await _play(players, lesson);
+    } finally {
+      // Nobody is logged in on the profile screen, and a duel must not
+      // leave the app believing otherwise - on every way out, including the
+      // ones where a child backs away halfway through. Nothing visible hangs
+      // on it today; the next thing that trusts the active profile would
+      // inherit the lie.
+      if (mounted) ref.read(activeUserProvider.notifier).logout();
+    }
+  }
+
+  Future<void> _play(List<User> players, LessonSpec lesson) async {
     final navigator = Navigator.of(context);
     // One seed for the whole duel: everyone solves the same tasks.
     final seed = Random().nextInt(0x7FFFFFFF);

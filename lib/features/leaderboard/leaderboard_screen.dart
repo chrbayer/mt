@@ -6,6 +6,7 @@ import '../../domain/lesson.dart';
 import '../../domain/scoring.dart';
 import '../../providers.dart';
 import '../../theme/app_theme.dart';
+import '../common/load_failure.dart';
 
 /// Ranking of all profiles in one lesson - this is how the children compete.
 class LeaderboardScreen extends ConsumerWidget {
@@ -22,7 +23,7 @@ class LeaderboardScreen extends ConsumerWidget {
       appBar: AppBar(title: Text('Bestenliste · ${lesson.title}')),
       body: entries.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(child: Text('Fehler: $error')),
+        error: (_, _) => const LoadFailure(),
         data: (list) => list.isEmpty
             ? const Center(
                 child: Text(
