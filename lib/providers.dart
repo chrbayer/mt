@@ -138,12 +138,21 @@ class AssignmentStats {
   /// Every closed period, oldest first, true where **every** lesson was met.
   final List<bool> closed;
 
+  /// How many closed periods each lesson met, by lesson id.
+  ///
+  /// Without this the dot strip says a period was missed but not by which
+  /// lesson - and since an assignment can name several, that is now the
+  /// usual case. "Einmaleins 12, Geld 9 von 15" points at the one to talk
+  /// about.
+  final Map<String, int> closedMetByLesson;
+
   const AssignmentStats({
     required this.assignment,
     required this.lessons,
     required this.currentPeriod,
     required this.current,
     required this.closed,
+    required this.closedMetByLesson,
   });
 
   /// Whether the running period is done - every lesson, not just one.
@@ -176,6 +185,22 @@ final assignmentStatsProvider =
       for (final entry in rows.entries)
         entry.key: [for (final row in entry.value) row.facts],
     };
+    // Walked once, not twice: the per-lesson tally and the "every lesson"
+    // verdict come out of the same pass over the closed periods.
+    final closed = <bool>[];
+    final metByLesson = {for (final id in a.lessonIds) id: 0};
+    for (final period in closedPeriods(a, now)) {
+      final byLessonHere = progressByLesson(
+        a: a,
+        period: period,
+        runsByLesson: byLesson,
+      );
+      closed.add(allLessonsMet(byLessonHere));
+      for (final entry in byLessonHere.entries) {
+        if (entry.value.met) metByLesson[entry.key] = metByLesson[entry.key]! + 1;
+      }
+    }
+
     return AssignmentStats(
       assignment: a,
       lessons: lessons,
@@ -185,14 +210,8 @@ final assignmentStatsProvider =
         period: currentPeriod,
         runsByLesson: byLesson,
       ),
-      closed: [
-        for (final period in closedPeriods(a, now))
-          allLessonsMet(progressByLesson(
-            a: a,
-            period: period,
-            runsByLesson: byLesson,
-          )),
-      ],
+      closed: closed,
+      closedMetByLesson: metByLesson,
     );
   });
 });
@@ -270,8 +289,8 @@ final progressProvider =
 );
 
 /// What the parent area's run log is narrowed to: one child or all of them,
-/// and how far back.
-typedef HistoryKey = ({int? userId, HistoryRange range});
+/// how far back, and whether runs a parent has taken out are shown as well.
+typedef HistoryKey = ({int? userId, HistoryRange range, bool deleted});
 
 /// The parent area's run log.
 ///
@@ -283,9 +302,24 @@ final historyProvider =
     StreamProvider.family<List<HistoryEntry>, HistoryKey>((ref, key) {
   ref.watch(dayStartProvider);
   final since = historySince(key.range, ref.watch(clockProvider)());
+  return ref.watch(statsRepositoryProvider).watchHistory(
+        userId: key.userId,
+        sinceMs: since,
+        includeDeleted: key.deleted,
+      );
+});
+
+/// How many abandoned runs the log's current filters cover.
+///
+/// Its own query, not a count of what is on screen: the list stops at two
+/// hundred rows and the button must not promise fewer than it removes.
+final abandonedCountProvider =
+    StreamProvider.family<int, HistoryKey>((ref, key) {
+  ref.watch(dayStartProvider);
+  final since = historySince(key.range, ref.watch(clockProvider)());
   return ref
       .watch(statsRepositoryProvider)
-      .watchHistory(userId: key.userId, sinceMs: since);
+      .watchAbandonedCount(userId: key.userId, sinceMs: since);
 });
 
 /// One row per profile for the overview across all children.

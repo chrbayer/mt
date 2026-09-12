@@ -1052,9 +1052,14 @@ betroffenen Kind-Lektion-Paare neu — ein zurückkehrender Lauf hebt sie
 genauso, wie sein Verschwinden sie gesenkt hat. `deleteIncompleteSessions`
 gibt dafür die **IDs** zurück statt einer Anzahl.
 
-Angeboten wird es als SnackBar direkt nach der Tat. Ohne den Weg zurück war
-ein Fehlgriff im Elternbereich endgültig, und die Zeile, die dabei verschwand,
-war jemandes Nachmittag.
+Angeboten wird es **zweimal**: als SnackBar direkt nach der Tat, und über den
+Chip **„Gelöschte"** im Übungsverlauf, der die markierten Zeilen gedämpft
+einblendet, jede mit einem Knopf zum Zurückholen. Die SnackBar hilft nur, wer
+gerade hinschaut; der Chip hilft dem, der es sich morgen anders überlegt.
+
+`watchHistory` nimmt dafür `includeDeleted`, und `HistoryEntry` trägt
+`deleted` — die Zeile wird gezeigt, nicht versteckt, denn markiert ist nicht
+gelöscht.
 
 ## Löschen, ohne die Zeit zurückzugeben
 
@@ -1076,6 +1081,13 @@ Löschen aus den übriggebliebenen Läufen neu — in Dart über `starsFor`, nic
 in SQL: seit v8 steht diese Regel an genau einer Stelle, und eine zweite
 Fassung hier wäre das, was die gespeicherten Sterne gerade beenden sollten.
 Bleibt nichts übrig, verschwindet die Zeile aus `lesson_stars`.
+
+Die Zahl am Aufräumknopf kommt aus `watchAbandonedCount`, einer **eigenen
+Abfrage**, nicht aus der Liste auf dem Bildschirm: die hört bei `historyLimit`
+(200) auf, und ein Knopf, der mehr entfernt, als er verspricht, ist genau die
+Falle, gegen die die Filter da sind. Ist die Liste abgeschnitten, sagt der
+Bildschirm das auch — ein Protokoll, das still aufhört, liest sich als
+vollständig.
 
 `deleteIncompleteSessions` räumt abgebrochene Läufe weg und **nur die vom
 gewählten Filter** — die Liste aufzuräumen, die man ansieht, ist etwas
@@ -1181,7 +1193,11 @@ mehr Arbeit, nicht weniger, und soll nicht an einer Obergrenze scheitern, die
 niemand verlangt hat.
 
 **Jede** ihrer Lektionen muss erfüllt werden, damit die Aufgabe erledigt ist;
-gemessen wird jede für sich (`progressByLesson`, `allLessonsMet`). Für das
+gemessen wird jede für sich (`progressByLesson`, `allLessonsMet`). Auch
+rückblickend: `closedMetByLesson` zählt je Lektion, wie viele abgeschlossene
+Zeiträume sie gehalten hat. Der Punktestreifen sagt nur, *dass* ein Zeitraum
+gerissen wurde — woran, ist bei mehreren Lektionen die einzige Hälfte, mit der
+ein Elternteil etwas anfangen kann. Für das
 Kind ändert das nichts: jede Lektion ist ihre eigene Karteikarte, genau wie
 damals, als eine Aufgabe nur eine tragen konnte. Gespeichert werden die IDs
 kommagetrennt in `assignments.lesson_ids`, in Katalogreihenfolge — dieselbe

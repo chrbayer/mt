@@ -87,6 +87,10 @@ class HistoryEntry {
   final bool completed;
   final DateTime playedAt;
 
+  /// Whether a parent has taken this run out of the record. Nothing is ever
+  /// erased, so the row can be shown again and put back.
+  final bool deleted;
+
   const HistoryEntry({
     required this.sessionId,
     required this.userId,
@@ -99,6 +103,7 @@ class HistoryEntry {
     required this.wrongAttempts,
     required this.completed,
     required this.playedAt,
+    this.deleted = false,
   });
 
   /// The scored time - the same metric the leaderboards rank by, so a parent
@@ -167,6 +172,14 @@ class ActivityPoint {
     required this.totalMs,
   });
 }
+
+/// How many rows the parent area's run log loads at once.
+///
+/// A year of practice is thousands of rows and nobody scrolls through them;
+/// the time filter is the way to the older ones. The screen says when it has
+/// cut the list off, because a log that quietly stops is one a parent would
+/// read as complete.
+const int historyLimit = 200;
 
 /// A calculation the child repeatedly struggles with.
 class HardTask {
@@ -467,7 +480,8 @@ class StatsRepository {
   Stream<List<HistoryEntry>> watchHistory({
     int? userId,
     int? sinceMs,
-    int limit = 200,
+    bool includeDeleted = false,
+    int limit = historyLimit,
   }) {
     return _db
         .customSelect(
@@ -482,11 +496,12 @@ class StatsRepository {
                  s.total_ms       AS total_ms,
                  s.wrong_attempts AS wrong_attempts,
                  s.completed      AS completed,
+                 s.deleted        AS deleted,
                  COALESCE(s.finished_at_ms, s.started_at_ms) AS played_at_ms
           FROM sessions s
           JOIN users u ON u.id = s.user_id
           WHERE (?1 IS NULL OR s.user_id = ?1)
-            AND s.deleted = 0
+            AND (s.deleted = 0 OR ?4 = 1)
             -- The alias cannot be used here, so the expression is repeated.
             AND (?2 IS NULL
                  OR COALESCE(s.finished_at_ms, s.started_at_ms) >= ?2)
@@ -497,6 +512,7 @@ class StatsRepository {
             if (userId == null) const Variable<int>(null) else Variable.withInt(userId),
             if (sinceMs == null) const Variable<int>(null) else Variable.withInt(sinceMs),
             Variable.withInt(limit),
+            Variable.withInt(includeDeleted ? 1 : 0),
           ],
           readsFrom: {_db.sessions, _db.users},
         )
@@ -514,6 +530,7 @@ class StatsRepository {
                   totalMs: row.read<int>('total_ms'),
                   wrongAttempts: row.read<int>('wrong_attempts'),
                   completed: row.read<bool>('completed'),
+                  deleted: row.read<bool>('deleted'),
                   playedAt: DateTime.fromMillisecondsSinceEpoch(
                     row.read<int>('played_at_ms'),
                   ),
@@ -937,6 +954,27 @@ class StatsRepository {
         .write(const SessionsCompanion(deleted: Value(true)));
     await _recountStars(session.userId, session.lessonId);
   }
+
+  /// How many abandoned runs the given filters cover.
+  ///
+  /// Counted in its own query rather than off the list on screen: that one
+  /// stops at [watchHistory]'s limit, so on a long history the number under
+  /// the button was too small - and a button that removes more than it
+  /// promises is the trap this whole corner is trying to avoid.
+  Stream<int> watchAbandonedCount({int? userId, int? sinceMs}) => (_db
+          .selectOnly(_db.sessions)
+        ..addColumns([_db.sessions.id.count()])
+        ..where(_db.sessions.completed.equals(false) &
+            _db.sessions.deleted.equals(false) &
+            (userId == null
+                ? const Constant(true)
+                : _db.sessions.userId.equals(userId)) &
+            (sinceMs == null
+                ? const Constant(true)
+                : coalesce([_db.sessions.finishedAtMs, _db.sessions.startedAtMs])
+                    .isBiggerOrEqualValue(sinceMs))))
+      .watchSingle()
+      .map((row) => row.read(_db.sessions.id.count()) ?? 0);
 
   /// Puts marked runs back into the record.
   ///

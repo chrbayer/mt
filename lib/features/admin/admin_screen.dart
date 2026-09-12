@@ -75,16 +75,24 @@ class _HistoryTabState extends ConsumerState<_HistoryTab> {
   int? _filter;
   HistoryRange _range = HistoryRange.all;
 
+  /// Whether runs a parent has taken out of the record are shown as well.
+  /// They were only ever marked, so this is a matter of looking rather than
+  /// of digging anything up.
+  bool _showDeleted = false;
+
   @override
   Widget build(BuildContext context) {
     final users = ref.watch(usersProvider).value ?? const <User>[];
-    final history =
-        ref.watch(historyProvider((userId: _filter, range: _range)));
+    final key = (userId: _filter, range: _range, deleted: _showDeleted);
+    final history = ref.watch(historyProvider(key));
 
-    // Counted off the list that is actually shown, so the number on the
-    // button and the rows it will remove are the same thing.
-    final abandoned =
-        history.value?.where((entry) => !entry.completed).length ?? 0;
+    // Its own query, not a count of the rows on screen: the list stops at
+    // two hundred, and a button that removes more than it promises is the
+    // very thing these filters exist to prevent.
+    final abandoned = ref.watch(abandonedCountProvider(key)).value ?? 0;
+    // A long history is cut off. Saying so beats letting a parent believe
+    // they have seen all of it.
+    final truncated = (history.value?.length ?? 0) >= historyLimit;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -141,9 +149,35 @@ class _HistoryTabState extends ConsumerState<_HistoryTab> {
                   selected: _range == range,
                   onSelected: (_) => setState(() => _range = range),
                 ),
+              const SizedBox(width: 12),
+              // Nothing is ever erased, so a deleted run is only out of
+              // sight - and getting it back should not depend on still
+              // having the moment it went on screen.
+              FilterChip(
+                avatar: Icon(
+                  _showDeleted ? Icons.visibility : Icons.visibility_off,
+                  size: 20,
+                  color: AppColors.textMuted,
+                ),
+                label:
+                    const Text('Gelöschte', style: TextStyle(fontSize: 19)),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 14, vertical: 10),
+                selected: _showDeleted,
+                onSelected: (on) => setState(() => _showDeleted = on),
+              ),
             ],
           ),
         ),
+        if (truncated)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(32, 0, 32, 8),
+            child: Text(
+              'Es werden die letzten $historyLimit Durchgänge angezeigt. '
+              'Ein kürzerer Zeitraum zeigt den Rest.',
+              style: TextStyle(fontSize: 16, color: AppColors.textMuted),
+            ),
+          ),
         // Only ever what the filter above shows. Tidying up the list one is
         // looking at is a different act from tidying up every child's list
         // at once, and a button that silently did the second would be a trap.
@@ -188,6 +222,9 @@ class _HistoryTabState extends ConsumerState<_HistoryTab> {
                     itemBuilder: (context, index) => _HistoryRow(
                       entry: entries[index],
                       onDelete: () => _confirmDelete(entries[index]),
+                      onRestore: () => ref
+                          .read(statsRepositoryProvider)
+                          .restoreSessions([entries[index].sessionId]),
                     ),
                   ),
           ),
@@ -302,7 +339,13 @@ class _HistoryRow extends StatelessWidget {
   final HistoryEntry entry;
   final VoidCallback onDelete;
 
-  const _HistoryRow({required this.entry, required this.onDelete});
+  final VoidCallback onRestore;
+
+  const _HistoryRow({
+    required this.entry,
+    required this.onDelete,
+    required this.onRestore,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -311,10 +354,14 @@ class _HistoryRow extends StatelessWidget {
     // log has to survive that rather than take the parent area down.
     final lesson = lessonByIdOrNull(entry.lessonId);
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
+    // Taken out of the record but not erased: dimmed, so it reads as gone
+    // without pretending it is.
+    return Opacity(
+      opacity: entry.deleted ? 0.5 : 1,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
         border: Border.all(color: AppColors.divider, width: 1.5),
         borderRadius: BorderRadius.circular(16),
       ),
@@ -378,12 +425,22 @@ class _HistoryRow extends StatelessWidget {
                 ),
               ),
             ),
-          IconButton(
-            tooltip: 'Durchgang löschen',
-            icon: const Icon(Icons.delete_outline, color: AppColors.textMuted),
-            onPressed: onDelete,
-          ),
+          if (entry.deleted)
+            IconButton(
+              tooltip: 'Wiederherstellen',
+              icon: const Icon(Icons.restore_from_trash_outlined,
+                  color: AppColors.correct),
+              onPressed: onRestore,
+            )
+          else
+            IconButton(
+              tooltip: 'Durchgang löschen',
+              icon:
+                  const Icon(Icons.delete_outline, color: AppColors.textMuted),
+              onPressed: onDelete,
+            ),
         ],
+        ),
       ),
     );
   }

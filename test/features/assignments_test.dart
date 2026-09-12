@@ -244,6 +244,50 @@ void main() {
     });
   });
 
+  testWidgets('the parent list says which lesson kept falling short',
+      (tester) async {
+    // Two lessons, one of them done yesterday and the other not. The dot
+    // strip says a period was missed; only this says by which lesson.
+    final id = await assign('add_100_plain',
+        lessonIds: ['add_100_plain', 'money_add']);
+    await container.read(assignmentRepositoryProvider).updateAssignment(
+          id,
+          lessonIds: const ['add_100_plain', 'money_add'],
+          rhythm: AssignmentRhythm.daily,
+          runs: 1,
+          taskCount: 10,
+          minStars: 0,
+          minBolts: 0,
+        );
+    await finishRun('add_100_plain');
+    // Move both the assignment and the run back a day, so today's period is
+    // fresh and yesterday's is closed.
+    final yesterday =
+        DateTime.now().subtract(const Duration(days: 1)).millisecondsSinceEpoch;
+    await db.customStatement(
+        'UPDATE assignments SET created_at_ms = $yesterday');
+    await db.customStatement(
+        'UPDATE sessions SET finished_at_ms = $yesterday');
+
+    tester.view.physicalSize = const Size(1600, 1000);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: MaterialApp(
+          theme: buildAppTheme(),
+          home: const Scaffold(body: AssignmentsTab()),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // One lesson held yesterday, the other did not.
+    expect(find.textContaining('davor 1 von 1 Tagen'), findsOneWidget);
+    expect(find.textContaining('davor 0 von 1 Tagen'), findsOneWidget);
+  });
+
   group('changing an assignment', () {
     Future<void> pumpTab(WidgetTester tester) async {
       tester.view.physicalSize = const Size(1600, 1000);

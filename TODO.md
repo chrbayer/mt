@@ -241,3 +241,14 @@ einzelne ID ist bereits eine gültige einelementige Liste.
 Nachgemessen und in Ordnung: bis 130 % System-Schriftgröße bricht kein
 Bildschirm, und Duell-Durchgänge werden je Kind gespeichert und zählen auf
 die Übungszeit.
+
+#38 erledigt (2.12.1) — Die drei offen gebliebenen Punkte aus der Durchsicht:
+
+* Gelöschte Durchgänge lassen sich über den Chip „Gelöschte" im
+  Übungsverlauf auch später zurückholen, nicht nur in den acht Sekunden, die
+  die Meldung steht.
+* Die Elternliste sagt je Lektion, wie viele abgeschlossene Zeiträume sie
+  gehalten hat. Der Punktestreifen sagte nur, dass einer gerissen wurde.
+* Die Zahl am Aufräumknopf kommt aus einer eigenen Abfrage statt aus der
+  angezeigten Liste, die bei 200 Zeilen endet. Ist die Liste abgeschnitten,
+  steht das jetzt dabei.

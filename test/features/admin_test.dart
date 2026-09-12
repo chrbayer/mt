@@ -536,6 +536,44 @@ void main() {
       expect(find.textContaining('kann das Kind nicht üben'), findsOneWidget);
     });
 
+    testWidgets('deleted runs can be brought back without the snack bar',
+        (tester) async {
+      // The snack bar right after the deed only helps whoever is still
+      // looking at it. This is the other way, and it does not depend on it.
+      await run(mia, 'add_20_plain');
+      await openAdmin(tester);
+
+      await tester.tap(find.byTooltip('Durchgang löschen'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Löschen'));
+      await tester.pumpAndSettle();
+      expect(find.text('Plus ohne Zehnerübergang  ·  Bis 20'), findsNothing);
+
+      // Nothing was ever erased, so looking is all it takes.
+      await tester.tap(find.text('Gelöschte'));
+      await tester.pumpAndSettle();
+      expect(find.text('Plus ohne Zehnerübergang  ·  Bis 20'), findsOneWidget);
+
+      await tester.tap(find.byTooltip('Wiederherstellen'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Gelöschte'));
+      await tester.pumpAndSettle();
+      expect(find.text('Plus ohne Zehnerübergang  ·  Bis 20'), findsOneWidget);
+    });
+
+    testWidgets('the tidy-up button counts past the end of the list',
+        (tester) async {
+      // More abandoned runs than the log shows at once. The count used to
+      // come off the list on screen, so the button promised too few.
+      for (var i = 0; i < 205; i++) {
+        await run(mia, 'add_20_plain', completed: false);
+      }
+      await openAdmin(tester);
+
+      expect(find.textContaining('aufräumen (205)'), findsOneWidget);
+      expect(find.textContaining('letzten 200 Durchgänge'), findsOneWidget);
+    });
+
     testWidgets('the parent area says when the last backup was',
         (tester) async {
       await openAdmin(tester);

@@ -209,6 +209,9 @@ class _AssignmentRow extends ConsumerWidget {
                     progress: stats.progressOf(lesson.id),
                     runs: assignment.runs,
                     showTitle: lessons.length > 1,
+                    closedMet: stats.closedMetByLesson[lesson.id] ?? 0,
+                    closedTotal: stats.closed.length,
+                    periodWord: periodWord,
                   ),
               const SizedBox(height: 4),
               Row(
@@ -256,11 +259,21 @@ class _LessonLine extends StatelessWidget {
   /// it here would only take the room the numbers need.
   final bool showTitle;
 
+  /// How many of the closed periods this lesson met, and how many there
+  /// were. The dot strip below says a period was missed; this says by which
+  /// lesson, which is the only half a parent can act on.
+  final int closedMet;
+  final int closedTotal;
+  final String periodWord;
+
   const _LessonLine({
     required this.lesson,
     required this.progress,
     required this.runs,
     required this.showTitle,
+    required this.closedMet,
+    required this.closedTotal,
+    required this.periodWord,
   });
 
   @override
@@ -291,6 +304,22 @@ class _LessonLine extends StatelessWidget {
             '${progress?.qualifyingRuns ?? 0}/$runs',
             style: const TextStyle(fontSize: 16, color: AppColors.textMuted),
           ),
+          if (closedTotal > 0) ...[
+            const SizedBox(width: 10),
+            Text(
+              '· davor $closedMet von $closedTotal $periodWord',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 15,
+                // The one that keeps falling short is the one to talk about,
+                // so it does not read like the others.
+                color: closedMet < closedTotal
+                    ? AppColors.profile1
+                    : AppColors.textMuted,
+              ),
+            ),
+          ],
         ],
       ),
     );
