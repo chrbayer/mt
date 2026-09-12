@@ -439,21 +439,46 @@ class _AssignmentGroup extends ConsumerWidget {
         Text('Deine Aufgaben',
             style: Theme.of(context).textTheme.headlineLarge),
         const SizedBox(height: 12),
-        GridView.count(
-          crossAxisCount: 4,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          mainAxisSpacing: 16,
-          crossAxisSpacing: 16,
-          childAspectRatio: 1.4,
-          children: [
-            for (final entry in entries)
-              AssignmentTile(assignment: entry.assignment),
-          ],
+        LayoutBuilder(
+          builder: (context, constraints) => GridView.count(
+            crossAxisCount: tileColumns(constraints.maxWidth),
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            mainAxisSpacing: 16,
+            crossAxisSpacing: 16,
+            childAspectRatio: 1.4,
+            children: [
+              for (final entry in entries)
+                AssignmentTile(assignment: entry.assignment),
+            ],
+          ),
         ),
       ],
     );
   }
+}
+
+/// How many tiles fit side by side before the footer starts losing text.
+///
+/// A practised tile's footer carries six symbols - three stars and three
+/// bolts at 24 dp each - and the time has to fit beside them. Of everything
+/// in that row only the time sits in an `Expanded`, so it is the only part
+/// that gives way, and below roughly 260 dp of tile width it gives way to
+/// nothing: measured at 960 dp with four columns, "125,0 s" was left with
+/// 19 dp and "noch nicht geübt" with 95.
+///
+/// Four columns used to be hard-coded. No test saw it, because the layout
+/// tests render at devicePixelRatio 1 on a 1280 dp screen - the generous
+/// case. A 10" tablet with 1920x1200 pixels reports 960 dp, and that is an
+/// ordinary tablet, not a corner.
+///
+/// The thresholds come out of that 260 dp: with the list's 32 dp of padding
+/// on each side and 16 dp between tiles, n columns need
+/// `276 * n + 48` of width.
+int tileColumns(double width) {
+  if (width >= 1160) return 4;
+  if (width >= 880) return 3;
+  return 2;
 }
 
 class _LessonGroup extends StatelessWidget {
@@ -474,17 +499,19 @@ class _LessonGroup extends StatelessWidget {
       children: [
         Text(title, style: Theme.of(context).textTheme.headlineLarge),
         const SizedBox(height: 12),
-        GridView.count(
-          crossAxisCount: 4,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          mainAxisSpacing: 16,
-          crossAxisSpacing: 16,
-          childAspectRatio: 1.4,
-          children: [
-            for (final lesson in lessons)
-              _LessonTile(lesson: lesson, stat: stats[lesson.id]),
-          ],
+        LayoutBuilder(
+          builder: (context, constraints) => GridView.count(
+            crossAxisCount: tileColumns(constraints.maxWidth),
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            mainAxisSpacing: 16,
+            crossAxisSpacing: 16,
+            childAspectRatio: 1.4,
+            children: [
+              for (final lesson in lessons)
+                _LessonTile(lesson: lesson, stat: stats[lesson.id]),
+            ],
+          ),
         ),
       ],
     );

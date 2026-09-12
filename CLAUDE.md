@@ -226,6 +226,33 @@ in `test/data/repositories_test.dart`, der eine Datenbank ins alte Schema
 zurückbaut, sie erneut öffnet und prüft, dass Profile und Durchgänge die
 Migration überleben. Auf den Tablets liegen echte Ergebnisse.
 
+## Wie viele Kacheln nebeneinander
+
+`tileColumns` in `lesson_home_screen.dart` entscheidet es nach der Breite:
+vier ab 1160 dp, drei ab 880, sonst zwei. Kachelkatalog und „Deine Aufgaben"
+benutzen dieselbe Funktion, damit die beiden Raster nicht auseinanderlaufen.
+
+Die Zahl kommt nicht aus dem Gefühl, sondern aus der Fußzeile. Eine geübte
+Kachel trägt dort sechs Symbole — drei Sterne und drei Blitze zu je 24 dp —
+und daneben muss die Zeit passen. Von allem in dieser Zeile steckt nur die
+Zeit in einem `Expanded`, sie ist also das Einzige, was nachgibt. Unter rund
+260 dp Kachelbreite gibt sie bis auf nichts nach: bei vier Spalten auf 960 dp
+blieben „125,0 s" ganze 19 dp und „noch nicht geübt" 95 von 144.
+
+**Warum das lange niemandem auffiel:** `screens_layout_test` rendert mit
+`devicePixelRatio = 1.0` auf 1280x800 und 1600x1000 — genau die großzügigen
+Fälle. Ein 10-Zoll-Tablet mit 1920x1200 meldet bei Dichte 2 aber 960 dp, und
+das ist ein gewöhnliches Gerät. Dazu kommt: ein **abgeschnittener Text ist
+kein Layoutfehler**. `TextOverflow.ellipsis` tut genau, was dort steht, der
+Test sieht keinen Überlauf und meldet nichts. Deshalb prüft der Test jetzt
+die Breite, die die Zeit tatsächlich bekommt, und nicht nur, ob etwas
+überläuft.
+
+Noch offen: unter etwa 900 dp läuft die **Kopfzeile** des Übungsbildschirms
+über — Profilname, zwei Gesamtstände und vier Knöpfe nebeneinander. Der Test
+bei 960 dp schluckt diesen Fehler ausdrücklich und sagt im Kommentar, dass er
+nicht den Kacheln gehört.
+
 ## Farben der Gruppen
 
 `AppColors.groupTints` liefert je Gruppe einen Pastellton für den

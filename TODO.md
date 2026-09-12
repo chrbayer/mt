@@ -164,3 +164,12 @@ Jetzt gilt überall dieselbe Regel: die Fehlerquote entscheidet. Ausgenommen
 bleibt allein die Mindestlänge — fünf Bilder zu zählen ist dort ein richtiger
 Durchgang. Bereits verdiente Sterne bleiben stehen, sie werden nur nach oben
 geschrieben; wer einen sauberen Stand will, gibt sie im Elternbereich zurück.
+
+#29 erledigt (2.9.2) — Die Zeit auf den Lektionskacheln wurde auf schmaleren
+Geräten abgeschnitten: bei vier fest eingestellten Spalten blieben ihr auf
+960 dp noch 19 dp. Die Fußzeile trägt sechs Symbole zu 24 dp, und nur die
+Zeit gibt nach. `tileColumns` wählt die Spaltenzahl jetzt nach der Breite.
+Aufgefallen war es nie, weil die Layouttests mit devicePixelRatio 1 auf
+1280x800 laufen, also im großzügigen Fall — und weil abgeschnittener Text
+kein Layoutfehler ist. Offen bleibt die Kopfzeile des Übungsbildschirms, die
+unter etwa 900 dp überläuft.

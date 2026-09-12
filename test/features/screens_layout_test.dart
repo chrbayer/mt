@@ -461,6 +461,54 @@ void main() {
     });
   }
 
+  group('Kacheln je Zeile', () {
+    // The numbers behind tileColumns, written out: n columns need
+    // 276 * n + 48 of width before the footer starts eating the time.
+    test('vier nur, wo die Kachel breit genug bleibt', () {
+      expect(tileColumns(1600), 4);
+      expect(tileColumns(1280), 4);
+      expect(tileColumns(1160), 4);
+      expect(tileColumns(1159), 3);
+    });
+
+    test('drei auf einem 1920x1200-Tablet, das 960 dp meldet', () {
+      expect(tileColumns(960), 3);
+      expect(tileColumns(880), 3);
+      expect(tileColumns(879), 2);
+    });
+
+    test('zwei, wo auch drei nicht mehr passen', () {
+      expect(tileColumns(740), 2);
+      expect(tileColumns(400), 2);
+    });
+  });
+
+  testWidgets('die Zeit auf der Kachel bleibt auch bei 960 dp lesbar',
+      (tester) async {
+    // The case that was broken: at 960 dp four columns left the time 19 dp,
+    // and an ellipsis is not a layout error, so nothing ever failed. 70 dp
+    // is what a three-digit time needs at 17 px.
+    //
+    // One group only, so the practised tile is on screen without scrolling.
+    final users = container.read(userRepositoryProvider);
+    await users.setHiddenGroups(mia.id,
+        LessonGroup.values.where((g) => g != LessonGroup.upTo100).toSet());
+    container.read(activeUserProvider.notifier).select(
+          (await users.findUser(mia.id))!,
+        );
+
+    await pumpScreen(tester, const LessonHomeScreen(), const Size(960, 600));
+    // Swallowed on purpose, and it is **not** the tiles: at this width the
+    // app bar overflows, with the profile badge, two running totals and four
+    // buttons side by side. Its own problem, still open.
+    tester.takeException();
+
+    // The footer of the one lesson that has been practised.
+    final time = find.textContaining(RegExp(r'^\d+,\d s$'));
+    expect(time, findsOneWidget);
+    expect(tester.getRect(time.first).width, greaterThanOrEqualTo(70));
+  });
+
   testWidgets('13c-profileinstellungen bleibt auf einem schmalen Gerät '
       'bedienbar', (tester) async {
     // Below the two-column width the settings fall back into one column.
