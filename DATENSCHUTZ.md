@@ -2,6 +2,9 @@
 
 Stand: 12. September 2026
 
+Der Mathe-Trainer ist quelloffen: <https://github.com/chrbayer/mt>. Alles,
+was hier steht, lässt sich dort nachlesen statt glauben.
+
 ## Kurz gesagt
 
 Der Mathe-Trainer sendet nichts. Alles, was die App über ein Kind weiß,
@@ -16,11 +19,15 @@ Android-Berechtigung** an, auch keinen Internetzugriff. Sie könnte gar nichts
 ## Wer verantwortlich ist
 
 <!-- Vor der Veröffentlichung ausfüllen: Play und die DSGVO verlangen einen
-     benannten Verantwortlichen mit erreichbarer Adresse. -->
+     benannten Verantwortlichen mit ladungsfähiger Anschrift. Der Link auf
+     das Projekt ersetzt das nicht. -->
 
-    Name:    …
+    Name:      …
     Anschrift: …
-    E-Mail:  …
+    E-Mail:    …
+
+Quelltext und dieser Text: <https://github.com/chrbayer/mt>. Fragen und
+Hinweise gern dort als Issue.
 
 ## Welche Daten die App verarbeitet
 

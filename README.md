@@ -1,5 +1,7 @@
 # Mathe-Trainer
 
+<https://github.com/chrbayer/mt>
+
 Kopfrechen-App für Grundschulkinder auf dem Android-Tablet. Gemessen wird die
 Zeit bis zur richtigen Lösung; daraus entstehen persönliche Lernkurven und
 Bestenlisten, in denen mehrere Kinder auf demselben Tablet gegeneinander
@@ -396,4 +398,6 @@ jede weitergegebene Abwandlung ihren Quelltext mitbringt.
 Die App sendet nichts und fordert in der veröffentlichten Fassung keine
 einzige Android-Berechtigung an. Die Einzelheiten stehen in
 [DATENSCHUTZ.md](DATENSCHUTZ.md); dieselbe Datei taugt als
-Datenschutzerklärung, sobald sie unter einer öffentlichen Adresse liegt.
+Datenschutzerklärung, sobald sie unter einer öffentlichen Adresse liegt — auf
+GitHub etwa unter
+<https://github.com/chrbayer/mt/blob/master/DATENSCHUTZ.md>.
