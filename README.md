@@ -407,6 +407,12 @@ rsvg-convert -w 512 -h 512 assets/icon/icon.svg \
 Die englische Fassung trägt dieselben Bilder: die Oberfläche gibt es nur auf
 Deutsch, und das steht auch in der englischen Beschreibung.
 
+## Aufnahme bei F-Droid
+
+Die Build-Recipe und die Hinweise zum Einreichen liegen unter
+[fdroid/](fdroid/). Sie muss bei jeder Veröffentlichung einen Eintrag mehr
+bekommen, denn F-Droid baut aus einem Tag, nicht aus einem Branch.
+
 ## Lizenz
 
 GNU General Public License, Version 3 oder später — der volle Text steht in
