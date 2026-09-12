@@ -54,8 +54,14 @@ class AssignmentRepository {
       ..where((a) =>
           (userId == null ? const Constant(true) : a.userId.equals(userId)) &
           (openOnly ? a.endedAtMs.isNull() : const Constant(true)))
+      // By the day it belongs to, newest first, and by creation for the
+      // repeating ones that have no day of their own. A plan read in
+      // creation order is not a plan.
       ..orderBy([
-        (a) => OrderingTerm(expression: a.createdAtMs, mode: OrderingMode.desc)
+        (a) => OrderingTerm(
+              expression: coalesce([a.onDayMs, a.createdAtMs]),
+              mode: OrderingMode.desc,
+            ),
       ]);
     return query.watch().map(
           (rows) => [for (final row in rows) _fromRow(row)],

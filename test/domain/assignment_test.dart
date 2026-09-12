@@ -371,7 +371,14 @@ void main() {
       final a = once(on: DateTime(2026, 9, 16));
       expect(formatDeadline(a, now: DateTime(2026, 9, 16, 9)), 'heute');
       expect(formatDeadline(a, now: DateTime(2026, 9, 14)), 'am Mi, 16.9.');
-      expect(formatDeadline(a, now: DateTime(2026, 9, 18)), 'noch offen');
+      // Over and not carried over: it is past, not pending. A parent
+      // cannot act on "noch offen" here, and a child never sees it.
+      expect(formatDeadline(a, now: DateTime(2026, 9, 18)), 'war Mi, 16.9.');
+      expect(
+        formatDeadline(once(on: DateTime(2026, 9, 16), carryOver: true),
+            now: DateTime(2026, 9, 18)),
+        'noch offen',
+      );
     });
 
     test('a repeating one is shown whatever day it is', () {

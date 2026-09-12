@@ -378,8 +378,13 @@ String formatDeadline(Assignment a, {DateTime? now}) {
   }
   final today = now ?? DateTime.now();
   final period = periodAt(a, today);
-  if (today.millisecondsSinceEpoch > period.dueMs) return 'noch offen';
   final day = DateTime.fromMillisecondsSinceEpoch(period.startMs);
+  if (today.millisecondsSinceEpoch > period.dueMs) {
+    // "Noch offen" only where it really is: a carried-over one is still to
+    // be done, one without is simply over, and saying otherwise would ask a
+    // parent to act on something that cannot be acted on any more.
+    return a.carryOver ? 'noch offen' : 'war ${_short(day)}';
+  }
   if (a.rhythm == AssignmentRhythm.weekly) {
     return withinPeriod(a, today) ? 'diese Woche' : 'ab ${_short(day)}';
   }

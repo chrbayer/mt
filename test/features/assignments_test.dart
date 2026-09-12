@@ -349,6 +349,45 @@ void main() {
     });
   });
 
+  // A plain test, not a widget one: awaiting a drift stream's `.first`
+  // inside testWidgets deadlocks because nothing pumps it - the same trap
+  // assignmentForLessonProvider works around in providers.dart.
+  test('the parent list reads as a plan, by day', () async {
+    // Created in the wrong order on purpose: what orders the list is the
+    // day an assignment belongs to, not the moment it was typed in.
+    final today = DateTime.now();
+    await container.read(assignmentRepositoryProvider).createAssignment(
+          userId: mia.id,
+          lessonIds: const ['money_add'],
+          rhythm: AssignmentRhythm.daily,
+          repeats: false,
+          onDayMs: today.millisecondsSinceEpoch,
+          runs: 1,
+          taskCount: 10,
+          minStars: 0,
+          minBolts: 0,
+        );
+    await container.read(assignmentRepositoryProvider).createAssignment(
+          userId: mia.id,
+          lessonIds: const ['add_100_plain'],
+          rhythm: AssignmentRhythm.daily,
+          repeats: false,
+          onDayMs:
+              today.add(const Duration(days: 3)).millisecondsSinceEpoch,
+          runs: 1,
+          taskCount: 10,
+          minStars: 0,
+          minBolts: 0,
+        );
+
+    final list = await container
+        .read(assignmentRepositoryProvider)
+        .watchAssignments(userId: mia.id)
+        .first;
+    expect(list.map((a) => a.lessonIds.single),
+        ['add_100_plain', 'money_add']);
+  });
+
   group('changing an assignment', () {
     Future<void> pumpTab(WidgetTester tester) async {
       tester.view.physicalSize = const Size(1600, 1000);

@@ -269,3 +269,9 @@ einmalige Aufgabe bleibt stehen, bis sie gemacht ist, der Tag selbst gilt
 aber weiter als verpasst. Nachziehen gibt es nur für einmalige; bei
 wiederkehrenden wäre es eine Schuld ohne Boden. Für das Kind ändert sich
 nichts an der Darstellung.
+
+#41 erledigt (2.13.1) — Zwei lose Enden aus 2.13.0: die Aufgabenliste im
+Elternbereich ist nach dem Tag sortiert, zu dem eine Aufgabe gehört, nicht
+nach dem Zeitpunkt der Eingabe — sonst liest sich ein Plan nicht als Plan.
+Und eine vergangene einmalige Aufgabe sagt nur dann „noch offen", wenn sie
+wirklich nachgezogen wird; sonst steht dort der Tag, an dem sie war.
