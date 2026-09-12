@@ -10,6 +10,7 @@ import 'package:mathe_trainer/features/admin/global_settings_tab.dart';
 import 'package:mathe_trainer/features/admin/profile_settings_screen.dart';
 import 'package:mathe_trainer/features/admin/reset_stars_dialog.dart';
 import 'package:mathe_trainer/features/leaderboard/leaderboard_screen.dart';
+import 'package:mathe_trainer/features/common/star_row.dart';
 import 'package:mathe_trainer/features/lessons/lesson_home_screen.dart';
 import 'package:mathe_trainer/features/lessons/start_lesson_sheet.dart';
 import 'package:mathe_trainer/features/practice/practice_screen.dart';
@@ -498,15 +499,38 @@ void main() {
         );
 
     await pumpScreen(tester, const LessonHomeScreen(), const Size(960, 600));
-    // Swallowed on purpose, and it is **not** the tiles: at this width the
-    // app bar overflows, with the profile badge, two running totals and four
-    // buttons side by side. Its own problem, still open.
+    // Swallowed on purpose, and it is **not** the tiles. The square test
+    // font makes every label about twice as wide as a real one, so the app
+    // bar overflows here while on a device it has room to spare at this
+    // width - measured with real glyph metrics, it only runs short below
+    // about 900 dp, and the compact bar takes over at 950.
     tester.takeException();
 
     // The footer of the one lesson that has been practised.
     final time = find.textContaining(RegExp(r'^\d+,\d s$'));
     expect(time, findsOneWidget);
     expect(tester.getRect(time.first).width, greaterThanOrEqualTo(70));
+  });
+
+  testWidgets('die Kopfzeile gibt auf einem schmalen Gerät ihre '
+      'Beschriftungen auf', (tester) async {
+    // A phone held sideways. With the labels the bar runs short below about
+    // 900 dp; without them everything stays reachable as an icon.
+    await pumpScreen(tester, const LessonHomeScreen(), const Size(820, 420));
+
+    expect(find.text('Statistik'), findsNothing);
+    expect(find.text('Wechseln'), findsNothing);
+    expect(find.byTooltip('Statistik'), findsOneWidget);
+    expect(find.byTooltip('Wechseln'), findsOneWidget);
+    // And the two running totals are still where a child looks for them.
+    expect(find.byType(StarTotal), findsNWidgets(2));
+  });
+
+  testWidgets('breit genug behält sie die Beschriftungen', (tester) async {
+    await pumpScreen(tester, const LessonHomeScreen(), const Size(1280, 800));
+
+    expect(find.text('Statistik'), findsOneWidget);
+    expect(find.text('Wechseln'), findsOneWidget);
   });
 
   testWidgets('13c-profileinstellungen bleibt auf einem schmalen Gerät '

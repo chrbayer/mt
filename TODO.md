@@ -171,5 +171,12 @@ Geräten abgeschnitten: bei vier fest eingestellten Spalten blieben ihr auf
 Zeit gibt nach. `tileColumns` wählt die Spaltenzahl jetzt nach der Breite.
 Aufgefallen war es nie, weil die Layouttests mit devicePixelRatio 1 auf
 1280x800 laufen, also im großzügigen Fall — und weil abgeschnittener Text
-kein Layoutfehler ist. Offen bleibt die Kopfzeile des Übungsbildschirms, die
-unter etwa 900 dp überläuft.
+kein Layoutfehler ist.
+
+#30 erledigt (2.9.3) — Nachtrag zu #29: die Kopfzeile des Übungsbildschirms
+läuft mit ihren Beschriftungen unter rund 900 dp über. Unter 950 dp geben
+„Statistik" und „Wechseln" deshalb ihr Wort auf und bleiben als Symbol mit
+Tooltip. Dabei stellte sich heraus, dass die erste Messung falsch war: die
+quadratische Testschrift macht jedes Wort doppelt so breit, weshalb die
+Kopfzeile im Test schon bei 960 dp überlief, auf einem Gerät aber erst unter
+900. Auf keinem Tablet trat das je auf.

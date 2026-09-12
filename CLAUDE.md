@@ -248,10 +248,18 @@ Test sieht keinen Überlauf und meldet nichts. Deshalb prüft der Test jetzt
 die Breite, die die Zeit tatsächlich bekommt, und nicht nur, ob etwas
 überläuft.
 
-Noch offen: unter etwa 900 dp läuft die **Kopfzeile** des Übungsbildschirms
-über — Profilname, zwei Gesamtstände und vier Knöpfe nebeneinander. Der Test
-bei 960 dp schluckt diesen Fehler ausdrücklich und sagt im Kommentar, dass er
-nicht den Kacheln gehört.
+Die **Kopfzeile** hat dasselbe Problem an einer anderen Schwelle: mit den
+Beschriftungen „Statistik" und „Wechseln" läuft sie unter rund 900 dp über.
+Unter `_compactBarWidth` (950) geben die beiden Knöpfe deshalb ihre
+Beschriftung auf und bleiben als Symbol mit Tooltip stehen — nicht der Knopf
+gibt nach, sondern sein Wort, denn erreichbar müssen beide bleiben. Damit
+passt die Zeile bis etwa 700 dp.
+
+**Vorsicht beim Messen von Textbreiten im Test:** die quadratische Testschrift
+macht jedes Wort etwa doppelt so breit wie eine echte. Die Kopfzeile läuft im
+Test deshalb schon bei 960 dp über, auf einem Gerät aber erst unter 900. Wer
+hier eine Schwelle festlegt, muss mit einer echten Schrift gegenmessen —
+`picture_group_test.dart` zeigt, wie man eine lädt.
 
 ## Farben der Gruppen
 

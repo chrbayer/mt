@@ -21,6 +21,15 @@ import 'pause_notice.dart';
 import 'recommendation.dart';
 import 'start_lesson_sheet.dart';
 
+/// Below this width the two labelled buttons in the app bar give up their
+/// labels. "Statistik" and "Wechseln" cost about 180 dp of text between
+/// them, and that is the whole difference: with the labels the bar overflows
+/// below roughly 900 dp, without them it fits down to about 700.
+///
+/// A tablet never gets here - even a 1920x1200 ten-incher reports 960 dp.
+/// This is the phone held sideways.
+const double _compactBarWidth = 950;
+
 class LessonHomeScreen extends ConsumerWidget {
   const LessonHomeScreen({super.key});
 
@@ -44,6 +53,7 @@ class LessonHomeScreen extends ConsumerWidget {
     // further down would be a contradiction, whether its card is still open
     // or already ticked off.
     final assignedLessonIds = {for (final a in assignments) a.lessonId};
+    final compactBar = MediaQuery.sizeOf(context).width < _compactBarWidth;
 
     /// The lessons of a group after the child's filter has had its say.
     List<LessonSpec> offered(LessonGroup group) => [
@@ -131,13 +141,24 @@ class LessonHomeScreen extends ConsumerWidget {
             ],
           ),
           const SizedBox(width: 4),
-          TextButton.icon(
-            icon: const Icon(Icons.insights_outlined, size: 28),
-            label: const Text('Statistik', style: TextStyle(fontSize: 20)),
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute<void>(builder: (_) => const StatsScreen()),
+          // The label is what gives way when the bar runs short, not the
+          // button: a child has to be able to reach both of these.
+          if (compactBar)
+            IconButton(
+              tooltip: 'Statistik',
+              icon: const Icon(Icons.insights_outlined, size: 28),
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(builder: (_) => const StatsScreen()),
+              ),
+            )
+          else
+            TextButton.icon(
+              icon: const Icon(Icons.insights_outlined, size: 28),
+              label: const Text('Statistik', style: TextStyle(fontSize: 20)),
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(builder: (_) => const StatsScreen()),
+              ),
             ),
-          ),
           const SizedBox(width: 8),
           IconButton(
             tooltip: 'Einstellungen',
@@ -147,14 +168,24 @@ class LessonHomeScreen extends ConsumerWidget {
             ),
           ),
           const SizedBox(width: 4),
-          TextButton.icon(
-            icon: const Icon(Icons.logout, size: 26),
-            label: const Text('Wechseln', style: TextStyle(fontSize: 20)),
-            onPressed: () {
-              ref.read(activeUserProvider.notifier).logout();
-              Navigator.of(context).pop();
-            },
-          ),
+          if (compactBar)
+            IconButton(
+              tooltip: 'Wechseln',
+              icon: const Icon(Icons.logout, size: 26),
+              onPressed: () {
+                ref.read(activeUserProvider.notifier).logout();
+                Navigator.of(context).pop();
+              },
+            )
+          else
+            TextButton.icon(
+              icon: const Icon(Icons.logout, size: 26),
+              label: const Text('Wechseln', style: TextStyle(fontSize: 20)),
+              onPressed: () {
+                ref.read(activeUserProvider.notifier).logout();
+                Navigator.of(context).pop();
+              },
+            ),
           const SizedBox(width: 12),
         ],
       ),
