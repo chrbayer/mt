@@ -51,3 +51,6 @@ app.*.map.json
 android/key.properties
 *.jks
 *.keystore
+
+# Obsidian vault, for notes kept alongside the project
+.obsidian/
