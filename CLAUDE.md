@@ -1154,12 +1154,19 @@ verstrichen" dieselbe Frage (v14 hat die beiden Spalten entfernt).
 mehr Arbeit, nicht weniger, und soll nicht an einer Obergrenze scheitern, die
 niemand verlangt hat.
 
-Eine Aufgabe wird **nie geändert**, nur beendet und neu angelegt.
-„Geschafft an 12 von 15 Tagen" ist nur wahr, solange sich die Messlatte
-nicht bewegt hat — eine Änderung mitten in der Statistik würde frühere und
-spätere Tage nach zwei verschiedenen Regeln zählen, ohne dass das irgendwo
-stünde. Ändern heißt deshalb: `endAssignment` auf die alte, `createAssignment`
-für die neue, jede mit ihrer eigenen Statistik.
+Eine laufende Aufgabe lässt sich **ändern** (`updateAssignment`), und zwar in
+allem außer Kind und Lektion: die beiden sind es, was eine Aufgabe *ist*, und
+mit ihnen gehörte die Statistik plötzlich zu Läufen, die nie zugewiesen
+waren. Wer die wechseln will, legt eine neue an.
+
+An einer Aufgabe ist **nichts eingefroren** — Stand und Statistik werden bei
+jedem Lesen frisch aus den Läufen gerechnet. Eine höher gehängte Latte
+bewertet deshalb auch das Zurückliegende neu, und der grüne Haken von heute
+kann wieder verschwinden. Das ist gewollt: es ist genau das, was „ich
+verlange jetzt mehr" heißt, und es hält die Aufgabe und ihre Statistik bei
+derselben Aussage. Die frühere Regel war, gar nicht ändern zu können, um
+„geschafft an 12 von 15 Tagen" stabil zu halten; das kostete mehr, als es
+einbrachte.
 
 **Der Deckel aus #16 wird ausgesetzt**, aber nur für die zugewiesene Lektion
 und nur, solange der laufende Zeitraum sein Ziel noch nicht erreicht hat.

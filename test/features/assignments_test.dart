@@ -203,6 +203,92 @@ void main() {
     });
   });
 
+  group('changing an assignment', () {
+    Future<void> pumpTab(WidgetTester tester) async {
+      tester.view.physicalSize = const Size(1600, 1000);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: MaterialApp(
+            theme: buildAppTheme(),
+            home: const Scaffold(body: AssignmentsTab()),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('raising the bar takes the tick away again', (tester) async {
+      // Two stars asked for, two stars delivered: done.
+      final id = await assign('add_100_plain', minStars: 2);
+      await finishRun('add_100_plain', wrongAttempts: 2);
+      await pump(tester);
+      expect(find.text('geschafft'), findsOneWidget);
+
+      // The parent raises it to three. Nothing about an assignment is
+      // frozen, so the same run is judged again - and no longer clears it.
+      await container.read(assignmentRepositoryProvider).updateAssignment(
+            id,
+            rhythm: AssignmentRhythm.daily,
+            runs: 1,
+            taskCount: 10,
+            minStars: 3,
+            minBolts: 0,
+          );
+      await pump(tester);
+      expect(find.text('geschafft'), findsNothing);
+      expect(find.textContaining('0/1'), findsOneWidget);
+    });
+
+    testWidgets('and lowering it hands the tick back', (tester) async {
+      final id = await assign('add_100_plain', minStars: 3);
+      await finishRun('add_100_plain', wrongAttempts: 2);
+      await pump(tester);
+      expect(find.text('geschafft'), findsNothing);
+
+      await container.read(assignmentRepositoryProvider).updateAssignment(
+            id,
+            rhythm: AssignmentRhythm.daily,
+            runs: 1,
+            taskCount: 10,
+            minStars: 2,
+            minBolts: 0,
+          );
+      await pump(tester);
+      expect(find.text('geschafft'), findsOneWidget);
+    });
+
+    testWidgets('the dialog opens on the values that are stored',
+        (tester) async {
+      await assign('money_add', runs: 3, taskCount: 20, minStars: 2);
+      await pumpTab(tester);
+
+      await tester.tap(find.text('Ändern'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Aufgabe ändern'), findsOneWidget);
+      // Child and lesson are shown but not offered: those two are what the
+      // assignment is.
+      expect(find.text('Geld zusammenzählen · ${groupTitle(
+          LessonGroup.everyday)}'), findsWidgets);
+      expect(find.byType(DropdownButtonFormField<String>), findsNothing);
+      expect(find.text('Speichern'), findsOneWidget);
+    });
+
+    testWidgets('an ended assignment cannot be changed any more',
+        (tester) async {
+      final id = await assign('add_100_plain');
+      await container
+          .read(assignmentRepositoryProvider)
+          .endAssignment(id, DateTime.now().millisecondsSinceEpoch);
+      await pumpTab(tester);
+
+      expect(find.text('Ändern'), findsNothing);
+    });
+  });
+
   testWidgets('the parent list writes the group the way the catalogue does',
       (tester) async {
     // German capitalises its nouns, and a group title is a name. The three

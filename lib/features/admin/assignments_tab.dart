@@ -13,9 +13,13 @@ import 'assignment_editor.dart';
 ///
 /// Filtered by child the same way the run log is, because the question here
 /// is the same one: "what has this child been asked to do, and how is it
-/// going". Assignments are never edited (see domain/assignment.dart), so
-/// there is no edit action here - only "Neue Aufgabe", "Beenden" and
-/// "Löschen".
+/// going".
+///
+/// An open assignment can be changed, and changing it re-judges what is
+/// behind it: nothing about an assignment is frozen, it is all worked out
+/// from the runs each time it is read. Raising the bar can therefore take
+/// today's tick away again, which is exactly what raising a bar means.
+/// Child and lesson stay put - see [AssignmentEditor].
 class AssignmentsTab extends ConsumerStatefulWidget {
   const AssignmentsTab({super.key});
 
@@ -152,6 +156,13 @@ class _AssignmentRow extends ConsumerWidget {
                         fontSize: 19, fontWeight: FontWeight.w600),
                   ),
                 ),
+                if (!ended)
+                  TextButton.icon(
+                    icon: const Icon(Icons.edit_outlined, size: 22),
+                    label: const Text('Ändern'),
+                    onPressed: () =>
+                        AssignmentEditor.show(context, existing: assignment),
+                  ),
                 if (!ended)
                   TextButton.icon(
                     icon: const Icon(Icons.stop_circle_outlined, size: 22),

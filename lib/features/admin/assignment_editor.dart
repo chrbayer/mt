@@ -15,16 +15,24 @@ import '../common/amount_choice.dart';
 /// more than ten in one period is asking for a different kind of app.
 const List<int> _runOptions = [1, 2, 3, 5, 7, 10];
 
-/// New assignment: pick a child, a lesson, a rhythm and the four
-/// requirements. There is no "edit" - only "Neue Aufgabe", because an
-/// assignment is never changed once created (see domain/assignment.dart);
-/// this dialog only ever inserts a row.
+/// Pick a child, a lesson, a rhythm and the four requirements - or change
+/// the requirements of one that already exists.
+///
+/// In edit mode child and lesson are shown but not offered: those two are
+/// what an assignment **is**, and swapping them would leave the statistics
+/// describing runs that were never assigned. Everything else is fair game,
+/// and because nothing is frozen, changing it re-judges the periods already
+/// behind it. That is the point of changing a requirement.
 class AssignmentEditor extends ConsumerStatefulWidget {
-  const AssignmentEditor({super.key});
+  /// The assignment being changed, or null when a new one is being made.
+  final Assignment? existing;
 
-  static Future<void> show(BuildContext context) => showDialog<void>(
+  const AssignmentEditor({super.key, this.existing});
+
+  static Future<void> show(BuildContext context, {Assignment? existing}) =>
+      showDialog<void>(
         context: context,
-        builder: (_) => const AssignmentEditor(),
+        builder: (_) => AssignmentEditor(existing: existing),
       );
 
   @override
@@ -32,13 +40,16 @@ class AssignmentEditor extends ConsumerStatefulWidget {
 }
 
 class _AssignmentEditorState extends ConsumerState<AssignmentEditor> {
-  int? _userId;
-  String? _lessonId;
-  AssignmentRhythm _rhythm = AssignmentRhythm.daily;
-  int _runs = 1;
-  int _taskCount = fallbackTaskCount;
-  int _minStars = 0;
-  int _minBolts = 0;
+  late int? _userId = widget.existing?.userId;
+  late String? _lessonId = widget.existing?.lessonId;
+  late AssignmentRhythm _rhythm =
+      widget.existing?.rhythm ?? AssignmentRhythm.daily;
+  late int _runs = widget.existing?.runs ?? 1;
+  late int _taskCount = widget.existing?.taskCount ?? fallbackTaskCount;
+  late int _minStars = widget.existing?.minStars ?? 0;
+  late int _minBolts = widget.existing?.minBolts ?? 0;
+
+  bool get _editing => widget.existing != null;
 
   @override
   Widget build(BuildContext context) {
@@ -60,29 +71,45 @@ class _AssignmentEditorState extends ConsumerState<AssignmentEditor> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text('Neue Aufgabe',
+              Text(_editing ? 'Aufgabe ändern' : 'Neue Aufgabe',
                   style: Theme.of(context).textTheme.headlineMedium),
               const SizedBox(height: 16),
               const Text('Kind', style: TextStyle(fontSize: 20)),
               const SizedBox(height: 8),
-              Wrap(
-                spacing: 10,
-                runSpacing: 10,
-                children: [
-                  for (final user in users)
-                    ChoiceChip(
-                      label: Text('${user.avatar}  ${user.name}',
-                          style: const TextStyle(fontSize: 18)),
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 14, vertical: 10),
-                      selected: _userId == user.id,
-                      onSelected: (_) => setState(() => _userId = user.id),
-                    ),
-                ],
-              ),
+              // Fixed while editing, and shown rather than hidden: a parent
+              // has to see whose assignment they are changing.
+              if (_editing)
+                _Fixed(
+                  users
+                          .where((u) => u.id == _userId)
+                          .map((u) => '${u.avatar}  ${u.name}')
+                          .firstOrNull ??
+                      'Unbekanntes Kind',
+                )
+              else
+                Wrap(
+                  spacing: 10,
+                  runSpacing: 10,
+                  children: [
+                    for (final user in users)
+                      ChoiceChip(
+                        label: Text('${user.avatar}  ${user.name}',
+                            style: const TextStyle(fontSize: 18)),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 14, vertical: 10),
+                        selected: _userId == user.id,
+                        onSelected: (_) => setState(() => _userId = user.id),
+                      ),
+                  ],
+                ),
               const SizedBox(height: 20),
               const Text('Lektion', style: TextStyle(fontSize: 20)),
               const SizedBox(height: 8),
+              if (_editing)
+                _Fixed(lesson == null
+                    ? _lessonId!
+                    : '${lesson.title} · ${groupTitle(lesson.group)}')
+              else
               DropdownButtonFormField<String>(
                 initialValue: _lessonId,
                 isExpanded: true,
@@ -216,20 +243,31 @@ class _AssignmentEditorState extends ConsumerState<AssignmentEditor> {
                         ? null
                         : () async {
                             final navigator = Navigator.of(context);
-                            await ref
-                                .read(assignmentRepositoryProvider)
-                                .createAssignment(
-                                  userId: _userId!,
-                                  lessonId: _lessonId!,
-                                  rhythm: _rhythm,
-                                  runs: _runs,
-                                  taskCount: _taskCount,
-                                  minStars: _minStars,
-                                  minBolts: _minBolts,
-                                );
+                            final repository =
+                                ref.read(assignmentRepositoryProvider);
+                            if (_editing) {
+                              await repository.updateAssignment(
+                                widget.existing!.id,
+                                rhythm: _rhythm,
+                                runs: _runs,
+                                taskCount: _taskCount,
+                                minStars: _minStars,
+                                minBolts: _minBolts,
+                              );
+                            } else {
+                              await repository.createAssignment(
+                                userId: _userId!,
+                                lessonId: _lessonId!,
+                                rhythm: _rhythm,
+                                runs: _runs,
+                                taskCount: _taskCount,
+                                minStars: _minStars,
+                                minBolts: _minBolts,
+                              );
+                            }
                             navigator.pop();
                           },
-                    child: const Text('Anlegen'),
+                    child: Text(_editing ? 'Speichern' : 'Anlegen'),
                   ),
                 ],
               ),
@@ -239,4 +277,18 @@ class _AssignmentEditorState extends ConsumerState<AssignmentEditor> {
       ),
     );
   }
+}
+
+/// A value that is part of what this assignment is, and therefore not up for
+/// changing here: shown plainly, so it is clear which one is being edited.
+class _Fixed extends StatelessWidget {
+  final String text;
+
+  const _Fixed(this.text);
+
+  @override
+  Widget build(BuildContext context) => Text(
+        text,
+        style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w600),
+      );
 }

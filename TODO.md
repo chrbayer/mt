@@ -209,3 +209,10 @@ die Aufgabe überhaupt verlangt hatte. Der Ergebnisbildschirm zeigt jetzt die
 geforderten Sterne und Blitze in denselben Symbolen wie die verdienten, dazu
 den Stand („zählt für deine Aufgabe: 1 von 3") oder den grünen Haken, wenn
 sie erfüllt ist.
+
+#35 erledigt (2.10.3) — Eine laufende Aufgabe lässt sich im Elternbereich
+ändern: Rhythmus, Durchgänge, Rechnungen, Mindeststerne und Mindestblitze.
+Kind und Lektion bleiben fest, die machen eine andere Aufgabe daraus. Der
+Erledigt-Status zieht automatisch nach, weil an einer Aufgabe nichts
+eingefroren ist — eine höher gehängte Latte nimmt den grünen Haken von heute
+also wieder weg, eine tiefer gehängte gibt ihn zurück.

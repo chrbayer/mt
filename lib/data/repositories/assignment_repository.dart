@@ -84,6 +84,33 @@ class AssignmentRepository {
             ),
           );
 
+  /// Changes what an assignment asks for. Child and lesson are not among
+  /// the arguments on purpose: those two make it a different assignment, and
+  /// its statistics would suddenly be about runs that were never assigned.
+  ///
+  /// Everything here is worked out fresh from the runs whenever it is read,
+  /// so raising the bar re-judges the periods already behind it - including
+  /// the one running now, whose tick can disappear again. That is what a
+  /// parent means by changing the requirement; freezing the old verdict
+  /// would leave two different answers standing side by side.
+  Future<void> updateAssignment(
+    int id, {
+    required AssignmentRhythm rhythm,
+    required int runs,
+    required int taskCount,
+    required int minStars,
+    required int minBolts,
+  }) =>
+      (_db.update(_db.assignments)..where((a) => a.id.equals(id))).write(
+        AssignmentsCompanion(
+          rhythm: Value(rhythm.name),
+          runs: Value(runs),
+          taskCount: Value(taskCount),
+          minStars: Value(minStars),
+          minBolts: Value(minBolts),
+        ),
+      );
+
   /// Closes an assignment. Its statistics stay exactly as they are - only a
   /// new assignment can change the target from here on.
   Future<void> endAssignment(int id, int nowMs) =>
