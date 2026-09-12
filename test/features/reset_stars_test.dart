@@ -103,8 +103,14 @@ void main() {
       expect(await starsOf('add_100_carry'), 0);
     });
 
-    test('the first steps earn theirs for finishing', () async {
+    test('the first steps are judged on care too', () async {
       await run('count_pictures', wrong: 10);
+      expect(await starsOf('count_pictures'), 1);
+    });
+
+    test('but a short run still counts in the first steps', () async {
+      // Five tasks are a proper run there, and the only exemption left.
+      await run('count_pictures', taskCount: 5);
       expect(await starsOf('count_pictures'), maxStars);
     });
   });

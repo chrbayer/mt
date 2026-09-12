@@ -112,16 +112,12 @@ class _AssignmentEditorState extends ConsumerState<AssignmentEditor> {
                   if (id == null || id.startsWith('_group_')) return;
                   setState(() {
                     _lessonId = id;
-                    // A first-steps lesson (scored == false) has no bolts to
-                    // earn, and its stars are awarded for finishing
-                    // regardless of how it went - starsFor(..., scored:
-                    // false) always returns full marks. Both requirements
-                    // would be a wish nobody can fail to grant, so drop them
-                    // rather than leave a dead control in the form.
-                    if (lessonByIdOrNull(id)?.scored == false) {
-                      _minBolts = 0;
-                      _minStars = 0;
-                    }
+                    // A first-steps lesson is not timed, so it has no bolts
+                    // to earn and a bolt requirement would be a wish nobody
+                    // can fail to grant. Its stars do mean something - they
+                    // follow the error rate like everywhere else - so that
+                    // requirement stays.
+                    if (lessonByIdOrNull(id)?.scored == false) _minBolts = 0;
                   });
                 },
               ),

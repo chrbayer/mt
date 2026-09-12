@@ -155,3 +155,12 @@ Profile erscheinen in der Liste gedämpft und mit Schloss. Üben und Zeit
 stehen im Querformat nebeneinander, darunter fällt es auf eine Spalte zurück.
 Umbenennen, Zurücksetzen und Löschen sind aus der Zeile in den Block
 „Aufräumen" am Fuß des Bildschirms gewandert.
+
+#28 erledigt (2.9.1) — In den Ersten Schritten gab es immer drei Sterne,
+unabhängig von den Fehlern. Damit sagten die Sterne dort nichts, und ein
+einziger Durchgang je Lektion räumte die Gruppe aus dem Katalog, weil
+„Fertige Lektionen ausblenden" in der ersten Stufe nur nach Sternen fragt.
+Jetzt gilt überall dieselbe Regel: die Fehlerquote entscheidet. Ausgenommen
+bleibt allein die Mindestlänge — fünf Bilder zu zählen ist dort ein richtiger
+Durchgang. Bereits verdiente Sterne bleiben stehen, sie werden nur nach oben
+geschrieben; wer einen sauberen Stand will, gibt sie im Elternbereich zurück.

@@ -30,9 +30,12 @@ void main() {
     );
 
     final stats = StatsRepository(db);
-    // Three stars despite thirty wrong attempts: finishing is the point.
-    expect((await stats.watchLessonStats(id).first)['count_pictures']!.bestStars, 3);
-    expect((await stats.watchStarTotals().first)[id], 3);
+    // Thirty wrong attempts over ten tasks: one star, exactly as anywhere
+    // else. Not being timed says nothing about how carefully it was worked.
+    expect(
+        (await stats.watchLessonStats(id).first)['count_pictures']!.bestStars,
+        1);
+    expect((await stats.watchStarTotals().first)[id], 1);
     // And it never turns up in a ranking.
     expect(await stats.watchLeaderboard('count_pictures').first, isEmpty);
     expect(await stats.watchAllLeaderboards().first, isEmpty);

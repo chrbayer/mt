@@ -49,12 +49,16 @@ const double twoStarErrorRate = 0.25;
 
 /// One to three stars. Deliberately never zero - the goal is encouragement.
 ///
-/// [scored] false means one of the first steps: those earn their stars for
-/// being finished, however long they were and however often the child had to
-/// try again.
+/// One rule for the whole catalogue: how carefully it was worked, nothing
+/// else. The first steps used to be exempt and earned full marks for being
+/// finished, however it went - which made their stars say nothing at all,
+/// and emptied the group out of the catalogue after a single run of each
+/// lesson, because hiding a finished lesson only asks for stars.
+///
+/// [scored] false still lifts the **minimum length**: five counting tasks
+/// are a proper run there, while five sums elsewhere are a warm-up.
 int starsFor(int wrongAttempts, int taskCount, {required bool scored}) {
-  if (!scored) return maxStars;
-  if (taskCount < minTasksForAward) return 0;
+  if (scored && taskCount < minTasksForAward) return 0;
   final rate = errorRate(wrongAttempts, taskCount);
   if (rate <= threeStarErrorRate) return maxStars;
   if (rate <= twoStarErrorRate) return 2;

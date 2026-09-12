@@ -1010,20 +1010,41 @@ void main() {
       expect((await stats.watchStarTotals().first)[mia], maxStars);
     });
 
-    test('an unscored lesson earns its stars for being finished', () async {
+    test('an unscored lesson is judged on care like every other', () async {
       final mia =
           await users.createUser(name: 'Mia', avatar: '🦊', colorIndex: 0);
-      // Ten tasks, ten wrong attempts - and still three stars, because in the
-      // first steps getting through is the achievement.
+      // Ten tasks, ten wrong attempts. It used to be worth full marks here
+      // for being finished at all, which made the stars say nothing.
       await recordRun(sessions,
           userId: mia, lessonId: 'count_pictures', wrongAttempts: 10);
 
       final byLesson = await stats.watchLessonStats(mia).first;
-      expect(byLesson['count_pictures']!.bestStars, maxStars);
-      expect((await stats.watchStarTotals().first)[mia], maxStars);
-      // And it stays out of every ranking.
+      expect(byLesson['count_pictures']!.bestStars, 1);
+      expect((await stats.watchStarTotals().first)[mia], 1);
+      // A clean run of the same lesson earns all three.
+      await recordRun(sessions,
+          userId: mia, lessonId: 'count_pictures', wrongAttempts: 0);
+      expect((await stats.watchLessonStats(mia).first)['count_pictures']!
+          .bestStars, maxStars);
+      // And it stays out of every ranking either way.
       expect(await stats.watchLeaderboard('count_pictures').first, isEmpty);
       expect(await stats.watchAllLeaderboards().first, isEmpty);
+    });
+
+    test('a short run still counts in the first steps, and not elsewhere',
+        () async {
+      final mia =
+          await users.createUser(name: 'Mia', avatar: '🦊', colorIndex: 0);
+      // Five tasks: a proper run for a five-year-old counting apples, a
+      // warm-up anywhere else. That is the one exemption left.
+      await recordRun(sessions,
+          userId: mia, lessonId: 'count_pictures', taskCount: 5);
+      await recordRun(sessions,
+          userId: mia, lessonId: 'add_20_plain', taskCount: 5);
+
+      final byLesson = await stats.watchLessonStats(mia).first;
+      expect(byLesson['count_pictures']!.bestStars, maxStars);
+      expect(byLesson['add_20_plain']!.bestStars, 0);
     });
 
     final now = DateTime.now();

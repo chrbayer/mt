@@ -160,11 +160,8 @@ void main() {
     expect(await showsGroup(tester, LessonGroup.upTo1000), isTrue);
   });
 
-  testWidgets('the first steps are filtered away like everything else',
-      (tester) async {
-    // Ten wrong out of ten and still three stars there: the stars come for
-    // finishing. One pass through the group therefore clears it - and a
-    // parent can hand the stars back when it should come back.
+  /// Works through every lesson of the first steps once.
+  Future<void> finishFirstSteps({required int wrongPerTask}) async {
     for (final lesson in lessonsInGroup(LessonGroup.firstSteps)) {
       final sessions = container.read(sessionRepositoryProvider);
       final id = await sessions.startSession(
@@ -182,11 +179,16 @@ void main() {
               task:
                   Task(a: 3, b: 1, op: Operation.add, form: TaskForm.quantity),
               elapsedMs: 1000,
-              wrongAttempts: 1,
+              wrongAttempts: wrongPerTask,
             ),
         ],
       );
     }
+  }
+
+  testWidgets('the first steps are filtered away like everything else',
+      (tester) async {
+    await finishFirstSteps(wrongPerTask: 0);
     await setFilter(LessonFilter.mastered);
     await pump(tester);
 
@@ -196,6 +198,18 @@ void main() {
     // nothing is timed.
     await setFilter(LessonFilter.perfected);
     await pump(tester);
+    expect(await showsGroup(tester, LessonGroup.firstSteps), isTrue);
+  });
+
+  testWidgets('a sloppy pass through the first steps does not clear them',
+      (tester) async {
+    // This is what used to happen: full marks for finishing, so one pass
+    // emptied the group however it had gone. Now the stars follow the error
+    // rate there too, and a pass full of mistakes leaves the group standing.
+    await finishFirstSteps(wrongPerTask: 1);
+    await setFilter(LessonFilter.mastered);
+    await pump(tester);
+
     expect(await showsGroup(tester, LessonGroup.firstSteps), isTrue);
   });
 

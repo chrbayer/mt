@@ -168,6 +168,8 @@ Die **Ersten Schritte sind nicht ausgenommen** — sie waren es, mit dem
 Argument, dass ihre Sterne fürs Beenden kommen und ein Durchgang je Lektion
 die Gruppe leert. Das galt, solange Ausblenden eine Einbahnstraße war; seit
 ein Elternteil die Sterne zurückgeben kann (2.3.0), ist es bloß Aufräumen.
+Und seit 2.9.1 kommen die Sterne auch dort für Sorgfalt, ein schludriger
+Durchgang leert die Gruppe also gar nicht mehr.
 
 Die **strengere** Stufe lässt sie trotzdem stehen, und zwar ohne Sonderfall:
 wo nichts gemessen wird, gibt es keine Blitze zu holen, also wird
@@ -684,10 +686,18 @@ mit `ReleaseMode.stop` bleibt die Quelle geladen.
 
 ## Nicht gewertete Lektionen
 
-`LessonSpec.scored == false` heißt dreierlei: keine sichtbare Uhr, kein
-Eintrag in einer Bestenliste, und Sterne fürs Beenden statt für die
-Fehlerquote. `unscoredLessonIds` reicht die betroffenen IDs an die
-SQL-Abfragen weiter — SQL kann den Katalog nicht lesen.
+`LessonSpec.scored == false` heißt: keine sichtbare Uhr, kein Eintrag in
+einer Bestenliste, keine Blitze — und eine **kürzere Mindestlänge**, weil
+fünf Aufgaben dort ein richtiger Durchgang sind. `unscoredLessonIds` reicht
+die betroffenen IDs an die SQL-Abfragen weiter — SQL kann den Katalog nicht
+lesen.
+
+Es heißt **nicht** mehr „volle Sterne fürs Beenden". Das war bis 2.9.0 so,
+und das Ergebnis war, dass die Sterne dort nichts aussagten: zehn Fehler in
+zehn Aufgaben gaben dieselben drei Sterne wie ein fehlerfreier Durchgang.
+Dazu räumte ein einziger Durchgang je Lektion die ganze Gruppe aus dem
+Katalog, denn die erste Stufe von „Fertige Lektionen ausblenden" fragt nur
+nach Sternen. Sorgfalt wird jetzt überall gleich gemessen.
 
 Nicht alle Formen sind Rechnungen. `Task._isCalculation` entscheidet das, und
 `result` liefert für die übrigen schlicht die Antwort: eine Uhr, die 9:45
@@ -988,10 +998,15 @@ etwas verdient, also ist danach auch nichts nachzurechnen.
 gleichermaßen. Fünf schnelle Aufgaben sind ein Aufwärmen, und ohne Untergrenze
 wäre der kürzeste Durchgang der billigste Weg zu vollen Sternen.
 
-Die **Ersten Schritte sind ausgenommen**: `starsFor(..., scored: false)` gibt
-immer volle Sterne, und die SQL-Fassung prüft `IN ($_unscored)` vor der
-Mindestlänge. Dort ist das Durchhalten die Leistung, und fünf Aufgaben sind
-eine richtige Länge.
+Die **Ersten Schritte sind von der Mindestlänge ausgenommen**, und das ist
+die einzige Ausnahme, die `starsFor` noch kennt: fünf Bilder zu zählen ist
+dort ein richtiger Durchgang, fünf Rechnungen anderswo ein Aufwärmen. Die
+Sterne selbst folgen auch dort der Fehlerquote.
+
+Die Fassung in der **Migration auf v8** gibt unbewerteten Lektionen weiterhin
+volle Sterne. Das bleibt so: eine Migration arbeitet gegen die Regel ihres
+eigenen Moments, sie hat einmal nachgetragen, was damals galt, und Sterne
+werden ohnehin nur nach oben geschrieben.
 
 `LessonStat.bestBolts` kommt aus SQL statt aus `bestScoreMs` im Widget: die
 schnellste Runde kann zu kurz zum Werten gewesen sein, und diese Regel soll an
