@@ -227,6 +227,14 @@ void main() {
       await recordRun(SessionRepository(before),
           userId: id, lessonId: 'add_20_plain');
 
+      if (version < 17) {
+        // Up to v16 every assignment repeated; there was no single one and
+        // nothing to carry over.
+        for (final column in ['repeats', 'on_day_ms', 'carry_over']) {
+          await before
+              .customStatement('ALTER TABLE assignments DROP COLUMN $column');
+        }
+      }
       if (version < 16) {
         // Up to v15 an assignment named exactly one lesson, in a column
         // called lesson_id.
@@ -318,7 +326,9 @@ void main() {
       return file;
     }
 
-    for (final from in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]) {
+    for (final from in [
+      1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16,
+    ]) {
       test('a database from schema v$from keeps its data', () async {
         final file = await databaseAtVersion(from);
 
@@ -388,6 +398,11 @@ void main() {
           expect(assignments.single.minStars, 2);
           expect(assignments.single.minBolts, 1);
           expect(assignments.single.endedAtMs, isNull);
+          // v17 split the rhythm into a unit and a repetition. What was
+          // already there repeats - that is what it always was.
+          expect(assignments.single.repeats, isTrue);
+          expect(assignments.single.onDayMs, isNull);
+          expect(assignments.single.carryOver, isFalse);
         }
       });
     }

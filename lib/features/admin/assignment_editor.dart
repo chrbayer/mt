@@ -44,6 +44,10 @@ class _AssignmentEditorState extends ConsumerState<AssignmentEditor> {
   late final Set<String> _lessonIds = {...?widget.existing?.lessonIds};
   late AssignmentRhythm _rhythm =
       widget.existing?.rhythm ?? AssignmentRhythm.daily;
+  late bool _repeats = widget.existing?.repeats ?? true;
+  late DateTime _onDay = DateTime.fromMillisecondsSinceEpoch(
+      widget.existing?.onDayMs ?? DateTime.now().millisecondsSinceEpoch);
+  late bool _carryOver = widget.existing?.carryOver ?? false;
   late int _runs = widget.existing?.runs ?? 1;
   late int _taskCount = widget.existing?.taskCount ?? fallbackTaskCount;
   late int _minStars = widget.existing?.minStars ?? 0;
@@ -180,34 +184,87 @@ class _AssignmentEditorState extends ConsumerState<AssignmentEditor> {
                   ),
                 ),
               const SizedBox(height: 20),
-              const Text('Rhythmus', style: TextStyle(fontSize: 20)),
+              // Two questions, not one: what a period is, and whether it
+              // comes round again. Squeezed into a single list of rhythms it
+              // would have grown a value for every new idea.
+              const Text('Zeitraum', style: TextStyle(fontSize: 20)),
               const SizedBox(height: 8),
               SegmentedButton<AssignmentRhythm>(
                 segments: const [
                   ButtonSegment(
                     value: AssignmentRhythm.daily,
-                    label: Text('täglich'),
+                    label: Text('ein Tag'),
                   ),
                   ButtonSegment(
                     value: AssignmentRhythm.weekly,
-                    label: Text('wöchentlich'),
+                    label: Text('eine Woche'),
                   ),
                 ],
                 selected: {_rhythm},
                 onSelectionChanged: (selection) =>
                     setState(() => _rhythm = selection.first),
               ),
+              const SizedBox(height: 16),
+              const Text('Wiederholung', style: TextStyle(fontSize: 20)),
               const SizedBox(height: 8),
-              // No hour to pick: the rhythm is the whole deadline. A finer
+              SegmentedButton<bool>(
+                segments: const [
+                  ButtonSegment(value: true, label: Text('jedes Mal')),
+                  ButtonSegment(value: false, label: Text('einmalig')),
+                ],
+                selected: {_repeats},
+                onSelectionChanged: (selection) => setState(() {
+                  _repeats = selection.first;
+                  // A repeating one brings a fresh one tomorrow anyway, so
+                  // carrying it over would only pile up a debt.
+                  if (_repeats) _carryOver = false;
+                }),
+              ),
+              const SizedBox(height: 8),
+              // No hour to pick: the period is the whole deadline. A finer
               // setting was precision nobody acted on, and a child does not
               // watch the clock.
-              Text(
-                _rhythm == AssignmentRhythm.daily
-                    ? 'Fällig am Ende des Tages.'
-                    : 'Fällig am Ende der Woche, also Sonntagabend.',
-                style: const TextStyle(
-                    fontSize: 17, color: AppColors.textMuted),
-              ),
+              if (_repeats)
+                Text(
+                  _rhythm == AssignmentRhythm.daily
+                      ? 'Jeden Tag neu, fällig am Ende des Tages.'
+                      : 'Jede Woche neu, fällig Sonntagabend.',
+                  style: const TextStyle(
+                      fontSize: 17, color: AppColors.textMuted),
+                )
+              else ...[
+                Row(
+                  children: [
+                    Text(
+                      _rhythm == AssignmentRhythm.daily
+                          ? 'Am ${_dayLabel(_onDay)}'
+                          : 'In der Woche ab ${_dayLabel(_monday(_onDay))}',
+                      style: const TextStyle(fontSize: 18),
+                    ),
+                    const SizedBox(width: 12),
+                    OutlinedButton(
+                      onPressed: _pickDay,
+                      child: const Text('Tag wählen …'),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                SwitchListTile(
+                  value: _carryOver,
+                  onChanged: (on) => setState(() => _carryOver = on),
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Nachziehen, wenn nicht geschafft',
+                      style: TextStyle(fontSize: 19)),
+                  subtitle: const Text(
+                    'Die Aufgabe bleibt danach stehen, bis sie erledigt ist. '
+                    'Der Tag selbst gilt trotzdem als verpasst - die '
+                    'Statistik sagt, wann geübt wurde, nicht was gemeint '
+                    'war.',
+                    style:
+                        TextStyle(fontSize: 16, color: AppColors.textMuted),
+                  ),
+                ),
+              ],
               const Divider(height: 32),
               const Text('Durchgänge', style: TextStyle(fontSize: 20)),
               const SizedBox(height: 8),
@@ -287,6 +344,11 @@ class _AssignmentEditorState extends ConsumerState<AssignmentEditor> {
                                 widget.existing!.id,
                                 lessonIds: chosen,
                                 rhythm: _rhythm,
+                                repeats: _repeats,
+                                onDayMs: _repeats
+                                    ? null
+                                    : _onDay.millisecondsSinceEpoch,
+                                carryOver: _carryOver,
                                 runs: _runs,
                                 taskCount: _taskCount,
                                 minStars: _minStars,
@@ -297,6 +359,11 @@ class _AssignmentEditorState extends ConsumerState<AssignmentEditor> {
                                 userId: _userId!,
                                 lessonIds: chosen,
                                 rhythm: _rhythm,
+                                repeats: _repeats,
+                                onDayMs: _repeats
+                                    ? null
+                                    : _onDay.millisecondsSinceEpoch,
+                                carryOver: _carryOver,
                                 runs: _runs,
                                 taskCount: _taskCount,
                                 minStars: _minStars,
@@ -314,6 +381,27 @@ class _AssignmentEditorState extends ConsumerState<AssignmentEditor> {
         ),
       ),
     );
+  }
+
+  static DateTime _monday(DateTime day) =>
+      DateTime(day.year, day.month, day.day - (day.weekday - 1));
+
+  static String _dayLabel(DateTime day) {
+    const names = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
+    return '${names[day.weekday - 1]}, ${day.day}.${day.month}.';
+  }
+
+  Future<void> _pickDay() async {
+    final today = DateTime.now();
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _onDay,
+      // A little way back, because a plan is sometimes written down after
+      // the fact, and far enough forward for a school term.
+      firstDate: DateTime(today.year, today.month, today.day - 7),
+      lastDate: DateTime(today.year, today.month, today.day + 180),
+    );
+    if (picked != null) setState(() => _onDay = picked);
   }
 }
 

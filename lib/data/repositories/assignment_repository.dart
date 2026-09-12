@@ -70,12 +70,18 @@ class AssignmentRepository {
     required int taskCount,
     required int minStars,
     required int minBolts,
+    bool repeats = true,
+    int? onDayMs,
+    bool carryOver = false,
   }) =>
       _db.into(_db.assignments).insert(
             AssignmentsCompanion.insert(
               userId: userId,
               lessonIds: lessonIdsToStored(lessonIds),
               rhythm: rhythm.name,
+              repeats: Value(repeats),
+              onDayMs: Value(onDayMs),
+              carryOver: Value(carryOver),
               runs: runs,
               taskCount: taskCount,
               minStars: minStars,
@@ -101,11 +107,17 @@ class AssignmentRepository {
     required int taskCount,
     required int minStars,
     required int minBolts,
+    bool repeats = true,
+    int? onDayMs,
+    bool carryOver = false,
   }) =>
       (_db.update(_db.assignments)..where((a) => a.id.equals(id))).write(
         AssignmentsCompanion(
           lessonIds: Value(lessonIdsToStored(lessonIds)),
           rhythm: Value(rhythm.name),
+          repeats: Value(repeats),
+          onDayMs: Value(onDayMs),
+          carryOver: Value(carryOver),
           runs: Value(runs),
           taskCount: Value(taskCount),
           minStars: Value(minStars),
@@ -165,6 +177,9 @@ class AssignmentRepository {
         userId: row.userId,
         lessonIds: lessonIdsByName(row.lessonIds),
         rhythm: rhythmByName(row.rhythm),
+        repeats: row.repeats,
+        onDayMs: row.onDayMs,
+        carryOver: row.carryOver,
         runs: row.runs,
         taskCount: row.taskCount,
         minStars: row.minStars,

@@ -454,20 +454,25 @@ class _AssignmentGroup extends ConsumerWidget {
     // numbers; asking twice would risk the two disagreeing for a frame.
     final entries = [
       for (final a in assignments)
-        for (final lesson in [
-          for (final id in a.lessonIds) ?lessonByIdOrNull(id),
-        ])
-          (
-            assignment: a,
-            lesson: lesson,
-            met: ref
-                    .watch(assignmentStatsProvider(a))
-                    .value
-                    ?.progressOf(lesson.id)
-                    ?.met ??
-                false,
-            dueMs: periodAt(a, now).dueMs,
-          ),
+        // A single assignment whose day is over is gone, unless it is
+        // carried over and still unfinished.
+        if (stillShown(a, now,
+            met: ref.watch(assignmentStatsProvider(a)).value?.settled ??
+                false))
+          for (final lesson in [
+            for (final id in a.lessonIds) ?lessonByIdOrNull(id),
+          ])
+            (
+              assignment: a,
+              lesson: lesson,
+              met: ref
+                      .watch(assignmentStatsProvider(a))
+                      .value
+                      ?.progressOf(lesson.id)
+                      ?.met ??
+                  false,
+              dueMs: periodAt(a, now).dueMs,
+            ),
     ]..sort((x, y) {
         if (x.met != y.met) return x.met ? 1 : -1;
         if (x.dueMs != y.dueMs) return x.dueMs.compareTo(y.dueMs);

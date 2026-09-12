@@ -259,3 +259,13 @@ und mit einer echten Schrift statt der quadratischen Testschrift. Beides
 förderte sofort etwas zutage — die Lektionstabelle der Statistik lief bei
 960 dp über, und der Startdialog passte mit aufgeklappter Erklärung nicht
 mehr auf einen 600 dp hohen Schirm. Beides behoben, nicht weggeprüft.
+
+#40 erledigt (2.13.0) — Aufgaben lassen sich planen statt nur wiederholen.
+Aus „täglich/wöchentlich" werden zwei Felder: was ein Zeitraum ist (Tag oder
+Woche) und ob er wiederkommt. Eine einmalige Aufgabe trägt ein Datum, und
+mehrere nebeneinander sind ein Plan — heute das, morgen jenes, diese Woche
+das, nächste Woche jenes. Dazu die Option „Nachziehen": eine nicht erledigte
+einmalige Aufgabe bleibt stehen, bis sie gemacht ist, der Tag selbst gilt
+aber weiter als verpasst. Nachziehen gibt es nur für einmalige; bei
+wiederkehrenden wäre es eine Schuld ohne Boden. Für das Kind ändert sich
+nichts an der Darstellung.

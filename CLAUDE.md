@@ -1220,8 +1220,27 @@ Eine **Aufgabe** (`domain/assignment.dart`) sind eine **oder mehrere**
 Lektionen plus ein Rhythmus plus vier Vorgaben: wie viele Durchgänge, wie viele Rechnungen je
 Durchgang, wie viele Sterne und Blitze jeder davon mindestens bringen muss.
 
-Der **Rhythmus ist die ganze Frist**: ein Tag, oder eine Woche, die
-Sonntagabend endet. Keine Uhrzeit. Ein Kind schaut nicht auf die Uhr, „noch
+Die Zeit einer Aufgabe steht in **zwei** Feldern, nicht in einem:
+`AssignmentRhythm` sagt, was **ein Zeitraum** ist (ein Tag oder eine Woche),
+`repeats` sagt, ob er **wiederkommt**. Beides war ein Feld, bis „heute das,
+morgen jenes" dazukam — ein Plan ist eine Reihe einmaliger Aufgaben, und in
+eine Liste von Rhythmen gepresst hätte sie für jede weitere Idee einen Wert
+mehr bekommen.
+
+Eine **einmalige** Aufgabe trägt in `onDayMs` einen Zeitpunkt in ihrem Tag
+bzw. ihrer Woche. `periodAt` gibt für sie immer denselben Zeitraum zurück,
+egal wann man hinschaut — das ist der ganze Unterschied zwischen einem Plan
+und einer Regel. `stillShown` entscheidet, ob das Kind sie noch sieht.
+
+**Nachziehen** (`carryOver`) gibt es nur für einmalige. Eine wiederkehrende
+bringt morgen ohnehin eine neue, und zwei Wochen Urlaub ergäben vierzehn
+nachgezogene Karten und eine Schuld, die niemand aufholt. Eine nachgezogene
+Aufgabe bleibt stehen, bis sie erledigt ist — **ihr Tag gilt trotzdem als
+verpasst**. Die Statistik sagt, wann geübt wurde, nicht was gemeint war.
+Technisch sind das zwei Aufrufe derselben Regel mit verschiedener Frist
+(`AssignmentStats.current` und `everSince`), nie eine zweite Fassung davon.
+
+Die Frist selbst bleibt **ohne Uhrzeit**. Ein Kind schaut nicht auf die Uhr, „noch
 bis 18:00" auf einer Kachel ist Druck ohne Zweck, und gemeint ist ohnehin
 „heute" oder „diese Woche". 2.8.0 hatte die Uhrzeit noch, und sie kostete
 mehr, als sie wert war: Zeitraumende und Frist fielen auseinander, so dass ein

@@ -137,6 +137,9 @@ class BackupRepository {
             'userId': row.userId,
             'lessonIds': row.lessonIds,
             'rhythm': row.rhythm,
+            'repeats': row.repeats,
+            'onDayMs': row.onDayMs,
+            'carryOver': row.carryOver,
             'runs': row.runs,
             'taskCount': row.taskCount,
             'minStars': row.minStars,
@@ -310,6 +313,11 @@ class BackupRepository {
                 lessonIds:
                     (row['lessonIds'] ?? row['lessonId']) as String,
                 rhythm: row['rhythm'] as String,
+                // Missing in a backup from before assignments could name a
+                // single day: everything back then repeated.
+                repeats: Value(row['repeats'] as bool? ?? true),
+                onDayMs: Value(row['onDayMs'] as int?),
+                carryOver: Value(row['carryOver'] as bool? ?? false),
                 // A 2.8.0 backup still carries `dueMinute` and `dueWeekday`.
                 // They are read past rather than rejected: the rhythm alone
                 // is the deadline now, and an hour nobody acts on is nothing

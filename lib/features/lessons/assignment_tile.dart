@@ -96,6 +96,7 @@ class AssignmentTile extends ConsumerWidget {
                 _AssignmentFooter(
                   assignment: assignment,
                   progress: progress,
+                  now: ref.watch(clockProvider)(),
                 ),
               ],
             ),
@@ -109,8 +110,13 @@ class AssignmentTile extends ConsumerWidget {
 class _AssignmentFooter extends StatelessWidget {
   final Assignment assignment;
   final AssignmentProgress progress;
+  final DateTime now;
 
-  const _AssignmentFooter({required this.assignment, required this.progress});
+  const _AssignmentFooter({
+    required this.assignment,
+    required this.progress,
+    required this.now,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -141,7 +147,8 @@ class _AssignmentFooter extends StatelessWidget {
         ],
         Expanded(
           child: Text(
-            '${progress.qualifyingRuns}/${a.runs} · ${formatDeadline(a)}',
+            '${progress.qualifyingRuns}/${a.runs} · '
+            '${formatDeadline(a, now: now)}',
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(fontSize: 15, color: AppColors.textMuted),

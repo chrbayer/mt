@@ -117,8 +117,13 @@ class _AssignmentRow extends ConsumerWidget {
     // The rhythm shows up twice in this row, once as its own word and once
     // as the unit the statistic counts in.
     final daily = assignment.rhythm == AssignmentRhythm.daily;
-    final rhythmWord = daily ? 'täglich' : 'wöchentlich';
     final periodWord = daily ? 'Tagen' : 'Wochen';
+    // A repeating one says how often; a single one says when, because that
+    // is what makes a row of them read as a plan.
+    final rhythmWord = assignment.repeats
+        ? (daily ? 'täglich' : 'wöchentlich')
+        : '${formatDeadline(assignment, now: ref.watch(clockProvider)())}'
+            '${assignment.carryOver ? ' · zieht nach' : ''}';
 
     return Opacity(
       opacity: ended ? 0.6 : 1,

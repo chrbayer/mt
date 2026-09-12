@@ -5,8 +5,13 @@ library;
 import 'lesson.dart';
 import 'scoring.dart';
 
-/// How often the goal renews, and that is the whole deadline: a day, or a
-/// week that ends on Sunday night.
+/// What one period of an assignment is: a day, or a week ending Sunday
+/// night. **The unit, not the repetition** - whether it renews at all is
+/// [Assignment.repeats].
+///
+/// The two were one field until a parent wanted "heute das, morgen jenes":
+/// a plan is a row of single assignments, and squeezing that into a list of
+/// rhythms would have grown a value for every new idea.
 ///
 /// Deliberately no time of day. A child does not watch the clock, and "noch
 /// bis 18:00" on a card is pressure without a purpose - what a parent
@@ -61,6 +66,25 @@ class Assignment {
 
   final int createdAtMs;
 
+  /// Whether the goal renews every period, or is a single one.
+  ///
+  /// A repeating assignment is a standing rule ("jeden Tag Einmaleins"); a
+  /// single one belongs to one named day or week, and several of them side
+  /// by side are a plan.
+  final bool repeats;
+
+  /// For a single assignment: any instant inside the day or week it belongs
+  /// to. Null for a repeating one, where the period is always the current.
+  final int? onDayMs;
+
+  /// Whether an unfinished single assignment stays on the child's screen
+  /// after its day is over.
+  ///
+  /// Only ever offered for single ones. A repeating assignment brings a
+  /// fresh one tomorrow anyway, and carrying those over would turn two
+  /// weeks of holiday into fourteen cards and a debt nobody catches up on.
+  final bool carryOver;
+
   /// When a parent ended this assignment. Null while it is still running.
   final int? endedAtMs;
 
@@ -74,6 +98,9 @@ class Assignment {
     required this.minStars,
     required this.minBolts,
     required this.createdAtMs,
+    this.repeats = true,
+    this.onDayMs,
+    this.carryOver = false,
     this.endedAtMs,
   });
 
@@ -96,11 +123,15 @@ class Assignment {
       other.minStars == minStars &&
       other.minBolts == minBolts &&
       other.createdAtMs == createdAtMs &&
+      other.repeats == repeats &&
+      other.onDayMs == onDayMs &&
+      other.carryOver == carryOver &&
       other.endedAtMs == endedAtMs;
 
   @override
   int get hashCode => Object.hash(id, userId, Object.hashAll(lessonIds),
-      rhythm, runs, taskCount, minStars, minBolts, createdAtMs, endedAtMs);
+      rhythm, runs, taskCount, minStars, minBolts, createdAtMs, repeats,
+      onDayMs, carryOver, endedAtMs);
 
   static bool _sameLessons(List<String> a, List<String> b) {
     if (a.length != b.length) return false;
@@ -147,7 +178,12 @@ class AssignmentPeriod {
 /// milliseconds, so the boundaries stay on real local midnights across a
 /// daylight-saving change.
 AssignmentPeriod periodAt(Assignment a, DateTime now) {
-  final today = DateTime(now.year, now.month, now.day);
+  // A single assignment always names the same period, whatever day it is
+  // looked at on. That is the whole difference between a plan and a rule.
+  final at = a.repeats
+      ? now
+      : DateTime.fromMillisecondsSinceEpoch(a.onDayMs ?? a.createdAtMs);
+  final today = DateTime(at.year, at.month, at.day);
   final (start, nextStart) = switch (a.rhythm) {
     AssignmentRhythm.daily => (
         today,
@@ -170,6 +206,28 @@ AssignmentPeriod periodAt(Assignment a, DateTime now) {
     // at the stroke of midnight belongs to the next one, not this one.
     dueMs: nextStart.millisecondsSinceEpoch - 1,
   );
+}
+
+/// Whether [now] still falls inside the assignment's own period.
+///
+/// Always true for a repeating one - its period is wherever now is.
+bool withinPeriod(Assignment a, DateTime now) {
+  if (a.repeats) return true;
+  final period = periodAt(a, now);
+  final ms = now.millisecondsSinceEpoch;
+  return ms >= period.startMs && ms <= period.dueMs;
+}
+
+/// Whether the child should still be shown this assignment.
+///
+/// A repeating one, always. A single one while its day or week is running -
+/// and past it only when it is carried over and still unfinished. [met] is
+/// handed in rather than worked out here: the domain layer never reaches for
+/// the runs on its own.
+bool stillShown(Assignment a, DateTime now, {required bool met}) {
+  if (a.repeats) return true;
+  if (withinPeriod(a, now)) return true;
+  return a.carryOver && !met;
 }
 
 /// The raw facts of one completed run that [qualifies] and [progressIn]
@@ -195,6 +253,16 @@ typedef RunFacts = ({
 /// safety valve: an assignment lives for weeks or months, never for an
 /// unbroken decade.
 List<AssignmentPeriod> closedPeriods(Assignment a, DateTime now) {
+  // A single assignment has exactly one period, and it counts once it is
+  // over. Making it up afterwards finishes the assignment but does not
+  // change what happened on the day - the record is about days, not
+  // intentions.
+  if (!a.repeats) {
+    final period = periodAt(a, now);
+    final overdue = now.millisecondsSinceEpoch > period.dueMs;
+    return overdue && period.dueMs >= a.createdAtMs ? [period] : const [];
+  }
+
   final step = a.rhythm == AssignmentRhythm.daily
       ? const Duration(days: 1)
       : const Duration(days: 7);
@@ -295,10 +363,32 @@ Map<String, AssignmentProgress> progressByLesson({
 bool allLessonsMet(Map<String, AssignmentProgress> byLesson) =>
     byLesson.isNotEmpty && byLesson.values.every((p) => p.met);
 
-/// The deadline as a child reads it: "heute" or "bis Sonntag".
+/// The deadline as a child reads it.
+///
+/// A repeating one says "heute" or "bis Sonntag". A single one says which
+/// day or week it belongs to, and says so plainly when that is behind us -
+/// a card that still claimed "heute" the morning after would be a lie.
 ///
 /// This is also what tells the two rhythms apart on a card, so it is the one
 /// place the wording lives - the card and the parent tab must never say it
 /// two different ways.
-String formatDeadline(Assignment a) =>
-    a.rhythm == AssignmentRhythm.daily ? 'heute' : 'bis Sonntag';
+String formatDeadline(Assignment a, {DateTime? now}) {
+  if (a.repeats) {
+    return a.rhythm == AssignmentRhythm.daily ? 'heute' : 'bis Sonntag';
+  }
+  final today = now ?? DateTime.now();
+  final period = periodAt(a, today);
+  if (today.millisecondsSinceEpoch > period.dueMs) return 'noch offen';
+  final day = DateTime.fromMillisecondsSinceEpoch(period.startMs);
+  if (a.rhythm == AssignmentRhythm.weekly) {
+    return withinPeriod(a, today) ? 'diese Woche' : 'ab ${_short(day)}';
+  }
+  final sameDay = DateTime(today.year, today.month, today.day) == day;
+  return sameDay ? 'heute' : 'am ${_short(day)}';
+}
+
+/// `Do, 18.9.` - short enough for a card's footer.
+String _short(DateTime day) {
+  const names = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
+  return '${names[day.weekday - 1]}, ${day.day}.${day.month}.';
+}

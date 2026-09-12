@@ -288,6 +288,67 @@ void main() {
     expect(find.textContaining('davor 0 von 1 Tagen'), findsOneWidget);
   });
 
+  group('a plan of single assignments', () {
+    Future<int> assignOnce(
+      String lessonId, {
+      required DateTime on,
+      bool carryOver = false,
+    }) =>
+        container.read(assignmentRepositoryProvider).createAssignment(
+              userId: mia.id,
+              lessonIds: [lessonId],
+              rhythm: AssignmentRhythm.daily,
+              repeats: false,
+              onDayMs: on.millisecondsSinceEpoch,
+              carryOver: carryOver,
+              runs: 1,
+              taskCount: 10,
+              minStars: 0,
+              minBolts: 0,
+            );
+
+    testWidgets('today shows today, not tomorrow', (tester) async {
+      final today = DateTime.now();
+      await assignOnce('add_100_plain', on: today);
+      await assignOnce('money_add',
+          on: today.add(const Duration(days: 1)));
+      await pump(tester);
+
+      final tiles = tester
+          .widgetList<AssignmentTile>(find.byType(AssignmentTile))
+          .toList();
+      expect(tiles.map((t) => t.lesson.id), ['add_100_plain']);
+    });
+
+    testWidgets('yesterday is gone unless it is carried over',
+        (tester) async {
+      final yesterday = DateTime.now().subtract(const Duration(days: 1));
+      await assignOnce('add_100_plain', on: yesterday);
+      await pump(tester);
+      expect(find.byType(AssignmentTile), findsNothing);
+
+      await assignOnce('money_add', on: yesterday, carryOver: true);
+      await pump(tester);
+      final tiles = tester
+          .widgetList<AssignmentTile>(find.byType(AssignmentTile))
+          .toList();
+      expect(tiles.map((t) => t.lesson.id), ['money_add']);
+      expect(find.textContaining('noch offen'), findsOneWidget);
+    });
+
+    testWidgets('making up a carried-over one takes the card away',
+        (tester) async {
+      final yesterday = DateTime.now().subtract(const Duration(days: 1));
+      await assignOnce('add_100_plain', on: yesterday, carryOver: true);
+      await pump(tester);
+      expect(find.byType(AssignmentTile), findsOneWidget);
+
+      await finishRun('add_100_plain');
+      await pump(tester);
+      expect(find.byType(AssignmentTile), findsNothing);
+    });
+  });
+
   group('changing an assignment', () {
     Future<void> pumpTab(WidgetTester tester) async {
       tester.view.physicalSize = const Size(1600, 1000);

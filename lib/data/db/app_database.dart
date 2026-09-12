@@ -213,6 +213,17 @@ class Assignments extends Table {
   /// night. v13 also held an hour and a weekday here; see the migration to
   /// v14 for why they went.
   TextColumn get rhythm => text()();
+
+  /// Whether the goal renews every period. False means a single one, and
+  /// then [onDayMs] says which day or week it belongs to; several of those
+  /// side by side are a plan.
+  BoolColumn get repeats => boolean().withDefault(const Constant(true))();
+  IntColumn get onDayMs => integer().nullable()();
+
+  /// Whether an unfinished single assignment stays on the child's screen
+  /// past its day. Never offered for a repeating one - see
+  /// `domain/assignment.dart`.
+  BoolColumn get carryOver => boolean().withDefault(const Constant(false))();
   IntColumn get runs => integer()();
   IntColumn get taskCount => integer()();
   IntColumn get minStars => integer()();
@@ -235,7 +246,7 @@ class AppDatabase extends _$AppDatabase {
       : super(executor ?? driftDatabase(name: 'mathe_trainer'));
 
   @override
-  int get schemaVersion => 16;
+  int get schemaVersion => 17;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -340,6 +351,18 @@ class AppDatabase extends _$AppDatabase {
           // renamed rather than added to: a single id is already a valid
           // one-element list, so every row carries straight over and no
           // assignment changes meaning.
+          // v17 splits the old rhythm into a unit and a repetition, so an
+          // assignment can name a single day instead of every one. What is
+          // already there repeats - that is what it always was.
+          //
+          // Only where the rebuild above did not already bring the columns
+          // along: it takes the table as it looks now, and that includes
+          // these three.
+          if (from >= 16 && from < 17) {
+            await m.addColumn(assignments, assignments.repeats);
+            await m.addColumn(assignments, assignments.onDayMs);
+            await m.addColumn(assignments, assignments.carryOver);
+          }
           if (from >= 13 && from < 16) {
             await m.alterTable(
               TableMigration(
@@ -348,6 +371,15 @@ class AppDatabase extends _$AppDatabase {
                   assignments.lessonIds:
                       const CustomExpression<String>('lesson_id'),
                 },
+                // Everything added to this table **after** v16 has to be
+                // declared here as well, or the rebuild goes looking for it
+                // in the old table. That is the third time this has bitten -
+                // see the same note at the v6 rebuild of `users`.
+                newColumns: [
+                  assignments.repeats,
+                  assignments.onDayMs,
+                  assignments.carryOver,
+                ],
               ),
             );
           }

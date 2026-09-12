@@ -135,6 +135,11 @@ class AssignmentStats {
   /// Where the running period stands, per lesson id.
   final Map<String, AssignmentProgress> current;
 
+  /// The same without a deadline, for a single assignment that is carried
+  /// over: making it up afterwards finishes it, even though the day it
+  /// belonged to stays missed. Identical to [current] for everything else.
+  final Map<String, AssignmentProgress> everSince;
+
   /// Every closed period, oldest first, true where **every** lesson was met.
   final List<bool> closed;
 
@@ -151,6 +156,7 @@ class AssignmentStats {
     required this.lessons,
     required this.currentPeriod,
     required this.current,
+    required this.everSince,
     required this.closed,
     required this.closedMetByLesson,
   });
@@ -158,9 +164,16 @@ class AssignmentStats {
   /// Whether the running period is done - every lesson, not just one.
   bool get met => allLessonsMet(current);
 
+  /// Whether the assignment is finished at all, made-up work included. The
+  /// same as [met] unless it is a single one being carried over.
+  bool get settled => allLessonsMet(everSince);
+
   int get closedMet => closed.where((met) => met).length;
 
-  AssignmentProgress? progressOf(String lessonId) => current[lessonId];
+  /// What to show for one lesson: the running period normally, and what has
+  /// been done since the start once a carried-over assignment is overdue.
+  AssignmentProgress? progressOf(String lessonId) =>
+      assignment.carryOver ? everSince[lessonId] : current[lessonId];
 }
 
 /// Null when the assigned lesson is one this version no longer knows - an
@@ -201,15 +214,29 @@ final assignmentStatsProvider =
       }
     }
 
+    final current = progressByLesson(
+      a: a,
+      period: currentPeriod,
+      runsByLesson: byLesson,
+    );
     return AssignmentStats(
       assignment: a,
       lessons: lessons,
       currentPeriod: currentPeriod,
-      current: progressByLesson(
-        a: a,
-        period: currentPeriod,
-        runsByLesson: byLesson,
-      ),
+      current: current,
+      // The same question with the deadline lifted. One call of the same
+      // rule rather than a second copy of it - what counts as a qualifying
+      // run must not be written down twice.
+      everSince: a.carryOver
+          ? progressByLesson(
+              a: a,
+              period: AssignmentPeriod(
+                startMs: currentPeriod.startMs,
+                dueMs: 1 << 62,
+              ),
+              runsByLesson: byLesson,
+            )
+          : current,
       closed: closed,
       closedMetByLesson: metByLesson,
     );

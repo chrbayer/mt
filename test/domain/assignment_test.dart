@@ -301,6 +301,86 @@ void main() {
     });
   });
 
+  group('a single assignment', () {
+    Assignment once({
+      required DateTime on,
+      AssignmentRhythm rhythm = AssignmentRhythm.daily,
+      bool carryOver = false,
+    }) =>
+        Assignment(
+          id: 3,
+          userId: 1,
+          lessonIds: [lesson.id],
+          rhythm: rhythm,
+          repeats: false,
+          onDayMs: on.millisecondsSinceEpoch,
+          carryOver: carryOver,
+          runs: 1,
+          taskCount: 10,
+          minStars: 0,
+          minBolts: 0,
+          createdAtMs: DateTime(2026, 9, 1).millisecondsSinceEpoch,
+        );
+
+    test('always names its own day, whatever day it is looked at on', () {
+      final a = once(on: DateTime(2026, 9, 16, 10));
+      for (final at in [
+        DateTime(2026, 9, 14),
+        DateTime(2026, 9, 16, 23),
+        DateTime(2026, 9, 30),
+      ]) {
+        expect(periodAt(a, at).startMs,
+            DateTime(2026, 9, 16).millisecondsSinceEpoch,
+            reason: '$at');
+      }
+    });
+
+    test('a weekly one names the whole week its day falls in', () {
+      final a = once(
+        on: DateTime(2026, 9, 16),
+        rhythm: AssignmentRhythm.weekly,
+      );
+      // The 16th is a Wednesday; its week starts Monday the 14th.
+      expect(periodAt(a, DateTime(2026, 9, 30)).startMs,
+          DateTime(2026, 9, 14).millisecondsSinceEpoch);
+    });
+
+    test('disappears once its day is over', () {
+      final a = once(on: DateTime(2026, 9, 16));
+      expect(stillShown(a, DateTime(2026, 9, 16, 20), met: false), isTrue);
+      expect(stillShown(a, DateTime(2026, 9, 17, 8), met: false), isFalse);
+    });
+
+    test('unless it is carried over and still unfinished', () {
+      final a = once(on: DateTime(2026, 9, 16), carryOver: true);
+      expect(stillShown(a, DateTime(2026, 9, 20), met: false), isTrue);
+      // Made up, so it goes.
+      expect(stillShown(a, DateTime(2026, 9, 20), met: true), isFalse);
+    });
+
+    test('has exactly one closed period, and only once it is over', () {
+      final a = once(on: DateTime(2026, 9, 16));
+      expect(closedPeriods(a, DateTime(2026, 9, 16, 20)), isEmpty);
+      expect(closedPeriods(a, DateTime(2026, 9, 18)), hasLength(1));
+      // Still one, however long ago it was: making it up later does not
+      // change what happened on the day.
+      expect(closedPeriods(a, DateTime(2026, 12, 1)), hasLength(1));
+    });
+
+    test('says which day it belongs to, and when that is behind us', () {
+      final a = once(on: DateTime(2026, 9, 16));
+      expect(formatDeadline(a, now: DateTime(2026, 9, 16, 9)), 'heute');
+      expect(formatDeadline(a, now: DateTime(2026, 9, 14)), 'am Mi, 16.9.');
+      expect(formatDeadline(a, now: DateTime(2026, 9, 18)), 'noch offen');
+    });
+
+    test('a repeating one is shown whatever day it is', () {
+      final a = daily(createdAtMs: 0);
+      expect(stillShown(a, DateTime(2026, 9, 20), met: true), isTrue);
+      expect(withinPeriod(a, DateTime(2026, 9, 20)), isTrue);
+    });
+  });
+
   group('formatDeadline', () {
     test('a daily assignment is due today', () {
       expect(formatDeadline(daily(createdAtMs: 0)), 'heute');

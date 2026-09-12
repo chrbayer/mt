@@ -3191,6 +3191,47 @@ class $AssignmentsTable extends Assignments
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _repeatsMeta = const VerificationMeta(
+    'repeats',
+  );
+  @override
+  late final GeneratedColumn<bool> repeats = GeneratedColumn<bool>(
+    'repeats',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("repeats" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  static const VerificationMeta _onDayMsMeta = const VerificationMeta(
+    'onDayMs',
+  );
+  @override
+  late final GeneratedColumn<int> onDayMs = GeneratedColumn<int>(
+    'on_day_ms',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _carryOverMeta = const VerificationMeta(
+    'carryOver',
+  );
+  @override
+  late final GeneratedColumn<bool> carryOver = GeneratedColumn<bool>(
+    'carry_over',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("carry_over" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
   static const VerificationMeta _runsMeta = const VerificationMeta('runs');
   @override
   late final GeneratedColumn<int> runs = GeneratedColumn<int>(
@@ -3261,6 +3302,9 @@ class $AssignmentsTable extends Assignments
     userId,
     lessonIds,
     rhythm,
+    repeats,
+    onDayMs,
+    carryOver,
     runs,
     taskCount,
     minStars,
@@ -3306,6 +3350,24 @@ class $AssignmentsTable extends Assignments
       );
     } else if (isInserting) {
       context.missing(_rhythmMeta);
+    }
+    if (data.containsKey('repeats')) {
+      context.handle(
+        _repeatsMeta,
+        repeats.isAcceptableOrUnknown(data['repeats']!, _repeatsMeta),
+      );
+    }
+    if (data.containsKey('on_day_ms')) {
+      context.handle(
+        _onDayMsMeta,
+        onDayMs.isAcceptableOrUnknown(data['on_day_ms']!, _onDayMsMeta),
+      );
+    }
+    if (data.containsKey('carry_over')) {
+      context.handle(
+        _carryOverMeta,
+        carryOver.isAcceptableOrUnknown(data['carry_over']!, _carryOverMeta),
+      );
     }
     if (data.containsKey('runs')) {
       context.handle(
@@ -3381,6 +3443,18 @@ class $AssignmentsTable extends Assignments
         DriftSqlType.string,
         data['${effectivePrefix}rhythm'],
       )!,
+      repeats: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}repeats'],
+      )!,
+      onDayMs: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}on_day_ms'],
+      ),
+      carryOver: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}carry_over'],
+      )!,
       runs: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}runs'],
@@ -3430,6 +3504,17 @@ class AssignmentRow extends DataClass implements Insertable<AssignmentRow> {
   /// night. v13 also held an hour and a weekday here; see the migration to
   /// v14 for why they went.
   final String rhythm;
+
+  /// Whether the goal renews every period. False means a single one, and
+  /// then [onDayMs] says which day or week it belongs to; several of those
+  /// side by side are a plan.
+  final bool repeats;
+  final int? onDayMs;
+
+  /// Whether an unfinished single assignment stays on the child's screen
+  /// past its day. Never offered for a repeating one - see
+  /// `domain/assignment.dart`.
+  final bool carryOver;
   final int runs;
   final int taskCount;
   final int minStars;
@@ -3441,6 +3526,9 @@ class AssignmentRow extends DataClass implements Insertable<AssignmentRow> {
     required this.userId,
     required this.lessonIds,
     required this.rhythm,
+    required this.repeats,
+    this.onDayMs,
+    required this.carryOver,
     required this.runs,
     required this.taskCount,
     required this.minStars,
@@ -3455,6 +3543,11 @@ class AssignmentRow extends DataClass implements Insertable<AssignmentRow> {
     map['user_id'] = Variable<int>(userId);
     map['lesson_ids'] = Variable<String>(lessonIds);
     map['rhythm'] = Variable<String>(rhythm);
+    map['repeats'] = Variable<bool>(repeats);
+    if (!nullToAbsent || onDayMs != null) {
+      map['on_day_ms'] = Variable<int>(onDayMs);
+    }
+    map['carry_over'] = Variable<bool>(carryOver);
     map['runs'] = Variable<int>(runs);
     map['task_count'] = Variable<int>(taskCount);
     map['min_stars'] = Variable<int>(minStars);
@@ -3472,6 +3565,11 @@ class AssignmentRow extends DataClass implements Insertable<AssignmentRow> {
       userId: Value(userId),
       lessonIds: Value(lessonIds),
       rhythm: Value(rhythm),
+      repeats: Value(repeats),
+      onDayMs: onDayMs == null && nullToAbsent
+          ? const Value.absent()
+          : Value(onDayMs),
+      carryOver: Value(carryOver),
       runs: Value(runs),
       taskCount: Value(taskCount),
       minStars: Value(minStars),
@@ -3493,6 +3591,9 @@ class AssignmentRow extends DataClass implements Insertable<AssignmentRow> {
       userId: serializer.fromJson<int>(json['userId']),
       lessonIds: serializer.fromJson<String>(json['lessonIds']),
       rhythm: serializer.fromJson<String>(json['rhythm']),
+      repeats: serializer.fromJson<bool>(json['repeats']),
+      onDayMs: serializer.fromJson<int?>(json['onDayMs']),
+      carryOver: serializer.fromJson<bool>(json['carryOver']),
       runs: serializer.fromJson<int>(json['runs']),
       taskCount: serializer.fromJson<int>(json['taskCount']),
       minStars: serializer.fromJson<int>(json['minStars']),
@@ -3509,6 +3610,9 @@ class AssignmentRow extends DataClass implements Insertable<AssignmentRow> {
       'userId': serializer.toJson<int>(userId),
       'lessonIds': serializer.toJson<String>(lessonIds),
       'rhythm': serializer.toJson<String>(rhythm),
+      'repeats': serializer.toJson<bool>(repeats),
+      'onDayMs': serializer.toJson<int?>(onDayMs),
+      'carryOver': serializer.toJson<bool>(carryOver),
       'runs': serializer.toJson<int>(runs),
       'taskCount': serializer.toJson<int>(taskCount),
       'minStars': serializer.toJson<int>(minStars),
@@ -3523,6 +3627,9 @@ class AssignmentRow extends DataClass implements Insertable<AssignmentRow> {
     int? userId,
     String? lessonIds,
     String? rhythm,
+    bool? repeats,
+    Value<int?> onDayMs = const Value.absent(),
+    bool? carryOver,
     int? runs,
     int? taskCount,
     int? minStars,
@@ -3534,6 +3641,9 @@ class AssignmentRow extends DataClass implements Insertable<AssignmentRow> {
     userId: userId ?? this.userId,
     lessonIds: lessonIds ?? this.lessonIds,
     rhythm: rhythm ?? this.rhythm,
+    repeats: repeats ?? this.repeats,
+    onDayMs: onDayMs.present ? onDayMs.value : this.onDayMs,
+    carryOver: carryOver ?? this.carryOver,
     runs: runs ?? this.runs,
     taskCount: taskCount ?? this.taskCount,
     minStars: minStars ?? this.minStars,
@@ -3547,6 +3657,9 @@ class AssignmentRow extends DataClass implements Insertable<AssignmentRow> {
       userId: data.userId.present ? data.userId.value : this.userId,
       lessonIds: data.lessonIds.present ? data.lessonIds.value : this.lessonIds,
       rhythm: data.rhythm.present ? data.rhythm.value : this.rhythm,
+      repeats: data.repeats.present ? data.repeats.value : this.repeats,
+      onDayMs: data.onDayMs.present ? data.onDayMs.value : this.onDayMs,
+      carryOver: data.carryOver.present ? data.carryOver.value : this.carryOver,
       runs: data.runs.present ? data.runs.value : this.runs,
       taskCount: data.taskCount.present ? data.taskCount.value : this.taskCount,
       minStars: data.minStars.present ? data.minStars.value : this.minStars,
@@ -3565,6 +3678,9 @@ class AssignmentRow extends DataClass implements Insertable<AssignmentRow> {
           ..write('userId: $userId, ')
           ..write('lessonIds: $lessonIds, ')
           ..write('rhythm: $rhythm, ')
+          ..write('repeats: $repeats, ')
+          ..write('onDayMs: $onDayMs, ')
+          ..write('carryOver: $carryOver, ')
           ..write('runs: $runs, ')
           ..write('taskCount: $taskCount, ')
           ..write('minStars: $minStars, ')
@@ -3581,6 +3697,9 @@ class AssignmentRow extends DataClass implements Insertable<AssignmentRow> {
     userId,
     lessonIds,
     rhythm,
+    repeats,
+    onDayMs,
+    carryOver,
     runs,
     taskCount,
     minStars,
@@ -3596,6 +3715,9 @@ class AssignmentRow extends DataClass implements Insertable<AssignmentRow> {
           other.userId == this.userId &&
           other.lessonIds == this.lessonIds &&
           other.rhythm == this.rhythm &&
+          other.repeats == this.repeats &&
+          other.onDayMs == this.onDayMs &&
+          other.carryOver == this.carryOver &&
           other.runs == this.runs &&
           other.taskCount == this.taskCount &&
           other.minStars == this.minStars &&
@@ -3609,6 +3731,9 @@ class AssignmentsCompanion extends UpdateCompanion<AssignmentRow> {
   final Value<int> userId;
   final Value<String> lessonIds;
   final Value<String> rhythm;
+  final Value<bool> repeats;
+  final Value<int?> onDayMs;
+  final Value<bool> carryOver;
   final Value<int> runs;
   final Value<int> taskCount;
   final Value<int> minStars;
@@ -3620,6 +3745,9 @@ class AssignmentsCompanion extends UpdateCompanion<AssignmentRow> {
     this.userId = const Value.absent(),
     this.lessonIds = const Value.absent(),
     this.rhythm = const Value.absent(),
+    this.repeats = const Value.absent(),
+    this.onDayMs = const Value.absent(),
+    this.carryOver = const Value.absent(),
     this.runs = const Value.absent(),
     this.taskCount = const Value.absent(),
     this.minStars = const Value.absent(),
@@ -3632,6 +3760,9 @@ class AssignmentsCompanion extends UpdateCompanion<AssignmentRow> {
     required int userId,
     required String lessonIds,
     required String rhythm,
+    this.repeats = const Value.absent(),
+    this.onDayMs = const Value.absent(),
+    this.carryOver = const Value.absent(),
     required int runs,
     required int taskCount,
     required int minStars,
@@ -3651,6 +3782,9 @@ class AssignmentsCompanion extends UpdateCompanion<AssignmentRow> {
     Expression<int>? userId,
     Expression<String>? lessonIds,
     Expression<String>? rhythm,
+    Expression<bool>? repeats,
+    Expression<int>? onDayMs,
+    Expression<bool>? carryOver,
     Expression<int>? runs,
     Expression<int>? taskCount,
     Expression<int>? minStars,
@@ -3663,6 +3797,9 @@ class AssignmentsCompanion extends UpdateCompanion<AssignmentRow> {
       if (userId != null) 'user_id': userId,
       if (lessonIds != null) 'lesson_ids': lessonIds,
       if (rhythm != null) 'rhythm': rhythm,
+      if (repeats != null) 'repeats': repeats,
+      if (onDayMs != null) 'on_day_ms': onDayMs,
+      if (carryOver != null) 'carry_over': carryOver,
       if (runs != null) 'runs': runs,
       if (taskCount != null) 'task_count': taskCount,
       if (minStars != null) 'min_stars': minStars,
@@ -3677,6 +3814,9 @@ class AssignmentsCompanion extends UpdateCompanion<AssignmentRow> {
     Value<int>? userId,
     Value<String>? lessonIds,
     Value<String>? rhythm,
+    Value<bool>? repeats,
+    Value<int?>? onDayMs,
+    Value<bool>? carryOver,
     Value<int>? runs,
     Value<int>? taskCount,
     Value<int>? minStars,
@@ -3689,6 +3829,9 @@ class AssignmentsCompanion extends UpdateCompanion<AssignmentRow> {
       userId: userId ?? this.userId,
       lessonIds: lessonIds ?? this.lessonIds,
       rhythm: rhythm ?? this.rhythm,
+      repeats: repeats ?? this.repeats,
+      onDayMs: onDayMs ?? this.onDayMs,
+      carryOver: carryOver ?? this.carryOver,
       runs: runs ?? this.runs,
       taskCount: taskCount ?? this.taskCount,
       minStars: minStars ?? this.minStars,
@@ -3712,6 +3855,15 @@ class AssignmentsCompanion extends UpdateCompanion<AssignmentRow> {
     }
     if (rhythm.present) {
       map['rhythm'] = Variable<String>(rhythm.value);
+    }
+    if (repeats.present) {
+      map['repeats'] = Variable<bool>(repeats.value);
+    }
+    if (onDayMs.present) {
+      map['on_day_ms'] = Variable<int>(onDayMs.value);
+    }
+    if (carryOver.present) {
+      map['carry_over'] = Variable<bool>(carryOver.value);
     }
     if (runs.present) {
       map['runs'] = Variable<int>(runs.value);
@@ -3741,6 +3893,9 @@ class AssignmentsCompanion extends UpdateCompanion<AssignmentRow> {
           ..write('userId: $userId, ')
           ..write('lessonIds: $lessonIds, ')
           ..write('rhythm: $rhythm, ')
+          ..write('repeats: $repeats, ')
+          ..write('onDayMs: $onDayMs, ')
+          ..write('carryOver: $carryOver, ')
           ..write('runs: $runs, ')
           ..write('taskCount: $taskCount, ')
           ..write('minStars: $minStars, ')
@@ -6311,6 +6466,9 @@ typedef $$AssignmentsTableCreateCompanionBuilder =
       required int userId,
       required String lessonIds,
       required String rhythm,
+      Value<bool> repeats,
+      Value<int?> onDayMs,
+      Value<bool> carryOver,
       required int runs,
       required int taskCount,
       required int minStars,
@@ -6324,6 +6482,9 @@ typedef $$AssignmentsTableUpdateCompanionBuilder =
       Value<int> userId,
       Value<String> lessonIds,
       Value<String> rhythm,
+      Value<bool> repeats,
+      Value<int?> onDayMs,
+      Value<bool> carryOver,
       Value<int> runs,
       Value<int> taskCount,
       Value<int> minStars,
@@ -6375,6 +6536,21 @@ class $$AssignmentsTableFilterComposer
 
   ColumnFilters<String> get rhythm => $composableBuilder(
     column: $table.rhythm,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get repeats => $composableBuilder(
+    column: $table.repeats,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get onDayMs => $composableBuilder(
+    column: $table.onDayMs,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get carryOver => $composableBuilder(
+    column: $table.carryOver,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -6456,6 +6632,21 @@ class $$AssignmentsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<bool> get repeats => $composableBuilder(
+    column: $table.repeats,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get onDayMs => $composableBuilder(
+    column: $table.onDayMs,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get carryOver => $composableBuilder(
+    column: $table.carryOver,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<int> get runs => $composableBuilder(
     column: $table.runs,
     builder: (column) => ColumnOrderings(column),
@@ -6527,6 +6718,15 @@ class $$AssignmentsTableAnnotationComposer
 
   GeneratedColumn<String> get rhythm =>
       $composableBuilder(column: $table.rhythm, builder: (column) => column);
+
+  GeneratedColumn<bool> get repeats =>
+      $composableBuilder(column: $table.repeats, builder: (column) => column);
+
+  GeneratedColumn<int> get onDayMs =>
+      $composableBuilder(column: $table.onDayMs, builder: (column) => column);
+
+  GeneratedColumn<bool> get carryOver =>
+      $composableBuilder(column: $table.carryOver, builder: (column) => column);
 
   GeneratedColumn<int> get runs =>
       $composableBuilder(column: $table.runs, builder: (column) => column);
@@ -6604,6 +6804,9 @@ class $$AssignmentsTableTableManager
                 Value<int> userId = const Value.absent(),
                 Value<String> lessonIds = const Value.absent(),
                 Value<String> rhythm = const Value.absent(),
+                Value<bool> repeats = const Value.absent(),
+                Value<int?> onDayMs = const Value.absent(),
+                Value<bool> carryOver = const Value.absent(),
                 Value<int> runs = const Value.absent(),
                 Value<int> taskCount = const Value.absent(),
                 Value<int> minStars = const Value.absent(),
@@ -6615,6 +6818,9 @@ class $$AssignmentsTableTableManager
                 userId: userId,
                 lessonIds: lessonIds,
                 rhythm: rhythm,
+                repeats: repeats,
+                onDayMs: onDayMs,
+                carryOver: carryOver,
                 runs: runs,
                 taskCount: taskCount,
                 minStars: minStars,
@@ -6628,6 +6834,9 @@ class $$AssignmentsTableTableManager
                 required int userId,
                 required String lessonIds,
                 required String rhythm,
+                Value<bool> repeats = const Value.absent(),
+                Value<int?> onDayMs = const Value.absent(),
+                Value<bool> carryOver = const Value.absent(),
                 required int runs,
                 required int taskCount,
                 required int minStars,
@@ -6639,6 +6848,9 @@ class $$AssignmentsTableTableManager
                 userId: userId,
                 lessonIds: lessonIds,
                 rhythm: rhythm,
+                repeats: repeats,
+                onDayMs: onDayMs,
+                carryOver: carryOver,
                 runs: runs,
                 taskCount: taskCount,
                 minStars: minStars,

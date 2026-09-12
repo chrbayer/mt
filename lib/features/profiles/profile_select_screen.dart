@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/db/app_database.dart';
+import '../../domain/assignment.dart';
 import '../../providers.dart';
 import '../../theme/app_theme.dart';
 import '../common/load_failure.dart';
@@ -190,11 +191,19 @@ class _ProfileTile extends ConsumerWidget {
     // already done.
     final assignments =
         ref.watch(openAssignmentsProvider(user.id)).value ?? const [];
-    final todo = assignments
+    final now = ref.watch(clockProvider)();
+    final shown = [
+      for (final a in assignments)
+        if (stillShown(a, now,
+            met: ref.watch(assignmentStatsProvider(a)).value?.settled ??
+                false))
+          a,
+    ];
+    final todo = shown
         .where((a) => !(ref.watch(assignmentStatsProvider(a)).value?.met ??
             false))
         .length;
-    final allDone = assignments.isNotEmpty && todo == 0;
+    final allDone = shown.isNotEmpty && todo == 0;
     return SizedBox(
       width: _tileWidth,
       height: _tileHeight,
