@@ -187,3 +187,11 @@ keine Bestenliste, keine Blitze. Bewirkt hat er nur, dass ein vierter Anlauf
 keine Sterne mehr brachte — bei den Jüngsten, für die ein vierter Anlauf
 genau das ist, wofür die Gruppe da ist. Der Hinweis „zählt heute nicht mehr"
 erscheint dort ebenfalls nicht mehr.
+
+#32 erledigt (2.10.0) — Der Übungsverlauf im Elternbereich lässt sich jetzt
+zusätzlich nach Zeit eingrenzen: Alle, Heute, 7 Tage, 30 Tage, in einer
+eigenen Chip-Reihe unter der nach Kind. Gezählt werden ganze Kalendertage,
+gerechnet über DateTime, damit die Zeitumstellung keinen Tag verschiebt. Der
+Aufräumknopf für abgebrochene Durchgänge folgt beiden Filtern und entfernt
+genau die Zeilen, die auf dem Bildschirm stehen; die Rückfrage nennt Kind und
+Zeitraum.

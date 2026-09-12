@@ -1,3 +1,4 @@
+import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -214,6 +215,54 @@ void main() {
 
       expect(find.text('Plus ohne Zehnerübergang  ·  bis 20'), findsOneWidget);
       expect(find.text('Plus und Minus gemischt  ·  bis 100'), findsNothing);
+    });
+
+    testWidgets('the history can be narrowed to the last seven days',
+        (tester) async {
+      await run(mia, 'add_20_plain');
+      await run(tom, 'mix_100');
+      // Push Mia's run ten days back, so only Tom's is left inside a week.
+      final rows = await db.select(db.sessions).get();
+      final old = rows.firstWhere((s) => s.userId == mia);
+      await (db.update(db.sessions)..where((s) => s.id.equals(old.id))).write(
+        SessionsCompanion(
+          finishedAtMs: Value(DateTime.now()
+              .subtract(const Duration(days: 10))
+              .millisecondsSinceEpoch),
+        ),
+      );
+      await openAdmin(tester);
+
+      // Both are there until the log is narrowed.
+      expect(find.text('Plus ohne Zehnerübergang  ·  bis 20'), findsOneWidget);
+
+      await tester.tap(find.text('7 Tage'));
+      await tester.pumpAndSettle();
+      expect(find.text('Plus ohne Zehnerübergang  ·  bis 20'), findsNothing);
+      expect(find.text('Plus und Minus gemischt  ·  bis 100'), findsOneWidget);
+
+      // And the two filters narrow independently.
+      await tester.tap(find.text('🐧  Tom'));
+      await tester.pumpAndSettle();
+      expect(find.text('Plus und Minus gemischt  ·  bis 100'), findsOneWidget);
+      await tester.tap(find.text('🦊  Mia'));
+      await tester.pumpAndSettle();
+      expect(find.text('Plus und Minus gemischt  ·  bis 100'), findsNothing);
+    });
+
+    testWidgets('tidying up says whose runs and from when', (tester) async {
+      await run(mia, 'add_20_plain', completed: false);
+      await openAdmin(tester);
+
+      await tester.tap(find.text('Heute'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.textContaining('aufräumen'));
+      await tester.pumpAndSettle();
+
+      // The question has to cover exactly what the button removes, now that
+      // the list is filtered two ways.
+      expect(find.textContaining('von allen Kindern von heute'),
+          findsOneWidget);
     });
 
     testWidgets('a single run can be deleted from the log', (tester) async {

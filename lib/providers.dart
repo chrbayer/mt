@@ -14,6 +14,7 @@ import 'data/repositories/settings_repository.dart';
 import 'data/repositories/stats_repository.dart';
 import 'data/repositories/user_repository.dart';
 import 'domain/assignment.dart';
+import 'domain/history_range.dart';
 import 'domain/lesson.dart';
 import 'domain/practice_limit.dart';
 import 'domain/task.dart';
@@ -246,11 +247,24 @@ final progressProvider =
       ),
 );
 
-/// The parent area's run log. A null key means "all children".
-final historyProvider = StreamProvider.family<List<HistoryEntry>, int?>(
-  (ref, userId) =>
-      ref.watch(statsRepositoryProvider).watchHistory(userId: userId),
-);
+/// What the parent area's run log is narrowed to: one child or all of them,
+/// and how far back.
+typedef HistoryKey = ({int? userId, HistoryRange range});
+
+/// The parent area's run log.
+///
+/// The day boundary comes from [clockProvider] through [historySince], so
+/// "Heute" means the same day everything else in the app means - and it is
+/// re-read whenever [dayStartProvider] is, since that is what notices a
+/// night has passed.
+final historyProvider =
+    StreamProvider.family<List<HistoryEntry>, HistoryKey>((ref, key) {
+  ref.watch(dayStartProvider);
+  final since = historySince(key.range, ref.watch(clockProvider)());
+  return ref
+      .watch(statsRepositoryProvider)
+      .watchHistory(userId: key.userId, sinceMs: since);
+});
 
 /// One row per profile for the overview across all children.
 final userSummariesProvider = StreamProvider<List<UserSummary>>(

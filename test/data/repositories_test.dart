@@ -10,6 +10,7 @@ import 'package:mathe_trainer/data/repositories/stats_repository.dart';
 import 'package:mathe_trainer/data/repositories/user_repository.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:mathe_trainer/domain/group_visibility.dart';
+import 'package:mathe_trainer/domain/history_range.dart';
 import 'package:mathe_trainer/domain/lesson.dart';
 import 'package:mathe_trainer/domain/lesson_filter.dart';
 import 'package:mathe_trainer/domain/scoring.dart';
@@ -747,6 +748,55 @@ void main() {
       final onlyMia = await stats.watchHistory(userId: mia).first;
       expect(onlyMia, hasLength(1));
       expect(onlyMia.single.userName, 'Mia');
+    });
+
+    test('history can be narrowed to a stretch of time', () async {
+      final mia =
+          await users.createUser(name: 'Mia', avatar: '🦊', colorIndex: 0);
+      final old =
+          await recordRun(sessions, userId: mia, lessonId: 'add_20_plain');
+      final recent =
+          await recordRun(sessions, userId: mia, lessonId: 'mix_100');
+      // Push the first one ten days back.
+      await (db.update(db.sessions)..where((s) => s.id.equals(old))).write(
+        SessionsCompanion(
+          finishedAtMs: Value(DateTime.now()
+              .subtract(const Duration(days: 10))
+              .millisecondsSinceEpoch),
+        ),
+      );
+
+      final week = historySince(HistoryRange.week, DateTime.now());
+      expect((await stats.watchHistory(sinceMs: week).first)
+          .map((h) => h.sessionId), [recent]);
+      // And without a bound both are there again.
+      expect(await stats.watchHistory().first, hasLength(2));
+    });
+
+    test('tidying up abandoned runs follows the stretch on screen', () async {
+      final mia =
+          await users.createUser(name: 'Mia', avatar: '🦊', colorIndex: 0);
+      final old = await recordRun(sessions,
+          userId: mia, lessonId: 'add_20_plain', completed: false);
+      final recent = await recordRun(sessions,
+          userId: mia, lessonId: 'mix_100', completed: false);
+      await (db.update(db.sessions)..where((s) => s.id.equals(old))).write(
+        SessionsCompanion(
+          finishedAtMs: Value(DateTime.now()
+              .subtract(const Duration(days: 10))
+              .millisecondsSinceEpoch),
+        ),
+      );
+
+      // Looking at the last seven days, only those may go - a button that
+      // silently reached further back than the list shows would be a trap.
+      final removed = await stats.deleteIncompleteSessions(
+        sinceMs: historySince(HistoryRange.week, DateTime.now()),
+      );
+      expect(removed, 1);
+      expect((await stats.watchHistory().first).map((h) => h.sessionId),
+          [old]);
+      expect(recent, isNot(old));
     });
 
     test('a single run can be deleted', () async {

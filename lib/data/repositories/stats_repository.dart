@@ -459,11 +459,16 @@ class StatsRepository {
             ]);
   }
 
-  /// The parent area's log: every run, newest first, optionally for one child.
+  /// The parent area's log: every run, newest first, optionally for one child
+  /// and optionally only back to [sinceMs].
   ///
   /// Abandoned runs are included on purpose - "started and gave up" is exactly
   /// the kind of thing a parent wants to see.
-  Stream<List<HistoryEntry>> watchHistory({int? userId, int limit = 200}) {
+  Stream<List<HistoryEntry>> watchHistory({
+    int? userId,
+    int? sinceMs,
+    int limit = 200,
+  }) {
     return _db
         .customSelect(
           '''
@@ -482,11 +487,15 @@ class StatsRepository {
           JOIN users u ON u.id = s.user_id
           WHERE (?1 IS NULL OR s.user_id = ?1)
             AND s.deleted = 0
+            -- The alias cannot be used here, so the expression is repeated.
+            AND (?2 IS NULL
+                 OR COALESCE(s.finished_at_ms, s.started_at_ms) >= ?2)
           ORDER BY played_at_ms DESC
-          LIMIT ?2
+          LIMIT ?3
           ''',
           variables: [
             if (userId == null) const Variable<int>(null) else Variable.withInt(userId),
+            if (sinceMs == null) const Variable<int>(null) else Variable.withInt(sinceMs),
             Variable.withInt(limit),
           ],
           readsFrom: {_db.sessions, _db.users},
@@ -929,18 +938,28 @@ class StatsRepository {
     await _recountStars(session.userId, session.lessonId);
   }
 
-  /// Takes every abandoned run out of the record, for one child or for all.
+  /// Takes every abandoned run out of the record, for one child or for all,
+  /// and only back to [sinceMs] where one is given.
   ///
   /// Abandoned runs are shown on purpose - "started and gave up" is worth
   /// seeing - but after a few weeks they are mostly noise between the runs a
   /// parent actually wants to read. They never earned anything, so nothing
   /// has to be worked out again. Returns how many were tidied away.
-  Future<int> deleteIncompleteSessions({int? userId}) async {
+  ///
+  /// Both filters are handed in so this removes **exactly what the list is
+  /// showing**. Tidying the list one is looking at is a different act from
+  /// silently tidying every child's whole history, and a button that did the
+  /// second would be a trap.
+  Future<int> deleteIncompleteSessions({int? userId, int? sinceMs}) async {
     final query = _db.update(_db.sessions)
       ..where((s) =>
           s.completed.equals(false) &
           s.deleted.equals(false) &
-          (userId == null ? const Constant(true) : s.userId.equals(userId)));
+          (userId == null ? const Constant(true) : s.userId.equals(userId)) &
+          (sinceMs == null
+              ? const Constant(true)
+              : coalesce([s.finishedAtMs, s.startedAtMs])
+                  .isBiggerOrEqualValue(sinceMs)));
     return query.write(const SessionsCompanion(deleted: Value(true)));
   }
 

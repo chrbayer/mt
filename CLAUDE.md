@@ -1009,6 +1009,27 @@ Ergebnisbildschirm stehen dann **null Sterne und null Blitze** — dieselbe
 Linie, die ein zu kurzer Lauf schon zieht. Drei goldene Sterne neben „zählt
 nicht" wären zwei Antworten auf dieselbe Frage.
 
+## Übungsverlauf: zwei Filter, ein Aufräumknopf
+
+Der Verlauf im Elternbereich wird nach **zwei** Dingen eingegrenzt, und die
+stehen bewusst in getrennten Chip-Reihen: nach Kind und nach Zeitraum
+(`domain/history_range.dart`). In einer Reihe gemischt wäre nicht zu sehen,
+dass sie unabhängig voneinander wirken.
+
+Der Zeitraum zählt **ganze Kalendertage**, keine rollenden Stunden: „7 Tage"
+heißt heute und die sechs Tage davor. Gerechnet wird über `DateTime` und
+nicht über abgezogene Millisekunden — zweimal im Jahr fehlt eine Stunde, und
+eine Grenze, die dann auf 23 Uhr fällt, nimmt still einen Tag mehr herein.
+Die Grenze kommt aus `clockProvider` über `dayStartProvider`, also aus
+derselben Uhr wie alles andere.
+
+`deleteIncompleteSessions` bekommt **beide** Filter mit. Der Knopf räumt
+genau die Zeilen weg, die auf dem Bildschirm stehen — dieselbe Überlegung wie
+schon beim Filter nach Kind: die Liste aufzuräumen, die man ansieht, ist
+etwas anderes, als stillschweigend weiter zu greifen. Die Rückfrage sagt
+deshalb beides ausdrücklich, „von Mia aus den letzten 7 Tagen", statt es in
+die Knopfbeschriftung zu quetschen.
+
 ## Löschen, ohne die Zeit zurückzugeben
 
 `deleteSession` **markiert** (`sessions.deleted`), es löscht nicht. Die Zeile

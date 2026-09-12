@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/db/app_database.dart';
 import '../../data/repositories/stats_repository.dart';
+import '../../domain/history_range.dart';
 import '../../domain/lesson.dart';
 import '../../domain/scoring.dart';
 import '../../providers.dart';
@@ -71,11 +72,13 @@ class _HistoryTab extends ConsumerStatefulWidget {
 
 class _HistoryTabState extends ConsumerState<_HistoryTab> {
   int? _filter;
+  HistoryRange _range = HistoryRange.all;
 
   @override
   Widget build(BuildContext context) {
     final users = ref.watch(usersProvider).value ?? const <User>[];
-    final history = ref.watch(historyProvider(_filter));
+    final history =
+        ref.watch(historyProvider((userId: _filter, range: _range)));
 
     // Counted off the list that is actually shown, so the number on the
     // button and the rows it will remove are the same thing.
@@ -119,6 +122,27 @@ class _HistoryTabState extends ConsumerState<_HistoryTab> {
             ],
           ),
         ),
+        // A second row rather than one long one: who and when are two
+        // different questions, and mixed into a single row of chips it would
+        // not be clear that they narrow the list independently.
+        Padding(
+          padding: const EdgeInsets.fromLTRB(32, 0, 32, 8),
+          child: Wrap(
+            spacing: 12,
+            runSpacing: 8,
+            children: [
+              for (final range in HistoryRange.values)
+                ChoiceChip(
+                  label: Text(historyRangeTitle(range),
+                      style: const TextStyle(fontSize: 19)),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 14, vertical: 10),
+                  selected: _range == range,
+                  onSelected: (_) => setState(() => _range = range),
+                ),
+            ],
+          ),
+        ),
         // Only ever what the filter above shows. Tidying up the list one is
         // looking at is a different act from tidying up every child's list
         // at once, and a button that silently did the second would be a trap.
@@ -129,6 +153,10 @@ class _HistoryTabState extends ConsumerState<_HistoryTab> {
               alignment: Alignment.centerLeft,
               child: OutlinedButton.icon(
                 icon: const Icon(Icons.cleaning_services_outlined, size: 22),
+                // The count comes from the list on screen, so the button
+                // and what it removes are the same rows. What exactly that
+                // covers is spelled out in the question, not squeezed into
+                // the label.
                 label: Text(
                   _filter == null
                       ? 'Abgebrochene Durchgänge aufräumen ($abandoned)'
@@ -136,7 +164,7 @@ class _HistoryTabState extends ConsumerState<_HistoryTab> {
                           '($abandoned)',
                   style: const TextStyle(fontSize: 18),
                 ),
-                onPressed: () => _confirmCleanup(abandoned),
+                onPressed: () => _confirmCleanup(abandoned, users),
               ),
             ),
           ),
@@ -199,7 +227,12 @@ class _HistoryTabState extends ConsumerState<_HistoryTab> {
   String _filterName(List<User> users) =>
       users.where((u) => u.id == _filter).firstOrNull?.name ?? 'diesem Kind';
 
-  Future<void> _confirmCleanup(int count) async {
+  Future<void> _confirmCleanup(int count, List<User> users) async {
+    // Says exactly what is about to go: whose runs, and from which stretch
+    // of time. The list is filtered two ways now, and a question that named
+    // neither would be asking about something else than the button removes.
+    final whose =
+        _filter == null ? 'von allen Kindern' : 'von ${_filterName(users)}';
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
@@ -208,11 +241,11 @@ class _HistoryTabState extends ConsumerState<_HistoryTab> {
               ? 'Einen abgebrochenen Durchgang aufräumen?'
               : '$count abgebrochene Durchgänge aufräumen?',
         ),
-        content: const Text(
-          'Abgebrochene Durchgänge zählten nie für Sterne, Blitze oder eine '
-          'Bestenliste - sie verschwinden nur aus dieser Liste. Die geübte '
-          'Zeit bleibt gezählt.',
-          style: TextStyle(fontSize: 20),
+        content: Text(
+          'Es verschwinden die abgebrochenen Durchgänge $whose '
+          '${historyRangePhrase(_range)}. Sie zählten nie für Sterne, Blitze '
+          'oder eine Bestenliste - die geübte Zeit bleibt gezählt.',
+          style: const TextStyle(fontSize: 20),
         ),
         actions: [
           OutlinedButton(
@@ -227,9 +260,11 @@ class _HistoryTabState extends ConsumerState<_HistoryTab> {
       ),
     );
     if (confirmed ?? false) {
-      await ref
-          .read(statsRepositoryProvider)
-          .deleteIncompleteSessions(userId: _filter);
+      // Both filters, so this removes exactly the rows that were on screen.
+      await ref.read(statsRepositoryProvider).deleteIncompleteSessions(
+            userId: _filter,
+            sinceMs: historySince(_range, ref.read(clockProvider)()),
+          );
     }
   }
 }
