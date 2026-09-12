@@ -18,16 +18,23 @@ Android-Berechtigung** an, auch keinen Internetzugriff. Sie könnte gar nichts
 
 ## Wer verantwortlich ist
 
-<!-- Vor der Veröffentlichung ausfüllen: Play und die DSGVO verlangen einen
-     benannten Verantwortlichen mit ladungsfähiger Anschrift. Der Link auf
-     das Projekt ersetzt das nicht. -->
-
-    Name:      …
-    Anschrift: …
-    E-Mail:    …
+Christoph Bayer, Deutschland.
 
 Quelltext und dieser Text: <https://github.com/chrbayer/mt>. Fragen und
 Hinweise gern dort als Issue.
+
+<!-- Anschrift und E-Mail bewusst offen.
+     Für F-Droid braucht es beides nicht: dort wird aus dem Quelltext gebaut,
+     ohne Identitätsprüfung und ohne Pflicht zu einer Datenschutzerklärung.
+     Für einen Play-Eintrag dagegen schon - dort ist eine ladungsfähige
+     Anschrift verlangt und wird bei einem privaten Konto ohnehin öffentlich
+     angezeigt. Dann hier eintragen:
+
+     Anschrift: …
+     E-Mail:    …
+
+     Vorher nicht: eine Privatanschrift, die einmal in der Historie dieses
+     Repositories steht, bekommt man ohne Umschreiben nicht wieder heraus. -->
 
 ## Welche Daten die App verarbeitet
 
