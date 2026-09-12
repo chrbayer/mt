@@ -252,3 +252,10 @@ die Übungszeit.
 * Die Zahl am Aufräumknopf kommt aus einer eigenen Abfrage statt aus der
   angezeigten Liste, die bei 200 Zeilen endet. Ist die Liste abgeschnitten,
   steht das jetzt dabei.
+
+#39 erledigt (2.12.2) — Die beiden Prüflücken geschlossen: die Layouttests
+laufen zusätzlich auf 960x600 (was ein 10-Zoll-Tablet mit 1920x1200 meldet)
+und mit einer echten Schrift statt der quadratischen Testschrift. Beides
+förderte sofort etwas zutage — die Lektionstabelle der Statistik lief bei
+960 dp über, und der Startdialog passte mit aufgeklappter Erklärung nicht
+mehr auf einen 600 dp hohen Schirm. Beides behoben, nicht weggeprüft.

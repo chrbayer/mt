@@ -90,8 +90,14 @@ class _StartLessonSheetState extends ConsumerState<StartLessonSheet> {
     final usedUpToday =
         capToday != null && capToday.left <= 0 ? capToday.used : null;
 
+    // On a short screen the sheet gives up its air rather than its content.
+    // With the explanation folded open it needed 635 dp of a 600 dp tablet,
+    // and "Los geht's" fell below the fold - the same trick the profile
+    // editor uses when the keyboard leaves it under 280 dp.
+    final tight = MediaQuery.sizeOf(context).height < 700;
+
     return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(40, 8, 40, 28),
+      padding: EdgeInsets.fromLTRB(40, tight ? 4 : 8, 40, tight ? 10 : 28),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -135,7 +141,7 @@ class _StartLessonSheetState extends ConsumerState<StartLessonSheet> {
                     const TextStyle(fontSize: 19, color: AppColors.textMuted),
               ),
             ),
-          const SizedBox(height: 26),
+          SizedBox(height: tight ? 10 : 26),
           if (assignment != null)
             // The length **and** the bar: the result screen shows what was
             // wanted once it is too late to aim for it, and this is the
@@ -167,7 +173,7 @@ class _StartLessonSheetState extends ConsumerState<StartLessonSheet> {
             )
           else ...[
             const Text('Wie viele Aufgaben?', style: TextStyle(fontSize: 22)),
-            const SizedBox(height: 12),
+            SizedBox(height: tight ? 8 : 12),
             Wrap(
               spacing: 14,
               runSpacing: 12,
@@ -231,7 +237,7 @@ class _StartLessonSheetState extends ConsumerState<StartLessonSheet> {
                     PracticeAllowance.unlimited,
               ),
             ),
-          const SizedBox(height: 30),
+          SizedBox(height: tight ? 12 : 30),
           // Stacked, not side by side: a bottom sheet is only ~640 dp wide,
           // and two labelled buttons in a row clip the second one.
           if (gate.pause != null)
@@ -276,7 +282,7 @@ class _StartLessonSheetState extends ConsumerState<StartLessonSheet> {
                     },
             ),
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: tight ? 8 : 12),
           SizedBox(
             width: double.infinity,
             child: OutlinedButton.icon(

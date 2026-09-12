@@ -239,13 +239,11 @@ Zeit in einem `Expanded`, sie ist also das Einzige, was nachgibt. Unter rund
 260 dp Kachelbreite gibt sie bis auf nichts nach: bei vier Spalten auf 960 dp
 blieben „125,0 s" ganze 19 dp und „noch nicht geübt" 95 von 144.
 
-**Warum das lange niemandem auffiel:** `screens_layout_test` rendert mit
-`devicePixelRatio = 1.0` auf 1280x800 und 1600x1000 — genau die großzügigen
-Fälle. Ein 10-Zoll-Tablet mit 1920x1200 meldet bei Dichte 2 aber 960 dp, und
-das ist ein gewöhnliches Gerät. Dazu kommt: ein **abgeschnittener Text ist
-kein Layoutfehler**. `TextOverflow.ellipsis` tut genau, was dort steht, der
-Test sieht keinen Überlauf und meldet nichts. Deshalb prüft der Test jetzt
-die Breite, die die Zeit tatsächlich bekommt, und nicht nur, ob etwas
+**Warum das lange niemandem auffiel** — und was daraus für die Tests folgt,
+steht jetzt unter „Zwei Fallen in den Layouttests". Ein **abgeschnittener
+Text ist kein Layoutfehler**: `TextOverflow.ellipsis` tut genau, was dort
+steht, der Test sieht keinen Überlauf und meldet nichts. Deshalb prüft der
+Test die Breite, die die Zeit tatsächlich bekommt, und nicht nur, ob etwas
 überläuft.
 
 Die **Kopfzeile** hat dasselbe Problem an einer anderen Schwelle: mit den
@@ -255,11 +253,38 @@ Beschriftung auf und bleiben als Symbol mit Tooltip stehen — nicht der Knopf
 gibt nach, sondern sein Wort, denn erreichbar müssen beide bleiben. Damit
 passt die Zeile bis etwa 700 dp.
 
-**Vorsicht beim Messen von Textbreiten im Test:** die quadratische Testschrift
-macht jedes Wort etwa doppelt so breit wie eine echte. Die Kopfzeile läuft im
-Test deshalb schon bei 960 dp über, auf einem Gerät aber erst unter 900. Wer
-hier eine Schwelle festlegt, muss mit einer echten Schrift gegenmessen —
-`picture_group_test.dart` zeigt, wie man eine lädt.
+Zur Schwelle selbst siehe „Zwei Fallen in den Layouttests" — sie war beim
+ersten Anlauf falsch gemessen.
+
+## Zwei Fallen in den Layouttests
+
+Beide haben je einen echten Fehler verdeckt und je einen falschen erfunden,
+und beide sind inzwischen zu.
+
+**Die Größen.** `screens_layout_test` lief nur auf 1280x800 und 1600x1000,
+und immer mit `devicePixelRatio = 1.0` — die großzügigen Fälle. Ein
+10-Zoll-Tablet mit 1920x1200 meldet bei Dichte 2 aber **960 dp**, und das ist
+ein gewöhnliches Gerät. Deshalb steht in `tabletSizes` jetzt zusätzlich
+`dicht` (960x600). Beim Einschalten fielen sofort zwei Bildschirme auf: die
+Lektionstabelle der Statistik lief um 18 px über (fünf feste Spalten zu 92 dp
+passen dort nicht mehr — sie geben jetzt gemeinsam nach, statt dass eine
+Spalte wegfällt), und der Startdialog brauchte mit aufgeklappter Erklärung
+635 dp auf einem 600 dp hohen Gerät (er gibt auf kurzen Schirmen seine
+Abstände auf, wie es der Profil-Editor bei offener Tastatur tut).
+
+**Die Schrift.** Flutters Testschrift ist quadratisch: jedes Zeichen ist so
+breit wie sein Schriftgrad, eine echte Schrift etwa halb so breit. Jede
+Messung „passt das noch?" ist damit um rund den Faktor zwei daneben, und zwar
+in Richtung erfundener Probleme — die Kopfzeile schien schon bei 960 dp
+überzulaufen, tat es auf einem Gerät aber erst unter 900. `loadRealFont` in
+`test/support/real_font.dart` leiht sich eine echte Schrift von der Maschine;
+`screens_layout_test` und `picture_group_test` benutzen dieselbe.
+
+Findet sich keine, bleibt die quadratische, und die Tests hüten dann weiter
+vor Überlauf — nur ihren Breitenmessungen ist nicht mehr zu trauen. Deshalb
+gibt `loadRealFont` zurück, ob es geklappt hat, und der eine Test, der eine
+Breite wirklich misst, sagt es ausdrücklich, statt auf einen Zufall
+durchzulaufen.
 
 ## Farben der Gruppen
 

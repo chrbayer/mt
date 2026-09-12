@@ -22,15 +22,29 @@ import 'package:mathe_trainer/features/stats/stats_screen.dart';
 import 'package:mathe_trainer/providers.dart';
 import 'package:mathe_trainer/theme/app_theme.dart';
 
+import '../support/real_font.dart';
+
 /// Every screen is rendered at real tablet sizes. A `RenderFlex overflowed`
 /// error fails the test, which is the cheap way to catch a layout that breaks
 /// on a smaller 10" tablet.
 const tabletSizes = <String, Size>{
   '10zoll': Size(1280, 800),
   'gross': Size(1600, 1000),
+  // A 10" tablet with 1920x1200 pixels reports this at density 2, and it is
+  // an ordinary device rather than a corner. Without it these tests only
+  // ever saw the generous case - which is how the time on a lesson tile came
+  // to be cut down to 19 dp with nothing failing.
+  'dicht': Size(960, 600),
 };
 
 void main() {
+  // A real font, not the square test one: half these tests are about whether
+  // something fits, and with glyphs as wide as their point size every string
+  // is about twice its real width. See test/support/real_font.dart - it once
+  // cost a wrong bug report.
+  var realFont = false;
+  setUpAll(() async => realFont = await loadRealFont());
+
   late AppDatabase db;
   late ProviderContainer container;
   late User mia;
@@ -509,6 +523,11 @@ void main() {
     // The footer of the one lesson that has been practised.
     final time = find.textContaining(RegExp(r'^\d+,\d s$'));
     expect(time, findsOneWidget);
+    // Said out loud rather than asserted into the dark: with the square test
+    // font this number means nothing, and a machine without any of the
+    // fonts in real_font.dart would otherwise pass on a coincidence.
+    expect(realFont, isTrue,
+        reason: 'Diese Messung braucht eine echte Schrift');
     expect(tester.getRect(time.first).width, greaterThanOrEqualTo(70));
   });
 

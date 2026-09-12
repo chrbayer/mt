@@ -1,10 +1,9 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mathe_trainer/domain/lesson.dart';
 import 'package:mathe_trainer/features/practice/widgets/picture_group.dart';
+
+import '../support/real_font.dart';
 
 /// The scatter has to hold still. Pictures that move while a child counts
 /// them would make the lesson impossible.
@@ -12,19 +11,7 @@ void main() {
   // Real glyph metrics: the test font is square, and the overflow this file
   // guards against only happens with a font whose glyphs are taller than
   // their point size - which every real one is.
-  setUpAll(() async {
-    for (final path in [
-      '/usr/share/fonts/google-noto-emoji-fonts/NotoEmoji-Regular.ttf',
-      '/usr/share/fonts/dejavu-sans-fonts/DejaVuSans.ttf',
-    ]) {
-      if (!File(path).existsSync()) continue;
-      final bytes = File(path).readAsBytesSync();
-      await (FontLoader('Roboto')
-            ..addFont(Future.value(ByteData.sublistView(bytes))))
-          .load();
-      break;
-    }
-  });
+  setUpAll(loadRealFont);
 
   Future<List<Offset>> positions(
     WidgetTester tester, {

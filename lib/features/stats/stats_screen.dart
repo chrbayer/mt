@@ -122,23 +122,43 @@ class _LessonTable extends StatelessWidget {
     required this.onSelect,
   });
 
+  /// Widest a value column gets, and the narrowest it may be squeezed to.
+  ///
+  /// Five columns of 92 plus a title need more room than a 960 dp tablet
+  /// gives this half of the screen - it overflowed by eighteen pixels, and
+  /// the layout tests never saw it because they only ran at the two roomy
+  /// sizes. Rather than drop a column, they give way together.
+  static const double _maxColumn = 92;
+  static const double _minColumn = 62;
+
+  /// What the lesson title needs before the columns may take any more.
+  static const double _titleRoom = 120;
+
   @override
   Widget build(BuildContext context) {
+    return LayoutBuilder(builder: (context, constraints) {
+      final column = ((constraints.maxWidth - 40 - _titleRoom) / 5)
+          .clamp(_minColumn, _maxColumn);
+      return _build(context, column);
+    });
+  }
+
+  Widget _build(BuildContext context, double column) {
     return ListView.separated(
       itemCount: lessons.length + 1,
       separatorBuilder: (_, _) => const SizedBox(height: 8),
       itemBuilder: (context, index) {
         if (index == 0) {
-          return const Padding(
-            padding: EdgeInsets.only(left: 20, right: 20, bottom: 4),
+          return Padding(
+            padding: const EdgeInsets.only(left: 20, right: 20, bottom: 4),
             child: Row(
               children: [
-                Expanded(child: SizedBox()),
-                _Head('Sterne'),
-                _Head('Bestzeit'),
-                _Head('Ø Zeit'),
-                _Head('Fehler'),
-                _Head('Runden'),
+                const Expanded(child: SizedBox()),
+                _Head('Sterne', width: column),
+                _Head('Bestzeit', width: column),
+                _Head('Ø Zeit', width: column),
+                _Head('Fehler', width: column),
+                _Head('Runden', width: column),
               ],
             ),
           );
@@ -191,7 +211,7 @@ class _LessonTable extends StatelessWidget {
                   // of a 10" tablet's width, and the times next to them lose
                   // more than the icons gain.
                   SizedBox(
-                    width: 92,
+                    width: column,
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.end,
@@ -204,11 +224,14 @@ class _LessonTable extends StatelessWidget {
                   ),
                   _Value(
                     lesson.scored ? formatPerTask(stat.bestScoreMs) : '–',
+                    width: column,
                     strong: true,
                   ),
-                  _Value(lesson.scored ? formatPerTask(stat.averageMs) : '–'),
-                  _Value('${(stat.errorRate * 100).round()} %'),
-                  _Value('${stat.runs}'),
+                  _Value(lesson.scored ? formatPerTask(stat.averageMs) : '–',
+                      width: column),
+                  _Value('${(stat.errorRate * 100).round()} %',
+                      width: column),
+                  _Value('${stat.runs}', width: column),
                 ],
               ),
             ),
@@ -221,12 +244,13 @@ class _LessonTable extends StatelessWidget {
 
 class _Head extends StatelessWidget {
   final String text;
+  final double width;
 
-  const _Head(this.text);
+  const _Head(this.text, {required this.width});
 
   @override
   Widget build(BuildContext context) => SizedBox(
-        width: 92,
+        width: width,
         child: Text(
           text,
           textAlign: TextAlign.right,
@@ -238,15 +262,18 @@ class _Head extends StatelessWidget {
 class _Value extends StatelessWidget {
   final String text;
   final bool strong;
+  final double width;
 
-  const _Value(this.text, {this.strong = false});
+  const _Value(this.text, {required this.width, this.strong = false});
 
   @override
   Widget build(BuildContext context) => SizedBox(
-        width: 92,
+        width: width,
         child: Text(
           text,
           textAlign: TextAlign.right,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
           style: TextStyle(
             fontSize: 20,
             fontWeight: strong ? FontWeight.w700 : FontWeight.w500,
