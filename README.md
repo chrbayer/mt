@@ -7,7 +7,7 @@ antreten. Die App läuft vollständig offline, ohne Konten und ohne Netzwerk.
 
 ## Was sie kann
 
-* **75 Lektionen** in neun Gruppen (Erste Schritte / Bis 10 / Bis 20 /
+* **76 Lektionen** in neun Gruppen (Erste Schritte / Bis 10 / Bis 20 /
   Bis 100 / Bis 1000 / Einmaleins / Einmaleins rückwärts / Mal und Geteilt /
   Uhrzeit und Geld).
   Ab 20 bietet jede Gruppe Plus und Minus mit und ohne Zehnerübergang, zwei
@@ -225,7 +225,7 @@ antreten. Die App läuft vollständig offline, ohne Konten und ohne Netzwerk.
   einem Knopf aus dem Verlauf räumen — für alle oder nur für das gewählte
   Kind. Löschen kostet Sterne, Blitze und Bestenlistenplätze, **aber nie die
   geübte Zeit**: sonst hätte die Tagesgrenze einen Löschknopf daneben.
-* **Fertige Lektionen ausblenden**: bei 75 Lektionen ist die Liste lang, und
+* **Fertige Lektionen ausblenden**: bei 76 Lektionen ist die Liste lang, und
   das meiste, woran ein Kind vorbeiscrollt, sitzt längst. Der Filter oben im
   Katalog kürzt sie in zwei Stufen — **mit 3 Sternen** verschwindet, was
   fehlerfrei läuft; **erst mit 3 Sternen und 3 Blitzen** ist strenger und
@@ -379,3 +379,21 @@ zwischen Wiederholungen, Determinismus), die Wertung, das SQL der Bestenlisten u
 Statistiken gegen eine In-Memory-Datenbank, die Timing-Regeln des
 Übungs-Controllers sowie einen kompletten Durchgang durch die echte
 Oberfläche.
+
+## Lizenz
+
+GNU General Public License, Version 3 oder später — der volle Text steht in
+[LICENSE](LICENSE).
+
+Die Wahl ist Absicht und kein Zufall: Diese App hat keine Werbung, kein
+Tracking und kein Konto, und das ist ihr halber Zweck. Unter einer
+freizügigeren Lizenz dürfte jemand genau diesen Stand nehmen, Werbung
+einbauen und das Ergebnis geschlossen weitergeben. Die GPL verlangt, dass
+jede weitergegebene Abwandlung ihren Quelltext mitbringt.
+
+## Datenschutz
+
+Die App sendet nichts und fordert in der veröffentlichten Fassung keine
+einzige Android-Berechtigung an. Die Einzelheiten stehen in
+[DATENSCHUTZ.md](DATENSCHUTZ.md); dieselbe Datei taugt als
+Datenschutzerklärung, sobald sie unter einer öffentlichen Adresse liegt.
