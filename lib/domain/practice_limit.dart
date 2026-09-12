@@ -236,5 +236,17 @@ int resolveScoredRuns({required int global, int? scoredRuns}) =>
 /// runs of the same lesson the child already has today.
 ///
 /// [limit] of zero means no cap at all.
-bool runStillCounts({required int limit, required int scoredToday}) =>
-    limit <= 0 || scoredToday < limit;
+///
+/// [lessonIsScored] false - one of the first steps - lifts the cap
+/// altogether. The cap exists to take away the point of grinding one easy
+/// lesson for a better time or a forced star, and there is nothing there to
+/// grind: no clock, no leaderboard, no bolts. All it did was withhold the
+/// stars of a fourth attempt from the youngest children, and a five-year-old
+/// counting apples for the fourth time is doing exactly what the group is
+/// for.
+bool runStillCounts({
+  required int limit,
+  required int scoredToday,
+  required bool lessonIsScored,
+}) =>
+    !lessonIsScored || limit <= 0 || scoredToday < limit;

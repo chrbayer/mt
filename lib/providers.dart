@@ -336,7 +336,11 @@ final scoredRunLimitProvider =
 final scoredRunsTodayProvider = StreamProvider.family<({int used, int left})?,
     ({int userId, String lessonId})>((ref, key) async* {
   final limit = await ref.watch(scoredRunLimitProvider(key.userId).future);
-  if (limit <= 0) {
+  // Null means "nothing to say about a cap here". No cap set is one such
+  // case; a lesson the cap does not apply to at all is the other - the first
+  // steps are exempt, so telling a child their fourth go at counting apples
+  // no longer counts would be both discouraging and untrue.
+  if (limit <= 0 || lessonByIdOrNull(key.lessonId)?.scored == false) {
     yield null;
     return;
   }

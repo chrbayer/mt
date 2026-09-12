@@ -59,13 +59,22 @@ class SessionRepository {
     final totalMs = results.fold<int>(0, (sum, r) => sum + r.elapsedMs);
     final wrong = results.fold<int>(0, (sum, r) => sum + r.wrongAttempts);
 
+    // A lesson this version no longer knows is treated as measured: the cap
+    // is the cautious answer when the catalogue cannot say.
+    final session = await sessionById(sessionId);
+    final lessonIsScored =
+        lessonByIdOrNull(session?.lessonId ?? '')?.scored ?? true;
+
     // An abandoned run never counted anyway, so it neither earns nor uses up
-    // one of the day's scoring slots.
+    // one of the day's scoring slots. The first steps are exempt from the
+    // cap altogether - see runStillCounts.
     final scored = completed &&
         (servesAssignment ||
+            !lessonIsScored ||
             runStillCounts(
               limit: scoredRunLimit,
               scoredToday: await _scoredToday(sessionId, dayStartMs),
+              lessonIsScored: lessonIsScored,
             ));
 
     await _db.transaction(() async {

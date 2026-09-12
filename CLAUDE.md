@@ -974,6 +974,14 @@ Zeit stimmte oder kein Fehler mehr passierte. Dagegen steht ein Deckel:
 `scoredRunsPerLesson` sagt, wie viele Durchgänge **einer Lektion an einem
 Tag** noch etwas einbringen dürfen. Vorgabe drei, null heißt kein Deckel.
 
+Die **Ersten Schritte sind ausgenommen**, seit 2.9.4. Dort gibt es nichts zu
+erschleichen: keine Uhr, keine Bestenliste, keine Blitze. Der Deckel hat nur
+eines bewirkt, nämlich den Sternen eines vierten Anlaufs die Wertung zu
+nehmen — ausgerechnet bei den Jüngsten, für die ein vierter Versuch genau das
+ist, wofür die Gruppe da ist. `runStillCounts` nimmt dafür `lessonIsScored`
+entgegen, und `scoredRunsTodayProvider` schweigt dort, statt „zählt heute
+nicht mehr" zu behaupten.
+
 Der Deckel sperrt **nichts**. Dieselbe Übung darf weiter gemacht werden, sie
 zählt zur geübten Zeit, steht im Verlauf und erhöht „12× geübt" auf der
 Kachel. Was sie nicht mehr tut: eine Bestzeit setzen, Sterne oder Blitze

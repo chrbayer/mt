@@ -6,6 +6,7 @@ import 'package:mathe_trainer/data/repositories/stats_repository.dart';
 import 'package:mathe_trainer/data/repositories/user_repository.dart';
 import 'package:mathe_trainer/domain/lesson.dart';
 import 'package:mathe_trainer/domain/practice_limit.dart';
+import 'package:mathe_trainer/domain/scoring.dart';
 import 'package:mathe_trainer/domain/task.dart';
 
 /// The daily cap on scored runs: repeating the easiest lesson must stop
@@ -73,6 +74,33 @@ void main() {
     expect(await scored(await run(msPerTask: 9000)), isTrue);
     expect(await scored(await run(msPerTask: 9000)), isFalse);
     expect(await scored(await run(msPerTask: 9000)), isFalse);
+  });
+
+  test('the first steps are not capped at all', () async {
+    // Six goes at counting apples, all of them still counting. There is
+    // nothing to grind there - no clock, no leaderboard, no bolts - so the
+    // cap only ever withheld the stars of a fourth attempt from the
+    // youngest children.
+    for (var i = 0; i < 6; i++) {
+      expect(await scored(await run(msPerTask: 4000, lessonId: 'count_pictures')),
+          isTrue,
+          reason: 'Durchgang ${i + 1}');
+    }
+  });
+
+  test('and a late clean run in the first steps still earns its stars',
+      () async {
+    // Three sloppy goes, then a clean one. Under the cap the good run came
+    // too late to be worth anything.
+    for (var i = 0; i < 3; i++) {
+      await run(msPerTask: 4000, wrong: 3, lessonId: 'count_pictures');
+    }
+    expect((await stats.watchLessonStats(mia).first)['count_pictures']!
+        .bestStars, 1);
+
+    await run(msPerTask: 4000, lessonId: 'count_pictures');
+    expect((await stats.watchLessonStats(mia).first)['count_pictures']!
+        .bestStars, maxStars);
   });
 
   test('a faster fourth run does not become the best time', () async {
@@ -167,10 +195,26 @@ void main() {
 
   group('the rule itself', () {
     test('counts up to the limit and no further', () {
-      expect(runStillCounts(limit: 3, scoredToday: 0), isTrue);
-      expect(runStillCounts(limit: 3, scoredToday: 2), isTrue);
-      expect(runStillCounts(limit: 3, scoredToday: 3), isFalse);
-      expect(runStillCounts(limit: 0, scoredToday: 99), isTrue);
+      expect(
+          runStillCounts(limit: 3, scoredToday: 0, lessonIsScored: true),
+          isTrue);
+      expect(
+          runStillCounts(limit: 3, scoredToday: 2, lessonIsScored: true),
+          isTrue);
+      expect(
+          runStillCounts(limit: 3, scoredToday: 3, lessonIsScored: true),
+          isFalse);
+      expect(
+          runStillCounts(limit: 0, scoredToday: 99, lessonIsScored: true),
+          isTrue);
+    });
+
+    test('and never applies to the first steps', () {
+      // Nothing to grind there: no clock, no leaderboard, no bolts. The cap
+      // only ever withheld the stars of a fourth attempt.
+      expect(
+          runStillCounts(limit: 3, scoredToday: 99, lessonIsScored: false),
+          isTrue);
     });
 
     test('a profile without its own follows the app-wide one', () {

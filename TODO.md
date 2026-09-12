@@ -180,3 +180,10 @@ Tooltip. Dabei stellte sich heraus, dass die erste Messung falsch war: die
 quadratische Testschrift macht jedes Wort doppelt so breit, weshalb die
 Kopfzeile im Test schon bei 960 dp überlief, auf einem Gerät aber erst unter
 900. Auf keinem Tablet trat das je auf.
+
+#31 erledigt (2.9.4) — Der Tagesdeckel für gewertete Durchgänge gilt in den
+Ersten Schritten nicht mehr. Dort gibt es nichts zu erschleichen: keine Uhr,
+keine Bestenliste, keine Blitze. Bewirkt hat er nur, dass ein vierter Anlauf
+keine Sterne mehr brachte — bei den Jüngsten, für die ein vierter Anlauf
+genau das ist, wofür die Gruppe da ist. Der Hinweis „zählt heute nicht mehr"
+erscheint dort ebenfalls nicht mehr.
