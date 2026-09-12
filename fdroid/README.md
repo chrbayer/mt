@@ -29,29 +29,27 @@ fdroid build -v -l com.chrbayer.mathe_trainer
 
 ## Was die Recipe voraussetzt
 
-* **Der Tag.** `commit: v2.13.3` zeigt auf einen annotierten Tag, nicht auf
-  einen Branch. Jede weitere Version braucht einen weiteren Eintrag unter
-  `Builds` und einen Tag dazu.
-* **Die Versionsnummern stehen doppelt.** `--build-name` und
-  `--build-number` müssen im Build-Befehl mitgegeben werden, weil
-  `pubspec.yaml` bewusst kein `+N` führt (siehe „Versionierung" in
-  CLAUDE.md). Ohne sie vergäbe Flutter `versionCode = 1`, und F-Droid bricht
-  ab, weil der Code nicht zu dem in der Recipe passt.
-* **`--dart-define=MT_VERSION`** ist dieselbe Nummer ein drittes Mal. Ohne
-  sie bleibt die Ecke auf dem Profilbildschirm leer — ehrlich, aber unnötig.
+* **Der Tag.** `commit: v2.13.4` zeigt auf einen annotierten Tag, nicht auf
+  einen Branch. Jede weitere Version braucht einen Tag dazu; den Eintrag
+  unter `Builds` schreibt F-Droid selbst (siehe unten).
+* **Die Versionsnummern stehen in `pubspec.yaml`**, als `2.13.4+21304`.
+  Deshalb braucht der Build-Befehl weder `--build-name` noch
+  `--build-number`: Flutter nimmt beides von dort. Ein Test hält die zwei
+  Hälften zusammen, siehe „Versionierung" in CLAUDE.md.
+* **`--dart-define=MT_VERSION`** ist die Nummer noch einmal, damit die App
+  sie anzeigen kann. `$$VERSION$$` setzt F-Droid aus `versionName` ein, also
+  steht sie auch hier nicht von Hand da.
 * **Die Screenshots und Beschreibungen** holt F-Droid selbst aus
   `fastlane/metadata/android/` im getaggten Commit. Nichts davon gehört in
-  die Recipe.
+  die Recipe. Der Änderungshinweis muss unter dem **versionCode** liegen,
+  also `changelogs/21304.txt`.
+* **Automatische Updates.** `UpdateCheckMode: Tags` findet den neuen Tag,
+  `UpdateCheckData` liest Name und Code aus `pubspec.yaml`, und
+  `AutoUpdateMode: Version v%v` legt den `Builds`-Eintrag an. Nach einem
+  Release ist also nichts mehr von Hand zu tun — vorausgesetzt, der Tag
+  heißt `v<Version>` und `pubspec.yaml` trägt das `+N`.
 
-## Drei Punkte, an denen eine Prüfung hängenbleiben kann
-
-**Flutter aus dem Beta-Kanal.** `pubspec.yaml` verlangt Dart
-`^3.14.0-95.2.beta`, und die Recipe checkt deshalb `3.48.0-0.4.pre` aus. Ein
-stabiles Flutter erfüllt diese Grenze nicht. Reviewer sehen das nicht gern,
-und der saubere Ausweg ist, die Grenze zu senken und gegen das aktuelle
-stabile Flutter zu prüfen — das ist eine Projektentscheidung und keine Frage
-der Recipe. Die Grenze stammt vermutlich nur daher, dass `flutter create`
-mit einem Beta-SDK lief.
+## Ein Punkt, an dem eine Prüfung hängenbleiben kann
 
 **Die Signatur.** Ohne `android/key.properties` fällt der Release-Build in
 `build.gradle.kts` auf den Debug-Schlüssel zurück, damit
@@ -63,20 +61,18 @@ debuggierbar — es sollte also durchlaufen. Wenn ein Reviewer daran Anstoß
 nimmt, ist die Antwort eine Zeile mehr im Gradle-Skript: gar nicht signieren,
 wenn kein Keystore da ist.
 
-**Keine automatischen Updates.** `AutoUpdateMode: None` heißt, dass jede neue
-Version von Hand als `Builds`-Eintrag nachgetragen wird. `UpdateCheckMode:
-Tags` sorgt immerhin dafür, dass F-Droid einen neuen Tag meldet. Voll
-automatisch ginge es erst, wenn in `pubspec.yaml` der Versionscode mit
-stünde (`version: 2.13.3+21303`) — dann läse ihn die übliche
-`UpdateCheckData` heraus. Das wäre dieselbe Zahl an zwei Stellen, und genau
-das vermeidet das Projekt bisher.
-
 ## Was geprüft ist
 
-* Keine Android-Berechtigung im Manifest, auch kein Internetzugriff.
+* Keine Berechtigung, die auf Daten, Sensoren oder das Netz zugreift, und
+  insbesondere kein Internetzugriff. Die Liste des fertigen APK zeigt eine
+  einzige Zeile, `DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION` — von AndroidX
+  erzeugt, `protectionLevel="signature"`, und sie erlaubt nichts, sondern
+  hält einen internen Empfänger von anderen Apps fern.
 * Keine Binärdateien im Repository: kein `.jar`, kein `.aar`, kein `.so`,
   kein Gradle-Wrapper-Jar. Die Icons sind PNG aus SVG erzeugt, die Töne
   WAV aus `tool/make_sounds.py`.
 * Nur freie Abhängigkeiten; kein Firebase, keine Google Play Services.
 * `LICENSE` ist der volle GPL-3-Text, und README nennt „Version 3 oder
   später" — daher `GPL-3.0-or-later`.
+* Die App baut und läuft auf dem **stabilen** Kanal; `pubspec.yaml` verlangt
+  Dart `^3.13.0`, und das erfüllt Flutter 3.47.4.

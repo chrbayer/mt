@@ -12,9 +12,16 @@ bleibt auf dem Gerät, auf dem geübt wird. Es gibt keine Konten, keine
 Werbung, keine Analyse, keine Absturzberichte und keine Verbindung zu
 irgendeinem Server.
 
-Die veröffentlichte Fassung der App fordert **keine einzige
-Android-Berechtigung** an, auch keinen Internetzugriff. Sie könnte gar nichts
-übertragen, selbst wenn sie es wollte.
+Die veröffentlichte Fassung der App fordert **keine Berechtigung an, die
+auf Daten, Sensoren oder das Netz zugreift** — insbesondere keinen
+Internetzugriff. Sie könnte gar nichts übertragen, selbst wenn sie es wollte.
+
+In der Berechtigungsliste steht genau ein Eintrag, und der stammt nicht aus
+dem Quelltext dieser App, sondern aus einer Android-Bibliothek:
+`com.chrbayer.mathe_trainer.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION`. Die
+App definiert ihn für sich selbst, er ist auf die eigene Signatur beschränkt,
+und er bewirkt nur eines — dass ein intern angemeldeter Empfänger für andere
+Apps unerreichbar bleibt. Er erlaubt nichts; er schließt aus.
 
 ## Wer verantwortlich ist
 

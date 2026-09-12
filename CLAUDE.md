@@ -1150,10 +1150,22 @@ mit, sonst sperrt eine Wiederherstellung die Eltern aus.
 
 ## Versionierung
 
-`pubspec.yaml` führt nur den Build-Namen: `version: 1.0.0`. Der Teil vor einem
+`pubspec.yaml` führt **beides**: `version: 2.13.4+21304`. Der Teil vor dem
 `+` wird zum Android-`versionName`, der Teil dahinter zum `versionCode` — die
 ganze Zeichenkette an `--build-name` zu hängen wäre falsch, dann stünde das
 `+N` im sichtbaren Versionsnamen.
+
+Lange stand dort nur der Name, und die Build-Skripte rechneten den Code
+selbst aus. Das ging, solange die Skripte die einzigen waren, die ihn
+brauchten. **F-Droid liest ihn aus dieser Zeile** — daran erkennt es, dass
+ein neuer Tag eine neuere Version ist —, und ein Wert, den nur ein Skript
+kennt, ist für alles außerhalb des Skripts nicht vorhanden.
+
+Dafür können die beiden Zahlen jetzt auseinanderlaufen, und deshalb gibt es
+`test/pubspec_version_test.dart`: er rechnet dieselbe Regel nach und schlägt
+fehl, sobald sie es tun. Die Skripte nehmen den Code weiterhin aus dem `+N`,
+wenn eines da ist, und rechnen ihn nur sonst aus — beide Wege stehen noch da,
+aber nur einer wird benutzt.
 
 Ohne `+N` gäbe Flutter jeder App **`versionCode = 1`**, und genau daran
 entscheidet Android, ob eine APK ein Update ist. Zwei verschiedene Builds, die
@@ -1195,6 +1207,24 @@ Das ist kein Versäumnis und braucht keinen Versuch. Wer `flutter pub upgrade`
 laufen lässt: danach `dart run build_runner build`, `flutter analyze` und
 `flutter test` — und die Version anheben, denn ein anderer Build darf nicht
 denselben `versionCode` behaupten wie der vorige (siehe „Versionierung").
+
+## Flutter stable, nicht beta
+
+`environment.sdk` in `pubspec.yaml` nennt eine **Untergrenze**, nicht die
+gerade installierte Fassung, und sie muss vom **stabilen** Kanal zu erfüllen
+sein: F-Droid baut aus `flutter@<Tag>`, und ein Beta-Tag ist dort schwer zu
+begründen. Die Grenze stand auf `^3.14.0-95.2.beta` — nicht aus Bedarf,
+sondern weil `flutter create` mit einem Beta-SDK lief.
+
+Wer sie anhebt, muss zwei Dinge prüfen: dass der **stabile** Kanal sie
+erfüllt, und dass die **Abhängigkeiten** sie nicht schon überholt haben. Die
+höchste Forderung unter ihnen bestimmt die Untergrenze nach unten hin; zum
+Zeitpunkt der Umstellung war das `^3.12.0` (`flutter_riverpod`, `riverpod`,
+`file_selector_android`, `synchronized`).
+
+Die Grenze ist zugleich die **Sprachversion**, gegen die der Analyzer prüft.
+Eine niedrig gesetzte Grenze ist damit kein Versprechen, sondern eine
+Bedingung, an die er sich hält.
 
 ## Linux-Build
 

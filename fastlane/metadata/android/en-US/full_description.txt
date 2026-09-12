@@ -5,8 +5,8 @@ compete with each other.
 
 <b>The interface is in German only.</b>
 
-It runs entirely offline. No account, no ads, no analytics, and no internet
-permission at all.
+It runs entirely offline. No account, no ads, no analytics and no internet
+permission - the app cannot send anything anywhere.
 
 <b>76 lessons in nine groups</b>
 

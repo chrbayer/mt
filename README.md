@@ -426,8 +426,11 @@ jede weitergegebene Abwandlung ihren Quelltext mitbringt.
 
 ## Datenschutz
 
-Die App sendet nichts und fordert in der veröffentlichten Fassung keine
-einzige Android-Berechtigung an. Die Einzelheiten stehen in
+Die App sendet nichts und fordert keine Berechtigung an, die auf Daten,
+Sensoren oder das Netz zugreift — insbesondere keinen Internetzugriff. Der
+einzige Eintrag in der Liste ist eine auf die eigene Signatur beschränkte
+Berechtigung, die eine Android-Bibliothek erzeugt, damit ein interner
+Empfänger für andere Apps unerreichbar bleibt. Die Einzelheiten stehen in
 [DATENSCHUTZ.md](DATENSCHUTZ.md); dieselbe Datei taugt als
 Datenschutzerklärung, sobald sie unter einer öffentlichen Adresse liegt — auf
 GitHub etwa unter

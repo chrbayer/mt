@@ -9,12 +9,12 @@ RepoType: git
 Repo: https://github.com/chrbayer/mt.git
 
 Builds:
-  - versionName: 2.13.3
-    versionCode: 21303
-    commit: v2.13.3
+  - versionName: 2.13.4
+    versionCode: 21304
+    commit: v2.13.4
     output: build/app/outputs/flutter-apk/app-release.apk
     srclibs:
-      - flutter@3.48.0-0.4.pre
+      - flutter@3.47.4
     prebuild:
       - export PUB_CACHE=$(pwd)/.pub-cache
       - $$flutter$$/bin/flutter config --no-analytics
@@ -23,9 +23,10 @@ Builds:
       - .pub-cache
     build:
       - export PUB_CACHE=$(pwd)/.pub-cache
-      - $$flutter$$/bin/flutter build apk --release --build-name=2.13.3 --build-number=21303 --dart-define=MT_VERSION=2.13.3
+      - $$flutter$$/bin/flutter build apk --release --dart-define=MT_VERSION=$$VERSION$$
 
-AutoUpdateMode: None
+AutoUpdateMode: Version v%v
 UpdateCheckMode: Tags
-CurrentVersion: 2.13.3
-CurrentVersionCode: 21303
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 2.13.4
+CurrentVersionCode: 21304

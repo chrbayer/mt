@@ -16,10 +16,19 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 2.13.3
+#
+# Der Teil hinter dem "+" ist der Android-versionCode und folgt der Version:
+# 2.13.4 wird 21304. Er steht hier und wird nicht mehr nur im Build-Skript
+# ausgerechnet, weil F-Droid ihn aus dieser Zeile liest und daran erkennt,
+# dass ein Tag eine neue Version ist. test/pubspec_version_test.dart hält die
+# beiden Zahlen zusammen.
+version: 2.13.4+21304
 
 environment:
-  sdk: ^3.14.0-95.2.beta
+  # Untergrenze und nicht die gerade installierte Fassung: F-Droid baut mit
+  # dem stabilen Kanal, und eine Beta-Grenze wäre dort nicht zu erfüllen.
+  # Die höchste Forderung aller Abhängigkeiten ist ^3.12.0.
+  sdk: ^3.13.0
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions

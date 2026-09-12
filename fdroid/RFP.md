@@ -32,15 +32,19 @@ Die Oberfläche ist auf Deutsch.
 | Quelltext | <https://github.com/chrbayer/mt> |
 | Lizenz | GPL-3.0-or-later |
 | Fehler und Fragen | <https://github.com/chrbayer/mt/issues> |
-| Aktuelle Version | 2.13.3 (versionCode 21303), Tag `v2.13.3` |
-| Gebaut mit | Flutter 3.48.0-0.4.pre |
+| Aktuelle Version | 2.13.4 (versionCode 21304), Tag `v2.13.4` |
+| Gebaut mit | Flutter 3.47.4 (stable) |
 
 Ich bin der Autor und reiche die App selbst ein.
 
 ## Warum sie hierher passt
 
-* **Keine einzige Android-Berechtigung**, auch kein Internetzugriff. Die App
-  kann nichts übertragen, selbst wenn sie wollte.
+* **Keine Berechtigung, die auf Daten, Sensoren oder das Netz zugreift**,
+  insbesondere kein Internetzugriff — die App kann nichts übertragen, selbst
+  wenn sie wollte. Die Liste zeigt einen einzigen Eintrag, den AndroidX
+  erzeugt: `DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION` mit
+  `protectionLevel="signature"`, der nur einen internen Empfänger vor anderen
+  Apps abschirmt.
 * Keine Werbung, kein Tracking, keine Analyse, keine Absturzberichte, keine
   Konten. Alles bleibt in einer Datenbank auf dem Gerät.
 * Nur freie Abhängigkeiten, kein Firebase, keine Google Play Services.
@@ -57,9 +61,6 @@ Ich bin der Autor und reiche die App selbst ein.
 Liegt fertig im Repository unter
 [`fdroid/com.chrbayer.mathe_trainer.yml`](https://github.com/chrbayer/mt/blob/master/fdroid/com.chrbayer.mathe_trainer.yml).
 
-Ein Punkt, den ich von mir aus nenne: `pubspec.yaml` verlangt Dart
-`^3.14.0-95.2.beta`, die Recipe checkt deshalb ein Flutter aus dem
-Beta-Kanal aus (`3.48.0-0.4.pre`). Die Grenze stammt daher, dass das Projekt
-mit einem Beta-SDK angelegt wurde; ob die App sie tatsächlich braucht, habe
-ich nicht gegengeprüft. Wenn ein stabiles Flutter Bedingung ist, senke ich
-die Grenze und prüfe dagegen.
+Sie baut mit dem stabilen Kanal, und `UpdateCheckMode: Tags` zusammen mit
+`AutoUpdateMode` sollte jede weitere Version ohne Zutun finden: Name und
+versionCode stehen beide in `pubspec.yaml`, und die Tags heißen `v<Version>`.

@@ -303,3 +303,25 @@ Woche später endet als der Tag. Am Sonntag laufen beide im selben Moment ab,
 und dann entscheidet das Alter — was der Test daneben ohnehin prüft. Der Test
 stellt die Uhr jetzt selbst auf einen Mittwoch, statt sich auf den Kalender
 zu verlassen.
+
+#45 erledigt (2.13.4) — Zwei Vorbedingungen für F-Droid eingelöst. Der
+versionCode steht jetzt in `pubspec.yaml` (`2.13.4+21304`) statt nur in den
+Build-Skripten: F-Droid liest ihn von dort und erkennt daran, dass ein neuer
+Tag eine neuere Version ist. Damit findet `UpdateCheckMode: Tags` jede
+weitere Veröffentlichung von selbst, und der Eintrag in der Recipe entsteht
+ohne Zutun. Weil die beiden Zahlen jetzt auseinanderlaufen können, rechnet
+`test/pubspec_version_test.dart` die Regel nach.
+
+Dazu die SDK-Grenze von `^3.14.0-95.2.beta` auf `^3.13.0` gesenkt und damit
+auf den stabilen Kanal umgestellt. Die Beta-Grenze stammte nicht aus Bedarf,
+sondern daher, dass `flutter create` mit einem Beta-SDK lief; die höchste
+Forderung unter den Abhängigkeiten war `^3.12.0`. Ein Beta-Tag in der
+F-Droid-Recipe wäre schwer zu begründen gewesen.
+
+Beim Gegenprüfen am fertigen APK fiel auf, dass „keine einzige
+Android-Berechtigung" nicht stimmte: AndroidX legt eine eigene an,
+`DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION` mit `protectionLevel="signature"`.
+Sie erlaubt nichts — sie hält einen intern angemeldeten Empfänger von anderen
+Apps fern —, aber F-Droid zeigt die Liste an, und dort hätte ein Eintrag
+gestanden, den die Beschreibung bestreitet. Datenschutzerklärung, README und
+beide Store-Texte sagen es jetzt genau.

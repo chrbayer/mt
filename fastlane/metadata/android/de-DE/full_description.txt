@@ -3,8 +3,8 @@ misst die Zeit bis zur richtigen Lösung und macht daraus eine Lernkurve und
 Bestenlisten, in denen mehrere Kinder auf demselben Gerät gegeneinander
 antreten.
 
-Sie läuft vollständig offline. Kein Konto, keine Werbung, keine Analyse, keine
-Internetberechtigung.
+Sie läuft vollständig offline. Kein Konto, keine Werbung, keine Analyse und
+keine Internetberechtigung — die App kann gar nichts übertragen.
 
 <b>76 Lektionen in neun Gruppen</b>
 
