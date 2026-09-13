@@ -11,13 +11,16 @@ RepoType: git
 Repo: https://github.com/chrbayer/mt.git
 
 Builds:
-  - versionName: 2.13.5
-    versionCode: 21305
-    commit: v2.13.5
+  - versionName: 2.13.6
+    versionCode: 21306
+    commit: 3733620d41e20d325ed193cd1547182bae5f8229
     output: build/app/outputs/flutter-apk/app-release.apk
     srclibs:
-      - flutter@3.47.4
+      - flutter@stable
     prebuild:
+      - flutterVersion=$(cat .flutter-version)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
       - export PUB_CACHE=$(pwd)/.pub-cache
       - $$flutter$$/bin/flutter config --no-analytics
       - $$flutter$$/bin/flutter pub get --enforce-lockfile
@@ -30,5 +33,5 @@ Builds:
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 2.13.5
-CurrentVersionCode: 21305
+CurrentVersion: 2.13.6
+CurrentVersionCode: 21306
