@@ -325,3 +325,19 @@ Sie erlaubt nichts — sie hält einen intern angemeldeten Empfänger von andere
 Apps fern —, aber F-Droid zeigt die Liste an, und dort hätte ein Eintrag
 gestanden, den die Beschreibung bestreitet. Datenschutzerklärung, README und
 beide Store-Texte sagen es jetzt genau.
+
+#46 erledigt (2.13.5) — Die Einreichung bei F-Droid durch deren eigene CI
+gezogen. Drei Beanstandungen, alle behoben: `AutoUpdateMode: Version v%v` ist
+ungültig (erlaubt sind nur `None` und `Version`, der Tag-Präfix gehört nicht
+dorthin), `AutoName` muss in der Recipe stehen, sonst trägt `checkupdates` ihn
+nach und schlägt deswegen fehl — und das fertige APK enthielt einen
+Extra-Block, den das Android-Gradle-Plugin anlegt und mit einem
+Google-Play-Schlüssel verschlüsselt. Was darin steht, kann von außen niemand
+nachprüfen, also weist F-Droid das APK ab. `dependenciesInfo` in
+`android/app/build.gradle.kts` schaltet ihn ab; gegengeprüft am gebauten APK,
+im Signing Block stehen jetzt nur noch die v2-Signatur und Füllbytes.
+
+Der Bauer von F-Droid hat die App dabei selbst gebaut und signiert. Damit ist
+auch die offene Frage beantwortet, ob der Rückfall auf den Debug-Schlüssel
+stört, wenn keine `key.properties` da ist: er stört nicht, `apksigner`
+ersetzt die Signatur.

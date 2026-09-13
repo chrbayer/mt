@@ -32,7 +32,7 @@ Die Oberfläche ist auf Deutsch.
 | Quelltext | <https://github.com/chrbayer/mt> |
 | Lizenz | GPL-3.0-or-later |
 | Fehler und Fragen | <https://github.com/chrbayer/mt/issues> |
-| Aktuelle Version | 2.13.4 (versionCode 21304), Tag `v2.13.4` |
+| Aktuelle Version | 2.13.5 (versionCode 21305), Tag `v2.13.5` |
 | Gebaut mit | Flutter 3.47.4 (stable) |
 
 Ich bin der Autor und reiche die App selbst ein.

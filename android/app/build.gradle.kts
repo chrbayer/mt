@@ -41,6 +41,15 @@ android {
         versionName = flutter.versionName
     }
 
+    // Gradle legt sonst einen verschlüsselten Block mit der Liste der
+    // Abhängigkeiten ins APK, den nur Google Play liest. F-Droid weist ein
+    // APK mit diesem Block ab ("Found extra signing block 'Dependency
+    // metadata'"), und zu Recht: er ist von außen nicht nachprüfbar.
+    dependenciesInfo {
+        includeInApk = false
+        includeInBundle = false
+    }
+
     signingConfigs {
         create("release") {
             if (keystorePropertiesFile.exists()) {

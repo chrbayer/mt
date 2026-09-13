@@ -29,10 +29,10 @@ fdroid build -v -l com.chrbayer.mathe_trainer
 
 ## Was die Recipe voraussetzt
 
-* **Der Tag.** `commit: v2.13.4` zeigt auf einen annotierten Tag, nicht auf
+* **Der Tag.** `commit: v2.13.5` zeigt auf einen annotierten Tag, nicht auf
   einen Branch. Jede weitere Version braucht einen Tag dazu; den Eintrag
   unter `Builds` schreibt F-Droid selbst (siehe unten).
-* **Die Versionsnummern stehen in `pubspec.yaml`**, als `2.13.4+21304`.
+* **Die Versionsnummern stehen in `pubspec.yaml`**, als `2.13.5+21305`.
   Deshalb braucht der Build-Befehl weder `--build-name` noch
   `--build-number`: Flutter nimmt beides von dort. Ein Test hält die zwei
   Hälften zusammen, siehe „Versionierung" in CLAUDE.md.
@@ -42,24 +42,49 @@ fdroid build -v -l com.chrbayer.mathe_trainer
 * **Die Screenshots und Beschreibungen** holt F-Droid selbst aus
   `fastlane/metadata/android/` im getaggten Commit. Nichts davon gehört in
   die Recipe. Der Änderungshinweis muss unter dem **versionCode** liegen,
-  also `changelogs/21304.txt`.
+  also `changelogs/21305.txt`.
+* **Die Flutter-Version ist fest.** `flutter@3.47.4` bleibt stehen, auch
+  wenn F-Droid neue `Builds`-Einträge selbst anlegt — es kopiert den
+  vorigen Block. Wer Flutter im Projekt anhebt, muss sie hier nachziehen.
+  Die Alternative wäre eine Datei `.flutter-version` im Projekt, die die
+  Recipe ausliest; rund hundert Rezepte machen das so, gut tausendachthundert
+  pinnen direkt.
 * **Automatische Updates.** `UpdateCheckMode: Tags` findet den neuen Tag,
   `UpdateCheckData` liest Name und Code aus `pubspec.yaml`, und
   `AutoUpdateMode: Version v%v` legt den `Builds`-Eintrag an. Nach einem
   Release ist also nichts mehr von Hand zu tun — vorausgesetzt, der Tag
   heißt `v<Version>` und `pubspec.yaml` trägt das `+N`.
 
-## Ein Punkt, an dem eine Prüfung hängenbleiben kann
+## Zwei Dinge, die die CI beim ersten Anlauf beanstandet hat
 
-**Die Signatur.** Ohne `android/key.properties` fällt der Release-Build in
-`build.gradle.kts` auf den Debug-Schlüssel zurück, damit
-`flutter run --release` ohne Keystore weiterläuft. Auf dem F-Droid-Bauer
-gibt es keine `key.properties`, die APK kommt also debug-signiert heraus.
-F-Droid signiert am Ende ohnehin selbst (`apksigner sign --in … --out …`
-ersetzt vorhandene Signaturen), und `release` bleibt dabei nicht
-debuggierbar — es sollte also durchlaufen. Wenn ein Reviewer daran Anstoß
-nimmt, ist die Antwort eine Zeile mehr im Gradle-Skript: gar nicht signieren,
-wenn kein Keystore da ist.
+Beide sind behoben; sie stehen hier, weil sie beim nächsten Mal wieder
+zuschlagen würden.
+
+**`AutoUpdateMode: Version v%v` ist ungültig.** Das Schema erlaubt nur
+`None` oder `Version`, letzteres höchstens mit einem `+Suffix`. Der
+Tag-Präfix gehört nicht dorthin: `UpdateCheckMode: Tags` findet den Tag, und
+Name und Code kommen aus `UpdateCheckData`, nicht aus dem Tag-Namen.
+
+**`AutoName` muss dabeistehen.** Der CI-Schritt `checkupdates` liest den
+Namen aus dem Android-Manifest und trägt ihn nach; steht er nicht schon da,
+verändert der Schritt die Datei und schlägt genau deshalb fehl.
+
+**Gradles Abhängigkeitsblock muss raus.** `check apk` wies das fertige APK
+ab: „Found extra signing block 'Dependency metadata'". Den legt das
+Android-Gradle-Plugin an, verschlüsselt mit einem Google-Play-Schlüssel, und
+von außen ist nicht nachprüfbar, was darin steht. `dependenciesInfo` in
+`android/app/build.gradle.kts` schaltet ihn ab. Das gehört ins Projekt, nicht
+in die Recipe.
+
+## Die Signatur ist kein Problem
+
+Ohne `android/key.properties` fällt der Release-Build in `build.gradle.kts`
+auf den Debug-Schlüssel zurück, damit `flutter run --release` ohne Keystore
+weiterläuft, und auf dem F-Droid-Bauer gibt es keine `key.properties`. Das
+war die offene Frage, und die CI hat sie beantwortet: sie hat
+`com.chrbayer.mathe_trainer:21305` gebaut und anschließend mit
+`apksigner sign --in … --out …` selbst signiert. Eine vorhandene Signatur
+wird dabei ersetzt.
 
 ## Was geprüft ist
 
@@ -76,3 +101,7 @@ wenn kein Keystore da ist.
   später" — daher `GPL-3.0-or-later`.
 * Die App baut und läuft auf dem **stabilen** Kanal; `pubspec.yaml` verlangt
   Dart `^3.13.0`, und das erfüllt Flutter 3.47.4.
+* **Der Bauer von F-Droid hat es selbst gebaut.** Der CI-Schritt
+  `fdroid build` im Fork meldet „Successfully built
+  com.chrbayer.mathe_trainer:21305" — nicht aus dieser Recipe abgeleitet,
+  sondern mit ihr ausgeführt.
