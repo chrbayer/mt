@@ -55,6 +55,43 @@ fdroid build -v -l com.chrbayer.mathe_trainer
   Release ist also nichts mehr von Hand zu tun — vorausgesetzt, der Tag
   heißt `v<Version>` und `pubspec.yaml` trägt das `+N`.
 
+## Vorbereitet: ein APK je Prozessorart
+
+Das eingereichte APK enthält alle drei Prozessorarten und ist 60 MB groß.
+Aufgeteilt sind es 18 bis 22 MB je APK. Das Projekt ist darauf vorbereitet
+(seit 2.13.7): `build.gradle.kts` vergibt die Codes nach F-Droids Schema,
+geprüft an allen drei gebauten APKs. Die Recipe bleibt bis zur Aufnahme
+unverändert, danach bekommt sie drei Blöcke statt einem:
+
+```yaml
+Builds:
+  - versionName: 2.13.7
+    versionCode: 213071
+    commit: <voller Hash>
+    output: build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
+    # srclibs, prebuild und scandelete wie bisher
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform=android-arm --dart-define=MT_VERSION=$$VERSION$$
+
+  # dasselbe mit versionCode 213072, app-arm64-v8a-release.apk, android-arm64
+  # und mit versionCode 213073, app-x86_64-release.apk, android-x64
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+VercodeOperation:
+  - '%c * 10 + 1'
+  - '%c * 10 + 2'
+  - '%c * 10 + 3'
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 2.13.7
+CurrentVersionCode: 213073
+```
+
+**Während des Reviews keinen neuen Tag pushen.** Der CI-Schritt
+`checkupdates` am Merge Request sucht nach Tags; fände er einen neueren als
+den eingereichten, wollte er die Recipe ändern und schlüge fehl.
+
 ## Zwei Dinge, die die CI beim ersten Anlauf beanstandet hat
 
 Beide sind behoben; sie stehen hier, weil sie beim nächsten Mal wieder

@@ -348,3 +348,14 @@ eines Tags, und die Flutter-Version steht im Projekt statt in der Recipe.
 Dafür gibt es jetzt `.flutter-version`; die Recipe liest die Datei aus und
 checkt genau diesen Tag aus. Die Build-Skripte warnen, wenn das installierte
 Flutter nicht dazu passt.
+
+#48 erledigt (2.13.7) — Zwei Aufräumarbeiten aus den Infos der F-Droid-CI.
+Das APK lässt sich jetzt nach Prozessorart aufteilen, mit den Codes, die
+F-Droid dafür erwartet: `versionCode * 10` plus 1, 2 oder 3. Flutters eigenes
+Schema (`abi * 1000` davor) ist abgeschaltet, damit es nur eines gibt. Am
+gebauten APK geprüft: 213061, 213062 und 213063 bei 18 bis 22 MB statt 60 MB
+für alle zusammen, und das APK für alle behält 21306. Die Recipe zieht erst
+nach der Aufnahme nach.
+
+Dazu `cupertino_icons` entfernt: aus der Vorlage von `flutter create`, nirgends
+benutzt, 0,2 MB Schrift im APK.

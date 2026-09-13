@@ -1175,6 +1175,21 @@ startet. Genau das ist einmal passiert — 2.4.0 startete nicht, lief aber
 einwandfrei, nachdem die Zwischenversionen der Reihe nach installiert worden
 waren, obwohl sich zwischen 2.3.0 und 2.4.0 am Schema nichts geändert hatte.
 
+**Nach Prozessorart aufgeteilte APKs** (`flutter build apk --split-per-abi`)
+bekommen einen eigenen Code: `versionCode * 10` plus eine Ziffer, 1 für
+`armeabi-v7a`, 2 für `arm64-v8a`, 3 für `x86_64` — aus 21306 werden 213061
+bis 213063. Das ist das Schema, das F-Droid für mehrere APKs erwartet, und es
+steht in `android/app/build.gradle.kts`, nicht in der Recipe: F-Droid prüft,
+dass der Code **im APK** zu dem in der Recipe passt. Die Ziffern steigen mit
+der Fähigkeit, weil der F-Droid-Client den höchsten Code wählt, den ein Gerät
+ausführen kann — ein arm64-Tablet bekommt so das arm64-APK und nicht das
+32-Bit-APK, das es auch starten könnte.
+
+Flutter selbst würde `abi * 1000` voranstellen (2021306). Die Gradle-Datei
+schaltet das über `force-version-code-ignoring-abi` ab, damit es genau ein
+Schema gibt. Das APK für alle, wie es `build_android.sh` baut, trägt keinen
+ABI-Filter und behält den Code aus `pubspec.yaml`.
+
 Die Skripte leiten den Code deshalb aus der Version ab: `2.4.1` wird `20401`.
 Damit ist jede Version wirklich neuer als die vorige — und ältere lassen sich
 nicht mehr darüber installieren, ohne vorher zu deinstallieren. Das ist der

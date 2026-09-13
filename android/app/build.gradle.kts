@@ -77,6 +77,32 @@ android {
     }
 }
 
+// Version codes for APKs split by ABI (`flutter build apk --split-per-abi`).
+//
+// F-Droid builds one APK per ABI and expects the code as versionCode * 10 plus
+// a digit per ABI - 21306 becomes 213061, 213062 and 213063. Its client picks
+// the highest code a device can run, so the digits climb with capability:
+// an arm64 tablet that could also run 32-bit code gets the arm64 APK.
+//
+// Flutter would put abi * 1000 in front instead (2021306); the property turns
+// that off so there is exactly one scheme. The universal APK carries no ABI
+// filter and keeps the plain code from pubspec.yaml.
+extra["force-version-code-ignoring-abi"] = "true"
+
+val abiDigits = mapOf("armeabi-v7a" to 1, "arm64-v8a" to 2, "x86_64" to 3)
+
+@Suppress("DEPRECATION")
+(extensions.getByName("android") as com.android.build.gradle.AppExtension)
+    .applicationVariants.all {
+        val baseCode = versionCode
+        outputs.all {
+            val output = this as com.android.build.gradle.api.ApkVariantOutput
+            val abi = output.getFilter(com.android.build.VariantOutput.FilterType.ABI)
+            val digit = abiDigits[abi] ?: return@all
+            output.versionCodeOverride = baseCode * 10 + digit
+        }
+    }
+
 kotlin {
     compilerOptions {
         jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
