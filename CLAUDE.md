@@ -1226,6 +1226,15 @@ Die Grenze ist zugleich die **Sprachversion**, gegen die der Analyzer prüft.
 Eine niedrig gesetzte Grenze ist damit kein Versprechen, sondern eine
 Bedingung, an die er sich hält.
 
+Welche Flutter-Fassung **tatsächlich** baut, steht getrennt davon in
+`.flutter-version`. Die F-Droid-Recipe liest sie aus und checkt genau diesen
+Tag aus; der Paketierer dort hat verlangt, dass die Version im Projekt
+gepinnt ist und nicht in der Recipe. Damit zieht ein Flutter-Update im
+Projekt auch den Bau bei F-Droid nach, ohne dass dort jemand etwas ändert.
+Beide Build-Skripte warnen, wenn das installierte Flutter nicht dazu passt:
+ein solcher Build ist nicht falsch, aber er ist nicht der, den F-Droid
+ausliefert. **Wer Flutter aktualisiert, hebt diese Datei mit an.**
+
 ## Linux-Build
 
 Der Desktop-Build wird **nicht** von `build_android.sh` mitgebaut. Wer eine

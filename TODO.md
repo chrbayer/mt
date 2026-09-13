@@ -341,3 +341,10 @@ Der Bauer von F-Droid hat die App dabei selbst gebaut und signiert. Damit ist
 auch die offene Frage beantwortet, ob der Rückfall auf den Debug-Schlüssel
 stört, wenn keine `key.properties` da ist: er stört nicht, `apksigner`
 ersetzt die Signatur.
+
+#47 erledigt (2.13.6) — Zwei Wünsche des F-Droid-Paketierers am Merge
+Request: `commit:` in der Recipe ist ein vollständiger Commit-Hash statt
+eines Tags, und die Flutter-Version steht im Projekt statt in der Recipe.
+Dafür gibt es jetzt `.flutter-version`; die Recipe liest die Datei aus und
+checkt genau diesen Tag aus. Die Build-Skripte warnen, wenn das installierte
+Flutter nicht dazu passt.

@@ -52,6 +52,15 @@ VERSION_ARGS=(
 )
 echo "Version: $BUILD_NAME (versionCode $BUILD_NUMBER)"
 
+# F-Droid builds with exactly the Flutter named in .flutter-version. A local
+# build with a different one is not wrong, but it is not the build users get
+# from there either - say so instead of letting the two drift apart quietly.
+WANT_FLUTTER=$(tr -d '[:space:]' < "$DIR/.flutter-version")
+HAVE_FLUTTER=$(flutter --version --machine 2>/dev/null | sed -n 's/.*"frameworkVersion": *"\([^"]*\)".*/\1/p')
+if [[ -n "$WANT_FLUTTER" && "$HAVE_FLUTTER" != "$WANT_FLUTTER" ]]; then
+    echo "WARNUNG: Flutter $HAVE_FLUTTER installiert, .flutter-version nennt $WANT_FLUTTER." >&2
+fi
+
 if $DEBUG; then
     echo "Building Linux DEBUG…"
     flutter build linux --debug "${VERSION_ARGS[@]}"
