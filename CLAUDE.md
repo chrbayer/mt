@@ -1252,6 +1252,8 @@ ausliefert. **Wer Flutter aktualisiert, hebt diese Datei mit an.**
 
 ## Veröffentlichen für F-Droid
 
+Die Schritte selbst stehen in `RELEASE.md`; hier steht, warum sie so sind.
+
 `./build_android.sh --github` baut zusätzlich zum APK für alle drei APKs nach
 Prozessorart, prüft, dass keines debug-signiert ist, und legt alle vier als
 GitHub-Release `v<Version>` ab. F-Droid baut dieselben APKs aus dem Quelltext

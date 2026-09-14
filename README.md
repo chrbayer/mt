@@ -407,11 +407,14 @@ rsvg-convert -w 512 -h 512 assets/icon/icon.svg \
 Die englische Fassung trägt dieselben Bilder: die Oberfläche gibt es nur auf
 Deutsch, und das steht auch in der englischen Beschreibung.
 
-## Aufnahme bei F-Droid
+## Veröffentlichen
 
-Die Build-Recipe und die Hinweise zum Einreichen liegen unter
-[fdroid/](fdroid/). Sie muss bei jeder Veröffentlichung einen Eintrag mehr
-bekommen, denn F-Droid baut aus einem Tag, nicht aus einem Branch.
+Wie eine neue Version entsteht und bei criby.de, auf GitHub und bei F-Droid
+ankommt, steht Schritt für Schritt in [RELEASE.md](RELEASE.md).
+
+Die Build-Recipe für F-Droid und die Hinweise zur Aufnahme liegen unter
+[fdroid/](fdroid/). Neue Versionen findet F-Droid selbst über die Tags; die
+Recipe muss dafür nicht angefasst werden.
 
 ## Lizenz
 

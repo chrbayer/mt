@@ -1,9 +1,11 @@
 # Aufnahme bei F-Droid
 
-`com.chrbayer.mathe_trainer.yml` ist die Build-Recipe, wie F-Droid sie
-erwartet. Sie liegt hier, weil sie bei jeder Veröffentlichung mitgepflegt
-werden muss — dort drüben ist sie eine Datei unter vielen, hier steht sie
-neben dem, was sie beschreibt.
+`com.chrbayer.mathe_trainer.yml` ist die Build-Recipe in der Fassung, die im
+Merge Request eingereicht wurde. Nach der Aufnahme pflegt F-Droid sie selbst:
+neue Versionen findet es über die Tags. Die Kopie hier muss deshalb nicht bei
+jeder Version nachgezogen werden.
+
+Wie eine neue Version veröffentlicht wird, steht in [RELEASE.md](../RELEASE.md).
 
 ## Der Weg
 
@@ -50,10 +52,12 @@ fdroid build -v -l com.chrbayer.mathe_trainer
   F-Droid kopiert beim automatischen Update den vorigen `Builds`-Block, eine
   fest eingetragene Flutter-Version bliebe also für immer stehen.
 * **Automatische Updates.** `UpdateCheckMode: Tags` findet den neuen Tag,
-  `UpdateCheckData` liest Name und Code aus `pubspec.yaml`, und
-  `AutoUpdateMode: Version v%v` legt den `Builds`-Eintrag an. Nach einem
-  Release ist also nichts mehr von Hand zu tun — vorausgesetzt, der Tag
-  heißt `v<Version>` und `pubspec.yaml` trägt das `+N`.
+  `UpdateCheckData` liest Name und Code aus `pubspec.yaml`,
+  `VercodeOperation` rechnet daraus die drei Codes, und `AutoUpdateMode:
+  Version` legt die drei `Builds`-Einträge an — samt `binary:`, das die
+  Version über `%v` einsetzt. Nach einem Release ist also nichts mehr von Hand
+  zu tun, vorausgesetzt, der Tag heißt `v<Version>` und `pubspec.yaml` trägt
+  das `+N`.
 
 ## Reproducible Builds
 
@@ -62,16 +66,14 @@ selbst aus dem Quelltext, vergleicht sie aber mit den APKs aus dem
 GitHub-Release und übernimmt **deren Signatur**, wenn jedes Byte stimmt. So
 tragen die F-Droid-Fassung und die eigenen APKs denselben Schlüssel.
 
-Der Ablauf je Version:
+Einmalig eingerichtet sind in der Recipe `binary:` je Block, das über `%v` auf
+das passende APK im GitHub-Release zeigt, und `AllowedAPKSigningKeys` mit dem
+Fingerabdruck des Release-Zertifikats:
+`7e85b3258cfd28059278887f771d0be0feb7b81c8143903129f8529937a611a1`.
 
-1. Version anheben, committen, `v<Version>` taggen und pushen.
-2. Im eigenen Terminal, mit gesetztem `MT_KEYSTORE_PATH` und
-   `MT_KEYSTORE_PASS`, auf genau diesem Commit `./build_android.sh --github`.
-3. In der Recipe je Block `binary:` auf das passende Release-APK zeigen lassen
-   und oben `AllowedAPKSigningKeys` mit dem Fingerabdruck des Zertifikats:
-   `7e85b3258cfd28059278887f771d0be0feb7b81c8143903129f8529937a611a1`.
-
-Stimmen F-Droids Build und das Release nicht überein, meldet das die CI.
+Je Version ist nur das Release zu bauen; die Schritte stehen in
+[RELEASE.md](../RELEASE.md). Stimmen F-Droids Build und das Release nicht
+überein, meldet das der Build-Schritt in F-Droids CI.
 
 **Nativer Code aus Plugins ist der heikle Teil.** Beim ersten Vergleich stimmte
 alles bis auf `libdartjni.so`, und zwar wegen einer Build-ID, die über
@@ -97,9 +99,9 @@ für `armeabi-v7a`, 2 für `arm64-v8a`, 3 für `x86_64`. F-Droid prüft, dass de
 Code **im APK** zu dem in der Recipe passt, also muss das Schema im Projekt
 stehen und nicht nur in `VercodeOperation`. Geprüft an gebauten APKs.
 
-## Zwei Dinge, die die CI beim ersten Anlauf beanstandet hat
+## Drei Dinge, die die CI beim ersten Anlauf beanstandet hat
 
-Beide sind behoben; sie stehen hier, weil sie beim nächsten Mal wieder
+Alle drei sind behoben; sie stehen hier, weil sie beim nächsten Mal wieder
 zuschlagen würden.
 
 **`AutoUpdateMode: Version v%v` ist ungültig.** Das Schema erlaubt nur
@@ -118,15 +120,17 @@ von außen ist nicht nachprüfbar, was darin steht. `dependenciesInfo` in
 `android/app/build.gradle.kts` schaltet ihn ab. Das gehört ins Projekt, nicht
 in die Recipe.
 
-## Die Signatur ist kein Problem
+## Die Signatur
 
-Ohne `android/key.properties` fällt der Release-Build in `build.gradle.kts`
+F-Droid baut ohne `android/key.properties`, und der Release-Build fällt dann
 auf den Debug-Schlüssel zurück, damit `flutter run --release` ohne Keystore
-weiterläuft, und auf dem F-Droid-Bauer gibt es keine `key.properties`. Das
-war die offene Frage, und die CI hat sie beantwortet: sie hat
-`com.chrbayer.mathe_trainer:21309` gebaut und anschließend mit
-`apksigner sign --in … --out …` selbst signiert. Eine vorhandene Signatur
+weiterläuft. Das stört nicht: bei Reproducible Builds kopiert F-Droid die
+Signatur aus dem Release-APK auf seinen eigenen Build, und der Debug-Schlüssel
 wird dabei ersetzt.
+
+Ein Release mit dem Debug-Schlüssel kann dagegen nicht entstehen:
+`build_android.sh --github` bricht ohne Release-Schlüssel ab und prüft jedes
+APK vor dem Hochladen.
 
 ## Was geprüft ist
 
@@ -143,7 +147,7 @@ wird dabei ersetzt.
   später" — daher `GPL-3.0-or-later`.
 * Die App baut und läuft auf dem **stabilen** Kanal; `pubspec.yaml` verlangt
   Dart `^3.13.0`, und das erfüllt Flutter 3.47.4.
-* **Der Bauer von F-Droid hat es selbst gebaut.** Der CI-Schritt
-  `fdroid build` im Fork meldet „Successfully built
-  com.chrbayer.mathe_trainer:21309" — nicht aus dieser Recipe abgeleitet,
-  sondern mit ihr ausgeführt.
+* **Reproducible Builds sind bestätigt.** Für 2.13.9 hat der CI-Schritt
+  `fdroid build` alle drei APKs selbst gebaut und für 213091, 213092 und
+  213093 gemeldet: „compared built binary to supplied reference binary
+  successfully".
