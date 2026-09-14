@@ -11,9 +11,9 @@ RepoType: git
 Repo: https://github.com/chrbayer/mt.git
 
 Builds:
-  - versionName: 2.13.8
-    versionCode: 213081
-    commit: 87d873ac8c92504337dc20239b873c90204650de
+  - versionName: 2.13.9
+    versionCode: 213091
+    commit: a615035b6ab37e600f9a34f271e853309bb5fed5
     sudo:
       - mkdir -p /home/chrbayer
       - chown -R vagrant /home/chrbayer
@@ -47,9 +47,9 @@ Builds:
       - popd
       - mv $repo com.chrbayer.mathe_trainer
 
-  - versionName: 2.13.8
-    versionCode: 213082
-    commit: 87d873ac8c92504337dc20239b873c90204650de
+  - versionName: 2.13.9
+    versionCode: 213092
+    commit: a615035b6ab37e600f9a34f271e853309bb5fed5
     sudo:
       - mkdir -p /home/chrbayer
       - chown -R vagrant /home/chrbayer
@@ -83,9 +83,9 @@ Builds:
       - popd
       - mv $repo com.chrbayer.mathe_trainer
 
-  - versionName: 2.13.8
-    versionCode: 213083
-    commit: 87d873ac8c92504337dc20239b873c90204650de
+  - versionName: 2.13.9
+    versionCode: 213093
+    commit: a615035b6ab37e600f9a34f271e853309bb5fed5
     sudo:
       - mkdir -p /home/chrbayer
       - chown -R vagrant /home/chrbayer
@@ -128,5 +128,5 @@ VercodeOperation:
   - 10 * %c + 2
   - 10 * %c + 3
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 2.13.8
-CurrentVersionCode: 213083
+CurrentVersion: 2.13.9
+CurrentVersionCode: 213093
