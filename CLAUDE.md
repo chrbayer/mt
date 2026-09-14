@@ -1250,6 +1250,34 @@ Beide Build-Skripte warnen, wenn das installierte Flutter nicht dazu passt:
 ein solcher Build ist nicht falsch, aber er ist nicht der, den F-Droid
 ausliefert. **Wer Flutter aktualisiert, hebt diese Datei mit an.**
 
+## Veröffentlichen für F-Droid
+
+`./build_android.sh --github` baut zusätzlich zum APK für alle drei APKs nach
+Prozessorart, prüft, dass keines debug-signiert ist, und legt alle vier als
+GitHub-Release `v<Version>` ab. F-Droid baut dieselben APKs aus dem Quelltext
+nach und übernimmt die Signatur **nur, wenn jedes Byte stimmt** (Reproducible
+Builds). Deshalb prüft das Skript vor dem ersten Build, statt danach:
+
+* Keystore und Kennwort sind gesetzt — ein debug-signiertes Release ist nutzlos.
+* Das installierte Flutter ist genau das aus `.flutter-version` — hier ist
+  das ein Fehler, keine Warnung.
+* Der Arbeitsbaum ist sauber, HEAD steht **genau auf dem Tag**, und der Tag ist
+  schon auf GitHub. F-Droid baut den getaggten Commit, und ein APK aus einem
+  späteren Commit passte nie dazu. Also: erst taggen und pushen, dann bauen,
+  und dazwischen nichts committen.
+
+Die APKs nach Prozessorart entstehen mit **genau den Argumenten der Recipe**
+und dem Paket-Cache im Projekt (`PUB_CACHE=$DIR/.pub-cache`), wie F-Droid ihn
+anlegt. Jede Abweichung ist ein Byte, das F-Droid nicht nachbaut.
+
+Hochgeladen wird **ohne `--clobber`**. F-Droid übernimmt die Signatur aus genau
+diesen Dateien; eine nachträglich ersetzte Datei hätte niemand verglichen.
+Muss ein Upload wiederholt werden, das Asset von Hand löschen.
+
+Der Keystore liegt außerhalb des Repositories und ist doppelt gesichert. Ohne
+ihn gibt es kein Update mehr, das sich über die installierte App legt — bei
+F-Droid nicht und bei den eigenen APKs nicht.
+
 ## Linux-Build
 
 Der Desktop-Build wird **nicht** von `build_android.sh` mitgebaut. Wer eine

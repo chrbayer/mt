@@ -359,3 +359,13 @@ nach der Aufnahme nach.
 
 Dazu `cupertino_icons` entfernt: aus der Vorlage von `flutter create`, nirgends
 benutzt, 0,2 MB Schrift im APK.
+
+#49 erledigt (2.13.8) — Eigener Release-Schlüssel und Vorbereitung für
+Reproducible Builds, auf Wunsch des F-Droid-Paketierers. `build_android.sh
+--github` baut zusätzlich drei APKs nach Prozessorart, genau wie die Recipe
+sie baut, prüft, dass keines debug-signiert ist, und veröffentlicht alle vier
+als GitHub-Release. Vor dem ersten Build prüft es Schlüssel, Flutter-Version,
+sauberen Arbeitsbaum und dass HEAD genau auf dem gepushten Tag steht — ein
+APK aus einem anderen Stand könnte F-Droid nie nachbauen. Hochgeladen wird
+ohne Überschreiben, weil F-Droid die Signatur aus genau diesen Dateien
+übernimmt.

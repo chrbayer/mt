@@ -55,6 +55,25 @@ fdroid build -v -l com.chrbayer.mathe_trainer
   Release ist also nichts mehr von Hand zu tun — vorausgesetzt, der Tag
   heißt `v<Version>` und `pubspec.yaml` trägt das `+N`.
 
+## Reproducible Builds
+
+Der Paketierer hat sie im Review erbeten. F-Droid baut die APKs dann weiter
+selbst aus dem Quelltext, vergleicht sie aber mit den APKs aus dem
+GitHub-Release und übernimmt **deren Signatur**, wenn jedes Byte stimmt. So
+tragen die F-Droid-Fassung und die eigenen APKs denselben Schlüssel.
+
+Der Ablauf je Version:
+
+1. Version anheben, committen, `v<Version>` taggen und pushen.
+2. Im eigenen Terminal, mit gesetztem `MT_KEYSTORE_PATH` und
+   `MT_KEYSTORE_PASS`, auf genau diesem Commit `./build_android.sh --github`.
+3. In der Recipe je Block `binary:` auf das passende Release-APK zeigen lassen
+   und oben `AllowedAPKSigningKeys` mit dem Fingerabdruck des Zertifikats:
+   `7e85b3258cfd28059278887f771d0be0feb7b81c8143903129f8529937a611a1`.
+
+Stimmen F-Droids Build und das Release nicht überein, meldet das die CI. Der
+wahrscheinlichste Unterschied ist der Build-Pfad; das Skript gibt ihn aus.
+
 ## Ein APK je Prozessorart
 
 Der Paketierer hat es im Review verlangt, und es lohnt sich: statt 60 MB für
