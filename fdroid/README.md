@@ -33,7 +33,7 @@ fdroid build -v -l com.chrbayer.mathe_trainer
   getaggten Commits. Der Paketierer hat das ausdrücklich verlangt: ein Tag
   lässt sich verschieben, ein Hash nicht. Getaggt wird trotzdem, denn
   `UpdateCheckMode: Tags` findet neue Versionen über die Tags.
-* **Die Versionsnummern stehen in `pubspec.yaml`**, als `2.13.6+21306`.
+* **Die Versionsnummern stehen in `pubspec.yaml`**, als `2.13.7+21307`.
   Deshalb braucht der Build-Befehl weder `--build-name` noch
   `--build-number`: Flutter nimmt beides von dort. Ein Test hält die zwei
   Hälften zusammen, siehe „Versionierung" in CLAUDE.md.
@@ -43,7 +43,7 @@ fdroid build -v -l com.chrbayer.mathe_trainer
 * **Die Screenshots und Beschreibungen** holt F-Droid selbst aus
   `fastlane/metadata/android/` im getaggten Commit. Nichts davon gehört in
   die Recipe. Der Änderungshinweis muss unter dem **versionCode** liegen,
-  also `changelogs/21306.txt`.
+  also `changelogs/21307.txt`.
 * **Die Flutter-Version kommt aus dem Projekt.** Die Recipe holt
   `flutter@stable` und checkt dann den Tag aus, der in `.flutter-version`
   steht. Auch das hat der Paketierer verlangt, und es hat einen Vorteil:
@@ -55,42 +55,16 @@ fdroid build -v -l com.chrbayer.mathe_trainer
   Release ist also nichts mehr von Hand zu tun — vorausgesetzt, der Tag
   heißt `v<Version>` und `pubspec.yaml` trägt das `+N`.
 
-## Vorbereitet: ein APK je Prozessorart
+## Ein APK je Prozessorart
 
-Das eingereichte APK enthält alle drei Prozessorarten und ist 60 MB groß.
-Aufgeteilt sind es 18 bis 22 MB je APK. Das Projekt ist darauf vorbereitet
-(seit 2.13.7): `build.gradle.kts` vergibt die Codes nach F-Droids Schema,
-geprüft an allen drei gebauten APKs. Die Recipe bleibt bis zur Aufnahme
-unverändert, danach bekommt sie drei Blöcke statt einem:
+Der Paketierer hat es im Review verlangt, und es lohnt sich: statt 60 MB für
+alle drei Prozessorarten sind es 18 bis 22 MB je APK. Die Recipe hat deshalb
+drei `Builds`-Blöcke, je einer mit `--split-per-abi --target-platform=…`.
 
-```yaml
-Builds:
-  - versionName: 2.13.7
-    versionCode: 213071
-    commit: <voller Hash>
-    output: build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
-    # srclibs, prebuild und scandelete wie bisher
-    build:
-      - export PUB_CACHE=$(pwd)/.pub-cache
-      - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform=android-arm --dart-define=MT_VERSION=$$VERSION$$
-
-  # dasselbe mit versionCode 213072, app-arm64-v8a-release.apk, android-arm64
-  # und mit versionCode 213073, app-x86_64-release.apk, android-x64
-
-AutoUpdateMode: Version
-UpdateCheckMode: Tags
-VercodeOperation:
-  - '%c * 10 + 1'
-  - '%c * 10 + 2'
-  - '%c * 10 + 3'
-UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 2.13.7
-CurrentVersionCode: 213073
-```
-
-**Während des Reviews keinen neuen Tag pushen.** Der CI-Schritt
-`checkupdates` am Merge Request sucht nach Tags; fände er einen neueren als
-den eingereichten, wollte er die Recipe ändern und schlüge fehl.
+Die Codes vergibt `android/app/build.gradle.kts`: `versionCode * 10` plus 1
+für `armeabi-v7a`, 2 für `arm64-v8a`, 3 für `x86_64`. F-Droid prüft, dass der
+Code **im APK** zu dem in der Recipe passt, also muss das Schema im Projekt
+stehen und nicht nur in `VercodeOperation`. Geprüft an gebauten APKs.
 
 ## Zwei Dinge, die die CI beim ersten Anlauf beanstandet hat
 
@@ -119,7 +93,7 @@ Ohne `android/key.properties` fällt der Release-Build in `build.gradle.kts`
 auf den Debug-Schlüssel zurück, damit `flutter run --release` ohne Keystore
 weiterläuft, und auf dem F-Droid-Bauer gibt es keine `key.properties`. Das
 war die offene Frage, und die CI hat sie beantwortet: sie hat
-`com.chrbayer.mathe_trainer:21306` gebaut und anschließend mit
+`com.chrbayer.mathe_trainer:21307` gebaut und anschließend mit
 `apksigner sign --in … --out …` selbst signiert. Eine vorhandene Signatur
 wird dabei ersetzt.
 
@@ -140,5 +114,5 @@ wird dabei ersetzt.
   Dart `^3.13.0`, und das erfüllt Flutter 3.47.4.
 * **Der Bauer von F-Droid hat es selbst gebaut.** Der CI-Schritt
   `fdroid build` im Fork meldet „Successfully built
-  com.chrbayer.mathe_trainer:21306" — nicht aus dieser Recipe abgeleitet,
+  com.chrbayer.mathe_trainer:21307" — nicht aus dieser Recipe abgeleitet,
   sondern mit ihr ausgeführt.
