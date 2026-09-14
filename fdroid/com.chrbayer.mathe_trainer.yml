@@ -11,65 +11,115 @@ RepoType: git
 Repo: https://github.com/chrbayer/mt.git
 
 Builds:
-  - versionName: 2.13.7
-    versionCode: 213071
-    commit: cbc8b3d9851e1139bb440b6dcb31ef9723777ec3
+  - versionName: 2.13.8
+    versionCode: 213081
+    commit: 87d873ac8c92504337dc20239b873c90204650de
+    sudo:
+      - mkdir -p /home/chrbayer
+      - chown -R vagrant /home/chrbayer
     output: build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
+    binary: https://github.com/chrbayer/mt/releases/download/v%v/mt-%v-armeabi-v7a.apk
     srclibs:
       - flutter@stable
     prebuild:
       - flutterVersion=$(cat .flutter-version)
       - '[[ $flutterVersion ]]'
       - git -C $$flutter$$ checkout -f $flutterVersion
+      - export repo=/home/chrbayer/mt
+      - cd ..
+      - mv com.chrbayer.mathe_trainer $repo
+      - pushd $repo
       - export PUB_CACHE=$(pwd)/.pub-cache
       - $$flutter$$/bin/flutter config --no-analytics
       - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - popd
+      - mv $repo com.chrbayer.mathe_trainer
     scandelete:
       - .pub-cache
     build:
+      - export repo=/home/chrbayer/mt
+      - cd ..
+      - mv com.chrbayer.mathe_trainer $repo
+      - pushd $repo
       - export PUB_CACHE=$(pwd)/.pub-cache
       - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform=android-arm
         --dart-define=MT_VERSION=$$VERSION$$
+      - popd
+      - mv $repo com.chrbayer.mathe_trainer
 
-  - versionName: 2.13.7
-    versionCode: 213072
-    commit: cbc8b3d9851e1139bb440b6dcb31ef9723777ec3
+  - versionName: 2.13.8
+    versionCode: 213082
+    commit: 87d873ac8c92504337dc20239b873c90204650de
+    sudo:
+      - mkdir -p /home/chrbayer
+      - chown -R vagrant /home/chrbayer
     output: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+    binary: https://github.com/chrbayer/mt/releases/download/v%v/mt-%v-arm64-v8a.apk
     srclibs:
       - flutter@stable
     prebuild:
       - flutterVersion=$(cat .flutter-version)
       - '[[ $flutterVersion ]]'
       - git -C $$flutter$$ checkout -f $flutterVersion
+      - export repo=/home/chrbayer/mt
+      - cd ..
+      - mv com.chrbayer.mathe_trainer $repo
+      - pushd $repo
       - export PUB_CACHE=$(pwd)/.pub-cache
       - $$flutter$$/bin/flutter config --no-analytics
       - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - popd
+      - mv $repo com.chrbayer.mathe_trainer
     scandelete:
       - .pub-cache
     build:
+      - export repo=/home/chrbayer/mt
+      - cd ..
+      - mv com.chrbayer.mathe_trainer $repo
+      - pushd $repo
       - export PUB_CACHE=$(pwd)/.pub-cache
       - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform=android-arm64
         --dart-define=MT_VERSION=$$VERSION$$
+      - popd
+      - mv $repo com.chrbayer.mathe_trainer
 
-  - versionName: 2.13.7
-    versionCode: 213073
-    commit: cbc8b3d9851e1139bb440b6dcb31ef9723777ec3
+  - versionName: 2.13.8
+    versionCode: 213083
+    commit: 87d873ac8c92504337dc20239b873c90204650de
+    sudo:
+      - mkdir -p /home/chrbayer
+      - chown -R vagrant /home/chrbayer
     output: build/app/outputs/flutter-apk/app-x86_64-release.apk
+    binary: https://github.com/chrbayer/mt/releases/download/v%v/mt-%v-x86_64.apk
     srclibs:
       - flutter@stable
     prebuild:
       - flutterVersion=$(cat .flutter-version)
       - '[[ $flutterVersion ]]'
       - git -C $$flutter$$ checkout -f $flutterVersion
+      - export repo=/home/chrbayer/mt
+      - cd ..
+      - mv com.chrbayer.mathe_trainer $repo
+      - pushd $repo
       - export PUB_CACHE=$(pwd)/.pub-cache
       - $$flutter$$/bin/flutter config --no-analytics
       - $$flutter$$/bin/flutter pub get --enforce-lockfile
+      - popd
+      - mv $repo com.chrbayer.mathe_trainer
     scandelete:
       - .pub-cache
     build:
+      - export repo=/home/chrbayer/mt
+      - cd ..
+      - mv com.chrbayer.mathe_trainer $repo
+      - pushd $repo
       - export PUB_CACHE=$(pwd)/.pub-cache
       - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform=android-x64
         --dart-define=MT_VERSION=$$VERSION$$
+      - popd
+      - mv $repo com.chrbayer.mathe_trainer
+
+AllowedAPKSigningKeys: 7e85b3258cfd28059278887f771d0be0feb7b81c8143903129f8529937a611a1
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
@@ -78,5 +128,5 @@ VercodeOperation:
   - 10 * %c + 2
   - 10 * %c + 3
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 2.13.7
-CurrentVersionCode: 213073
+CurrentVersion: 2.13.8
+CurrentVersionCode: 213083
