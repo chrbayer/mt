@@ -103,6 +103,29 @@ val abiDigits = mapOf("armeabi-v7a" to 1, "arm64-v8a" to 2, "x86_64" to 3)
         }
     }
 
+// Native libraries that plugins compile from C during the build (so far only
+// libdartjni.so from package:jni) must come out byte for byte the same on
+// every machine, or F-Droid's reproducible build rejects the release.
+//
+// They do not by default. The NDK links with --build-id=sha1, and that ID is a
+// hash over the unstripped library - debug info included, which records
+// absolute paths like the NDK's install location. The stripped library in the
+// APK keeps the ID, so a different NDK path changes bytes in the APK even when
+// the code is identical. That was exactly the one file F-Droid reported.
+//
+// Turning the ID off for every plugin's CMake build removes the only
+// path-dependent bytes. The NDK's own linker flags stay; this one comes later on
+// the command line and wins. Nothing here reads the ID: there is no crash
+// reporting to symbolise against it.
+rootProject.subprojects {
+    plugins.withId("com.android.library") {
+        @Suppress("DEPRECATION")
+        (extensions.getByName("android") as com.android.build.gradle.LibraryExtension)
+            .defaultConfig.externalNativeBuild.cmake
+            .arguments("-DCMAKE_SHARED_LINKER_FLAGS=-Wl,--build-id=none")
+    }
+}
+
 kotlin {
     compilerOptions {
         jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17

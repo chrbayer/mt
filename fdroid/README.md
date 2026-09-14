@@ -33,7 +33,7 @@ fdroid build -v -l com.chrbayer.mathe_trainer
   getaggten Commits. Der Paketierer hat das ausdrücklich verlangt: ein Tag
   lässt sich verschieben, ein Hash nicht. Getaggt wird trotzdem, denn
   `UpdateCheckMode: Tags` findet neue Versionen über die Tags.
-* **Die Versionsnummern stehen in `pubspec.yaml`**, als `2.13.8+21308`.
+* **Die Versionsnummern stehen in `pubspec.yaml`**, als `2.13.9+21309`.
   Deshalb braucht der Build-Befehl weder `--build-name` noch
   `--build-number`: Flutter nimmt beides von dort. Ein Test hält die zwei
   Hälften zusammen, siehe „Versionierung" in CLAUDE.md.
@@ -43,7 +43,7 @@ fdroid build -v -l com.chrbayer.mathe_trainer
 * **Die Screenshots und Beschreibungen** holt F-Droid selbst aus
   `fastlane/metadata/android/` im getaggten Commit. Nichts davon gehört in
   die Recipe. Der Änderungshinweis muss unter dem **versionCode** liegen,
-  also `changelogs/21308.txt`.
+  also `changelogs/21309.txt`.
 * **Die Flutter-Version kommt aus dem Projekt.** Die Recipe holt
   `flutter@stable` und checkt dann den Tag aus, der in `.flutter-version`
   steht. Auch das hat der Paketierer verlangt, und es hat einen Vorteil:
@@ -72,6 +72,12 @@ Der Ablauf je Version:
    `7e85b3258cfd28059278887f771d0be0feb7b81c8143903129f8529937a611a1`.
 
 Stimmen F-Droids Build und das Release nicht überein, meldet das die CI.
+
+**Nativer Code aus Plugins ist der heikle Teil.** Beim ersten Vergleich stimmte
+alles bis auf `libdartjni.so`, und zwar wegen einer Build-ID, die über
+pfadabhängige Debug-Infos gerechnet wird. `android/app/build.gradle.kts`
+schaltet sie für alle Plugin-Builds ab; die Einzelheiten stehen in CLAUDE.md
+unter „Veröffentlichen für F-Droid".
 
 **Der Build-Pfad wird nachgestellt.** Das Release entsteht unter
 `/home/chrbayer/mt`, F-Droid baut unter `/home/vagrant/build/<App-ID>`, und
@@ -118,7 +124,7 @@ Ohne `android/key.properties` fällt der Release-Build in `build.gradle.kts`
 auf den Debug-Schlüssel zurück, damit `flutter run --release` ohne Keystore
 weiterläuft, und auf dem F-Droid-Bauer gibt es keine `key.properties`. Das
 war die offene Frage, und die CI hat sie beantwortet: sie hat
-`com.chrbayer.mathe_trainer:21308` gebaut und anschließend mit
+`com.chrbayer.mathe_trainer:21309` gebaut und anschließend mit
 `apksigner sign --in … --out …` selbst signiert. Eine vorhandene Signatur
 wird dabei ersetzt.
 
@@ -139,5 +145,5 @@ wird dabei ersetzt.
   Dart `^3.13.0`, und das erfüllt Flutter 3.47.4.
 * **Der Bauer von F-Droid hat es selbst gebaut.** Der CI-Schritt
   `fdroid build` im Fork meldet „Successfully built
-  com.chrbayer.mathe_trainer:21308" — nicht aus dieser Recipe abgeleitet,
+  com.chrbayer.mathe_trainer:21309" — nicht aus dieser Recipe abgeleitet,
   sondern mit ihr ausgeführt.

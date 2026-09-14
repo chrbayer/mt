@@ -1274,6 +1274,24 @@ Hochgeladen wird **ohne `--clobber`**. F-Droid übernimmt die Signatur aus genau
 diesen Dateien; eine nachträglich ersetzte Datei hätte niemand verglichen.
 Muss ein Upload wiederholt werden, das Asset von Hand löschen.
 
+**Nativer Code aus Plugins braucht eine Sonderbehandlung.** Beim ersten
+Anlauf wich F-Droids Build in genau einer Datei ab: `libdartjni.so` aus
+`package:jni`, das `path_provider_android` mitbringt und das beim Build aus C
+kompiliert wird. Der NDK linkt mit `--build-id=sha1`, und diese ID ist ein Hash
+über die **ungestrippte** Bibliothek samt Debug-Infos — die absolute Pfade wie
+den Installationsort des NDK enthalten. Die gestrippte Bibliothek im APK behält
+die ID. Ein anderer NDK-Pfad ändert also Bytes im APK, obwohl der Code gleich
+ist.
+
+`android/app/build.gradle.kts` schaltet die ID deshalb für den CMake-Build
+**jedes** Plugins ab (`-DCMAKE_SHARED_LINKER_FLAGS=-Wl,--build-id=none`). Die
+übrigen Linker-Flags des NDK bleiben, das eigene Flag steht später auf der
+Kommandozeile und gewinnt. Nachgewiesen: dieselbe Quelle aus zwei
+verschiedenen Pfaden gebaut ergibt ohne das Flag verschiedene Bibliotheken,
+mit dem Flag gleiche. Wer ein Plugin mit nativem Code ergänzt, bekommt das
+automatisch; ein Plugin, das eigene Linker-Flags setzt, sollte man trotzdem
+einmal gegenprüfen.
+
 Der Keystore liegt außerhalb des Repositories und ist doppelt gesichert. Ohne
 ihn gibt es kein Update mehr, das sich über die installierte App legt — bei
 F-Droid nicht und bei den eigenen APKs nicht.

@@ -369,3 +369,11 @@ sauberen Arbeitsbaum und dass HEAD genau auf dem gepushten Tag steht — ein
 APK aus einem anderen Stand könnte F-Droid nie nachbauen. Hochgeladen wird
 ohne Überschreiben, weil F-Droid die Signatur aus genau diesen Dateien
 übernimmt.
+
+#50 erledigt (2.13.9) — Der erste Reproducible Build bei F-Droid scheiterte an
+einer einzigen Datei: `libdartjni.so` aus `package:jni`, beim Build aus C
+kompiliert. Der NDK schreibt eine Build-ID hinein, die über die Debug-Infos
+mit absoluten Pfaden gerechnet wird, und F-Droids NDK liegt woanders als der
+eigene. Die ID ist jetzt für alle nativen Plugin-Builds abgeschaltet.
+Dart-Code, Flutter-Engine und SQLite stimmten schon beim ersten Anlauf Byte
+für Byte.
