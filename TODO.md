@@ -377,3 +377,13 @@ mit absoluten Pfaden gerechnet wird, und F-Droids NDK liegt woanders als der
 eigene. Die ID ist jetzt für alle nativen Plugin-Builds abgeschaltet.
 Dart-Code, Flutter-Engine und SQLite stimmten schon beim ersten Anlauf Byte
 für Byte.
+
+#51 offen — Auf einem Fire HD stürzt das Einspielen einer Sicherung ab, wenn
+die Datei in der Dateiauswahl direkt aus der Nextcloud-App kommt. Nach
+Kopieren nach „Downloads" klappt es. An den Daten liegt es nicht: dieselbe
+Sicherung (aus 2.9.x, Schema 15) spielt sich im Test fehlerfrei ein, auch
+über vorhandene Daten, und alle Hauptbildschirme bauen danach auf. Verdacht:
+Fire OS beendet die App, solange die Nextcloud-Auswahl vorne ist, oder die
+Übergabe der Datei blockiert. Zum Beheben braucht es den Absturzbericht per
+`adb logcat`. Wichtig, weil die App selbst empfiehlt, Sicherungen in eine Cloud
+zu legen.
