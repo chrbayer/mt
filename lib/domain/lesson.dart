@@ -823,6 +823,23 @@ const _everydayLessons = [
   ),
 ];
 
+/// Place value as a question, the small version: ones and tens only.
+///
+/// Same idea as [_placeValueTo1000] one range further up, and the same twist:
+/// "13 Einer, 4 Zehner" is 53, so the ones have to be carried over into the
+/// tens. Below a hundred there are only two places to name, which is what
+/// makes this the one to start with.
+const _placeValueTo100 = LessonSpec(
+  id: 'place_value_100',
+  title: 'Einer und Zehner',
+  description: 'Wie viele Einer und Zehner sind es? Welche Zahl ist das '
+      'zusammen? Es können auch mehr als neun Einer sein.',
+  group: LessonGroup.upTo100,
+  op: ArithmeticOp.add,
+  carry: CarryMode.any,
+  form: TaskForm.placeValue,
+);
+
 /// Place value as a question: how many ones, tens, hundreds and thousands
 /// make which number.
 ///
@@ -850,6 +867,7 @@ final List<LessonSpec> lessonCatalog = List.unmodifiable([
   ..._upTo10Lessons,
   ..._rangeGroup(LessonGroup.upTo20, '20', nameTheTen: true),
   ..._rangeGroup(LessonGroup.upTo100, '100', nameTheTen: true),
+  _placeValueTo100,
   ..._rangeGroup(LessonGroup.upTo1000, '1000', nameTheTen: false),
   _placeValueTo1000,
   ..._timesTableLessons(),

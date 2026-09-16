@@ -363,7 +363,7 @@ Task? _sample(LessonSpec lesson, Operation op, Random random) {
         form: TaskForm.dice,
       );
     case TaskForm.placeValue:
-      return _samplePlaceValue(random);
+      return _samplePlaceValue(lesson, random);
     case TaskForm.compare:
       final a = _between(random, 1, 5);
       final b = _between(random, 1, 5);
@@ -426,12 +426,23 @@ const _placePresence = [0.9, 0.85, 0.6, 0.3];
 /// stay rare. Four big counts at once would turn a question about places
 /// into a column addition, and the places are what is being drilled.
 ///
+/// How far it goes comes from the lesson's range: below a hundred there are
+/// two places to name, below ten thousand there are four. The answer never
+/// leaves the range the group is named after.
+///
 /// Returns null when the draw missed: fewer than two places named, or an
-/// answer that would not fit four digits.
-Task? _samplePlaceValue(Random random) {
+/// answer too big for the range.
+Task? _samplePlaceValue(LessonSpec lesson, Random random) {
+  final (highest, biggest) = switch (lesson.group) {
+    // Ones and tens, and the answer stays two-digit.
+    LessonGroup.upTo100 => (1, 99),
+    _ => (3, 9999),
+  };
+
   int drawCount(int place) {
-    // A thousands count above nine cannot fit under 10000 at all.
-    if (place == 3) return _between(random, 1, 9);
+    // The top place is capped so the answer cannot leave the range at all:
+    // ten tens are already a hundred, ten thousands already ten thousand.
+    if (place == highest) return _between(random, 1, 9);
     final roll = random.nextDouble();
     if (roll < 0.7) return _between(random, 1, 9);
     if (roll < 0.93) return _between(random, 10, 29);
@@ -440,13 +451,15 @@ Task? _samplePlaceValue(Random random) {
 
   final counts = [
     for (var place = 0; place < 4; place++)
-      random.nextDouble() < _placePresence[place] ? drawCount(place) : 0
+      place <= highest && random.nextDouble() < _placePresence[place]
+          ? drawCount(place)
+          : 0
   ];
 
   if (counts.where((count) => count > 0).length < 2) return null;
 
   final value = counts[0] + 10 * counts[1] + 100 * counts[2] + 1000 * counts[3];
-  if (value > 9999) return null;
+  if (value > biggest) return null;
 
   return Task(
     a: counts[0],

@@ -1,3 +1,4 @@
-A new lesson in the range up to 1000: put ones, tens, hundreds and thousands
-together into one number. The counts go past nine on purpose, because twelve
-tens are a hundred and twenty - and that is the whole point.
+Two new place-value lessons: ones and tens up to 100, and ones, tens,
+hundreds and thousands up to 1000. The counts are put together into one
+number, and they go past nine on purpose - twelve tens are a hundred and
+twenty, and that is the whole point.

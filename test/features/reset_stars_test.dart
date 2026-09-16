@@ -218,7 +218,7 @@ void main() {
       expect(
         find.descendant(
           of: rowOf(LessonGroup.upTo100),
-          matching: find.text('3 von 21 Sternen'),
+          matching: find.text('3 von 24 Sternen'),
         ),
         findsOneWidget,
       );
@@ -231,7 +231,7 @@ void main() {
       expect(
         find.descendant(
           of: rowOf(LessonGroup.upTo100),
-          matching: find.text('0 von 21 Sternen'),
+          matching: find.text('0 von 24 Sternen'),
         ),
         findsOneWidget,
       );

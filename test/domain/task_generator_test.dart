@@ -1180,8 +1180,8 @@ void main() {
   });
 
   group('lesson catalog', () {
-    test('has 77 lessons in nine groups with unique ids', () {
-      expect(lessonCatalog, hasLength(77));
+    test('has 78 lessons in nine groups with unique ids', () {
+      expect(lessonCatalog, hasLength(78));
       expect(lessonsInGroup(LessonGroup.firstSteps), hasLength(12));
       expect(lessonsInGroup(LessonGroup.everyday), hasLength(9));
       // Nine rows of the times table plus a mixed one.
@@ -1194,10 +1194,10 @@ void main() {
       // pairs that make ten plus five lessons, instead of the usual seven.
       expect(lessonsInGroup(LessonGroup.upTo10), hasLength(6));
       expect(lessonsInGroup(LessonGroup.upTo20), hasLength(7));
-      expect(lessonsInGroup(LessonGroup.upTo100), hasLength(7));
+      expect(lessonsInGroup(LessonGroup.upTo100), hasLength(8));
       expect(lessonsInGroup(LessonGroup.upTo1000), hasLength(8));
       expect(lessonCatalog.first.id, 'count_pictures');
-      expect(lessonCatalog.map((l) => l.id).toSet(), hasLength(77));
+      expect(lessonCatalog.map((l) => l.id).toSet(), hasLength(78));
     });
 
     // The rule the numerals follow: a number belongs where an amount is meant

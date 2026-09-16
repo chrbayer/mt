@@ -1462,6 +1462,16 @@ einmal die Woche umkippt, liest sich beim nächsten Mal als echter Fehler.
 ergibt das", sondern „welche Zahl ist das" — 5 Einer, 12 Zehner, 3 Hunderter
 sind 425.
 
+Die Form steckt **zweimal** im Katalog, einmal je Zahlenraum: Einer und Zehner
+in „Bis 100", alle vier Stellen in „Bis 1000". Wie weit eine Aufgabe reicht,
+entscheidet `_samplePlaceValue` an der **Gruppe** der Lektion, nicht an der
+Form — die höchste Stelle und die Obergrenze der Antwort kommen von dort. Eine
+weitere Stufe braucht deshalb nur einen Fall mehr in diesem `switch`.
+
+Die oberste Stelle einer Lektion ist immer auf neun gedeckelt: zehn Zehner
+sind schon hundert, zehn Tausender schon zehntausend. Damit kann keine Antwort
+den Zahlenraum verlassen, in dem die Lektion steht.
+
 **Die Anzahlen gehen über neun hinaus, und das ist der Inhalt der Lektion.**
 „3 Zehner" liest nur eine Ziffer ab; „12 Zehner" verlangt den Schritt, der
 sagt, was eine Stelle überhaupt bedeutet.

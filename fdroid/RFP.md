@@ -15,7 +15,7 @@ Der Merge Request ist der schnellere Weg, siehe [README.md](README.md).
 Kopfrechnen für die Grundschule, auf einem Tablet im Querformat. Die App
 misst die Zeit bis zur richtigen Lösung und macht daraus eine Lernkurve und
 Bestenlisten, in denen mehrere Kinder auf demselben Gerät gegeneinander
-antreten. 77 Lektionen in neun Gruppen, von Bildern zählen über Plus und
+antreten. 78 Lektionen in neun Gruppen, von Bildern zählen über Plus und
 Minus bis zum Einmaleins, Uhrzeit und Geld.
 
 Eltern schalten hinter einer PIN Bereiche frei, begrenzen die Übungszeit am
