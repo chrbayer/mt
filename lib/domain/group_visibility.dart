@@ -68,3 +68,22 @@ String groupNames(Set<LessonGroup> groups) =>
 /// Every group this version has, for the moment a decision is written down:
 /// whatever a parent has just looked at, they have seen all of it.
 String get allGroupNames => groupNames(LessonGroup.values.toSet());
+
+/// The lessons a parent can put into an assignment for one child.
+///
+/// Only the areas the child actually has: a lesson from a switched-off group
+/// cannot be practised, so assigning it would set a task nobody can finish.
+///
+/// What is **already in the assignment** stays in the list, whatever group it
+/// belongs to. A group can be switched off after the fact, and a parent has
+/// to be able to see what was assigned - and to take it out again, which is
+/// impossible for a line that is not there.
+List<LessonSpec> assignableLessons({
+  required Set<LessonGroup> visible,
+  Set<String> alreadyChosen = const {},
+}) =>
+    [
+      for (final lesson in lessonCatalog)
+        if (visible.contains(lesson.group) || alreadyChosen.contains(lesson.id))
+          lesson
+    ];

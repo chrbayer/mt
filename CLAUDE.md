@@ -1367,6 +1367,15 @@ Machart wie `hidden_groups`, und aus demselben Grund unbedenklich: eine
 Lektions-ID enthält kein Komma. Schema v16 hat die Spalte nur umbenannt, denn
 eine einzelne ID ist bereits eine gültige einelementige Liste.
 
+Der Editor bietet nur Lektionen aus **Bereichen an, die das Kind hat**
+(`assignableLessons` in `domain/group_visibility.dart`). Eine Lektion aus
+einem abgeschalteten Bereich lässt sich nicht üben, eine Aufgabe daraus wäre
+also von vornherein unerfüllbar. **Was schon in der Aufgabe steht, bleibt
+trotzdem in der Liste**: ein Bereich kann nachträglich abgeschaltet worden
+sein, und eine Zeile, die nicht da ist, lässt sich auch nicht herausnehmen.
+Solange kein Kind gewählt ist, steht der ganze Katalog da — es gibt nichts,
+wonach gefiltert werden könnte.
+
 Eine laufende Aufgabe lässt sich **ändern** (`updateAssignment`), und zwar in
 allem außer dem Kind — Lektionen dürfen dabei dazukommen und wegfallen, das
 Kind nicht. Im Bearbeiten-Dialog sind die Lektionen, die das Kind im

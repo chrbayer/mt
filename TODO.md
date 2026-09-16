@@ -403,3 +403,9 @@ Platzhalter dazwischen, die Stellen bis zum Tausender und Plus und Minus ohne
 eigene Aufgabenform. Die Stellenwertlektion in „Bis 1000" hört dafür bei den
 Hundertern auf; sie hatte vorher Antworten bis 9999 in einer Gruppe, die
 anders heißt.
+
+#54 erledigt (2.14.1) — Beim Anlegen einer Aufgabe stehen nur noch Übungen aus
+Bereichen zur Wahl, die das Kind auch sieht; eine Aufgabe aus einem
+abgeschalteten Bereich wäre unerfüllbar gewesen. Was schon in der Aufgabe
+steht, bleibt in der Liste, sonst ließe es sich nicht mehr herausnehmen. Die
+Regel steht als reine Funktion in der Fachlogik und ist dort geprüft.

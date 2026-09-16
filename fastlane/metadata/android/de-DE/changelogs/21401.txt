@@ -1,0 +1,4 @@
+Beim Anlegen einer Aufgabe stehen nur noch die Übungen zur Wahl, die das Kind
+auch sieht. Abgeschaltete Bereiche tauchen nicht mehr auf — eine Aufgabe
+daraus hätte niemand erfüllen können. Was schon in einer Aufgabe steht, bleibt
+sichtbar, auch wenn der Bereich später abgeschaltet wurde.

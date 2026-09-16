@@ -102,4 +102,48 @@ void main() {
       'firstSteps,everyday',
     );
   });
+
+
+  group('lessons a parent can assign', () {
+    test('only come from areas the child actually has', () {
+      final offered = assignableLessons(
+        visible: {LessonGroup.upTo20, LessonGroup.upTo100},
+      );
+      expect(offered.map((l) => l.group).toSet(),
+          {LessonGroup.upTo20, LessonGroup.upTo100});
+      expect(offered, isNotEmpty);
+    });
+
+    test('a lesson already in the assignment stays, group switched off or not',
+        () {
+      // The group was switched off after the assignment was made. Hiding the
+      // line now would leave a parent unable to take it out again.
+      final offered = assignableLessons(
+        visible: {LessonGroup.upTo20},
+        alreadyChosen: {'clock_half'},
+      );
+      expect(offered.map((l) => l.id), contains('clock_half'));
+      expect(
+        offered.where((l) => l.group == LessonGroup.everyday).map((l) => l.id),
+        ['clock_half'],
+      );
+    });
+
+    test('with every area on, the whole catalogue is on offer', () {
+      expect(
+        assignableLessons(visible: LessonGroup.values.toSet()),
+        hasLength(lessonCatalog.length),
+      );
+    });
+
+    test('with nothing on and nothing chosen, there is nothing to assign', () {
+      expect(assignableLessons(visible: const {}), isEmpty);
+    });
+
+    test('the catalogue order is kept', () {
+      final offered = assignableLessons(visible: LessonGroup.values.toSet());
+      expect(offered.map((l) => l.id).toList(),
+          lessonCatalog.map((l) => l.id).toList());
+    });
+  });
 }

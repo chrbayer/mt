@@ -1,0 +1,4 @@
+When setting an assignment, only the lessons the child actually sees are on
+offer. Switched-off areas no longer appear - an assignment from one could
+never have been finished. What is already in an assignment stays visible, even
+if its area was switched off afterwards.

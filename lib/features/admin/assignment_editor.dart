@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/db/app_database.dart';
+import '../../data/repositories/user_repository.dart';
 import '../../domain/assignment.dart';
+import '../../domain/group_visibility.dart';
 import '../../domain/lesson.dart';
 import '../../domain/scoring.dart';
 import '../../domain/task_count.dart';
@@ -58,6 +60,13 @@ class _AssignmentEditorState extends ConsumerState<AssignmentEditor> {
   @override
   Widget build(BuildContext context) {
     final users = ref.watch(usersProvider).value ?? const <User>[];
+    // Only the areas this child has. Before one is picked there is nothing to
+    // go by, so the whole catalogue stands there.
+    final child = users.where((user) => user.id == _userId).firstOrNull;
+    final offered = assignableLessons(
+      visible: child?.visibleGroups.toSet() ?? LessonGroup.values.toSet(),
+      alreadyChosen: _lessonIds,
+    );
     // Which of the chosen lessons the child has already finished in the
     // period running now - shown ticked and dimmed in the picker, so a
     // parent adding a lesson can see what is already behind them.
@@ -147,7 +156,7 @@ class _AssignmentEditorState extends ConsumerState<AssignmentEditor> {
                   padding: const EdgeInsets.symmetric(vertical: 4),
                   children: [
                     for (final group in LessonGroup.values)
-                      if (lessonsInGroup(group).isNotEmpty) ...[
+                      if (offered.any((l) => l.group == group)) ...[
                         Padding(
                           padding: const EdgeInsets.fromLTRB(16, 10, 16, 2),
                           child: Text(
@@ -158,7 +167,8 @@ class _AssignmentEditorState extends ConsumerState<AssignmentEditor> {
                             ),
                           ),
                         ),
-                        for (final option in lessonsInGroup(group))
+                        for (final option
+                            in offered.where((l) => l.group == group))
                           _LessonChoice(
                             lesson: option,
                             selected: _lessonIds.contains(option.id),
