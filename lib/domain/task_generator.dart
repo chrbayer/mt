@@ -436,7 +436,9 @@ Task? _samplePlaceValue(LessonSpec lesson, Random random) {
   final (highest, biggest) = switch (lesson.group) {
     // Ones and tens, and the answer stays two-digit.
     LessonGroup.upTo100 => (1, 99),
-    _ => (3, 9999),
+    // Up to hundreds, and the answer stays inside the range the group is
+    // named after. Thousands belong to a group that has thousands in it.
+    _ => (2, 999),
   };
 
   int drawCount(int place) {

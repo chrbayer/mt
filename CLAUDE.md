@@ -1463,7 +1463,8 @@ ergibt das", sondern „welche Zahl ist das" — 5 Einer, 12 Zehner, 3 Hunderter
 sind 425.
 
 Die Form steckt **zweimal** im Katalog, einmal je Zahlenraum: Einer und Zehner
-in „Bis 100", alle vier Stellen in „Bis 1000". Wie weit eine Aufgabe reicht,
+in „Bis 100", dazu die Hunderter in „Bis 1000". Keine Lektion nennt Stellen,
+die über ihren Zahlenraum hinausführen. Wie weit eine Aufgabe reicht,
 entscheidet `_samplePlaceValue` an der **Gruppe** der Lektion, nicht an der
 Form — die höchste Stelle und die Obergrenze der Antwort kommen von dort. Eine
 weitere Stufe braucht deshalb nur einen Fall mehr in diesem `switch`.

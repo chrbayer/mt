@@ -840,19 +840,17 @@ const _placeValueTo100 = LessonSpec(
   form: TaskForm.placeValue,
 );
 
-/// Place value as a question: how many ones, tens, hundreds and thousands
-/// make which number.
+/// Place value as a question: how many ones, tens and hundreds make which
+/// number.
 ///
 /// The counts deliberately run past nine. "3 Zehner" is reading a digit off;
 /// "12 Zehner" is the step that says what a place actually means. The answer
-/// stays below 10000, so it still fits the keypad and the range this group
-/// is named after.
+/// stays below 1000 - the range this group is named after.
 const _placeValueTo1000 = LessonSpec(
   id: 'place_value_1000',
   title: 'Einer, Zehner, Hunderter',
-  description: 'Wie viele Einer, Zehner, Hunderter und Tausender sind es? '
-      'Welche Zahl ist das zusammen? Es können auch mehr als neun von einer '
-      'Sorte sein.',
+  description: 'Wie viele Einer, Zehner und Hunderter sind es? Welche Zahl '
+      'ist das zusammen? Es können auch mehr als neun von einer Sorte sein.',
   group: LessonGroup.upTo1000,
   op: ArithmeticOp.add,
   carry: CarryMode.any,

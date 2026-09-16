@@ -1,4 +1,4 @@
 Zwei neue Übungen zum Stellenwert: Einer und Zehner bis 100, und Einer,
-Zehner, Hunderter und Tausender bis 1000. Aus den Anzahlen wird die Zahl
+Zehner und Hunderter bis 1000. Aus den Anzahlen wird die Zahl
 gebildet. Die Anzahlen gehen dabei auch über neun hinaus, denn zwölf Zehner
 sind hundertzwanzig — und genau darum geht es.

@@ -11,13 +11,14 @@ List<Task> _draw(String id, {int runs = 60, int count = 20}) => [
 
 void main() {
   // The same lesson twice, one range apart: ones and tens below a hundred,
-  // all four places below ten thousand.
-  const ranges = {'place_value_100': 99, 'place_value_1000': 9999};
+  // hundreds on top below a thousand. Neither names a place that would take
+  // the answer out of its range.
+  const ranges = {'place_value_100': 99, 'place_value_1000': 999};
 
   for (final MapEntry(key: id, value: biggest) in ranges.entries) {
     group(id, () {
       final tasks = _draw(id);
-      final highest = biggest == 99 ? 1 : 3;
+      final highest = biggest == 99 ? 1 : 2;
 
       test('the answer is what the named places add up to', () {
         for (final task in tasks) {
@@ -84,7 +85,6 @@ void main() {
         tasks.where((task) => task.places[place] > 0).length;
     expect(named(0), greaterThan(named(2)));
     expect(named(1), greaterThan(named(2)));
-    expect(named(2), greaterThan(named(3)));
   });
 
   test('the text names the parts from the ones upwards', () {
