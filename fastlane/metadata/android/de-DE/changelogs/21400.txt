@@ -1,0 +1,3 @@
+Neue Übung im Zahlenraum bis 1000: Einer, Zehner, Hunderter und Tausender
+zu einer Zahl zusammensetzen. Die Anzahlen gehen dabei auch über neun hinaus,
+denn zwölf Zehner sind hundertzwanzig — und genau darum geht es.

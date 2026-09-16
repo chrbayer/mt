@@ -1456,6 +1456,37 @@ Wochenkarte" war sonst sechs Tage die Woche wahr und sonntags falsch, weil
 beide dann im selben Moment ablaufen und das Alter entscheidet. Ein Test, der
 einmal die Woche umkippt, liest sich beim nächsten Mal als echter Fehler.
 
+## Stellenwerte
+
+`TaskForm.placeValue` fragt andersherum als der Rest des Katalogs: nicht „was
+ergibt das", sondern „welche Zahl ist das" — 5 Einer, 12 Zehner, 3 Hunderter
+sind 425.
+
+**Die Anzahlen gehen über neun hinaus, und das ist der Inhalt der Lektion.**
+„3 Zehner" liest nur eine Ziffer ab; „12 Zehner" verlangt den Schritt, der
+sagt, was eine Stelle überhaupt bedeutet.
+
+Zwei Verteilungen laufen dabei nach unten, beide in `_samplePlaceValue`: eine
+Stelle wird umso seltener genannt, je höher sie sitzt (`_placePresence`), und
+Anzahlen über neun sind die Ausnahme. Vier große Anzahlen auf einmal wären
+eine schriftliche Addition im Kostüm einer Stellenwertaufgabe.
+
+**Vier Anzahlen in drei Feldern.** Gespeichert wird eine Aufgabe als
+`operandA`, `operandB`, `operandC`; hier sind es Einer, Zehner und
+`100 * Tausender + Hunderter`. Das passt, weil mehr als neun Tausender die
+Antwort über 9999 hiebe, und 9999 ist die Grenze: darüber bräuchte die
+Tastatur eine fünfte Ziffer. `Task.places` packt es wieder aus, `Task.key`
+nimmt `c` mit auf — sonst gälten zwei Aufgaben mit verschiedenen Hundertern
+als dieselbe.
+
+Die Antwort darf deshalb **vier Ziffern** haben. Wie viele es sind, sagt
+`Task.maxAnswerDigits`, nicht mehr eine Konstante im Controller.
+
+Auf dem Bildschirm steht **jeder Teil in einer eigenen Zeile**, im
+Übungsbildschirm wie auf der Kachel. In einer Zeile läuft „94 Einer, 9 Zehner,
+2 Tausender" bei dieser Schriftgröße über den Rand, und kleiner zu setzen
+träfe ausgerechnet die Aufgaben, die am schwersten zu lesen sind.
+
 ## Punkt vor Strich
 
 `TaskForm.chain` (nachgetragen aus 2.7.0) zeigt drei Operanden in

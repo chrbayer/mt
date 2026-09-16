@@ -138,6 +138,11 @@ void main() {
           lesson: lessonById('div_remainder'),
           taskCount: 10,
         ),
+    // The tallest task there is: up to four named places, one per line.
+    '03d-stellenwerte': () => PracticeScreen(
+          lesson: lessonById('place_value_1000'),
+          taskCount: 10,
+        ),
     // Pictures to count, dice to read, two heaps to compare, a number line.
     '02a-zaehlen': () => PracticeScreen(
           lesson: lessonById('count_pictures'),

@@ -362,6 +362,8 @@ Task? _sample(LessonSpec lesson, Operation op, Random random) {
         op: Operation.add,
         form: TaskForm.dice,
       );
+    case TaskForm.placeValue:
+      return _samplePlaceValue(random);
     case TaskForm.compare:
       final a = _between(random, 1, 5);
       final b = _between(random, 1, 5);
@@ -412,6 +414,50 @@ Task? _sample(LessonSpec lesson, Operation op, Random random) {
 /// A 24-hour lesson starts at six in the morning and runs to eleven at night:
 /// those are the hours a child has a name for. Half of them are past noon, so
 /// converting is the rule rather than the exception.
+/// How likely each place is to be named at all, ones first.
+///
+/// Downwards on purpose: a task naming thousands is the exception, and one
+/// that names nothing but ones is not much of a task.
+const _placePresence = [0.9, 0.85, 0.6, 0.3];
+
+/// Draws a place-value task: so many ones, so many tens, and so on.
+///
+/// The counts run past nine - "12 Zehner" is the whole idea - but large ones
+/// stay rare. Four big counts at once would turn a question about places
+/// into a column addition, and the places are what is being drilled.
+///
+/// Returns null when the draw missed: fewer than two places named, or an
+/// answer that would not fit four digits.
+Task? _samplePlaceValue(Random random) {
+  int drawCount(int place) {
+    // A thousands count above nine cannot fit under 10000 at all.
+    if (place == 3) return _between(random, 1, 9);
+    final roll = random.nextDouble();
+    if (roll < 0.7) return _between(random, 1, 9);
+    if (roll < 0.93) return _between(random, 10, 29);
+    return _between(random, 30, 99);
+  }
+
+  final counts = [
+    for (var place = 0; place < 4; place++)
+      random.nextDouble() < _placePresence[place] ? drawCount(place) : 0
+  ];
+
+  if (counts.where((count) => count > 0).length < 2) return null;
+
+  final value = counts[0] + 10 * counts[1] + 100 * counts[2] + 1000 * counts[3];
+  if (value > 9999) return null;
+
+  return Task(
+    a: counts[0],
+    b: counts[1],
+    // Hundreds and thousands share the third field; see `Task.places`.
+    c: 100 * counts[3] + counts[2],
+    op: Operation.add,
+    form: TaskForm.placeValue,
+  );
+}
+
 Task _sampleClock(LessonSpec lesson, Random random) {
   final steps = 60 ~/ lesson.minuteStep;
   return Task(

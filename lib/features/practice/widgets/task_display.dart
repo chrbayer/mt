@@ -247,7 +247,20 @@ class TaskDisplay extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(width: 44),
-              ] else
+              ] else if (task.form == TaskForm.placeValue)
+                // One part per line. Four of them in a row - "94 Einer,
+                // 9 Zehner, 2 Tausender" - do not fit across a tablet at
+                // this size, and shrinking the type would punish exactly the
+                // tasks that are hardest to read.
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    for (final part in task.placeParts)
+                      Text(part, style: style.copyWith(fontSize: 54)),
+                  ],
+                )
+              else
                 Text(task.prefix, style: style),
               // The box is the next number in the row, so it stands at the
               // same distance as the numbers before it - a tighter gap made

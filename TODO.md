@@ -387,3 +387,10 @@ Fire OS beendet die App, solange die Nextcloud-Auswahl vorne ist, oder die
 Übergabe der Datei blockiert. Zum Beheben braucht es den Absturzbericht per
 `adb logcat`. Wichtig, weil die App selbst empfiehlt, Sicherungen in eine Cloud
 zu legen.
+
+#52 erledigt (2.14.0) — Neue Lektion „Einer, Zehner, Hunderter" im Zahlenraum
+bis 1000: aus genannten Anzahlen je Stelle die Zahl bilden. Die Anzahlen gehen
+bewusst über neun hinaus, hohe Stellen und große Anzahlen werden seltener
+gezogen. Die Antwort bleibt unter 10000 und darf als einzige im Katalog vier
+Ziffern haben. Die Teile stehen untereinander, weil sie in einer Zeile über den
+Rand liefen.

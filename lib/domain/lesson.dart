@@ -124,6 +124,11 @@ enum TaskForm {
   /// `a · b + c` - two operations in one term, and the point one (`·` or
   /// `:`) is worked out first, whichever side of the term it sits on.
   chain,
+
+  /// "5 Einer, 12 Zehner, 3 Hunderter" - what number is that? Place value
+  /// read forwards, and the counts go past nine on purpose: twelve tens are
+  /// a hundred and twenty, and that is the whole point of the exercise.
+  placeValue,
 }
 
 /// Immutable description of one lesson. Lessons are defined as compile-time
@@ -244,6 +249,9 @@ class LessonSpec {
       TaskForm.moneyCompose => 2.0,
       // Two calculations instead of one, plus deciding which comes first.
       TaskForm.chain => 1.5,
+      // Up to four parts to put together, and the ones above nine have to be
+      // carried over into the next place.
+      TaskForm.placeValue => 1.2,
       _ => 1.0,
     };
 
@@ -815,6 +823,25 @@ const _everydayLessons = [
   ),
 ];
 
+/// Place value as a question: how many ones, tens, hundreds and thousands
+/// make which number.
+///
+/// The counts deliberately run past nine. "3 Zehner" is reading a digit off;
+/// "12 Zehner" is the step that says what a place actually means. The answer
+/// stays below 10000, so it still fits the keypad and the range this group
+/// is named after.
+const _placeValueTo1000 = LessonSpec(
+  id: 'place_value_1000',
+  title: 'Einer, Zehner, Hunderter',
+  description: 'Wie viele Einer, Zehner, Hunderter und Tausender sind es? '
+      'Welche Zahl ist das zusammen? Es können auch mehr als neun von einer '
+      'Sorte sein.',
+  group: LessonGroup.upTo1000,
+  op: ArithmeticOp.add,
+  carry: CarryMode.any,
+  form: TaskForm.placeValue,
+);
+
 /// The full, fixed lesson catalog, ordered from the first steps up to 1000.
 /// It opens with the pairs that make ten.
 final List<LessonSpec> lessonCatalog = List.unmodifiable([
@@ -824,6 +851,7 @@ final List<LessonSpec> lessonCatalog = List.unmodifiable([
   ..._rangeGroup(LessonGroup.upTo20, '20', nameTheTen: true),
   ..._rangeGroup(LessonGroup.upTo100, '100', nameTheTen: true),
   ..._rangeGroup(LessonGroup.upTo1000, '1000', nameTheTen: false),
+  _placeValueTo1000,
   ..._timesTableLessons(),
   ..._reverseTimesTableLessons(),
   ..._timesAndDivisionLessons,

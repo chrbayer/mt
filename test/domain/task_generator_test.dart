@@ -36,25 +36,30 @@ void main() {
             );
             expect(tasks, hasLength(count));
 
-            final limit = switch (lesson.group) {
-              // Counting pictures, dice pips and the number line all stay
-              // inside one hand's worth - except the sequence, which walks
-              // up to ten.
-              LessonGroup.firstSteps => 10,
-              LessonGroup.upTo10 => 10,
-              LessonGroup.upTo20 => 20,
-              LessonGroup.upTo100 => 100,
-              LessonGroup.upTo1000 => 999,
-              // The small times table tops out at 10 x 10, and every division
-              // is built backwards from it.
-              LessonGroup.timesTables => 100,
-              // Every dividend is a product from the small table.
-              LessonGroup.reverseTimesTables => 100,
-              // Beyond the table: 25 x 9 and 96 : 6 both live here.
-              LessonGroup.timesAndDivision => 999,
-              // Money is held in cents, so the numbers are the biggest of all.
-              LessonGroup.everyday => 2000,
-            };
+            // Place value counts places instead of naming a number in the
+            // range: four counts of up to 99 add up to at most 9999, and the
+            // operands are the counts themselves.
+            final limit = lesson.form == TaskForm.placeValue
+                ? 9999
+                : switch (lesson.group) {
+                    // Counting pictures, dice pips and the number line all stay
+                    // inside one hand's worth - except the sequence, which walks
+                    // up to ten.
+                    LessonGroup.firstSteps => 10,
+                    LessonGroup.upTo10 => 10,
+                    LessonGroup.upTo20 => 20,
+                    LessonGroup.upTo100 => 100,
+                    LessonGroup.upTo1000 => 999,
+                    // The small times table tops out at 10 x 10, and every division
+                    // is built backwards from it.
+                    LessonGroup.timesTables => 100,
+                    // Every dividend is a product from the small table.
+                    LessonGroup.reverseTimesTables => 100,
+                    // Beyond the table: 25 x 9 and 96 : 6 both live here.
+                    LessonGroup.timesAndDivision => 999,
+                    // Money is held in cents, so the numbers are the biggest of all.
+                    LessonGroup.everyday => 2000,
+                  };
             // A pair lesson asks in both directions and a clock reads minute
             // zero, so those allow 0. Everywhere else 1 is the smallest.
             final smallest = lesson.fixedSum != null ||
@@ -63,7 +68,9 @@ void main() {
                     lesson.form == TaskForm.dice ||
                     lesson.form == TaskForm.sequence ||
                     // An amount to lay out has no second operand at all.
-                    lesson.form == TaskForm.moneyCompose
+                    lesson.form == TaskForm.moneyCompose ||
+                    // A place that is not named is a count of zero.
+                    lesson.form == TaskForm.placeValue
                 ? 0
                 : 1;
             for (final task in tasks) {
@@ -1097,6 +1104,9 @@ void main() {
 
     test('up-to-1000 lessons work with three-digit numbers', () {
       for (final lesson in lessonsInGroup(LessonGroup.upTo1000)) {
+        // Place value names counts, not numbers from the range: "12 Zehner"
+        // is a two-digit count that stands for 120.
+        if (lesson.form == TaskForm.placeValue) continue;
         final tasks = generateTasks(lesson: lesson, count: 40, seed: 8);
         for (final task in tasks) {
           // Either operand may be the small one - additions are shown in both
@@ -1170,8 +1180,8 @@ void main() {
   });
 
   group('lesson catalog', () {
-    test('has 76 lessons in nine groups with unique ids', () {
-      expect(lessonCatalog, hasLength(76));
+    test('has 77 lessons in nine groups with unique ids', () {
+      expect(lessonCatalog, hasLength(77));
       expect(lessonsInGroup(LessonGroup.firstSteps), hasLength(12));
       expect(lessonsInGroup(LessonGroup.everyday), hasLength(9));
       // Nine rows of the times table plus a mixed one.
@@ -1185,9 +1195,9 @@ void main() {
       expect(lessonsInGroup(LessonGroup.upTo10), hasLength(6));
       expect(lessonsInGroup(LessonGroup.upTo20), hasLength(7));
       expect(lessonsInGroup(LessonGroup.upTo100), hasLength(7));
-      expect(lessonsInGroup(LessonGroup.upTo1000), hasLength(7));
+      expect(lessonsInGroup(LessonGroup.upTo1000), hasLength(8));
       expect(lessonCatalog.first.id, 'count_pictures');
-      expect(lessonCatalog.map((l) => l.id).toSet(), hasLength(76));
+      expect(lessonCatalog.map((l) => l.id).toSet(), hasLength(77));
     });
 
     // The rule the numerals follow: a number belongs where an amount is meant

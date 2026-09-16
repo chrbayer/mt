@@ -9,7 +9,7 @@ antreten. Die App läuft vollständig offline, ohne Konten und ohne Netzwerk.
 
 ## Was sie kann
 
-* **76 Lektionen** in neun Gruppen (Erste Schritte / Bis 10 / Bis 20 /
+* **77 Lektionen** in neun Gruppen (Erste Schritte / Bis 10 / Bis 20 /
   Bis 100 / Bis 1000 / Einmaleins / Einmaleins rückwärts / Mal und Geteilt /
   Uhrzeit und Geld).
   Ab 20 bietet jede Gruppe Plus und Minus mit und ohne Zehnerübergang, zwei
@@ -227,7 +227,7 @@ antreten. Die App läuft vollständig offline, ohne Konten und ohne Netzwerk.
   einem Knopf aus dem Verlauf räumen — für alle oder nur für das gewählte
   Kind. Löschen kostet Sterne, Blitze und Bestenlistenplätze, **aber nie die
   geübte Zeit**: sonst hätte die Tagesgrenze einen Löschknopf daneben.
-* **Fertige Lektionen ausblenden**: bei 76 Lektionen ist die Liste lang, und
+* **Fertige Lektionen ausblenden**: bei 77 Lektionen ist die Liste lang, und
   das meiste, woran ein Kind vorbeiscrollt, sitzt längst. Der Filter oben im
   Katalog kürzt sie in zwei Stufen — **mit 3 Sternen** verschwindet, was
   fehlerfrei läuft; **erst mit 3 Sternen und 3 Blitzen** ist strenger und

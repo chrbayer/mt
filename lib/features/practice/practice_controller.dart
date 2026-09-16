@@ -14,9 +14,12 @@ enum AnswerField { primary, second }
 /// Deliberately free of any widget code so the rules - especially "the clock
 /// keeps running through wrong answers" - can be tested directly.
 class PracticeController extends ChangeNotifier {
-  /// Answers never exceed three digits (100 in the small range, 999 in the
-  /// large one), so the box refuses a fourth digit instead of silently
-  /// swallowing it.
+  /// How long an answer may get, for the forms that ask for a plain number.
+  ///
+  /// The box refuses one digit too many instead of silently swallowing it.
+  /// Most lessons stop at three (100 in the small range, 999 in the large
+  /// one); a place-value task adds up to four places, so the limit comes from
+  /// the task rather than from here.
   static const int maxInputDigits = 3;
 
   final LessonSpec lesson;
@@ -114,7 +117,7 @@ class PracticeController extends ChangeNotifier {
     if (_active == '0') {
       _setActive('$digit');
     } else {
-      if (_active.length >= maxInputDigits) return false;
+      if (_active.length >= currentTask.maxAnswerDigits) return false;
       _setActive('$_active$digit');
     }
     notifyListeners();

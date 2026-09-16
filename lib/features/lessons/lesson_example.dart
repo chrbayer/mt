@@ -113,6 +113,25 @@ class LessonExample extends StatelessWidget {
         countColor: ink,
       );
     }
+    // Place value names up to four parts. On one line the tile cuts them off
+    // after the second, which is where the interesting one usually sits.
+    if (task.form == TaskForm.placeValue) {
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          for (final part in task.placeParts)
+            Text(
+              part,
+              style: TextStyle(
+                fontSize: fontSize * 0.72,
+                color: ink,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+        ],
+      );
+    }
     // Both comparison lessons draw two real heaps with their numbers, the
     // same as the practice screen. Written out as text they lost the numbers
     // and, worse, the row and the cloud looked identical.

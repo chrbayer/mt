@@ -1,0 +1,3 @@
+A new lesson in the range up to 1000: put ones, tens, hundreds and thousands
+together into one number. The counts go past nine on purpose, because twelve
+tens are a hundred and twenty - and that is the whole point.

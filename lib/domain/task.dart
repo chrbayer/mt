@@ -124,9 +124,20 @@ class Task {
         TaskForm.dice ||
         TaskForm.compare ||
         TaskForm.sequence ||
-        TaskForm.quantityAdd =>
+        TaskForm.quantityAdd ||
+        TaskForm.placeValue =>
           false,
       };
+
+  /// The four place-value counts, smallest first: ones, tens, hundreds,
+  /// thousands. Zero means the place is not named at all.
+  ///
+  /// Four counts in three fields, and they fit: a thousands count above nine
+  /// would push the answer past 9999, so thousands and hundreds share `c` as
+  /// `100 * Tausender + Hunderter`. That keeps the task inside `operandA`,
+  /// `operandB` and `operandC`, which is what the database stores and what
+  /// the review list rebuilds a task from.
+  List<int> get places => [a, b, (c ?? 0) % 100, (c ?? 0) ~/ 100];
 
   /// Applies one operation to two numbers. Shared by [result] and
   /// [_chainResult] so the arithmetic itself is written down exactly once.
@@ -195,6 +206,12 @@ class Task {
         // b == 0 counts up from a, b == 1 counts down.
         TaskForm.sequence => b == 0 ? a + 3 : a - 3,
         TaskForm.quantityAdd => a + b,
+        // Ones, tens, hundreds, thousands - each count times what its place
+        // is worth.
+        TaskForm.placeValue => places[0] +
+            10 * places[1] +
+            100 * places[2] +
+            1000 * places[3],
       };
 
   /// The second number to enter, for the forms that ask for two. Null for the
@@ -214,6 +231,7 @@ class Task {
         TaskForm.compare ||
         TaskForm.sequence ||
         TaskForm.quantityAdd ||
+        TaskForm.placeValue ||
         TaskForm.chain =>
           null,
       };
@@ -250,8 +268,25 @@ class Task {
         TaskForm.compare => 'Wo sind mehr? Tippe die größere Anzahl.',
         TaskForm.sequence => 'Welche Zahl kommt danach?',
         TaskForm.quantityAdd => 'Wie viele sind es zusammen?',
+        TaskForm.placeValue => 'Welche Zahl ist das?',
         _ => null,
       };
+
+  /// The named places as text, smallest first: "5 Einer", "12 Zehner", …
+  ///
+  /// One per line on screen. Written as a single line they run off the edge
+  /// at the size the practice screen uses, and German spells these the same
+  /// in the singular, so a count of one needs no special case.
+  List<String> get placeParts => [
+        for (final (index, count) in places.indexed)
+          if (count > 0) '$count ${_placeNames[index]}'
+      ];
+
+  /// How many digits the answer can have.
+  ///
+  /// Three everywhere else - 100 in the small range, 999 in the large one -
+  /// but a place-value task adds up to four places and can reach 9999.
+  int get maxAnswerDigits => form == TaskForm.placeValue ? 4 : 3;
 
   /// U+2212 MINUS SIGN reads better than a hyphen at large font sizes. The
   /// multiplication dot and the colon are what German primary schools write.
@@ -272,6 +307,8 @@ class Task {
         // else says which one binds first, so the term has to stand there
         // and speak for itself.
         TaskForm.chain => '$a $opSymbol $b ${symbolOf(op2!)} $c =',
+        // The parts themselves, smallest first, as they were dictated.
+        TaskForm.placeValue => placeParts.join(', '),
         // These all draw their own picture; there is nothing to write.
         TaskForm.clock ||
         TaskForm.clockPhrase ||
@@ -292,6 +329,7 @@ class Task {
   /// [remainderAnswer] in the second one where there is one.
   String render(String answer, [String secondAnswer = '?']) => switch (form) {
         TaskForm.result => '$prefix $answer',
+        TaskForm.placeValue => '$prefix = $answer',
         TaskForm.gap => '$prefix $answer $suffix',
         TaskForm.partner => '$a \u2665 $answer',
         TaskForm.remainder => '$prefix $answer Rest $secondAnswer',
@@ -330,6 +368,9 @@ class Task {
   /// a few tasks. For the other forms the order does matter: `13 + ? = 81`
   /// and `68 + ? = 81` ask for different numbers.
   String get key {
+    // Two tasks that name the same counts are the same task; c holds two of
+    // the four, so it has to be part of the key.
+    if (form == TaskForm.placeValue) return '$a:$b:$c:places';
     // Unlike `result`, the order here is exactly what is being drilled: `3 ·
     // 6 + 40` and `40 − 3 · 6` are different facts, not the same one shown
     // two ways.
@@ -358,6 +399,9 @@ class Task {
   @override
   String toString() => render('?');
 }
+
+/// What the four places are called, smallest first.
+const _placeNames = ['Einer', 'Zehner', 'Hunderter', 'Tausender'];
 
 /// A finished task together with how it went. Collected in memory during a
 /// run and written to the database when the session ends.
