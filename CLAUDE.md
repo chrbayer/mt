@@ -1456,15 +1456,44 @@ Wochenkarte" war sonst sechs Tage die Woche wahr und sonntags falsch, weil
 beide dann im selben Moment ablaufen und das Alter entscheidet. Ein Test, der
 einmal die Woche umkippt, liest sich beim nächsten Mal als echter Fehler.
 
+## Mit Tausendern
+
+Die Gruppe steht zwischen „Bis 1000" und dem Einmaleins und bleibt **unter
+10000**. Sie rechnet nicht mit beliebigen vierstelligen Zahlen, sondern mit
+glatten: ganze Tausender, ganze Hunderter, dieselbe Frage rückwärts als
+Platzhalter, die Stellen bis zum Tausender und zum Schluss Plus und Minus
+ohne Übergang.
+
+**„Glatt" ist eine Eigenschaft der Zahlen, keine eigene Aufgabenform.**
+`LessonSpec.roundTo` sagt, welches Vielfache beide Operanden sein müssen —
+1000 oder 100. Geschrieben, beantwortet, gespeichert und wiedervorgelegt wird
+so eine Aufgabe wie jede andere Addition; eine eigene `TaskForm` bräuchte
+Anzeige, Speicherung und Wiedervorlage noch einmal, ohne dass sich etwas
+davon unterschiede. Der Generator zieht die Vielfachen direkt, statt frei zu
+ziehen und dann zu verwerfen.
+
+Zwei Regeln mussten davon wissen. Das **Kontingent für leichte Operanden**
+gilt hier nicht: in einer Lektion aus glatten Tausendern ist jede Zahl durch
+zehn teilbar, ein Fünftel-Deckel ließe keine Aufgabe übrig — dieselbe
+Ausnahme wie in der 10er-Reihe. Und die **Übergangsstellen** gehen bis zur
+Hunderterstelle, sonst wäre „ohne Übergang" bei vierstelligen Zahlen keine
+Aussage.
+
+Die Zielzeit bekommt einen Abschlag: glatte Tausender sind das kleine
+Einmaleins mit drei Nullen dahinter, und ohne `byRound` würden sie gemessen
+wie echtes vierstelliges Rechnen.
+
 ## Stellenwerte
 
 `TaskForm.placeValue` fragt andersherum als der Rest des Katalogs: nicht „was
 ergibt das", sondern „welche Zahl ist das" — 5 Einer, 12 Zehner, 3 Hunderter
 sind 425.
 
-Die Form steckt **zweimal** im Katalog, einmal je Zahlenraum: Einer und Zehner
-in „Bis 100", dazu die Hunderter in „Bis 1000". Keine Lektion nennt Stellen,
-die über ihren Zahlenraum hinausführen. Wie weit eine Aufgabe reicht,
+Die Form steckt **dreimal** im Katalog, einmal je Zahlenraum: Einer und
+Zehner in „Bis 100", dazu die Hunderter in „Bis 1000", dazu die Tausender in
+„Mit Tausendern". Keine Lektion nennt Stellen, die über ihren Zahlenraum
+hinausführen — die Tausender standen zuerst in „Bis 1000", und damit ging die
+Antwort bis 9999 in einer Gruppe, die anders heißt. Wie weit eine Aufgabe reicht,
 entscheidet `_samplePlaceValue` an der **Gruppe** der Lektion, nicht an der
 Form — die höchste Stelle und die Obergrenze der Antwort kommen von dort. Eine
 weitere Stufe braucht deshalb nur einen Fall mehr in diesem `switch`.
@@ -1490,8 +1519,10 @@ Tastatur eine fünfte Ziffer. `Task.places` packt es wieder aus, `Task.key`
 nimmt `c` mit auf — sonst gälten zwei Aufgaben mit verschiedenen Hundertern
 als dieselbe.
 
-Die Antwort darf deshalb **vier Ziffern** haben. Wie viele es sind, sagt
-`Task.maxAnswerDigits`, nicht mehr eine Konstante im Controller.
+Wie viele Ziffern die Antwort haben darf, sagt `Task.maxAnswerDigits` und
+nicht mehr eine Konstante im Controller: drei bis 999, vier darüber. Das gilt
+für jede Aufgabe, nicht nur für die Stellenwerte — in „Mit Tausendern"
+brauchen auch die Summen vier Ziffern.
 
 Auf dem Bildschirm steht **jeder Teil in einer eigenen Zeile**, im
 Übungsbildschirm wie auf der Kachel. In einer Zeile läuft „94 Einer, 9 Zehner,

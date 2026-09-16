@@ -395,3 +395,11 @@ bewusst über neun hinaus, hohe Stellen und große Anzahlen werden seltener
 gezogen. Die Antwort bleibt unter 10000 und darf als einzige im Katalog vier
 Ziffern haben. Die Teile stehen untereinander, weil sie in einer Zeile über den
 Rand liefen.
+
+#53 erledigt (2.14.0) — Neue Gruppe „Mit Tausendern" zwischen „Bis 1000" und
+dem Einmaleins, mit fünf Lektionen: glatte Tausender, glatte Hunderter, ein
+Platzhalter dazwischen, die Stellen bis zum Tausender und Plus und Minus ohne
+Übergang. „Glatt" ist dabei eine Eigenschaft der Zahlen (`roundTo`) und keine
+eigene Aufgabenform. Die Stellenwertlektion in „Bis 1000" hört dafür bei den
+Hundertern auf; sie hatte vorher Antworten bis 9999 in einer Gruppe, die
+anders heißt.

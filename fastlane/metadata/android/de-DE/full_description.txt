@@ -6,10 +6,10 @@ antreten.
 Sie läuft vollständig offline. Kein Konto, keine Werbung, keine Analyse und
 keine Internetberechtigung — die App kann gar nichts übertragen.
 
-<b>78 Lektionen in neun Gruppen</b>
+<b>83 Lektionen in zehn Gruppen</b>
 
-Erste Schritte, Bis 10, Bis 20, Bis 100, Bis 1000, Einmaleins, Einmaleins
-rückwärts, Mal und Geteilt, Uhrzeit und Geld. Ab 20 bietet jede Gruppe Plus
+Erste Schritte, Bis 10, Bis 20, Bis 100, Bis 1000, Mit Tausendern,
+Einmaleins, Einmaleins rückwärts, Mal und Geteilt, Uhrzeit und Geld. Ab 20 bietet jede Gruppe Plus
 und Minus mit und ohne Zehnerübergang, Aufgaben mit Platzhalter und eine
 gemischte Lektion.
 

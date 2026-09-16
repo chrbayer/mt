@@ -140,7 +140,7 @@ void main() {
         ),
     // The tallest task there is: up to four named places, one per line.
     '03d-stellenwerte': () => PracticeScreen(
-          lesson: lessonById('place_value_1000'),
+          lesson: lessonById('place_value_10000'),
           taskCount: 10,
         ),
     // Pictures to count, dice to read, two heaps to compare, a number line.

@@ -16,6 +16,11 @@ enum LessonGroup {
   upTo20,
   upTo100,
   upTo1000,
+
+  /// Working with thousands, but not with arbitrary four-digit numbers: whole
+  /// thousands and whole hundreds, a placeholder among them, the places by
+  /// name, and adding without crossing. Everything stays below 10000.
+  withThousands,
   timesTables,
   reverseTimesTables,
   timesAndDivision,
@@ -29,6 +34,7 @@ String groupTitle(LessonGroup group) => switch (group) {
       LessonGroup.upTo20 => 'Bis 20',
       LessonGroup.upTo100 => 'Bis 100',
       LessonGroup.upTo1000 => 'Bis 1000',
+      LessonGroup.withThousands => 'Mit Tausendern',
       LessonGroup.timesTables => 'Einmaleins',
       LessonGroup.reverseTimesTables => 'Einmaleins rückwärts',
       LessonGroup.timesAndDivision => 'Mal und Geteilt',
@@ -177,6 +183,14 @@ class LessonSpec {
   /// 3 and at 15 o'clock, so these tasks also name the part of the day.
   final bool clock24;
 
+  /// When set, both operands are multiples of this - 1000 for whole
+  /// thousands, 100 for whole hundreds.
+  ///
+  /// A property of the numbers, not a form of its own: "3000 + 4000 = ?" is
+  /// still written, answered and stored like any other addition. Zero means
+  /// the lesson draws freely.
+  final int roundTo;
+
   /// Whether this lesson is measured and ranked.
   ///
   /// The first steps are not: no clock, no leaderboard, and the stars are for
@@ -194,6 +208,7 @@ class LessonSpec {
     required this.carry,
     required this.form,
     this.fixedSum,
+    this.roundTo = 0,
     this.timesTable,
     this.scale = FactorScale.table,
     this.minuteStep = 0,
@@ -224,6 +239,9 @@ class LessonSpec {
       LessonGroup.upTo20 => 4000,
       LessonGroup.upTo100 => 6000,
       LessonGroup.upTo1000 => 9000,
+      // Four-digit numbers, but the lessons here lean on whole thousands and
+      // hundreds rather than on hard column arithmetic.
+      LessonGroup.withThousands => 11000,
       // A row of the times table is learnt by heart, so it is quick once it
       // sits - quicker than adding two-digit numbers.
       LessonGroup.timesTables => 4000,
@@ -255,6 +273,15 @@ class LessonSpec {
       _ => 1.0,
     };
 
+    // Whole thousands are the small table with three noughts behind it, and
+    // whole hundreds are barely harder. Without this they would be measured
+    // as if every one of them were real four-digit arithmetic.
+    final byRound = switch (roundTo) {
+      >= 1000 => 0.6,
+      >= 100 => 0.8,
+      _ => 1.0,
+    };
+
     final byCarry = carry == CarryMode.required ? 1.15 : 1.0;
     final byOp = op == ArithmeticOp.mixed ? 1.1 : 1.0;
 
@@ -271,7 +298,9 @@ class LessonSpec {
 
     // To a tenth of a second: the targets are shown to children, and
     // "6,9 s" is a number to aim at while "6,873 s" is noise.
-    return ((base * byForm * byCarry * byOp * byTable) / 100).round() * 100;
+    return ((base * byForm * byRound * byCarry * byOp * byTable) / 100)
+            .round() *
+        100;
   }
 
   @override
@@ -857,6 +886,69 @@ const _placeValueTo1000 = LessonSpec(
   form: TaskForm.placeValue,
 );
 
+/// Working with thousands, below ten thousand throughout.
+///
+/// Whole thousands first - that is the small times table with three noughts
+/// behind it - then whole hundreds, then the same backwards as a placeholder.
+/// The place-value question gets its fourth place here, where thousands
+/// belong, and the last lesson adds and subtracts for real, but without a
+/// crossing.
+const _withThousandsLessons = [
+  LessonSpec(
+    id: 'round_thousands',
+    title: 'Glatte Tausender',
+    description: '3000 + 4000, 8000 − 5000: rechne mit ganzen Tausendern. '
+        'Wer 3 + 4 kann, kann das auch.',
+    group: LessonGroup.withThousands,
+    op: ArithmeticOp.mixed,
+    carry: CarryMode.any,
+    form: TaskForm.result,
+    roundTo: 1000,
+  ),
+  LessonSpec(
+    id: 'round_hundreds',
+    title: 'Glatte Hunderter',
+    description: '2300 + 400, 5600 − 200: rechne mit ganzen Hundertern. '
+        'Hier geht es auch über den Tausender.',
+    group: LessonGroup.withThousands,
+    op: ArithmeticOp.mixed,
+    carry: CarryMode.any,
+    form: TaskForm.result,
+    roundTo: 100,
+  ),
+  LessonSpec(
+    id: 'round_gap',
+    title: 'Glatte Zahlen mit Platzhalter',
+    description: '3000 + ? = 7000. Was fehlt bis zur Zahl? Rückwärts gedacht.',
+    group: LessonGroup.withThousands,
+    op: ArithmeticOp.mixed,
+    carry: CarryMode.any,
+    form: TaskForm.gap,
+    roundTo: 1000,
+  ),
+  LessonSpec(
+    id: 'place_value_10000',
+    title: 'Einer, Zehner, Hunderter, Tausender',
+    description: 'Wie viele Einer, Zehner, Hunderter und Tausender sind es? '
+        'Welche Zahl ist das zusammen? Es können auch mehr als neun von einer '
+        'Sorte sein.',
+    group: LessonGroup.withThousands,
+    op: ArithmeticOp.add,
+    carry: CarryMode.any,
+    form: TaskForm.placeValue,
+  ),
+  LessonSpec(
+    id: 'add_sub_10000_plain',
+    title: 'Plus und Minus ohne Übergang',
+    description: '4200 + 350, 6870 − 40: vierstellig rechnen, aber ohne '
+        'Übergang. Jede Stelle für sich.',
+    group: LessonGroup.withThousands,
+    op: ArithmeticOp.mixed,
+    carry: CarryMode.none,
+    form: TaskForm.result,
+  ),
+];
+
 /// The full, fixed lesson catalog, ordered from the first steps up to 1000.
 /// It opens with the pairs that make ten.
 final List<LessonSpec> lessonCatalog = List.unmodifiable([
@@ -868,6 +960,7 @@ final List<LessonSpec> lessonCatalog = List.unmodifiable([
   _placeValueTo100,
   ..._rangeGroup(LessonGroup.upTo1000, '1000', nameTheTen: false),
   _placeValueTo1000,
+  ..._withThousandsLessons,
   ..._timesTableLessons(),
   ..._reverseTimesTableLessons(),
   ..._timesAndDivisionLessons,

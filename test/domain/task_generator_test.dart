@@ -50,6 +50,8 @@ void main() {
                     LessonGroup.upTo20 => 20,
                     LessonGroup.upTo100 => 100,
                     LessonGroup.upTo1000 => 999,
+                    // Whole thousands and four-digit sums, all below 10000.
+                    LessonGroup.withThousands => 9999,
                     // The small times table tops out at 10 x 10, and every division
                     // is built backwards from it.
                     LessonGroup.timesTables => 100,
@@ -160,6 +162,10 @@ void main() {
         if (lesson.group == LessonGroup.everyday) return;
         // The first steps deal in ones and fives by their very nature.
         if (lesson.group == LessonGroup.firstSteps) return;
+        // A lesson of whole thousands is round from end to end. Capping that
+        // would leave it without tasks - the same exception the production
+        // rule makes.
+        if (lesson.roundTo > 0) return;
         // Round tens and the operand 1 are allowed, but a fifth of the run at
         // most - otherwise a small number range turns into a plus-one drill.
         for (final seed in seeds) {
@@ -1180,8 +1186,8 @@ void main() {
   });
 
   group('lesson catalog', () {
-    test('has 78 lessons in nine groups with unique ids', () {
-      expect(lessonCatalog, hasLength(78));
+    test('has 83 lessons in ten groups with unique ids', () {
+      expect(lessonCatalog, hasLength(83));
       expect(lessonsInGroup(LessonGroup.firstSteps), hasLength(12));
       expect(lessonsInGroup(LessonGroup.everyday), hasLength(9));
       // Nine rows of the times table plus a mixed one.
@@ -1196,8 +1202,11 @@ void main() {
       expect(lessonsInGroup(LessonGroup.upTo20), hasLength(7));
       expect(lessonsInGroup(LessonGroup.upTo100), hasLength(8));
       expect(lessonsInGroup(LessonGroup.upTo1000), hasLength(8));
+      // Whole thousands, whole hundreds, a placeholder, the places by name,
+      // and adding without crossing.
+      expect(lessonsInGroup(LessonGroup.withThousands), hasLength(5));
       expect(lessonCatalog.first.id, 'count_pictures');
-      expect(lessonCatalog.map((l) => l.id).toSet(), hasLength(78));
+      expect(lessonCatalog.map((l) => l.id).toSet(), hasLength(83));
     });
 
     // The rule the numerals follow: a number belongs where an amount is meant

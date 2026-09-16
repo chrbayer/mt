@@ -25,7 +25,8 @@ void main() {
 
   group('a group the setting has never seen', () {
     test('comes along when it borders one the child already has', () {
-      // Up to 1000 is on, and the times tables sit right next to it.
+      // Working with thousands is on, and the times tables sit right next
+      // to it.
       final visible = visibleGroups(
         hidden: const {},
         known: allBut([LessonGroup.timesTables]),
@@ -35,7 +36,7 @@ void main() {
 
     test('stays away when both its neighbours are switched off', () {
       final visible = visibleGroups(
-        hidden: {LessonGroup.upTo1000, LessonGroup.reverseTimesTables},
+        hidden: {LessonGroup.withThousands, LessonGroup.reverseTimesTables},
         known: allBut([LessonGroup.timesTables]),
       );
       expect(visible, isNot(contains(LessonGroup.timesTables)));
@@ -66,7 +67,7 @@ void main() {
       // has and comes along; the earlier one borders only its hidden
       // neighbour and its brand-new one, and stays away.
       final visible = visibleGroups(
-        hidden: {LessonGroup.upTo1000},
+        hidden: {LessonGroup.withThousands},
         known: allBut([LessonGroup.timesTables, LessonGroup.reverseTimesTables]),
       );
       expect(visible, contains(LessonGroup.reverseTimesTables));

@@ -10,15 +10,19 @@ List<Task> _draw(String id, {int runs = 60, int count = 20}) => [
     ];
 
 void main() {
-  // The same lesson twice, one range apart: ones and tens below a hundred,
-  // hundreds on top below a thousand. Neither names a place that would take
-  // the answer out of its range.
-  const ranges = {'place_value_100': 99, 'place_value_1000': 999};
+  // The same lesson once per range: ones and tens below a hundred, hundreds
+  // on top below a thousand, thousands where thousands belong. None of them
+  // names a place that would take the answer out of its range.
+  const ranges = {
+    'place_value_100': 99,
+    'place_value_1000': 999,
+    'place_value_10000': 9999,
+  };
 
   for (final MapEntry(key: id, value: biggest) in ranges.entries) {
     group(id, () {
       final tasks = _draw(id);
-      final highest = biggest == 99 ? 1 : 2;
+      final highest = switch (biggest) { 99 => 1, 999 => 2, _ => 3 };
 
       test('the answer is what the named places add up to', () {
         for (final task in tasks) {
@@ -80,11 +84,12 @@ void main() {
   }
 
   test('the higher the place, the rarer it is named', () {
-    final tasks = _draw('place_value_1000');
+    final tasks = _draw('place_value_10000');
     int named(int place) =>
         tasks.where((task) => task.places[place] > 0).length;
     expect(named(0), greaterThan(named(2)));
     expect(named(1), greaterThan(named(2)));
+    expect(named(2), greaterThan(named(3)));
   });
 
   test('the text names the parts from the ones upwards', () {
@@ -94,7 +99,8 @@ void main() {
     expect(task.placeParts, ['5 Einer', '12 Zehner', '3 Hunderter']);
     expect(task.expected, 5 + 120 + 300);
     expect(task.question, 'Welche Zahl ist das?');
-    expect(task.maxAnswerDigits, 4);
+    // Three digits are enough for this one; the box grows with the answer.
+    expect(task.maxAnswerDigits, 3);
   });
 
   test('a place that is not named is left out of the text', () {
@@ -102,6 +108,7 @@ void main() {
         Task(a: 0, b: 4, c: 200, op: Operation.add, form: TaskForm.placeValue);
     expect(task.prefix, '4 Zehner, 2 Tausender');
     expect(task.expected, 2040);
+    expect(task.maxAnswerDigits, 4);
   });
 
   test('two tasks with different hundreds are different tasks', () {

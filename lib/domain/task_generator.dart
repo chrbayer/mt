@@ -14,6 +14,10 @@ import 'task.dart';
 const double _maxEasyShare = 0.2;
 
 bool _isEasy(LessonSpec lesson, Task task) {
+  // A lesson made of whole thousands consists of nothing but round numbers.
+  // Capping them would leave it with no tasks at all - the same reasoning as
+  // in the 10er-Reihe, where every task contains a ten.
+  if (lesson.roundTo > 0) return false;
   // The rule only fits the number ranges from 20 upwards, where "47 + 1" is a
   // freebie next to "47 + 38". Up to 10, 1 and 10 are two of eleven numbers.
   // In the 10er-Reihe every single task contains a ten, and a division by ten
@@ -29,6 +33,7 @@ bool _isEasy(LessonSpec lesson, Task task) {
     case LessonGroup.upTo20:
     case LessonGroup.upTo100:
     case LessonGroup.upTo1000:
+    case LessonGroup.withThousands:
       return task.a % 10 == 0 ||
           task.b % 10 == 0 ||
           task.a == 1 ||
@@ -436,8 +441,10 @@ Task? _samplePlaceValue(LessonSpec lesson, Random random) {
   final (highest, biggest) = switch (lesson.group) {
     // Ones and tens, and the answer stays two-digit.
     LessonGroup.upTo100 => (1, 99),
+    // Thousands belong to the group that has thousands in it.
+    LessonGroup.withThousands => (3, 9999),
     // Up to hundreds, and the answer stays inside the range the group is
-    // named after. Thousands belong to a group that has thousands in it.
+    // named after.
     _ => (2, 999),
   };
 
@@ -703,6 +710,32 @@ Task? _sampleSum(LessonSpec lesson, Operation op, Random random) {
       final maxB = a - 10;
       if (maxB < 1) return null;
       b = zeroResult ? a : _between(random, 1, maxB);
+    // Whole thousands and whole hundreds: draw the multiples themselves, so
+    // the numbers are round by construction rather than by rejection.
+    case (LessonGroup.withThousands, Operation.add) when lesson.roundTo > 0:
+      final step = lesson.roundTo;
+      a = step * _between(random, 1, 9999 ~/ step - 1);
+      final maxB = (9999 - a) ~/ step;
+      if (maxB < 1) return null;
+      b = step * _between(random, 1, maxB);
+    case (LessonGroup.withThousands, Operation.sub) when lesson.roundTo > 0:
+      final step = lesson.roundTo;
+      a = step * _between(random, 2, 9999 ~/ step);
+      final maxB = a ~/ step - 1;
+      if (maxB < 1) return null;
+      b = zeroResult ? a : step * _between(random, 1, maxB);
+    // Four-digit numbers for real. The second operand starts at 100 so the
+    // task is not a four-digit number with a crumb added to it.
+    case (LessonGroup.withThousands, Operation.add):
+      a = _between(random, 1000, 8999);
+      final maxB = 9999 - a;
+      if (maxB < 100) return null;
+      b = _between(random, 100, maxB);
+    case (LessonGroup.withThousands, Operation.sub):
+      a = _between(random, 1100, 9999);
+      final maxB = a - 100;
+      if (maxB < 100) return null;
+      b = zeroResult ? a : _between(random, 100, maxB);
     case (LessonGroup.timesTables, _):
     case (LessonGroup.reverseTimesTables, _):
     case (LessonGroup.timesAndDivision, _):
@@ -719,7 +752,12 @@ Task? _sampleSum(LessonSpec lesson, Operation op, Random random) {
   // tens up to 1000. A carry out of the tens digit up to 100 would mean
   // crossing 100, which the ranges above already exclude. Up to 10 nothing can
   // cross at all, which is why those lessons all use CarryMode.any.
-  final places = lesson.group == LessonGroup.upTo1000 ? 2 : 1;
+  final places = switch (lesson.group) {
+    LessonGroup.upTo1000 => 2,
+    // Ones, tens and hundreds can all carry below ten thousand.
+    LessonGroup.withThousands => 3,
+    _ => 1,
+  };
   final crosses = op == Operation.add
       ? _hasCarry(a, b, places)
       : _hasBorrow(a, b, places);

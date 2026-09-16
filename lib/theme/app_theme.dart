@@ -65,6 +65,7 @@ abstract final class AppColors {
     Color(0xFFE1F2F3), // Bis 20 - Türkis
     Color(0xFFE4EEFA), // Bis 100 - Himmel
     Color(0xFFEAE9F8), // Bis 1000 - Lavendel
+    Color(0xFFE9F0DF), // Mit Tausendern - Salbei
     Color(0xFFFBF2DA), // Einmaleins - Sonne
     Color(0xFFFCEBDB), // Einmaleins rückwärts - Apricot
     Color(0xFFFBE9EE), // Mal und Geteilt - Rosé
@@ -79,6 +80,7 @@ abstract final class AppColors {
     Color(0xFFC3D2D3),
     Color(0xFFC6CFD9),
     Color(0xFFCBCAD7),
+    Color(0xFFCBD0BE),
     Color(0xFFDAD2BD),
     Color(0xFFDBCCBE),
     Color(0xFFDACACF),

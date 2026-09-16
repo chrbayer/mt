@@ -1,4 +1,4 @@
-Two new place-value lessons: ones and tens up to 100, and ones, tens
-and hundreds up to 1000. The counts are put together into one
-number, and they go past nine on purpose - twelve tens are a hundred and
-twenty, and that is the whole point.
+New: the group "Mit Tausendern" with five lessons - whole thousands and
+hundreds, a placeholder among them, the places by name up to thousands, and
+adding without crossing. Plus place-value lessons up to 100 and up to 1000:
+counts make the number, and twelve tens are a hundred and twenty.

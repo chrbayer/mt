@@ -124,6 +124,7 @@ void main() {
         LessonGroup.upTo10,
         LessonGroup.upTo20,
         LessonGroup.upTo100,
+        LessonGroup.withThousands,
         LessonGroup.reverseTimesTables,
       ]);
       expect(reloaded.shows(LessonGroup.timesTables), isFalse);
@@ -147,7 +148,7 @@ void main() {
       // yet, with both of the neighbouring groups switched off.
       await (db.update(db.users)..where((u) => u.id.equals(id))).write(
         UsersCompanion(
-          hiddenGroups: const Value('upTo1000,reverseTimesTables'),
+          hiddenGroups: const Value('withThousands,reverseTimesTables'),
           knownGroups: Value(groupNames(
               LessonGroup.values.toSet()..remove(LessonGroup.timesTables))),
         ),
@@ -160,7 +161,7 @@ void main() {
 
       // Once a parent has looked at the list, the group is no longer new:
       // leaving it on is now a decision like any other.
-      await users.setHiddenGroups(id, {LessonGroup.upTo1000});
+      await users.setHiddenGroups(id, {LessonGroup.withThousands});
       final decided = (await users.findUser(id))!;
       expect(decided.shows(LessonGroup.timesTables), isTrue);
       expect(decided.known, LessonGroup.values.toSet());

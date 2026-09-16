@@ -284,9 +284,10 @@ class Task {
 
   /// How many digits the answer can have.
   ///
-  /// Three everywhere else - 100 in the small range, 999 in the large one -
-  /// but a place-value task adds up to four places and can reach 9999.
-  int get maxAnswerDigits => form == TaskForm.placeValue ? 4 : 3;
+  /// The box refuses one digit too many instead of swallowing it, and how
+  /// many that is depends on the task rather than on the app: three up to a
+  /// thousand, four for the lessons that work with thousands.
+  int get maxAnswerDigits => expected > 999 ? 4 : 3;
 
   /// U+2212 MINUS SIGN reads better than a hyphen at large font sizes. The
   /// multiplication dot and the colon are what German primary schools write.
