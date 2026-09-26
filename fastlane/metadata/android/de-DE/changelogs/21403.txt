@@ -1,0 +1,5 @@
+Eine Pause, die abgelaufen ist, während das Tablet schlief, gibt jetzt
+wieder frei. Vorher konnte nach dem Aufwachen noch Stunden später „Weiter
+geht es um 11:15 - gleich" dastehen, obwohl die Pause längst vorbei war.
+
+Dazu mit einer neueren Flutter-Version gebaut.

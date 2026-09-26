@@ -1,0 +1,5 @@
+A break that ran out while the tablet was asleep now ends properly. Before,
+waking the tablet could still show the break notice hours later, long after
+the break was over.
+
+Also built with a newer Flutter version.
