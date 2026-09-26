@@ -146,7 +146,7 @@ APK vor dem Hochladen.
 * `LICENSE` ist der volle GPL-3-Text, und README nennt „Version 3 oder
   später" — daher `GPL-3.0-or-later`.
 * Die App baut und läuft auf dem **stabilen** Kanal; `pubspec.yaml` verlangt
-  Dart `^3.13.0`, und das erfüllt Flutter 3.47.4.
+  Dart `^3.13.0`, und das erfüllt Flutter 3.47.5.
 * **Reproducible Builds sind bestätigt.** Für 2.13.9 hat der CI-Schritt
   `fdroid build` alle drei APKs selbst gebaut und für 213091, 213092 und
   213093 gemeldet: „compared built binary to supplied reference binary
