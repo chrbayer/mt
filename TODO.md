@@ -409,3 +409,11 @@ Bereichen zur Wahl, die das Kind auch sieht; eine Aufgabe aus einem
 abgeschalteten Bereich wäre unerfüllbar gewesen. Was schon in der Aufgabe
 steht, bleibt in der Liste, sonst ließe es sich nicht mehr herausnehmen. Die
 Regel steht als reine Funktion in der Fachlogik und ist dort geprüft.
+
+#55 erledigt (2.14.2) — Eine Pause, die ablief, während das Tablet schlief,
+blieb nach dem Aufwachen stehen: um 13 Uhr hieß es noch „Weiter geht es um
+11:15 - gleich". Der Pausenwecker ist ein Dart-Timer auf der monotonen Uhr,
+die im Standby stillsteht, und das Zurückkehren in den Vordergrund fragte nur
+den Tagesbeginn neu, der am selben Tag unverändert blieb. `refreshDay` fragt
+jetzt auch die Erlaubnis selbst neu; ein Test stellt den Sprung der Wanduhr
+ohne Timer nach.

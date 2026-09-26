@@ -944,6 +944,14 @@ Vordergrund** (`app.dart`) — die eine Stelle, an der eine durchlebte Nacht
 verlässlich auffällt. Der Pausenwecker macht es zusätzlich mit, denn wenn der
 Weckruf Mitternacht ist, hat sich der Tag geändert.
 
+`refreshDay` fragt dabei auch **die Erlaubnis selbst** neu
+(`practiceAllowanceForProvider`), nicht nur über den Tagesbeginn. Am selben
+Tag kommt dort derselbe Wert heraus, Riverpod sieht keine Änderung und sagt
+niemandem Bescheid. Und auf den Pausenwecker ist nach dem Aufwachen kein
+Verlass: ein Dart-`Timer` läuft auf der monotonen Uhr, und die steht still,
+solange das Tablet schläft. Ein Kind, das um 11 Uhr gesperrt wurde, las um
+13 Uhr noch „Weiter geht es um 11:15 - gleich".
+
 Einen **eigenen Timer bis Mitternacht** hat `dayStartProvider` bewusst nicht:
 ein schwebender Weckruf hält jeden Widget-Test wach, und das kostete beim
 ersten Versuch fünfzehn Tests. Aus demselben Grund darf die Frage auch nicht

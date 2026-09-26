@@ -410,7 +410,17 @@ final dayStartProvider = Provider<int>((ref) {
 /// the app coming back to the foreground. Invalidating it from inside a run
 /// being prepared looked tempting and was worse than the bug - the screen
 /// under it watches the allowance, so the rebuild it set off never settled.
-void refreshDay(WidgetRef ref) => ref.invalidate(dayStartProvider);
+///
+/// The allowance is asked again as well, and not just through the day
+/// boundary: on the same day that boundary comes back unchanged, Riverpod
+/// sees an equal value and tells nobody. The break alarm is no help either -
+/// a Dart [Timer] runs on the monotonic clock, which stands still while an
+/// Android tablet sleeps. A child locked at 11:00 and picking the tablet up
+/// again at 13:00 was still told "weiter um 11:15 - gleich".
+void refreshDay(WidgetRef ref) {
+  ref.invalidate(dayStartProvider);
+  ref.invalidate(practiceAllowanceForProvider);
+}
 
 /// How many runs of one lesson may still earn something today, for one
 /// child: their own cap where they have one, the app-wide one where not.

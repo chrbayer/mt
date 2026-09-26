@@ -301,6 +301,38 @@ void main() {
     expect(container.read(dayStartProvider), greaterThan(before));
   });
 
+  testWidgets('a break that ended while the tablet slept is over on waking',
+      (tester) async {
+    await setLimit(limit: 20, pause: 15);
+    await practise(minutes: 22, endedMinutesAgo: 0);
+    tester.view.physicalSize = const Size(2400, 1500);
+    tester.view.devicePixelRatio = 2.0;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(UncontrolledProviderScope(
+      container: container,
+      child: MaterialApp(
+        theme: buildAppTheme(),
+        home: const _Resumable(child: LessonHomeScreen()),
+      ),
+    ));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.byType(PauseNotice), findsOneWidget);
+
+    // Two hours on the wall clock, none on the monotonic one: the break
+    // alarm is a Timer, and while an Android tablet sleeps it does not run.
+    clock = clock.add(const Duration(hours: 2));
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(find.byType(PauseNotice), findsNothing);
+
+    // The alarm set before the jump is still pending; let it run out so the
+    // harness finds no timer left behind.
+    await tester.pump(const Duration(minutes: 16));
+  });
+
   testWidgets('with the cap lifted the same run may start', (tester) async {
     await setLimit(limit: 60, pause: 15);
     await practise(minutes: 25, endedMinutesAgo: 1);
@@ -542,4 +574,37 @@ void main() {
     expect(find.textContaining('noch 14 Minuten'), findsOneWidget);
     await waitOut(tester, const Duration(minutes: 16));
   });
+}
+
+/// The lifecycle hook of [MatheTrainerApp], around any screen - the app
+/// itself always starts on the profile picker.
+class _Resumable extends ConsumerStatefulWidget {
+  final Widget child;
+  const _Resumable({required this.child});
+
+  @override
+  ConsumerState<_Resumable> createState() => _ResumableState();
+}
+
+class _ResumableState extends ConsumerState<_Resumable>
+    with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) refreshDay(ref);
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
 }
