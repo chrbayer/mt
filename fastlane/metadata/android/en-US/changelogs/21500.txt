@@ -1,0 +1,6 @@
+Finished assignments can be hidden: for the child in the filter menu, and in
+the parent area with a switch of its own. There, "set again" turns a finished
+assignment into a new one with all its old settings.
+
+The undo offer after deleting a run disappears by itself again and no longer
+follows you onto other screens.

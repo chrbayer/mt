@@ -30,6 +30,10 @@ import 'start_lesson_sheet.dart';
 /// This is the phone held sideways.
 const double _compactBarWidth = 950;
 
+/// Sentinel value for the one non-[LessonFilter] entry in the app bar's
+/// popup menu, so `onSelected` can tell the two kinds of item apart.
+enum _MenuToggle { hideDoneAssignments }
+
 class LessonHomeScreen extends ConsumerWidget {
   const LessonHomeScreen({super.key});
 
@@ -98,25 +102,36 @@ class LessonHomeScreen extends ConsumerWidget {
           // The filter belongs here rather than in the settings: it changes
           // what is on this screen, and a child should be able to put the
           // catalogue back without going looking for a switch.
-          PopupMenuButton<LessonFilter>(
-            tooltip: 'Fertige Lektionen ausblenden',
+          //
+          // Typed on `Object` rather than `LessonFilter`: the menu now also
+          // carries the assignment toggle below, and `onSelected` tells the
+          // two apart by type.
+          PopupMenuButton<Object>(
+            tooltip: 'Fertiges ausblenden',
             icon: Icon(
-              user.filter == LessonFilter.all
+              user.filter == LessonFilter.all && !user.hideDoneAssignments
                   ? Icons.filter_list_off
                   : Icons.filter_list,
               size: 28,
-              color: user.filter == LessonFilter.all
-                  ? AppColors.textMuted
-                  : AppColors.primary,
+              color:
+                  user.filter == LessonFilter.all && !user.hideDoneAssignments
+                      ? AppColors.textMuted
+                      : AppColors.primary,
             ),
-            onSelected: (filter) =>
-                ref.read(userRepositoryProvider).setLessonFilter(
-                      user.id,
-                      filter,
-                    ),
+            onSelected: (value) {
+              final repository = ref.read(userRepositoryProvider);
+              if (value is LessonFilter) {
+                repository.setLessonFilter(user.id, value);
+              } else if (value == _MenuToggle.hideDoneAssignments) {
+                repository.setHideDoneAssignments(
+                  user.id,
+                  !user.hideDoneAssignments,
+                );
+              }
+            },
             itemBuilder: (context) => [
               for (final filter in LessonFilter.values)
-                PopupMenuItem<LessonFilter>(
+                PopupMenuItem<Object>(
                   value: filter,
                   child: Row(
                     children: [
@@ -140,6 +155,32 @@ class LessonHomeScreen extends ConsumerWidget {
                     ],
                   ),
                 ),
+              // Only where there is something to hide: with no assignment at
+              // all, this switch would have nothing to do.
+              if (assignments.isNotEmpty) ...[
+                const PopupMenuDivider(),
+                PopupMenuItem<Object>(
+                  value: _MenuToggle.hideDoneAssignments,
+                  child: Row(
+                    children: [
+                      Icon(
+                        user.hideDoneAssignments
+                            ? Icons.check_box
+                            : Icons.check_box_outline_blank,
+                        size: 22,
+                        color: user.hideDoneAssignments
+                            ? AppColors.primary
+                            : AppColors.textMuted,
+                      ),
+                      const SizedBox(width: 12),
+                      const Flexible(
+                        child: Text('Erledigte Aufgaben ausblenden',
+                            style: TextStyle(fontSize: 19)),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ],
           ),
           const SizedBox(width: 4),
@@ -209,11 +250,17 @@ class LessonHomeScreen extends ConsumerWidget {
                 // Above the recommendation and above the break notice: an
                 // assignment answers "what now?" better than either, and a
                 // finished card is the reward for finishing it.
-                if (assignments.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 28),
-                    child: _AssignmentGroup(assignments: assignments),
-                  ),
+                //
+                // No `if (assignments.isNotEmpty)` guard here any more: once
+                // a single assignment's day is over unless carried over, the
+                // group itself can end up with nothing to show even though
+                // the list is not empty, and it already decides that case on
+                // its own (see below) - including its own bottom padding, so
+                // there is nothing left to wrap here.
+                _AssignmentGroup(
+                  assignments: assignments,
+                  hideDone: user.hideDoneAssignments,
+                ),
                 if (!allowance.allowed)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 16),
@@ -440,7 +487,11 @@ class _RecommendationCard extends ConsumerWidget {
 class _AssignmentGroup extends ConsumerWidget {
   final List<Assignment> assignments;
 
-  const _AssignmentGroup({required this.assignments});
+  /// Whether a met card should be left out of the grid rather than shown
+  /// ticked off - the profile setting `users.hide_done_assignments`.
+  final bool hideDone;
+
+  const _AssignmentGroup({required this.assignments, required this.hideDone});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -486,30 +537,62 @@ class _AssignmentGroup extends ConsumerWidget {
         return x.lesson.group.index.compareTo(y.lesson.group.index);
       });
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('Deine Aufgaben',
-            style: Theme.of(context).textTheme.headlineLarge),
-        const SizedBox(height: 12),
-        LayoutBuilder(
-          builder: (context, constraints) => GridView.count(
-            crossAxisCount: tileColumns(constraints.maxWidth),
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            mainAxisSpacing: 16,
-            crossAxisSpacing: 16,
-            childAspectRatio: 1.4,
-            children: [
-              for (final entry in entries)
-                AssignmentTile(
-                  assignment: entry.assignment,
-                  lesson: entry.lesson,
+    // Nothing to show at all: every assignment's period is over and none of
+    // them is carried over. No heading either - an empty section under
+    // "Deine Aufgaben" would read as a bug in the catalogue below it, not as
+    // "nothing due". The bottom padding lives here rather than around this
+    // widget so that it disappears along with everything else.
+    if (entries.isEmpty) return const SizedBox.shrink();
+
+    final visible = [
+      for (final entry in entries)
+        if (!(hideDone && entry.met)) entry,
+    ];
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 28),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Deine Aufgaben',
+              style: Theme.of(context).textTheme.headlineLarge),
+          const SizedBox(height: 12),
+          if (visible.isEmpty)
+            // Everything was met and the child chose to hide it. Not a blank
+            // stretch under the heading either: the point of the setting is
+            // to tidy up, not to make the work invisible.
+            const Row(
+              children: [
+                Icon(Icons.check_circle, color: AppColors.correct, size: 28),
+                SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    'Alles erledigt! Die fertigen Aufgaben sind ausgeblendet.',
+                    style: TextStyle(fontSize: 22, color: AppColors.textMuted),
+                  ),
                 ),
-            ],
-          ),
-        ),
-      ],
+              ],
+            )
+          else
+            LayoutBuilder(
+              builder: (context, constraints) => GridView.count(
+                crossAxisCount: tileColumns(constraints.maxWidth),
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                mainAxisSpacing: 16,
+                crossAxisSpacing: 16,
+                childAspectRatio: 1.4,
+                children: [
+                  for (final entry in visible)
+                    AssignmentTile(
+                      assignment: entry.assignment,
+                      lesson: entry.lesson,
+                    ),
+                ],
+              ),
+            ),
+        ],
+      ),
     );
   }
 }

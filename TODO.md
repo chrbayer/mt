@@ -417,3 +417,25 @@ die im Standby stillsteht, und das Zurückkehren in den Vordergrund fragte nur
 den Tagesbeginn neu, der am selben Tag unverändert blieb. `refreshDay` fragt
 jetzt auch die Erlaubnis selbst neu; ein Test stellt den Sprung der Wanduhr
 ohne Timer nach.
+
+#56 erledigt (2.15.0) — „Rückgängig" nach dem Löschen oder Aufräumen im
+Übungsverlauf verschwand nie mehr: nicht nach den acht Sekunden, nicht beim
+Verlassen des Elternbereichs. Seit Flutter 3.29 bleibt eine SnackBar mit
+Aktion stehen, bis jemand tippt, und sie hing am Messenger der ganzen App.
+Jetzt `persist: false`, ein eigener Messenger für den Elternbereich, und der
+Verlaufsreiter nimmt sie beim Wechseln mit. Drei Tests, je Weg einer.
+
+#57 erledigt (2.15.0) — Erledigte Aufgaben lassen sich auf dem
+Kinderbildschirm ausblenden, im selben Menü wie fertige Lektionen oder im
+Profil. Standard aus, denn der Haken ist die Belohnung. Sind alle Karten
+ausgeblendet, steht dort „Alles erledigt!" statt eines leeren Rasters; ist gar
+keine Aufgabe mehr zu zeigen, verschwindet auch die Überschrift. Schema v18.
+
+#58 erledigt (2.15.0) — Im Elternbereich blendet „Erledigte ausblenden"
+beendete und abgelaufene Aufgaben aus, mit der Zahl der ausgeblendeten
+daneben. „Erneut stellen" legt aus einer erledigten Aufgabe eine neue an,
+vorbelegt und ab heute; die alte bleibt mit ihrer Statistik stehen.
+
+#59 erledigt (2.15.0) — Der Erklärtext zu „Fertige Lektionen ausblenden" in
+den Profil-Einstellungen behauptete noch, die Ersten Schritte blieben immer
+stehen. Das gilt seit 2.9.1 nur für die strengere Stufe.

@@ -386,6 +386,38 @@ void main() {
       expect(stillShown(a, DateTime(2026, 9, 20), met: true), isTrue);
       expect(withinPeriod(a, DateTime(2026, 9, 20)), isTrue);
     });
+
+    group('isFinished', () {
+      test('an ended repeating assignment is finished', () {
+        final a = daily(createdAtMs: 0, endedAtMs: 1);
+        expect(isFinished(a, DateTime(2026, 9, 20), met: false), isTrue);
+      });
+
+      test('an open repeating assignment never is', () {
+        final a = daily(createdAtMs: 0);
+        expect(isFinished(a, DateTime(2026, 9, 20), met: true), isFalse);
+      });
+
+      test('a single assignment inside its own day is not finished yet', () {
+        final a = once(on: DateTime(2026, 9, 16));
+        expect(isFinished(a, DateTime(2026, 9, 16, 20), met: false), isFalse);
+      });
+
+      test('a single assignment past its day, without carry-over, is', () {
+        final a = once(on: DateTime(2026, 9, 16));
+        expect(isFinished(a, DateTime(2026, 9, 17, 8), met: false), isTrue);
+      });
+
+      test('a carried-over single assignment stays open while unmet', () {
+        final a = once(on: DateTime(2026, 9, 16), carryOver: true);
+        expect(isFinished(a, DateTime(2026, 9, 20), met: false), isFalse);
+      });
+
+      test('and is finished once it was made up', () {
+        final a = once(on: DateTime(2026, 9, 16), carryOver: true);
+        expect(isFinished(a, DateTime(2026, 9, 20), met: true), isTrue);
+      });
+    });
   });
 
   group('formatDeadline', () {

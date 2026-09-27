@@ -36,28 +36,33 @@ class AdminScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return DefaultTabController(
-      length: 4,
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Elternbereich'),
-          bottom: const TabBar(
-            labelStyle: TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
-            tabs: [
-              Tab(height: 58, text: 'Übungsverlauf'),
-              Tab(height: 58, text: 'Verwaltung'),
-              Tab(height: 58, text: 'Aufgaben'),
-              Tab(height: 58, text: 'Einstellungen'),
+    // Its own messenger: a snack bar raised in here belongs to this screen
+    // and goes with it. On the app's one it followed the parent back out to
+    // the profiles and sat on top of whatever came next.
+    return ScaffoldMessenger(
+      child: DefaultTabController(
+        length: 4,
+        child: Scaffold(
+          appBar: AppBar(
+            title: const Text('Elternbereich'),
+            bottom: const TabBar(
+              labelStyle: TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
+              tabs: [
+                Tab(height: 58, text: 'Übungsverlauf'),
+                Tab(height: 58, text: 'Verwaltung'),
+                Tab(height: 58, text: 'Aufgaben'),
+                Tab(height: 58, text: 'Einstellungen'),
+              ],
+            ),
+          ),
+          body: const TabBarView(
+            children: [
+              _HistoryTab(),
+              _ManagementTab(),
+              AssignmentsTab(),
+              GlobalSettingsTab(),
             ],
           ),
-        ),
-        body: const TabBarView(
-          children: [
-            _HistoryTab(),
-            _ManagementTab(),
-            AssignmentsTab(),
-            GlobalSettingsTab(),
-          ],
         ),
       ),
     );
@@ -79,6 +84,23 @@ class _HistoryTabState extends ConsumerState<_HistoryTab> {
   /// They were only ever marked, so this is a matter of looking rather than
   /// of digging anything up.
   bool _showDeleted = false;
+
+  /// The undo offer on screen, if any. It is about this list and goes when
+  /// the tab does - the "Gelöschte" chip stays as the way back for later.
+  ScaffoldFeatureController<SnackBar, SnackBarClosedReason>? _undo;
+  ScaffoldMessengerState? _undoMessenger;
+
+  @override
+  void dispose() {
+    final messenger = _undoMessenger;
+    if (_undo != null && messenger != null) {
+      // Not during teardown: hiding can rebuild the messenger right away.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (messenger.mounted) messenger.hideCurrentSnackBar();
+      });
+    }
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -268,19 +290,26 @@ class _HistoryTabState extends ConsumerState<_HistoryTab> {
   /// went was somebody's afternoon.
   void _offerUndo(String what, List<int> ids) {
     if (!mounted || ids.isEmpty) return;
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          content: Text(what, style: const TextStyle(fontSize: 18)),
-          duration: const Duration(seconds: 8),
-          action: SnackBarAction(
-            label: 'Rückgängig',
-            onPressed: () =>
-                ref.read(statsRepositoryProvider).restoreSessions(ids),
-          ),
+    final messenger = ScaffoldMessenger.of(context)..hideCurrentSnackBar();
+    final undo = messenger.showSnackBar(
+      SnackBar(
+        content: Text(what, style: const TextStyle(fontSize: 18)),
+        duration: const Duration(seconds: 8),
+        // Flutter keeps a snack bar with an action up until it is tapped
+        // unless told otherwise - the eight seconds above did nothing.
+        persist: false,
+        action: SnackBarAction(
+          label: 'Rückgängig',
+          onPressed: () =>
+              ref.read(statsRepositoryProvider).restoreSessions(ids),
         ),
-      );
+      ),
+    );
+    _undo = undo;
+    _undoMessenger = messenger;
+    undo.closed.then((_) {
+      if (identical(_undo, undo)) _undo = null;
+    });
   }
 
   String _filterName(List<User> users) =>

@@ -130,6 +130,12 @@ class UserRepository {
       (_db.update(_db.users)..where((u) => u.id.equals(id)))
           .write(UsersCompanion(lessonFilter: Value(filter.name)));
 
+  /// Turns hiding a met assignment card before its deadline on or off for
+  /// one child.
+  Future<void> setHideDoneAssignments(int id, bool value) =>
+      (_db.update(_db.users)..where((u) => u.id.equals(id)))
+          .write(UsersCompanion(hideDoneAssignments: Value(value)));
+
   /// Hides or shows whole lesson groups for one child - a first-grader has no
   /// business being offered "Bis 1000".
   Future<void> setHiddenGroups(int id, Set<LessonGroup> hidden) =>

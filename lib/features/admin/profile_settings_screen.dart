@@ -57,6 +57,7 @@ class _ProfileSettingsScreenState
   late int? _scoredRuns = widget.user.scoredRunsPerLesson;
   late bool _locked = widget.user.locked;
   late LessonFilter _filter = widget.user.filter;
+  late bool _hideDoneAssignments = widget.user.hideDoneAssignments;
 
   /// Set once the profile is gone, so leaving does not ask to save settings
   /// for a child who no longer exists.
@@ -78,7 +79,8 @@ class _ProfileSettingsScreenState
           _dailyMinutes != widget.user.dailyLimitMinutes ||
           _scoredRuns != widget.user.scoredRunsPerLesson ||
           _locked != widget.user.locked ||
-          _filter != widget.user.filter);
+          _filter != widget.user.filter ||
+          _hideDoneAssignments != widget.user.hideDoneAssignments);
 
   static bool _setEquals(Set<LessonGroup> a, Set<LessonGroup> b) =>
       a.length == b.length && a.containsAll(b);
@@ -102,6 +104,7 @@ class _ProfileSettingsScreenState
     );
     await repository.setScoredRunsPerLesson(id, _scoredRuns);
     await repository.setLocked(id, _locked);
+    await repository.setHideDoneAssignments(id, _hideDoneAssignments);
     navigator.pop();
   }
 
@@ -241,9 +244,9 @@ class _ProfileSettingsScreenState
           const Text(
             'Kürzt den Katalog um das, was schon sitzt. Das Kind kann es auf '
             'dem Übungsbildschirm selbst umstellen - hier steht es, damit man '
-            'es einmal einrichten kann. Die Ersten Schritte bleiben immer '
-            'stehen: dort gibt es die Sterne fürs Durchhalten, nicht fürs '
-            'Richtigsein.',
+            'es einmal einrichten kann. Die strengere Stufe lässt die Ersten '
+            'Schritte stehen: dort wird nicht auf Zeit gerechnet, also gibt '
+            'es keine Blitze zu holen.',
             style: TextStyle(fontSize: 17, color: AppColors.textMuted),
           ),
           const SizedBox(height: 10),
@@ -267,6 +270,14 @@ class _ProfileSettingsScreenState
                   ),
               ],
             ),
+          ),
+          const SizedBox(height: 8),
+          SwitchTile(
+            title: 'Erledigte Aufgaben ausblenden',
+            subtitle: 'Fertige Karten verschwinden schon vor Ende des Tages '
+                'bzw. der Woche. Sonst bleiben sie abgehakt stehen.',
+            value: _hideDoneAssignments,
+            onChanged: (on) => setState(() => _hideDoneAssignments = on),
           ),
           const SizedBox(height: 24),
           Text('Aufgaben pro Durchgang',

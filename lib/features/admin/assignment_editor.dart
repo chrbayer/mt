@@ -29,12 +29,26 @@ class AssignmentEditor extends ConsumerStatefulWidget {
   /// The assignment being changed, or null when a new one is being made.
   final Assignment? existing;
 
-  const AssignmentEditor({super.key, this.existing});
+  /// An ended or expired assignment to copy every value from, for "Erneut
+  /// stellen": the result is a **new** assignment, not this one reopened. A
+  /// repeating assignment would otherwise count the whole pause as a run of
+  /// missed periods, and a single one needs a new day picked anyway - so the
+  /// old one is left exactly as it was, statistics included, and a fresh one
+  /// starts from nothing.
+  final Assignment? template;
 
-  static Future<void> show(BuildContext context, {Assignment? existing}) =>
+  const AssignmentEditor({super.key, this.existing, this.template})
+      : assert(existing == null || template == null);
+
+  static Future<void> show(
+    BuildContext context, {
+    Assignment? existing,
+    Assignment? template,
+  }) =>
       showDialog<void>(
         context: context,
-        builder: (_) => AssignmentEditor(existing: existing),
+        builder: (_) =>
+            AssignmentEditor(existing: existing, template: template),
       );
 
   @override
@@ -42,18 +56,24 @@ class AssignmentEditor extends ConsumerStatefulWidget {
 }
 
 class _AssignmentEditorState extends ConsumerState<AssignmentEditor> {
-  late int? _userId = widget.existing?.userId;
-  late final Set<String> _lessonIds = {...?widget.existing?.lessonIds};
-  late AssignmentRhythm _rhythm =
-      widget.existing?.rhythm ?? AssignmentRhythm.daily;
-  late bool _repeats = widget.existing?.repeats ?? true;
+  /// The assignment to read starting values from, whichever role it plays:
+  /// the one being changed, or the one being copied.
+  Assignment? get _source => widget.existing ?? widget.template;
+
+  late int? _userId = _source?.userId;
+  late final Set<String> _lessonIds = {...?_source?.lessonIds};
+  late AssignmentRhythm _rhythm = _source?.rhythm ?? AssignmentRhythm.daily;
+  late bool _repeats = _source?.repeats ?? true;
+  // A template's own day is the point of the old assignment, not of the new
+  // one - "erneut stellen" starts today, the same as any other new single
+  // assignment does.
   late DateTime _onDay = DateTime.fromMillisecondsSinceEpoch(
       widget.existing?.onDayMs ?? DateTime.now().millisecondsSinceEpoch);
-  late bool _carryOver = widget.existing?.carryOver ?? false;
-  late int _runs = widget.existing?.runs ?? 1;
-  late int _taskCount = widget.existing?.taskCount ?? fallbackTaskCount;
-  late int _minStars = widget.existing?.minStars ?? 0;
-  late int _minBolts = widget.existing?.minBolts ?? 0;
+  late bool _carryOver = _source?.carryOver ?? false;
+  late int _runs = _source?.runs ?? 1;
+  late int _taskCount = _source?.taskCount ?? fallbackTaskCount;
+  late int _minStars = _source?.minStars ?? 0;
+  late int _minBolts = _source?.minBolts ?? 0;
 
   bool get _editing => widget.existing != null;
 
@@ -103,7 +123,12 @@ class _AssignmentEditorState extends ConsumerState<AssignmentEditor> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(_editing ? 'Aufgabe ändern' : 'Neue Aufgabe',
+              Text(
+                  _editing
+                      ? 'Aufgabe ändern'
+                      : widget.template != null
+                          ? 'Aufgabe erneut stellen'
+                          : 'Neue Aufgabe',
                   style: Theme.of(context).textTheme.headlineMedium),
               const SizedBox(height: 16),
               const Text('Kind', style: TextStyle(fontSize: 20)),

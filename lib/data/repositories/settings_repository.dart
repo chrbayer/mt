@@ -38,6 +38,16 @@ class AppPreferences {
   /// reminded them.
   final int? lastBackupMs;
 
+  /// Whether the parent tab's assignment list leaves out finished
+  /// assignments (`isFinished` in `domain/assignment.dart`).
+  ///
+  /// A parent setting, not one per child - the list is the same list
+  /// whichever child is filtered in. Remembered rather than a display
+  /// state, because the list should look the same tomorrow as it does
+  /// today; off by default so nothing vanishes from it right after an
+  /// update.
+  final bool hideFinishedAssignments;
+
   const AppPreferences({
     this.showClock = false,
     this.haptics = true,
@@ -46,6 +56,7 @@ class AppPreferences {
     this.limits = const PracticeLimits(),
     this.scoredRunsPerLesson = defaultScoredRunsPerLesson,
     this.lastBackupMs,
+    this.hideFinishedAssignments = false,
   });
 
   AppPreferences copyWith({
@@ -56,6 +67,7 @@ class AppPreferences {
     PracticeLimits? limits,
     int? scoredRunsPerLesson,
     int? lastBackupMs,
+    bool? hideFinishedAssignments,
   }) =>
       AppPreferences(
         showClock: showClock ?? this.showClock,
@@ -65,6 +77,8 @@ class AppPreferences {
         limits: limits ?? this.limits,
         scoredRunsPerLesson: scoredRunsPerLesson ?? this.scoredRunsPerLesson,
         lastBackupMs: lastBackupMs ?? this.lastBackupMs,
+        hideFinishedAssignments:
+            hideFinishedAssignments ?? this.hideFinishedAssignments,
       );
 }
 
@@ -82,6 +96,7 @@ class SettingsRepository {
   static const _dailyMinutes = 'daily_limit_minutes';
   static const _scoredRuns = 'scored_runs_per_lesson';
   static const _lastBackup = 'last_backup_ms';
+  static const _hideFinishedAssignments = 'hide_finished_assignments';
   static const _pinSalt = 'admin_pin_salt';
   static const _pinHash = 'admin_pin_hash';
 
@@ -115,6 +130,9 @@ class SettingsRepository {
       scoredRunsPerLesson: int.tryParse(map[_scoredRuns] ?? '') ??
           defaults.scoredRunsPerLesson,
       lastBackupMs: int.tryParse(map[_lastBackup] ?? ''),
+      hideFinishedAssignments: map[_hideFinishedAssignments] == '1'
+          ? true
+          : defaults.hideFinishedAssignments,
     );
   }
 
@@ -127,6 +145,9 @@ class SettingsRepository {
   Future<void> setHaptics(bool value) => _put(_haptics, value ? '1' : '0');
 
   Future<void> setSounds(bool value) => _put(_sounds, value ? '1' : '0');
+
+  Future<void> setHideFinishedAssignments(bool value) =>
+      _put(_hideFinishedAssignments, value ? '1' : '0');
 
   Future<void> setDefaultTaskCount(int value) =>
       _put(_defaultTaskCount, '$value');

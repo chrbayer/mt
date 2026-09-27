@@ -74,6 +74,7 @@ class BackupRepository {
             'lessonFilter': user.lessonFilter,
             'scoredRunsPerLesson': user.scoredRunsPerLesson,
             'locked': user.locked,
+            'hideDoneAssignments': user.hideDoneAssignments,
           }
       ],
       'sessions': [
@@ -234,6 +235,11 @@ class BackupRepository {
                 scoredRunsPerLesson:
                     Value(user['scoredRunsPerLesson'] as int?),
                 locked: Value(user['locked'] as bool? ?? false),
+                // An older backup knows nothing of this switch, and showing
+                // a met card until its deadline - the long-standing default -
+                // is the safe reading of that.
+                hideDoneAssignments:
+                    Value(user['hideDoneAssignments'] as bool? ?? false),
               ),
             );
       }

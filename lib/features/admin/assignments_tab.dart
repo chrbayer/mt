@@ -33,8 +33,26 @@ class _AssignmentsTabState extends ConsumerState<AssignmentsTab> {
   @override
   Widget build(BuildContext context) {
     final users = ref.watch(usersProvider).value ?? const <User>[];
-    final assignments = ref.watch(assignmentsProvider(_filter)).value ??
+    final all = ref.watch(assignmentsProvider(_filter)).value ??
         const <Assignment>[];
+    final now = ref.watch(clockProvider)();
+    final hideFinished =
+        ref.watch(preferencesProvider).value?.hideFinishedAssignments ??
+            false;
+
+    // Watched once per assignment, here, so the filter and every row below
+    // judge "finished" against the same numbers.
+    final finished = {
+      for (final a in all)
+        a.id: isFinished(a, now,
+            met: ref.watch(assignmentStatsProvider(a)).value?.settled ??
+                false),
+    };
+    final assignments = [
+      for (final a in all)
+        if (!hideFinished || !finished[a.id]!) a,
+    ];
+    final hiddenCount = all.length - assignments.length;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -77,24 +95,66 @@ class _AssignmentsTabState extends ConsumerState<AssignmentsTab> {
             ],
           ),
         ),
+        // Its own row, not squeezed in with the child chips above: the two
+        // filters are independent of each other, and a shared row would
+        // hide that.
+        Padding(
+          padding: const EdgeInsets.fromLTRB(32, 0, 32, 8),
+          child: Row(
+            children: [
+              FilterChip(
+                label: const Text('Erledigte ausblenden',
+                    style: TextStyle(fontSize: 19)),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 14, vertical: 10),
+                selected: hideFinished,
+                onSelected: (on) => ref
+                    .read(settingsRepositoryProvider)
+                    .setHideFinishedAssignments(on),
+              ),
+              // Only where it actually hides something: a chip that could
+              // silently show fewer rows would read as a complete list when
+              // it is not.
+              if (hideFinished && hiddenCount > 0) ...[
+                const SizedBox(width: 12),
+                Text(
+                  hiddenCount == 1
+                      ? '1 ausgeblendet'
+                      : '$hiddenCount ausgeblendet',
+                  style: const TextStyle(
+                      fontSize: 16, color: AppColors.textMuted),
+                ),
+              ],
+            ],
+          ),
+        ),
         Expanded(
-          child: assignments.isEmpty
+          child: all.isEmpty
               ? const Center(
                   child: Text(
                     'Noch keine Aufgaben.',
                     style: TextStyle(fontSize: 22, color: AppColors.textMuted),
                   ),
                 )
-              : ListView.separated(
-                  padding: const EdgeInsets.fromLTRB(32, 8, 32, 32),
-                  itemCount: assignments.length,
-                  separatorBuilder: (_, _) => const SizedBox(height: 10),
-                  itemBuilder: (context, index) => _AssignmentRow(
-                    assignment: assignments[index],
-                    user: users.where((u) => u.id == assignments[index].userId)
-                        .firstOrNull,
-                  ),
-                ),
+              : assignments.isEmpty
+                  ? const Center(
+                      child: Text(
+                        'Keine offenen Aufgaben. Erledigte sind ausgeblendet.',
+                        style: TextStyle(
+                            fontSize: 22, color: AppColors.textMuted),
+                      ),
+                    )
+                  : ListView.separated(
+                      padding: const EdgeInsets.fromLTRB(32, 8, 32, 32),
+                      itemCount: assignments.length,
+                      separatorBuilder: (_, _) => const SizedBox(height: 10),
+                      itemBuilder: (context, index) => _AssignmentRow(
+                        assignment: assignments[index],
+                        user: users
+                            .where((u) => u.id == assignments[index].userId)
+                            .firstOrNull,
+                      ),
+                    ),
         ),
       ],
     );
@@ -113,7 +173,14 @@ class _AssignmentRow extends ConsumerWidget {
     final lessons = [
       for (final id in assignment.lessonIds) ?lessonByIdOrNull(id),
     ];
+    final now = ref.watch(clockProvider)();
     final ended = !assignment.isOpen;
+    // The counterpart of `stillShown`: ended by hand, or a single one whose
+    // day is over and was never carried over unmet. "Ändern" and "Beenden"
+    // stop making sense for either - there is nothing left to change or to
+    // end - so this, not `ended` alone, decides which buttons the row gets.
+    final finished =
+        isFinished(assignment, now, met: stats?.settled ?? false);
     // The rhythm shows up twice in this row, once as its own word and once
     // as the unit the statistic counts in.
     final daily = assignment.rhythm == AssignmentRhythm.daily;
@@ -122,11 +189,11 @@ class _AssignmentRow extends ConsumerWidget {
     // is what makes a row of them read as a plan.
     final rhythmWord = assignment.repeats
         ? (daily ? 'täglich' : 'wöchentlich')
-        : '${formatDeadline(assignment, now: ref.watch(clockProvider)())}'
+        : '${formatDeadline(assignment, now: now)}'
             '${assignment.carryOver ? ' · zieht nach' : ''}';
 
     return Opacity(
-      opacity: ended ? 0.6 : 1,
+      opacity: finished ? 0.6 : 1,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
         decoration: BoxDecoration(
@@ -166,14 +233,13 @@ class _AssignmentRow extends ConsumerWidget {
                         fontSize: 19, fontWeight: FontWeight.w600),
                   ),
                 ),
-                if (!ended)
+                if (!finished) ...[
                   TextButton.icon(
                     icon: const Icon(Icons.edit_outlined, size: 22),
                     label: const Text('Ändern'),
                     onPressed: () =>
                         AssignmentEditor.show(context, existing: assignment),
                   ),
-                if (!ended)
                   TextButton.icon(
                     icon: const Icon(Icons.stop_circle_outlined, size: 22),
                     label: const Text('Beenden'),
@@ -183,6 +249,17 @@ class _AssignmentRow extends ConsumerWidget {
                           assignment.id,
                           DateTime.now().millisecondsSinceEpoch,
                         ),
+                  ),
+                ] else
+                  // A finished single assignment cannot sensibly be changed
+                  // or ended any more, and four buttons do not reliably fit
+                  // this row on a 960 dp tablet anyway - this one replaces
+                  // both instead of joining them.
+                  TextButton.icon(
+                    icon: const Icon(Icons.replay, size: 22),
+                    label: const Text('Erneut stellen'),
+                    onPressed: () =>
+                        AssignmentEditor.show(context, template: assignment),
                   ),
                 IconButton(
                   tooltip: 'Aufgabe löschen',

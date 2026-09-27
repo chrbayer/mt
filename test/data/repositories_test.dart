@@ -228,6 +228,11 @@ void main() {
       await recordRun(SessionRepository(before),
           userId: id, lessonId: 'add_20_plain');
 
+      if (version < 18) {
+        // Up to v17 nobody could hide a met assignment card early.
+        await before.customStatement(
+            'ALTER TABLE users DROP COLUMN hide_done_assignments');
+      }
       if (version < 17) {
         // Up to v16 every assignment repeated; there was no single one and
         // nothing to carry over.
@@ -328,7 +333,7 @@ void main() {
     }
 
     for (final from in [
-      1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16,
+      1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17,
     ]) {
       test('a database from schema v$from keeps its data', () async {
         final file = await databaseAtVersion(from);
@@ -368,6 +373,9 @@ void main() {
             isFalse);
         // And nobody was locked out by an update.
         expect(user.locked, isFalse);
+        // Nobody had this switched on, so an update must not make an
+        // assignment card disappear before its deadline.
+        expect(user.hideDoneAssignments, isFalse);
         // The stars were worked out from the runs before v8 and are carried
         // over once: a clean run of ten is worth three, and nobody loses
         // what they collected because the app changed how it keeps score.
@@ -1332,6 +1340,17 @@ void main() {
       expect(updated.showClock, isTrue);
       expect(updated.haptics, isFalse);
       expect(updated.defaultTaskCount, 30);
+    });
+
+    test('hiding finished assignments is off by default and remembered',
+        () async {
+      expect((await settings.load()).hideFinishedAssignments, isFalse);
+
+      await settings.setHideFinishedAssignments(true);
+      expect((await settings.load()).hideFinishedAssignments, isTrue);
+
+      await settings.setHideFinishedAssignments(false);
+      expect((await settings.load()).hideFinishedAssignments, isFalse);
     });
   });
 }

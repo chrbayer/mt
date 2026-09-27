@@ -182,6 +182,20 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
     ),
     defaultValue: const Constant(false),
   );
+  static const VerificationMeta _hideDoneAssignmentsMeta =
+      const VerificationMeta('hideDoneAssignments');
+  @override
+  late final GeneratedColumn<bool> hideDoneAssignments = GeneratedColumn<bool>(
+    'hide_done_assignments',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("hide_done_assignments" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -199,6 +213,7 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
     lessonFilter,
     scoredRunsPerLesson,
     locked,
+    hideDoneAssignments,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -337,6 +352,15 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
         locked.isAcceptableOrUnknown(data['locked']!, _lockedMeta),
       );
     }
+    if (data.containsKey('hide_done_assignments')) {
+      context.handle(
+        _hideDoneAssignmentsMeta,
+        hideDoneAssignments.isAcceptableOrUnknown(
+          data['hide_done_assignments']!,
+          _hideDoneAssignmentsMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -405,6 +429,10 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
       locked: attachedDatabase.typeMapping.read(
         DriftSqlType.bool,
         data['${effectivePrefix}locked'],
+      )!,
+      hideDoneAssignments: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}hide_done_assignments'],
       )!,
     );
   }
@@ -483,6 +511,15 @@ class User extends DataClass implements Insertable<User> {
   /// the point - a parent who wants to stop the tablet for a while should not
   /// have to choose between nagging and destroying a year of best times.
   final bool locked;
+
+  /// Whether a met assignment card disappears as soon as its period is met,
+  /// instead of staying ticked off until the deadline.
+  ///
+  /// A profile setting like [lessonFilter], not a display state - the
+  /// catalogue should look the same tomorrow as it does today. Off by
+  /// default: a finished card stays as the reward for finishing it (see
+  /// `domain/assignment.dart`), and hiding it sooner is a choice, not a rule.
+  final bool hideDoneAssignments;
   const User({
     required this.id,
     required this.name,
@@ -499,6 +536,7 @@ class User extends DataClass implements Insertable<User> {
     required this.lessonFilter,
     this.scoredRunsPerLesson,
     required this.locked,
+    required this.hideDoneAssignments,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -528,6 +566,7 @@ class User extends DataClass implements Insertable<User> {
       map['scored_runs_per_lesson'] = Variable<int>(scoredRunsPerLesson);
     }
     map['locked'] = Variable<bool>(locked);
+    map['hide_done_assignments'] = Variable<bool>(hideDoneAssignments);
     return map;
   }
 
@@ -558,6 +597,7 @@ class User extends DataClass implements Insertable<User> {
           ? const Value.absent()
           : Value(scoredRunsPerLesson),
       locked: Value(locked),
+      hideDoneAssignments: Value(hideDoneAssignments),
     );
   }
 
@@ -586,6 +626,9 @@ class User extends DataClass implements Insertable<User> {
         json['scoredRunsPerLesson'],
       ),
       locked: serializer.fromJson<bool>(json['locked']),
+      hideDoneAssignments: serializer.fromJson<bool>(
+        json['hideDoneAssignments'],
+      ),
     );
   }
   @override
@@ -607,6 +650,7 @@ class User extends DataClass implements Insertable<User> {
       'lessonFilter': serializer.toJson<String>(lessonFilter),
       'scoredRunsPerLesson': serializer.toJson<int?>(scoredRunsPerLesson),
       'locked': serializer.toJson<bool>(locked),
+      'hideDoneAssignments': serializer.toJson<bool>(hideDoneAssignments),
     };
   }
 
@@ -626,6 +670,7 @@ class User extends DataClass implements Insertable<User> {
     String? lessonFilter,
     Value<int?> scoredRunsPerLesson = const Value.absent(),
     bool? locked,
+    bool? hideDoneAssignments,
   }) => User(
     id: id ?? this.id,
     name: name ?? this.name,
@@ -650,6 +695,7 @@ class User extends DataClass implements Insertable<User> {
         ? scoredRunsPerLesson.value
         : this.scoredRunsPerLesson,
     locked: locked ?? this.locked,
+    hideDoneAssignments: hideDoneAssignments ?? this.hideDoneAssignments,
   );
   User copyWithCompanion(UsersCompanion data) {
     return User(
@@ -690,6 +736,9 @@ class User extends DataClass implements Insertable<User> {
           ? data.scoredRunsPerLesson.value
           : this.scoredRunsPerLesson,
       locked: data.locked.present ? data.locked.value : this.locked,
+      hideDoneAssignments: data.hideDoneAssignments.present
+          ? data.hideDoneAssignments.value
+          : this.hideDoneAssignments,
     );
   }
 
@@ -710,7 +759,8 @@ class User extends DataClass implements Insertable<User> {
           ..write('dailyLimitMinutes: $dailyLimitMinutes, ')
           ..write('lessonFilter: $lessonFilter, ')
           ..write('scoredRunsPerLesson: $scoredRunsPerLesson, ')
-          ..write('locked: $locked')
+          ..write('locked: $locked, ')
+          ..write('hideDoneAssignments: $hideDoneAssignments')
           ..write(')'))
         .toString();
   }
@@ -732,6 +782,7 @@ class User extends DataClass implements Insertable<User> {
     lessonFilter,
     scoredRunsPerLesson,
     locked,
+    hideDoneAssignments,
   );
   @override
   bool operator ==(Object other) =>
@@ -751,7 +802,8 @@ class User extends DataClass implements Insertable<User> {
           other.dailyLimitMinutes == this.dailyLimitMinutes &&
           other.lessonFilter == this.lessonFilter &&
           other.scoredRunsPerLesson == this.scoredRunsPerLesson &&
-          other.locked == this.locked);
+          other.locked == this.locked &&
+          other.hideDoneAssignments == this.hideDoneAssignments);
 }
 
 class UsersCompanion extends UpdateCompanion<User> {
@@ -770,6 +822,7 @@ class UsersCompanion extends UpdateCompanion<User> {
   final Value<String> lessonFilter;
   final Value<int?> scoredRunsPerLesson;
   final Value<bool> locked;
+  final Value<bool> hideDoneAssignments;
   const UsersCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
@@ -786,6 +839,7 @@ class UsersCompanion extends UpdateCompanion<User> {
     this.lessonFilter = const Value.absent(),
     this.scoredRunsPerLesson = const Value.absent(),
     this.locked = const Value.absent(),
+    this.hideDoneAssignments = const Value.absent(),
   });
   UsersCompanion.insert({
     this.id = const Value.absent(),
@@ -803,6 +857,7 @@ class UsersCompanion extends UpdateCompanion<User> {
     this.lessonFilter = const Value.absent(),
     this.scoredRunsPerLesson = const Value.absent(),
     this.locked = const Value.absent(),
+    this.hideDoneAssignments = const Value.absent(),
   }) : name = Value(name),
        avatar = Value(avatar),
        colorIndex = Value(colorIndex),
@@ -823,6 +878,7 @@ class UsersCompanion extends UpdateCompanion<User> {
     Expression<String>? lessonFilter,
     Expression<int>? scoredRunsPerLesson,
     Expression<bool>? locked,
+    Expression<bool>? hideDoneAssignments,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -842,6 +898,8 @@ class UsersCompanion extends UpdateCompanion<User> {
       if (scoredRunsPerLesson != null)
         'scored_runs_per_lesson': scoredRunsPerLesson,
       if (locked != null) 'locked': locked,
+      if (hideDoneAssignments != null)
+        'hide_done_assignments': hideDoneAssignments,
     });
   }
 
@@ -861,6 +919,7 @@ class UsersCompanion extends UpdateCompanion<User> {
     Value<String>? lessonFilter,
     Value<int?>? scoredRunsPerLesson,
     Value<bool>? locked,
+    Value<bool>? hideDoneAssignments,
   }) {
     return UsersCompanion(
       id: id ?? this.id,
@@ -878,6 +937,7 @@ class UsersCompanion extends UpdateCompanion<User> {
       lessonFilter: lessonFilter ?? this.lessonFilter,
       scoredRunsPerLesson: scoredRunsPerLesson ?? this.scoredRunsPerLesson,
       locked: locked ?? this.locked,
+      hideDoneAssignments: hideDoneAssignments ?? this.hideDoneAssignments,
     );
   }
 
@@ -929,6 +989,9 @@ class UsersCompanion extends UpdateCompanion<User> {
     if (locked.present) {
       map['locked'] = Variable<bool>(locked.value);
     }
+    if (hideDoneAssignments.present) {
+      map['hide_done_assignments'] = Variable<bool>(hideDoneAssignments.value);
+    }
     return map;
   }
 
@@ -949,7 +1012,8 @@ class UsersCompanion extends UpdateCompanion<User> {
           ..write('dailyLimitMinutes: $dailyLimitMinutes, ')
           ..write('lessonFilter: $lessonFilter, ')
           ..write('scoredRunsPerLesson: $scoredRunsPerLesson, ')
-          ..write('locked: $locked')
+          ..write('locked: $locked, ')
+          ..write('hideDoneAssignments: $hideDoneAssignments')
           ..write(')'))
         .toString();
   }
@@ -3987,6 +4051,7 @@ typedef $$UsersTableCreateCompanionBuilder = UsersCompanion Function({
   Value<String> lessonFilter,
   Value<int?> scoredRunsPerLesson,
   Value<bool> locked,
+  Value<bool> hideDoneAssignments,
 });
 typedef $$UsersTableUpdateCompanionBuilder = UsersCompanion Function({
   Value<int> id,
@@ -4004,6 +4069,7 @@ typedef $$UsersTableUpdateCompanionBuilder = UsersCompanion Function({
   Value<String> lessonFilter,
   Value<int?> scoredRunsPerLesson,
   Value<bool> locked,
+  Value<bool> hideDoneAssignments,
 });
 
 final class $$UsersTableReferences
@@ -4167,6 +4233,11 @@ class $$UsersTableFilterComposer extends Composer<_$AppDatabase, $UsersTable> {
 
   ColumnFilters<bool> get locked => $composableBuilder(
     column: $table.locked,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get hideDoneAssignments => $composableBuilder(
+    column: $table.hideDoneAssignments,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -4354,6 +4425,11 @@ class $$UsersTableOrderingComposer
     column: $table.locked,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<bool> get hideDoneAssignments => $composableBuilder(
+    column: $table.hideDoneAssignments,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$UsersTableAnnotationComposer
@@ -4431,6 +4507,11 @@ class $$UsersTableAnnotationComposer
 
   GeneratedColumn<bool> get locked =>
       $composableBuilder(column: $table.locked, builder: (column) => column);
+
+  GeneratedColumn<bool> get hideDoneAssignments => $composableBuilder(
+    column: $table.hideDoneAssignments,
+    builder: (column) => column,
+  );
 
   Expression<T> sessionsRefs<T extends Object>(
     Expression<T> Function($$SessionsTableAnnotationComposer a) f,
@@ -4582,6 +4663,7 @@ class $$UsersTableTableManager
                 Value<String> lessonFilter = const Value.absent(),
                 Value<int?> scoredRunsPerLesson = const Value.absent(),
                 Value<bool> locked = const Value.absent(),
+                Value<bool> hideDoneAssignments = const Value.absent(),
               }) => UsersCompanion(
                 id: id,
                 name: name,
@@ -4598,6 +4680,7 @@ class $$UsersTableTableManager
                 lessonFilter: lessonFilter,
                 scoredRunsPerLesson: scoredRunsPerLesson,
                 locked: locked,
+                hideDoneAssignments: hideDoneAssignments,
               ),
           createCompanionCallback:
               ({
@@ -4616,6 +4699,7 @@ class $$UsersTableTableManager
                 Value<String> lessonFilter = const Value.absent(),
                 Value<int?> scoredRunsPerLesson = const Value.absent(),
                 Value<bool> locked = const Value.absent(),
+                Value<bool> hideDoneAssignments = const Value.absent(),
               }) => UsersCompanion.insert(
                 id: id,
                 name: name,
@@ -4632,6 +4716,7 @@ class $$UsersTableTableManager
                 lessonFilter: lessonFilter,
                 scoredRunsPerLesson: scoredRunsPerLesson,
                 locked: locked,
+                hideDoneAssignments: hideDoneAssignments,
               ),
           withReferenceMapper: (p0) => p0
               .map(

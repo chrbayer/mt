@@ -82,6 +82,16 @@ class Users extends Table {
   /// the point - a parent who wants to stop the tablet for a while should not
   /// have to choose between nagging and destroying a year of best times.
   BoolColumn get locked => boolean().withDefault(const Constant(false))();
+
+  /// Whether a met assignment card disappears as soon as its period is met,
+  /// instead of staying ticked off until the deadline.
+  ///
+  /// A profile setting like [lessonFilter], not a display state - the
+  /// catalogue should look the same tomorrow as it does today. Off by
+  /// default: a finished card stays as the reward for finishing it (see
+  /// `domain/assignment.dart`), and hiding it sooner is a choice, not a rule.
+  BoolColumn get hideDoneAssignments =>
+      boolean().withDefault(const Constant(false))();
 }
 
 /// What one child last chose for one lesson.
@@ -246,7 +256,7 @@ class AppDatabase extends _$AppDatabase {
       : super(executor ?? driftDatabase(name: 'mathe_trainer'));
 
   @override
-  int get schemaVersion => 17;
+  int get schemaVersion => 18;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -278,6 +288,7 @@ class AppDatabase extends _$AppDatabase {
                 users.scoredRunsPerLesson,
                 users.locked,
                 users.knownGroups,
+                users.hideDoneAssignments,
               ]),
             );
             // A profile still carrying what v5 handed it never had a decision
@@ -394,6 +405,13 @@ class AppDatabase extends _$AppDatabase {
             await m.database.customStatement(
               "UPDATE users SET known_groups = '$allGroupNames'",
             );
+          }
+          // v18 lets a profile hide a met assignment card before its
+          // deadline. Nobody had it switched on, so the column's default of
+          // false is the whole migration - only where the v6 rebuild above
+          // did not already bring it along.
+          if (from < 18 && from >= 6) {
+            await m.addColumn(users, users.hideDoneAssignments);
           }
         },
         beforeOpen: (details) async {

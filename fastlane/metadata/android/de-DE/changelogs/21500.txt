@@ -1,0 +1,6 @@
+Erledigte Aufgaben lassen sich ausblenden: für das Kind im Filtermenü, im
+Elternbereich mit einem eigenen Schalter. Eine erledigte Aufgabe lässt sich
+dort mit „Erneut stellen" als neue anlegen, mit allen Vorgaben der alten.
+
+„Rückgängig" nach dem Löschen im Übungsverlauf verschwindet wieder von
+selbst und läuft nicht mehr auf andere Bildschirme mit.

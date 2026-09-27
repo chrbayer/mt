@@ -34,6 +34,7 @@ void main() {
     await users.createUser(name: 'Tom', avatar: '🐧', colorIndex: 1);
     await users.setHiddenGroups(mia, {LessonGroup.upTo1000});
     await users.setReviewHardTasks(mia, false);
+    await users.setHideDoneAssignments(mia, true);
     await SettingsRepository(db).setAdminPin('4711');
     await SettingsRepository(db).setDefaultTaskCount(30);
     await users.setProfileTaskCount(mia, 20);
@@ -88,6 +89,7 @@ void main() {
     expect(restored.avatar, '🦊');
     expect(restored.hidden, {LessonGroup.upTo1000});
     expect(restored.reviewHardTasks, isFalse);
+    expect(restored.hideDoneAssignments, isTrue);
     expect(restored.defaultTaskCount, 20);
     // The per-lesson choice travels too - it is the most specific level and
     // the easiest to lose without noticing.
@@ -233,6 +235,9 @@ void main() {
     final user = (await users.allUsers()).single;
     // The missing columns arrive at their defaults.
     expect(user.reviewHardTasks, isTrue);
+    // That backup knows nothing of this switch either, and showing a met
+    // card until its deadline is the safe reading of that.
+    expect(user.hideDoneAssignments, isFalse);
     // Nothing was recorded about which groups that backup's version knew, so
     // it knew all of them: restoring an old backup must never take a group
     // away from a child who could see it when the backup was made.

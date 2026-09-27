@@ -230,6 +230,19 @@ bool stillShown(Assignment a, DateTime now, {required bool met}) {
   return a.carryOver && !met;
 }
 
+/// Whether a parent may regard this assignment as done: ended by hand, or a
+/// single one the child no longer sees because its day or week is over.
+///
+/// This is the exact counterpart of [stillShown], read the other way round -
+/// the parent tab and the child's screen must never disagree about what
+/// "erledigt" means. A carried-over single assignment that is still
+/// unfulfilled is therefore *not* finished here either, even past its day: a
+/// parent hiding it as done while the child still sees it as a card would be
+/// a contradiction, not a cleanup. [met] is handed in for the same reason it
+/// is in [stillShown] - this layer never reaches for the runs on its own.
+bool isFinished(Assignment a, DateTime now, {required bool met}) =>
+    !a.isOpen || !stillShown(a, now, met: met);
+
 /// The raw facts of one completed run that [qualifies] and [progressIn]
 /// need. Deliberately a record and not a database row: the domain layer
 /// takes no Flutter or drift import, and four numbers are all this needs.

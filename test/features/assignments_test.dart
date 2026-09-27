@@ -6,6 +6,7 @@ import 'package:mathe_trainer/data/db/app_database.dart';
 import 'package:mathe_trainer/domain/assignment.dart';
 import 'package:mathe_trainer/domain/task.dart';
 import 'package:mathe_trainer/features/admin/assignments_tab.dart';
+import 'package:mathe_trainer/features/common/amount_choice.dart';
 import 'package:mathe_trainer/features/common/run_hints.dart';
 import 'package:mathe_trainer/features/common/star_row.dart';
 import 'package:mathe_trainer/features/result/result_screen.dart';
@@ -641,5 +642,263 @@ void main() {
       reason: 'already has a card of its own above',
     );
     expect(find.text('Wie viele? (Wolke) · Erste Schritte'), findsOneWidget);
+  });
+
+  group('hiding done assignments', () {
+    Future<void> setHideDone(bool value) async {
+      await container
+          .read(userRepositoryProvider)
+          .setHideDoneAssignments(mia.id, value);
+      container.read(activeUserProvider.notifier).select(
+            (await container.read(userRepositoryProvider).findUser(mia.id))!,
+          );
+    }
+
+    testWidgets('off by default: a met card still stands', (tester) async {
+      await assign('add_100_plain');
+      await finishRun('add_100_plain');
+      await pump(tester);
+
+      expect(find.byType(AssignmentTile), findsOneWidget);
+      expect(find.text('geschafft'), findsOneWidget);
+    });
+
+    testWidgets('once switched on, only the open card is left',
+        (tester) async {
+      await assign('add_100_plain');
+      await assign('money_add');
+      await finishRun('add_100_plain');
+      await setHideDone(true);
+      await pump(tester);
+
+      final tiles = tester
+          .widgetList<AssignmentTile>(find.byType(AssignmentTile))
+          .toList();
+      expect(tiles.map((t) => t.lesson.id), ['money_add']);
+    });
+
+    testWidgets('with everything met and hidden, a line says so instead',
+        (tester) async {
+      await assign('add_100_plain');
+      await finishRun('add_100_plain');
+      await setHideDone(true);
+      await pump(tester);
+
+      expect(find.text('Deine Aufgaben'), findsOneWidget);
+      expect(
+        find.text('Alles erledigt! Die fertigen Aufgaben sind ausgeblendet.'),
+        findsOneWidget,
+      );
+      expect(find.byType(AssignmentTile), findsNothing);
+    });
+
+    testWidgets('the switch can be reached from the catalogue menu',
+        (tester) async {
+      await assign('add_100_plain');
+      await finishRun('add_100_plain');
+      await pump(tester);
+      expect(find.byType(AssignmentTile), findsOneWidget);
+
+      await tester.tap(find.byTooltip('Fertiges ausblenden'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Erledigte Aufgaben ausblenden'));
+      await tester.pumpAndSettle();
+
+      expect(
+        (await container.read(userRepositoryProvider).findUser(mia.id))!
+            .hideDoneAssignments,
+        isTrue,
+      );
+      expect(find.byType(AssignmentTile), findsNothing);
+    });
+
+    testWidgets('with no assignment at all, the menu has nothing to offer',
+        (tester) async {
+      await pump(tester);
+
+      await tester.tap(find.byTooltip('Fertiges ausblenden'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Erledigte Aufgaben ausblenden'), findsNothing);
+    });
+  });
+
+  group('the parent tab hides finished assignments on request', () {
+    Future<void> pumpTab(WidgetTester tester,
+        {Size size = const Size(1600, 1000)}) async {
+      tester.view.physicalSize = size;
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: MaterialApp(
+            theme: buildAppTheme(),
+            home: const Scaffold(body: AssignmentsTab()),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    Future<int> assignOnce(
+      String lessonId, {
+      required DateTime onDay,
+      bool carryOver = false,
+    }) =>
+        container.read(assignmentRepositoryProvider).createAssignment(
+              userId: mia.id,
+              lessonIds: [lessonId],
+              rhythm: AssignmentRhythm.daily,
+              repeats: false,
+              onDayMs: onDay.millisecondsSinceEpoch,
+              carryOver: carryOver,
+              runs: 1,
+              taskCount: 10,
+              minStars: 0,
+              minBolts: 0,
+            );
+
+    testWidgets('off by default: an ended and an expired one still show',
+        (tester) async {
+      final endedId = await assign('add_100_plain');
+      await container
+          .read(assignmentRepositoryProvider)
+          .endAssignment(endedId, DateTime.now().millisecondsSinceEpoch);
+      await assignOnce('money_add',
+          onDay: DateTime.now().subtract(const Duration(days: 2)));
+
+      await pumpTab(tester);
+
+      expect(find.text('Erneut stellen'), findsNWidgets(2));
+      expect(find.text('Erledigte ausblenden'), findsOneWidget);
+    });
+
+    testWidgets(
+        'switched on: both go, an open one and an unmet carried-over one '
+        'stay, and the count says how many are gone', (tester) async {
+      final endedId = await assign('add_100_plain');
+      await container
+          .read(assignmentRepositoryProvider)
+          .endAssignment(endedId, DateTime.now().millisecondsSinceEpoch);
+      await assignOnce('money_add',
+          onDay: DateTime.now().subtract(const Duration(days: 2)));
+      // Still running - a recurring one is always shown.
+      await assign('div_plain');
+      // Past its day but carried over and never done - still shown too.
+      await assignOnce('sub_100_plain',
+          onDay: DateTime.now().subtract(const Duration(days: 2)),
+          carryOver: true);
+
+      await pumpTab(tester);
+      await tester.tap(find.text('Erledigte ausblenden'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Erneut stellen'), findsNothing);
+      expect(find.text('2 ausgeblendet'), findsOneWidget);
+      expect(
+        (await container.read(settingsRepositoryProvider).load())
+            .hideFinishedAssignments,
+        isTrue,
+      );
+    });
+
+    testWidgets(
+        'only finished ones left: the tab says so instead of an empty list',
+        (tester) async {
+      final endedId = await assign('add_100_plain');
+      await container
+          .read(assignmentRepositoryProvider)
+          .endAssignment(endedId, DateTime.now().millisecondsSinceEpoch);
+      await container
+          .read(settingsRepositoryProvider)
+          .setHideFinishedAssignments(true);
+
+      await pumpTab(tester);
+
+      expect(
+        find.text('Keine offenen Aufgaben. Erledigte sind ausgeblendet.'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('a finished row offers neither "Ändern" nor "Beenden"',
+        (tester) async {
+      final id = await assign('add_100_plain');
+      await container
+          .read(assignmentRepositoryProvider)
+          .endAssignment(id, DateTime.now().millisecondsSinceEpoch);
+
+      await pumpTab(tester);
+
+      expect(find.text('Ändern'), findsNothing);
+      expect(find.text('Beenden'), findsNothing);
+      expect(find.text('Erneut stellen'), findsOneWidget);
+    });
+
+  });
+
+  testWidgets(
+      '"Erneut stellen" opens a prefilled editor and makes a second, open '
+      'assignment', (tester) async {
+    // 'money_add' rather than one of the range lessons: several of those
+    // share a title across number ranges ("Plus ohne Zehnerübergang" is
+    // both `add_20_plain` and `add_100_plain`), which would leave two
+    // checkboxes to find by the same text.
+    final id = await assign('money_add', runs: 3, taskCount: 20, minStars: 2);
+    await container
+        .read(assignmentRepositoryProvider)
+        .endAssignment(id, DateTime.now().millisecondsSinceEpoch);
+
+    // Tall enough that the whole dialog fits without an internal scroll:
+    // "Anlegen" sits below the fold at the usual 1600x1000, and tapping a
+    // point fully outside the render view does not just miss, it wedges
+    // the test.
+    tester.view.physicalSize = const Size(1600, 1900);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: MaterialApp(
+          theme: buildAppTheme(),
+          home: const Scaffold(body: AssignmentsTab()),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Erneut stellen'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Aufgabe erneut stellen'), findsOneWidget);
+    // The old run counts are prefilled, in declaration order: runs, task
+    // count, minimum stars.
+    final amounts =
+        tester.widgetList<AmountChoice>(find.byType(AmountChoice)).toList();
+    expect(amounts[0].value, 3);
+    expect(amounts[1].value, 20);
+    expect(amounts[2].value, 2);
+
+    // Saving without touching the lesson picker only creates a second
+    // assignment if a lesson was already selected - confirming the old one
+    // carried over without having to inspect its checkbox directly.
+    await tester.tap(find.text('Anlegen'));
+    await tester.pumpAndSettle();
+
+    // Read once, not through `watchAssignments().first`: a drift stream
+    // hands its value out after a timer, and inside the widget test's fake
+    // clock that timer never fires - the test simply stopped there.
+    final all = await db.select(db.assignments).get();
+    expect(all, hasLength(2));
+    final old = all.firstWhere((a) => a.id == id);
+    // The old one is untouched - still ended, same id, same statistics.
+    expect(old.endedAtMs, isNotNull);
+    final fresh = all.firstWhere((a) => a.id != id);
+    expect(fresh.endedAtMs, isNull);
+    expect(fresh.lessonIds, 'money_add');
+    expect(fresh.runs, 3);
+    expect(fresh.taskCount, 20);
+    expect(fresh.minStars, 2);
   });
 }

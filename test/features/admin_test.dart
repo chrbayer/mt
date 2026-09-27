@@ -297,6 +297,43 @@ void main() {
       expect(find.textContaining('abgebrochen nach'), findsOneWidget);
     });
 
+    Future<void> deleteTheRun(WidgetTester tester) async {
+      await run(mia, 'add_20_plain');
+      await openAdmin(tester);
+      await tester.tap(find.byTooltip('Durchgang löschen'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Löschen'));
+      await tester.pumpAndSettle();
+      expect(find.text('Rückgängig'), findsOneWidget);
+    }
+
+    // Flutter keeps a snack bar with an action up until it is tapped, and on
+    // the app's messenger it followed the parent onto every later screen.
+    testWidgets('the undo offer goes away by itself', (tester) async {
+      await deleteTheRun(tester);
+
+      await tester.pump(const Duration(seconds: 9));
+      await tester.pumpAndSettle();
+      expect(find.text('Rückgängig'), findsNothing);
+    });
+
+    testWidgets('the undo offer stays behind when the parent area is left',
+        (tester) async {
+      await deleteTheRun(tester);
+
+      await simulateBack(tester);
+      expect(find.text('Eltern'), findsOneWidget);
+      expect(find.text('Rückgängig'), findsNothing);
+    });
+
+    testWidgets('the undo offer goes with the history tab', (tester) async {
+      await deleteTheRun(tester);
+
+      await tester.tap(find.text('Verwaltung'));
+      await tester.pumpAndSettle();
+      expect(find.text('Rückgängig'), findsNothing);
+    });
+
     testWidgets('a single run can be deleted from the log', (tester) async {
       await run(mia, 'add_20_plain');
       await openAdmin(tester);

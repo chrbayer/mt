@@ -1090,6 +1090,13 @@ Chip **„Gelöschte"** im Übungsverlauf, der die markierten Zeilen gedämpft
 einblendet, jede mit einem Knopf zum Zurückholen. Die SnackBar hilft nur, wer
 gerade hinschaut; der Chip hilft dem, der es sich morgen anders überlegt.
 
+Die SnackBar setzt **`persist: false`** ausdrücklich: seit Flutter 3.29
+bleibt eine SnackBar mit Aktion stehen, bis jemand tippt, und die acht
+Sekunden taten nichts. Dazu hat der Elternbereich einen **eigenen**
+`ScaffoldMessenger` — auf dem der App lief sie beim Verlassen mit auf jeden
+weiteren Bildschirm —, und der Verlaufsreiter nimmt sie beim Wechseln mit.
+Der Weg zurück für später ist der Chip, nicht die SnackBar.
+
 `watchHistory` nimmt dafür `includeDeleted`, und `HistoryEntry` trägt
 `deleted` — die Zeile wird gezeigt, nicht versteckt, denn markiert ist nicht
 gelöscht.
@@ -1428,6 +1435,39 @@ etwas anderes. Erledigt heißt **gedämpft, nicht gesperrt**: die Karte bleibt
 antippbar, denn diese App verbietet nie das Üben, dieselbe Linie wie beim
 Tagesdeckel selbst. Sie bleibt bis zum Ende des Zeitraums stehen — der Haken
 ist die Belohnung, eine verschwindende Karte wäre keine.
+
+`users.hide_done_assignments` blendet eine erledigte Karte trotzdem vorzeitig
+aus, wenn eine Familie das so will. Standard aus: der Haken bleibt die
+Belohnung, ausblenden ist eine Wahl und keine Regel. Eine Eigenschaft des
+Profils wie `LessonFilter`, nicht ein Anzeigezustand — das Kind stellt sie im
+selben Menü um, in dem es auch fertige Lektionen ausblendet, ein Elternteil im
+Profil. Sind nach dem Ausblenden alle Karten weg, aber es gab welche, steht
+statt des leeren Rasters „Alles erledigt!" — derselbe Grundsatz wie bei
+„Fertige Lektionen ausblenden": ein leerer Bildschirm wäre ein Fehler und kein
+Erfolg. Die Empfehlung schließt eine zugewiesene Lektion weiterhin aus, ob
+ihre Karte gerade sichtbar ist oder nicht.
+
+Im Elternbereich blendet der Schalter **„Erledigte ausblenden"** im Reiter
+„Aufgaben" ebenfalls aus, aber nach einer anderen Regel: „erledigt" heißt dort
+genau das Gegenstück zu dem, was das Kind noch sieht.
+`domain/assignment.dart` hält das als `isFinished` neben `stillShown` fest —
+beendet von Hand, oder eine einmalige, deren Tag oder Woche vorbei ist. Eine
+nachziehende, noch unerfüllte bleibt deshalb stehen: sie ist beim Kind noch
+eine Karte, und ein Elternteil sollte sie nicht als erledigt ausgeblendet
+bekommen. Es ist eine App-Einstellung (`app_settings`), keine je Kind — die
+Liste im Reiter ist dieselbe Liste, welches Kind auch gefiltert ist —, und
+gemerkt statt Anzeigezustand, aus demselben Grund wie beim Kind: der Reiter
+soll morgen so aussehen wie heute. Daneben steht, wie viele gerade
+ausgeblendet sind — eine Liste, die stillschweigend weniger zeigt, läse sich
+sonst als vollständig.
+
+Neben jeder erledigten Zeile steht **„Erneut stellen"** statt „Ändern" und
+„Beenden", die dort ohnehin ins Leere griffen. Es legt eine **neue** Aufgabe
+aus der alten als Vorlage an, statt sie wieder zu öffnen: bei einer
+wiederkehrenden zählte die Pause sonst als lauter verpasste Zeiträume in der
+Statistik, und eine einmalige braucht ohnehin ein neues Datum. Die alte bleibt
+dabei unangetastet stehen, mit ihrer Statistik — ausgeblendet statt gelöscht
+heißt, dass genau diese Vorlage erhalten bleibt.
 
 Am **Ende eines Durchgangs** zeigt `AssignmentGoalHint` die geforderten
 Sterne und Blitze in denselben Symbolen wie die verdienten darüber — das ist
