@@ -10,6 +10,7 @@ import '../../data/repositories/backup_repository.dart';
 import '../../providers.dart';
 import '../../domain/scoring.dart';
 import '../../theme/app_theme.dart';
+import 'admin_session.dart';
 
 /// Save and restore the whole database.
 ///
@@ -41,11 +42,16 @@ class _BackupActionsState extends ConsumerState<BackupActions> {
       final file = File('${directory.path}/$_fileName');
       await file.writeAsString(json);
 
-      final result = await SharePlus.instance.share(
-        ShareParams(
-          files: [XFile(file.path, mimeType: 'application/json')],
-          fileNameOverrides: [_fileName],
-          subject: 'Mathe-Trainer Sicherung',
+      // Held open: sharing sends the app to the background on purpose, and
+      // the parent area closing itself for that would cut the share sheet
+      // off mid-share.
+      final result = await AdminSession.holdOpen(
+        () => SharePlus.instance.share(
+          ShareParams(
+            files: [XFile(file.path, mimeType: 'application/json')],
+            fileNameOverrides: [_fileName],
+            subject: 'Mathe-Trainer Sicherung',
+          ),
         ),
       );
       // Only once it really went somewhere. A share sheet that was opened
@@ -95,7 +101,11 @@ class _BackupActionsState extends ConsumerState<BackupActions> {
         extensions: ['json'],
         mimeTypes: ['application/json'],
       );
-      final file = await openFile(acceptedTypeGroups: const [typeGroup]);
+      // Held open for the same reason as in _export: picking a file also
+      // sends the app to the background.
+      final file = await AdminSession.holdOpen(
+        () => openFile(acceptedTypeGroups: const [typeGroup]),
+      );
       if (file == null) return;
 
       final summary =

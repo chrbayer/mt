@@ -206,15 +206,6 @@ class SettingsRepository {
     return _hashPin(pin, salt) == hash;
   }
 
-  /// Forgets the PIN, so the next visit to the parent area sets a new one.
-  /// This is how "change PIN" works - there is nothing to gain from asking
-  /// for the old one first, the parent just got past it.
-  Future<void> clearAdminPin() async {
-    await (_db.delete(_db.appSettings)
-          ..where((s) => s.settingKey.isIn([_pinSalt, _pinHash])))
-        .go();
-  }
-
   static String _hashPin(String pin, String salt) =>
       sha256.convert(utf8.encode('$salt:$pin')).toString();
 

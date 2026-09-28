@@ -20,10 +20,31 @@ Future<bool> requireAdminPin(BuildContext context) async {
   return passed ?? false;
 }
 
+/// Starts the "choose a PIN" dialog directly, for "PIN ändern".
+///
+/// Unlike the first-time setup [requireAdminPin] falls into when there is no
+/// PIN yet, the old one is not cleared beforehand: [setAdminPin] only
+/// overwrites it once the new one has been entered twice, so aborting this
+/// dialog - or the parent area closing itself out from under it - leaves the
+/// previous PIN in place instead of leaving none at all.
+Future<bool> changeAdminPin(BuildContext context) async {
+  final changed = await showDialog<bool>(
+    context: context,
+    barrierDismissible: false,
+    builder: (_) => const _PinDialog(initialStep: _Step.choose),
+  );
+  return changed ?? false;
+}
+
 enum _Step { verify, choose, repeat }
 
 class _PinDialog extends ConsumerStatefulWidget {
-  const _PinDialog();
+  /// Skips [_decideStep] and starts here instead, for [changeAdminPin]. Null
+  /// means [requireAdminPin]'s usual case: ask the repository whether a PIN
+  /// exists yet.
+  final _Step? initialStep;
+
+  const _PinDialog({this.initialStep});
 
   @override
   ConsumerState<_PinDialog> createState() => _PinDialogState();
@@ -38,7 +59,11 @@ class _PinDialogState extends ConsumerState<_PinDialog> {
   @override
   void initState() {
     super.initState();
-    _decideStep();
+    if (widget.initialStep != null) {
+      _step = widget.initialStep;
+    } else {
+      _decideStep();
+    }
   }
 
   Future<void> _decideStep() async {

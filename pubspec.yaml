@@ -22,7 +22,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # ausgerechnet, weil F-Droid ihn aus dieser Zeile liest und daran erkennt,
 # dass ein Tag eine neue Version ist. test/pubspec_version_test.dart hält die
 # beiden Zahlen zusammen.
-version: 2.15.0+21500
+version: 2.15.1+21501
 
 environment:
   # Untergrenze und nicht die gerade installierte Fassung: F-Droid baut mit

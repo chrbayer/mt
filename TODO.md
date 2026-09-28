@@ -439,3 +439,13 @@ vorbelegt und ab heute; die alte bleibt mit ihrer Statistik stehen.
 #59 erledigt (2.15.0) — Der Erklärtext zu „Fertige Lektionen ausblenden" in
 den Profil-Einstellungen behauptete noch, die Ersten Schritte blieben immer
 stehen. Das gilt seit 2.9.1 nur für die strengere Stufe.
+
+#60 erledigt (2.15.1) — Der Elternbereich schließt sich selbst: nach drei
+Minuten ohne Berührung und sobald die App in den Hintergrund geht. Zurück geht
+es zum Profilbildschirm, auch aus Unterseiten und Dialogen heraus;
+ungespeicherte Änderungen fallen dabei weg. Sichern und Einspielen verlassen
+die App mit Absicht und halten ihn so lange offen.
+
+#61 erledigt (2.15.1) — „PIN ändern" löschte die alte PIN, bevor die neue
+feststand. Wer abbrach, stand ohne PIN da, und der Elternbereich öffnete sich
+danach ohne Abfrage. Die alte gilt jetzt, bis die neue bestätigt ist.

@@ -426,9 +426,13 @@ sollen alle gleich aussehen und gleich klingen.
 Die PIN (`SettingsRepository.setAdminPin` / `checkAdminPin`) schützt vor einem
 neugierigen Geschwisterkind, nicht vor einem Angreifer mit dem Gerät in der
 Hand. Trotzdem wird sie gesalzen gehasht abgelegt — ein Blick in die Datenbank
-soll sie nicht verraten. Beim Ändern wird die alte PIN gelöscht und der
-Einrichtungsdialog erneut gezeigt; nach der alten zu fragen wäre sinnlos, der
-Weg dorthin führte gerade durch sie hindurch.
+soll sie nicht verraten. Beim Ändern (`changeAdminPin` in `pin_gate.dart`)
+bleibt die alte PIN gültig, bis die neue bestätigt ist: `setAdminPin`
+überschreibt sie erst, nachdem die neue zweimal übereinstimmend eingegeben
+wurde. Nach der alten wird dabei nicht gefragt — sinnlos, der Weg dorthin
+führte gerade durch sie hindurch —, aber sie vorher zu löschen hieße, ein
+abgebrochenes „PIN ändern" ließe das Profil ganz ohne PIN zurück, und der
+nächste Weg hinein richtete stillschweigend eine neue ein.
 
 Die PIN-Tastatur hat **keine grüne Taste**. Eine PIN ist genau
 `adminPinLength` Ziffern lang, und die letzte schickt sie ab — die grüne
@@ -440,6 +444,44 @@ die Ziffern darüber nicht verrutschen.
 
 `requireAdminPin(context)` ist die einzige Schranke. Wer sie umgeht, umgeht den
 Schutz — neue geschützte Aktionen also immer dahinter aufhängen.
+
+## Der Elternbereich schließt sich selbst
+
+Bisher blieb er offen, bis jemand ihn verließ — ein liegengelassenes Tablet
+stand dem Kind damit komplett offen, PIN hin oder her. `AdminSession` in
+`features/admin/admin_session.dart` beendet ihn deshalb von selbst, auf zwei
+Wegen: nach `adminIdleTimeout` (3 Minuten) ohne Berührung, oder sobald die App
+in den Hintergrund geht (`paused`/`hidden`). `inactive` allein reicht
+ausdrücklich nicht — das feuert schon bei einer heruntergezogenen
+Benachrichtigungsleiste, und der Elternbereich dafür zu schließen wäre lästiger
+als das, wovor er schützt.
+
+Geschlossen heißt **verlassen, nicht überlagert**: `_expire` springt mit
+`popUntil` zurück auf die Route, von der aus geöffnet wurde, statt einen
+Sperrbildschirm über alles zu legen. `popUntil` geht dabei an `PopScope`
+vorbei — Absicht, nicht Lücke: eine Rückfrage „Änderungen verwerfen?" in den
+Profil-Einstellungen wäre für jemanden, der nicht mehr da ist, genau die
+offene Tür, die hier geschlossen wird. Ungespeichertes fällt also wortlos weg.
+
+Berührungen kommen über eine **globale** Zeigerroute
+(`GestureBinding.instance.pointerRouter.addGlobalRoute`), nicht über einen
+Listener im Elternbereich selbst: der müsste alles umschließen, was je über
+dem Elternbereich liegen kann — Profil-Einstellungen, Aufgaben-Editor,
+Bestätigungsdialoge —, und wüsste es doch nie vollständig. Eine globale Route
+sieht sie alle, unabhängig davon, was gerade obenauf liegt, und braucht dafür
+nichts in `app.dart` verankert.
+
+Eine Ausnahme stößt der Elternbereich selbst an: Sichern und Einspielen
+schicken die App absichtlich in den Hintergrund (Android-Freigabeblatt bzw.
+Dateiauswahl), und das darf ihn nicht mitten im Sichern schließen.
+`AdminSession.holdOpen` in `backup_actions.dart` umschließt genau die beiden
+Aufrufe, die die App verlassen — nicht die ganzen Methoden —, und hält beide
+Signale für die Dauer an. Ein Zähler statt eines Bools, falls sich zwei
+Aktionen einmal überlappen sollten.
+
+Und deshalb ersetzt „PIN ändern" die alte PIN erst, wenn die neue steht (siehe
+oben): schließt sich der Elternbereich künftig selbst mitten im
+Ändern-Dialog, darf danach nicht plötzlich gar keine PIN mehr gelten.
 
 ## Profil vorübergehend sperren
 

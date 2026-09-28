@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
@@ -8,11 +10,43 @@ import 'package:mathe_trainer/data/repositories/user_repository.dart';
 import 'package:mathe_trainer/domain/lesson.dart';
 import 'package:mathe_trainer/domain/task.dart';
 import 'package:mathe_trainer/features/admin/admin_screen.dart';
+import 'package:mathe_trainer/features/admin/admin_session.dart';
 import 'package:mathe_trainer/features/leaderboard/leaderboard_screen.dart';
 import 'package:mathe_trainer/features/profiles/profile_select_screen.dart';
 import 'package:mathe_trainer/features/stats/global_stats_screen.dart';
 import 'package:mathe_trainer/providers.dart';
 import 'package:mathe_trainer/theme/app_theme.dart';
+
+/// A [testWidgets] that also closes any parent-area session still open once
+/// [body] returns.
+///
+/// Plenty of tests below open the parent area just to look at it and never
+/// navigate back - harmless before AdminSession existed, but now it would
+/// leave a real idle [Timer] running. `tearDown`/`addTearDown` are too late
+/// to cancel it: flutter_test's own "a Timer is still pending" check runs
+/// inside the test body's own call tree, before either gets a chance to run.
+/// Backgrounding the app is the one signal that reaches AdminSession no
+/// matter how deep a test drilled (a sub-screen, a dialog), and popping and
+/// closing happen synchronously right out of dispatching it, so no `pump` is
+/// needed either. Resuming afterwards then leaves a clean lifecycle state
+/// for whichever test runs next.
+void adminTest(
+  String description,
+  Future<void> Function(WidgetTester tester) body,
+) {
+  testWidgets(description, (tester) async {
+    await body(tester);
+    // The full chain, not a direct paused->resumed jump: some screens below
+    // carry a text field, and Flutter's own AppLifecycleListener (attached
+    // by EditableText) asserts each step against a fixed transition table -
+    // paused really is only ever reached by way of hidden, and resumed only
+    // by way of inactive.
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.hidden);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+  });
+}
 
 /// The parent area and the overview across all children, driven the way a
 /// parent drives them: from the profile screen, through the PIN pad.
@@ -91,7 +125,7 @@ void main() {
   }
 
   group('PIN gate', () {
-    testWidgets('the first visit sets a PIN up, entered twice', (tester) async {
+    adminTest('the first visit sets a PIN up, entered twice', (tester) async {
       await pumpProfiles(tester);
       await tester.tap(find.text('Eltern'));
       await tester.pumpAndSettle();
@@ -108,7 +142,7 @@ void main() {
           isTrue);
     });
 
-    testWidgets('a mismatch during setup starts over', (tester) async {
+    adminTest('a mismatch during setup starts over', (tester) async {
       await pumpProfiles(tester);
       await tester.tap(find.text('Eltern'));
       await tester.pumpAndSettle();
@@ -123,7 +157,7 @@ void main() {
           isFalse);
     });
 
-    testWidgets('afterwards the PIN is asked for, and a wrong one refused',
+    adminTest('afterwards the PIN is asked for, and a wrong one refused',
         (tester) async {
       await container.read(settingsRepositoryProvider).setAdminPin('4711');
       await pumpProfiles(tester);
@@ -140,7 +174,7 @@ void main() {
       expect(find.byType(AdminScreen), findsOneWidget);
     });
 
-    testWidgets('creating a profile is behind the PIN, the look is not',
+    adminTest('creating a profile is behind the PIN, the look is not',
         (tester) async {
       await container.read(settingsRepositoryProvider).setAdminPin('4711');
       await pumpProfiles(tester);
@@ -158,7 +192,7 @@ void main() {
       expect(find.text('Bild'), findsNothing);
     });
 
-    testWidgets('a child may change picture and colour without the PIN',
+    adminTest('a child may change picture and colour without the PIN',
         (tester) async {
       await container.read(settingsRepositoryProvider).setAdminPin('4711');
       await pumpProfiles(tester);
@@ -193,7 +227,7 @@ void main() {
       await tester.pumpAndSettle();
     }
 
-    testWidgets('the history lists runs and marks the abandoned ones',
+    adminTest('the history lists runs and marks the abandoned ones',
         (tester) async {
       await run(mia, 'add_20_plain');
       await run(tom, 'mix_100', completed: false);
@@ -205,7 +239,7 @@ void main() {
       expect(find.text('Tom'), findsWidgets);
     });
 
-    testWidgets('the history can be filtered to one child', (tester) async {
+    adminTest('the history can be filtered to one child', (tester) async {
       await run(mia, 'add_20_plain');
       await run(tom, 'mix_100');
       await openAdmin(tester);
@@ -217,7 +251,7 @@ void main() {
       expect(find.text('Plus und Minus gemischt  ·  Bis 100'), findsNothing);
     });
 
-    testWidgets('the history can be narrowed to the last seven days',
+    adminTest('the history can be narrowed to the last seven days',
         (tester) async {
       await run(mia, 'add_20_plain');
       await run(tom, 'mix_100');
@@ -250,7 +284,7 @@ void main() {
       expect(find.text('Plus und Minus gemischt  ·  Bis 100'), findsNothing);
     });
 
-    testWidgets('tidying up says whose runs and from when', (tester) async {
+    adminTest('tidying up says whose runs and from when', (tester) async {
       await run(mia, 'add_20_plain', completed: false);
       await openAdmin(tester);
 
@@ -265,7 +299,7 @@ void main() {
           findsOneWidget);
     });
 
-    testWidgets('a deletion can be taken back right away', (tester) async {
+    adminTest('a deletion can be taken back right away', (tester) async {
       await run(mia, 'add_20_plain');
       await openAdmin(tester);
 
@@ -282,7 +316,7 @@ void main() {
       expect(find.text('Plus ohne Zehnerübergang  ·  Bis 20'), findsOneWidget);
     });
 
-    testWidgets('and so can tidying up the abandoned ones', (tester) async {
+    adminTest('and so can tidying up the abandoned ones', (tester) async {
       await run(mia, 'add_20_plain', completed: false);
       await openAdmin(tester);
 
@@ -309,7 +343,7 @@ void main() {
 
     // Flutter keeps a snack bar with an action up until it is tapped, and on
     // the app's messenger it followed the parent onto every later screen.
-    testWidgets('the undo offer goes away by itself', (tester) async {
+    adminTest('the undo offer goes away by itself', (tester) async {
       await deleteTheRun(tester);
 
       await tester.pump(const Duration(seconds: 9));
@@ -317,7 +351,7 @@ void main() {
       expect(find.text('Rückgängig'), findsNothing);
     });
 
-    testWidgets('the undo offer stays behind when the parent area is left',
+    adminTest('the undo offer stays behind when the parent area is left',
         (tester) async {
       await deleteTheRun(tester);
 
@@ -326,7 +360,7 @@ void main() {
       expect(find.text('Rückgängig'), findsNothing);
     });
 
-    testWidgets('the undo offer goes with the history tab', (tester) async {
+    adminTest('the undo offer goes with the history tab', (tester) async {
       await deleteTheRun(tester);
 
       await tester.tap(find.text('Verwaltung'));
@@ -334,7 +368,7 @@ void main() {
       expect(find.text('Rückgängig'), findsNothing);
     });
 
-    testWidgets('a single run can be deleted from the log', (tester) async {
+    adminTest('a single run can be deleted from the log', (tester) async {
       await run(mia, 'add_20_plain');
       await openAdmin(tester);
 
@@ -349,7 +383,7 @@ void main() {
       expect((await db.select(db.sessions).get()).single.deleted, isTrue);
     });
 
-    testWidgets('abandoned runs can be tidied away in one go', (tester) async {
+    adminTest('abandoned runs can be tidied away in one go', (tester) async {
       await run(mia, 'add_20_plain');
       await run(mia, 'mix_100', completed: false);
       await openAdmin(tester);
@@ -365,7 +399,7 @@ void main() {
       expect(find.textContaining('aufräumen'), findsNothing);
     });
 
-    testWidgets('the PIN pad has no green key', (tester) async {
+    adminTest('the PIN pad has no green key', (tester) async {
       // A PIN is exactly four digits, and the fourth submits it - so the
       // green key could only ever be pressed on an incomplete entry, where
       // it does nothing. That would teach the wrong thing about the green
@@ -379,7 +413,7 @@ void main() {
       expect(find.byKey(const Key('submit')), findsNothing);
     });
 
-    testWidgets('the fourth digit opens the parent area by itself',
+    adminTest('the fourth digit opens the parent area by itself',
         (tester) async {
       await pumpProfiles(tester);
       await tester.tap(find.text('Eltern'));
@@ -399,7 +433,7 @@ void main() {
       await tester.pumpAndSettle();
     }
 
-    testWidgets('a profile can be locked and unlocked again', (tester) async {
+    adminTest('a profile can be locked and unlocked again', (tester) async {
       await openAdmin(tester);
       await openSettings(tester);
       // The lock sits in the first block, above everything else: it is what
@@ -421,7 +455,7 @@ void main() {
       expect(locked.avatar, '🦊');
     });
 
-    testWidgets('statistics can be reset per profile', (tester) async {
+    adminTest('statistics can be reset per profile', (tester) async {
       await run(mia, 'add_20_plain');
       await run(tom, 'mix_100');
       await openAdmin(tester);
@@ -448,7 +482,7 @@ void main() {
           isNotNull);
     });
 
-    testWidgets('groups can be switched off for one child', (tester) async {
+    adminTest('groups can be switched off for one child', (tester) async {
       await openAdmin(tester);
       await tester.tap(find.text('Verwaltung'));
       await tester.pumpAndSettle();
@@ -477,7 +511,7 @@ void main() {
       expect(find.text('Alle Bereiche'), findsOneWidget);
     });
 
-    testWidgets('the review of hard tasks can be switched off per child',
+    adminTest('the review of hard tasks can be switched off per child',
         (tester) async {
       await openAdmin(tester);
       await tester.tap(find.text('Verwaltung'));
@@ -506,7 +540,7 @@ void main() {
       expect(find.textContaining('ohne Wiederholung'), findsOneWidget);
     });
 
-    testWidgets('leaving by the cross asks before throwing changes away',
+    adminTest('leaving by the cross asks before throwing changes away',
         (tester) async {
       await openAdmin(tester);
       await openSettings(tester);
@@ -535,7 +569,7 @@ void main() {
           .hidden, isEmpty);
     });
 
-    testWidgets('the back gesture asks too, and only when something changed',
+    adminTest('the back gesture asks too, and only when something changed',
         (tester) async {
       await openAdmin(tester);
       await openSettings(tester);
@@ -555,7 +589,7 @@ void main() {
       expect(find.text('Änderungen verwerfen?'), findsOneWidget);
     });
 
-    testWidgets('switching everything off is flagged in the dialog',
+    adminTest('switching everything off is flagged in the dialog',
         (tester) async {
       await openAdmin(tester);
       await tester.tap(find.text('Verwaltung'));
@@ -573,7 +607,7 @@ void main() {
       expect(find.textContaining('kann das Kind nicht üben'), findsOneWidget);
     });
 
-    testWidgets('deleted runs can be brought back without the snack bar',
+    adminTest('deleted runs can be brought back without the snack bar',
         (tester) async {
       // The snack bar right after the deed only helps whoever is still
       // looking at it. This is the other way, and it does not depend on it.
@@ -598,7 +632,7 @@ void main() {
       expect(find.text('Plus ohne Zehnerübergang  ·  Bis 20'), findsOneWidget);
     });
 
-    testWidgets('the tidy-up button counts past the end of the list',
+    adminTest('the tidy-up button counts past the end of the list',
         (tester) async {
       // More abandoned runs than the log shows at once. The count used to
       // come off the list on screen, so the button promised too few.
@@ -611,7 +645,7 @@ void main() {
       expect(find.textContaining('letzten 200 Durchgänge'), findsOneWidget);
     });
 
-    testWidgets('the parent area says when the last backup was',
+    adminTest('the parent area says when the last backup was',
         (tester) async {
       await openAdmin(tester);
       await tester.tap(find.text('Verwaltung'));
@@ -634,7 +668,7 @@ void main() {
       expect(find.textContaining('eine Weile her'), findsNothing);
     });
 
-    testWidgets('changing the PIN asks for a new one right away',
+    adminTest('changing the PIN asks for a new one right away',
         (tester) async {
       await openAdmin(tester);
       await tester.tap(find.text('Verwaltung'));
@@ -651,10 +685,162 @@ void main() {
       expect(await settings.checkAdminPin('0000'), isTrue);
       expect(await settings.checkAdminPin('4711'), isFalse);
     });
+
+    adminTest('aborting a PIN change keeps the old one', (tester) async {
+      await openAdmin(tester);
+      await tester.tap(find.text('Verwaltung'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('PIN ändern'));
+      await tester.pumpAndSettle();
+      expect(find.text('Elternbereich einrichten'), findsOneWidget);
+
+      // The old PIN is only overwritten once the new one has been entered
+      // twice - so backing out here, same as the setup dialog, must not
+      // leave the profile with no PIN at all.
+      await tester.tap(find.text('Abbrechen'));
+      await tester.pumpAndSettle();
+
+      final settings = container.read(settingsRepositoryProvider);
+      expect(await settings.checkAdminPin('4711'), isTrue);
+    });
+
+    group('closes itself', () {
+      adminTest('idle timeout closes it and says so', (tester) async {
+        await openAdmin(tester);
+        expect(find.byType(AdminScreen), findsOneWidget);
+
+        await tester.pump(adminIdleTimeout + const Duration(seconds: 1));
+        await tester.pumpAndSettle();
+
+        expect(find.byType(AdminScreen), findsNothing);
+        expect(find.text('Eltern'), findsOneWidget);
+        expect(find.text('Elternbereich geschlossen.'), findsOneWidget);
+      });
+
+      adminTest('a touch resets the idle timer', (tester) async {
+        await openAdmin(tester);
+
+        await tester.pump(const Duration(minutes: 2));
+        // Any touch counts - a tab is the easiest one to reach from here.
+        await tester.tap(find.text('Verwaltung'));
+        await tester.pumpAndSettle();
+
+        await tester.pump(const Duration(minutes: 2));
+        await tester.pumpAndSettle();
+        expect(find.byType(AdminScreen), findsOneWidget);
+
+        await tester.pump(const Duration(minutes: 3));
+        await tester.pumpAndSettle();
+        expect(find.byType(AdminScreen), findsNothing);
+      });
+
+      adminTest(
+          'unsaved changes in a sub-screen fall away, without asking',
+          (tester) async {
+        await openAdmin(tester);
+        await tester.tap(find.text('Verwaltung'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Mia'));
+        await tester.pumpAndSettle();
+
+        // Touch something so there is a change to lose, then let it sit.
+        await tester.tap(find.text('Profil vorübergehend sperren'));
+        await tester.pump();
+
+        await tester.pump(adminIdleTimeout + const Duration(seconds: 1));
+        await tester.pumpAndSettle();
+
+        // popUntil bypasses PopScope on purpose: nobody is left to answer a
+        // "discard changes?" dialog, so the change is simply gone.
+        expect(find.text('Änderungen verwerfen?'), findsNothing);
+        expect(find.byType(AdminScreen), findsNothing);
+        expect(find.text('Eltern'), findsOneWidget);
+
+        final mother = await container.read(userRepositoryProvider).findUser(mia);
+        expect(mother!.locked, isFalse);
+      });
+
+      adminTest(
+          'going to the background closes it, staying merely inactive does not',
+          (tester) async {
+        await openAdmin(tester);
+
+        // The app goes away the way it really does: resumed -> inactive ->
+        // paused. Merely going inactive - a pulled-down notification shade -
+        // must not close it.
+        tester.binding
+            .handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+        await tester.pumpAndSettle();
+        expect(find.byType(AdminScreen), findsOneWidget);
+
+        // AdminSession pops synchronously right here, out of this call - but
+        // a paused app does not paint frames, so nothing on screen can show
+        // it yet, same as on a real device. Coming back out to `inactive`
+        // (by way of `hidden`, the only valid route) is what lets the next
+        // pump actually draw the already-popped tree, exactly as it would
+        // once the tablet wakes back up.
+        tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+        tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.hidden);
+        tester.binding
+            .handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+        await tester.pumpAndSettle();
+        expect(find.byType(AdminScreen), findsNothing);
+        expect(find.text('Elternbereich geschlossen.'), findsOneWidget);
+
+        tester.binding
+            .handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      });
+
+      adminTest(
+          'holdOpen suspends both signals while a backup action is in flight',
+          (tester) async {
+        await openAdmin(tester);
+        addTearDown(() => tester.binding
+            .handleAppLifecycleStateChanged(AppLifecycleState.resumed));
+
+        final completer = Completer<void>();
+        final held = AdminSession.holdOpen(() => completer.future);
+
+        tester.binding
+            .handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+        tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+        await tester.pump(adminIdleTimeout + const Duration(seconds: 1));
+        await tester.pump();
+        expect(find.byType(AdminScreen), findsOneWidget);
+
+        tester.binding
+            .handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+        completer.complete();
+        await held;
+        await tester.pumpAndSettle();
+        expect(find.byType(AdminScreen), findsOneWidget);
+
+        // Idle time starts fresh once the hold ends, and the ordinary timeout
+        // works again afterwards.
+        await tester.pump(adminIdleTimeout + const Duration(seconds: 1));
+        await tester.pumpAndSettle();
+        expect(find.byType(AdminScreen), findsNothing);
+      });
+
+      adminTest('leaving normally does not leave a timer pending',
+          (tester) async {
+        await openAdmin(tester);
+        await simulateBack(tester);
+        expect(find.byType(AdminScreen), findsNothing);
+
+        // If AdminSession.close() had missed cancelling its Timer, pumping
+        // past when it would have fired throws "A Timer is still pending" at
+        // the end of the test - that is the real assertion here.
+        await tester.pump(adminIdleTimeout * 2);
+        await tester.pumpAndSettle();
+        expect(find.text('Elternbereich geschlossen.'), findsNothing);
+      });
+    });
   });
 
   group('overview across all children', () {
-    testWidgets('shows a card per profile, including untouched ones',
+    adminTest('shows a card per profile, including untouched ones',
         (tester) async {
       await run(mia, 'add_20_plain', msPerTask: 6000);
       await pumpProfiles(tester);
@@ -674,7 +860,7 @@ void main() {
       expect(find.text('Noch nicht geübt.'), findsOneWidget);
     });
 
-    testWidgets('every leaderboard is reachable from the second tab',
+    adminTest('every leaderboard is reachable from the second tab',
         (tester) async {
       await run(mia, 'times_7', msPerTask: 3000);
       await run(tom, 'times_7', msPerTask: 2000);
@@ -701,7 +887,7 @@ void main() {
       expect(find.text('Bestenliste · 7er-Reihe'), findsOneWidget);
     });
 
-    testWidgets('lessons without a ranking stay out of the list',
+    adminTest('lessons without a ranking stay out of the list',
         (tester) async {
       // Too short to count, so there is nothing to rank yet.
       await run(mia, 'times_7', taskCount: 5, msPerTask: 1000);

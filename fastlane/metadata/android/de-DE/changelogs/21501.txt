@@ -1,0 +1,6 @@
+Der Elternbereich schließt sich selbst: nach drei Minuten ohne Berührung und
+sobald das Tablet einschläft oder die App verlassen wird. Ein liegengelassenes
+Tablet steht dem Kind damit nicht mehr offen.
+
+„PIN ändern" behält die alte PIN, bis die neue bestätigt ist. Wer vorher
+abbrach, stand bisher ganz ohne PIN da.

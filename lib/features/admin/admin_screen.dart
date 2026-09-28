@@ -12,6 +12,7 @@ import '../common/load_failure.dart';
 import '../../data/repositories/user_repository.dart';
 import '../common/star_row.dart';
 import '../profiles/profile_editor.dart';
+import 'admin_session.dart';
 import 'assignments_tab.dart';
 import 'backup_actions.dart';
 import 'global_settings_tab.dart';
@@ -29,9 +30,16 @@ class AdminScreen extends ConsumerWidget {
   static Future<void> open(BuildContext context) async {
     final navigator = Navigator.of(context);
     if (!await requireAdminPin(context)) return;
+    if (!context.mounted) return;
+    // Taken before the push: this is the route the profile screen is still
+    // standing on, and the one AdminSession pops back to once the parent
+    // area closes itself.
+    final below = ModalRoute.of(context)!;
+    final session = AdminSession.open(navigator, below);
     await navigator.push(
       MaterialPageRoute<void>(builder: (_) => const AdminScreen()),
     );
+    session.close();
   }
 
   @override
@@ -555,10 +563,7 @@ class _ManagementTab extends ConsumerWidget {
         OutlinedButton.icon(
           icon: const Icon(Icons.password, size: 26),
           label: const Text('PIN ändern'),
-          onPressed: () async {
-            await ref.read(settingsRepositoryProvider).clearAdminPin();
-            if (context.mounted) await requireAdminPin(context);
-          },
+          onPressed: () => changeAdminPin(context),
         ),
       ],
     );
