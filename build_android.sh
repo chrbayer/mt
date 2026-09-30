@@ -107,6 +107,18 @@ if $GITHUB; then
         || fail "HEAD ist nicht $TAG. Erst 'git checkout $TAG' oder den Tag auf den richtigen Commit setzen."
     git -C "$DIR" ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null \
         || fail "$TAG ist noch nicht auf GitHub. Erst 'git push origin $TAG'."
+
+    # F-Droid attaches changelogs/<n>.txt only where n is a versionCode it
+    # publishes, and those are the per-ABI codes, 10 * versionCode + 1/2/3.
+    # Named after the plain versionCode, no release ever showed "Was ist
+    # neu" there. Checked here as a last guard; flutter test catches it
+    # earlier, before anything is tagged.
+    for lang in de-DE en-US; do
+        for abi in 1 2 3; do
+            [[ -f "$DIR/fastlane/metadata/android/$lang/changelogs/$BUILD_NUMBER$abi.txt" ]] \
+                || fail "Änderungshinweis fehlt: $lang/changelogs/$BUILD_NUMBER$abi.txt (siehe RELEASE.md, Schritt 2)."
+        done
+    done
 fi
 
 # Write key.properties for release signing if env vars are set
@@ -200,7 +212,7 @@ else
 fi
 
 cd "$DIR"
-NOTES="$DIR/fastlane/metadata/android/de-DE/changelogs/$BUILD_NUMBER.txt"
+NOTES="$DIR/fastlane/metadata/android/de-DE/changelogs/${BUILD_NUMBER}1.txt"
 if gh release view "$TAG" >/dev/null 2>&1; then
     echo "Release $TAG gibt es schon, es kommen nur die APKs dazu."
 else

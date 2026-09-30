@@ -32,12 +32,22 @@ fehl, wenn die beiden nicht zusammenpassen. Hintergrund: CLAUDE.md,
 
 ## 2. Änderungshinweis schreiben
 
-Je eine **neue** Datei unter dem neuen versionCode, auf Deutsch und Englisch:
+Je Sprache **drei** neue Dateien mit demselben Text, benannt nach den
+versionCodes der drei APKs — versionCode mal zehn plus 1, 2 und 3:
 
 ```
-fastlane/metadata/android/de-DE/changelogs/21400.txt
-fastlane/metadata/android/en-US/changelogs/21400.txt
+fastlane/metadata/android/de-DE/changelogs/214001.txt
+fastlane/metadata/android/de-DE/changelogs/214002.txt
+fastlane/metadata/android/de-DE/changelogs/214003.txt
+fastlane/metadata/android/en-US/changelogs/214001.txt   (und …2, …3)
 ```
+
+F-Droid hängt einen Änderungshinweis nur an, wenn sein Name einer der
+veröffentlichten Codes ist, und das sind die je Prozessorart. Unter
+`21400.txt` findet es ihn nicht; bis 2.15.1 stand deshalb bei keiner Version
+etwas. `flutter test` prüft die drei Dateien, `build_android.sh --github`
+noch einmal. Den Text für das GitHub-Release nimmt das Skript aus der
+deutschen `…1.txt`.
 
 Die alten Dateien bleiben liegen, jede gehört zu ihrer Version. Kurz halten,
 höchstens 500 Zeichen, geschrieben für Eltern, nicht für Entwickler. F-Droid

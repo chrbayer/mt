@@ -1,0 +1,6 @@
+The parent area now closes by itself: after three minutes without a touch,
+and as soon as the tablet goes to sleep or the app is left. A tablet left
+lying around no longer stays open to the child.
+
+"Change PIN" keeps the old PIN until the new one is confirmed. Cancelling
+halfway used to leave no PIN at all.

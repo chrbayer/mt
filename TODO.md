@@ -449,3 +449,10 @@ die App mit Absicht und halten ihn so lange offen.
 #61 erledigt (2.15.1) — „PIN ändern" löschte die alte PIN, bevor die neue
 feststand. Wer abbrach, stand ohne PIN da, und der Elternbereich öffnete sich
 danach ohne Abfrage. Die alte gilt jetzt, bis die neue bestätigt ist.
+
+#62 erledigt (nach 2.15.1, ohne eigene Version) — F-Droid zeigte bei keiner
+Version „Was ist neu": die Änderungshinweise hießen nach dem versionCode aus
+`pubspec.yaml`, veröffentlicht werden aber die Codes je Prozessorart (mal zehn
+plus 1/2/3). Gefunden hat es ein Tester im Merge Request. Ab jetzt drei
+Dateien je Version und Sprache, geprüft von `flutter test` vor dem Taggen und
+von `build_android.sh --github` noch einmal. Wirkt ab der nächsten Version.

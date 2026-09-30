@@ -1329,6 +1329,18 @@ Die APKs nach Prozessorart entstehen mit **genau den Argumenten der Recipe**
 und dem Paket-Cache im Projekt (`PUB_CACHE=$DIR/.pub-cache`), wie F-Droid ihn
 anlegt. Jede Abweichung ist ein Byte, das F-Droid nicht nachbaut.
 
+Die **Änderungshinweise** heißen nach den Codes je Prozessorart, nicht nach
+dem aus `pubspec.yaml`: `215021.txt` bis `215023.txt` statt `21502.txt`.
+fdroidserver hängt `changelogs/<n>.txt` nur an, wenn `n` ein veröffentlichter
+versionCode ist, und das sind hier die drei mit angehängter Ziffer. Bis 2.15.1
+hießen sie nach dem Code aus `pubspec.yaml`, und F-Droid zeigte bei keiner
+Version „Was ist neu" — gefunden hat es ein Tester im Merge Request, keine
+eigene Prüfung. Jetzt prüft `test/fastlane_changelog_test.dart` es vor dem
+Taggen, denn F-Droid liest die Dateien aus dem getaggten Commit, und danach
+ließe es sich nur noch durch Verschieben eines öffentlichen Tags beheben. Eine
+`default.txt` wäre kein Ersatz: sie ist der Rückfall für jede Version und
+stünde bei allen gleich da.
+
 Hochgeladen wird **ohne `--clobber`**. F-Droid übernimmt die Signatur aus genau
 diesen Dateien; eine nachträglich ersetzte Datei hätte niemand verglichen.
 Muss ein Upload wiederholt werden, das Asset von Hand löschen.
