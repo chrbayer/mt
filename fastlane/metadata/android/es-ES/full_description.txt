@@ -1,0 +1,23 @@
+Práctica de cálculo mental en la tableta, para niños desde el primer curso. La aplicación mide el tiempo hasta la respuesta correcta y lo convierte en una curva de aprendizaje y en clasificaciones, donde varios niños del mismo dispositivo compiten entre sí.
+
+<b>Alemán, inglés, francés, español e italiano.</b> La interfaz sigue el idioma del dispositivo; cualquier otro idioma muestra inglés. La traducción al español es nueva: las mejoras son bienvenidas en GitHub (https://github.com/chrbayer/mt).
+
+Funciona totalmente sin conexión. Sin cuenta, sin anuncios, sin análisis y sin permiso de Internet: la aplicación no puede enviar nada a ningún sitio.
+
+<b>83 lecciones en diez áreas</b>
+
+Contar y comparar dibujos para los más pequeños, después sumas y restas hasta 10, 20, 100 y 1000 – con y sin llevadas –, millares y centenas enteros por debajo de diez mil, las tablas de multiplicar al derecho y al revés, la división con y sin resto, la jerarquía de las operaciones, la hora y el dinero.
+
+<b>Estrellas por el cuidado, rayos por la velocidad</b>
+
+Dos ejes separados, a propósito. Las estrellas siguen la tasa de errores, los rayos el tiempo por cálculo. Un niño que trabaja con cuidado gana sus estrellas aunque sea despacio.
+
+<b>Lo que pueden ajustar los padres</b>
+
+Tras un PIN: qué áreas ve un niño, cuánto tiempo puede practicar seguido y al día, cuántas rondas de una misma lección cuentan aún para los récords en un día, y si se repiten los cálculos difíciles.
+
+También hay tareas: asignar una lección a un niño, a diario o cada semana, o como plan para un día concreto, con un mínimo de estrellas y rayos que alcanzar.
+
+<b>Tus datos se quedan contigo</b>
+
+Todo está en una base de datos del dispositivo. Una copia de seguridad solo se crea cuando la pides y se entrega al menú de compartir de Android: tú decides adónde va.

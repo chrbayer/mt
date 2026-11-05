@@ -1,0 +1,23 @@
+Esercizi di calcolo mentale sul tablet, per i bambini dalla prima elementare. L’app misura il tempo fino alla risposta giusta e ne ricava una curva di apprendimento e delle classifiche, in cui più bambini sullo stesso dispositivo gareggiano fra loro.
+
+<b>Tedesco, inglese, francese, spagnolo e italiano.</b> L’interfaccia segue la lingua del dispositivo; ogni altra lingua mostra l’inglese. La traduzione italiana è nuova: i miglioramenti sono benvenuti su GitHub (https://github.com/chrbayer/mt).
+
+Funziona interamente offline. Nessun account, nessuna pubblicità, nessuna analisi e nessun permesso Internet: l’app non può inviare nulla da nessuna parte.
+
+<b>83 lezioni in dieci aree</b>
+
+Contare e confrontare immagini per i più piccoli, poi addizioni e sottrazioni fino a 10, 20, 100 e 1000 – con e senza cambio –, migliaia e centinaia intere sotto diecimila, le tabelline in avanti e all’indietro, la divisione con e senza resto, la precedenza delle operazioni, l’ora e il denaro.
+
+<b>Stelle per la precisione, fulmini per la velocità</b>
+
+Due assi separati, di proposito. Le stelle seguono la percentuale di errori, i fulmini il tempo per calcolo. Un bambino che lavora con cura guadagna le sue stelle anche se è lento.
+
+<b>Cosa possono impostare i genitori</b>
+
+Dietro un PIN: quali aree vede un bambino, quanto può esercitarsi di seguito e al giorno, quante partite di una stessa lezione contano ancora per i record in un giorno, e se i calcoli difficili vengono ripresi.
+
+Ci sono anche i compiti: assegnare una lezione a un bambino, ogni giorno o ogni settimana, o come piano per un giorno preciso, con un minimo di stelle e fulmini da raggiungere.
+
+<b>I tuoi dati restano tuoi</b>
+
+Tutto si trova in un database sul dispositivo. Un backup viene creato solo su richiesta e consegnato al menu di condivisione di Android: sei tu a decidere dove va.

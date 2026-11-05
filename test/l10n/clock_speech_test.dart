@@ -1,8 +1,10 @@
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mathe_trainer/domain/clock_speech.dart';
 import 'package:mathe_trainer/domain/lesson.dart';
 import 'package:mathe_trainer/domain/task.dart';
 import 'package:mathe_trainer/features/practice/practice_controller.dart';
+import 'package:mathe_trainer/l10n/l10n.dart';
 import 'package:mathe_trainer/l10n/task_texts.dart';
 
 import '../support/l10n.dart';
@@ -91,9 +93,78 @@ void main() {
     });
   });
 
+  group('French, Spanish and Italian', () {
+    // All three say the hour first and name the coming hour from :35 on.
+    for (final entry in {
+      'fr': ClockSpeech.fr,
+      'es': ClockSpeech.es,
+      'it': ClockSpeech.it,
+    }.entries) {
+      group(entry.key, () {
+        final speech = entry.value;
+
+        test('is chosen by its language code', () {
+          expect(identical(ClockSpeech.forLanguage(entry.key), speech), isTrue);
+          expect(speech.hourFirst, isTrue);
+          expect(speech.nextHourFromIndex, 6);
+        });
+
+        test('names the hour that has begun up to :30, the next from :35', () {
+          expect(at(3, 15).expectedSecondIn(speech), 3);
+          expect(at(3, 25).expectedSecondIn(speech), 3);
+          expect(at(3, 30).expectedSecondIn(speech), 3);
+          expect(at(3, 35).expectedSecondIn(speech), 4);
+          expect(at(3, 45).expectedSecondIn(speech), 4);
+          expect(at(3, 55).expectedSecondIn(speech), 4);
+        });
+
+        test('the hour after twelve is one', () {
+          expect(at(12, 45).expectedSecondIn(speech), 1);
+          expect(at(12, 15).expectedSecondIn(speech), 12);
+        });
+      });
+    }
+
+    test('French puts the hour in front of the phrase', () {
+      final fr = lookupAppLocalizations(const Locale('fr'));
+      expect(spokenTime(fr, at(3, 15), speech: ClockSpeech.fr), '3 h et quart');
+      expect(
+        spokenTime(fr, at(3, 30), speech: ClockSpeech.fr),
+        '3 h et demie',
+      );
+      expect(
+        spokenTime(fr, at(3, 35), speech: ClockSpeech.fr),
+        '4 h moins vingt-cinq',
+      );
+      expect(
+        spokenTime(fr, at(3, 45), speech: ClockSpeech.fr),
+        '4 h moins le quart',
+      );
+      expect(
+        spokenTime(fr, at(12, 45), speech: ClockSpeech.fr),
+        '1 h moins le quart',
+      );
+      // Without an explicit speech it follows the language of the texts.
+      expect(spokenTime(fr, at(3, 45)), '4 h moins le quart');
+    });
+
+    test('the word at the hour box never names the answer', () {
+      // No article or plural that depends on the hour: the phrases of two
+      // different hours differ only in the hour box.
+      final fr = lookupAppLocalizations(const Locale('fr'));
+      for (final minute in [5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55]) {
+        final one = spokenTime(fr, at(1, minute), speech: ClockSpeech.fr);
+        final three = spokenTime(fr, at(3, minute), speech: ClockSpeech.fr);
+        expect(one.substring(one.indexOf(' ')),
+            three.substring(three.indexOf(' ')),
+            reason: ':$minute');
+      }
+    });
+  });
+
   group('a language that says the hour first', () {
-    // French "3 heures et quart": nothing in the app is French yet, but the
-    // controller must already be able to follow the order.
+    // French "3 h et quart": any speech that sets hourFirst is followed by
+    // the controller; the French one is checked on the real screen too.
     const french = ClockSpeech(nextHourFromIndex: 6, hourFirst: true);
     final lesson = lessonById('clock_words');
 

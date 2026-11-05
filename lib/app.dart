@@ -46,9 +46,9 @@ class _MatheTrainerAppState extends ConsumerState<MatheTrainerApp>
     return MaterialApp(
       onGenerateTitle: (context) => context.l10n.appTitle,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
-      supportedLocales: const [Locale('de'), Locale('en')],
-      // German for German, English for everything else: a child who reads
-      // neither German nor French is better served by English.
+      supportedLocales: AppLocalizations.supportedLocales,
+      // The device's language where the app has it, English for everything
+      // else: a child who reads none of them is better served by English.
       localeResolutionCallback: resolveAppLocale,
       debugShowCheckedModeBanner: false,
       theme: buildAppTheme(),
@@ -57,7 +57,14 @@ class _MatheTrainerAppState extends ConsumerState<MatheTrainerApp>
   }
 }
 
-/// The language of the app for a device language: German if the device says
-/// German, otherwise English - also for languages the app does not know.
-Locale resolveAppLocale(Locale? device, Iterable<Locale> supported) =>
-    device?.languageCode == 'de' ? const Locale('de') : const Locale('en');
+/// The language of the app for a device language: the device's own if the
+/// app has it (German, French, Spanish, Italian - in every region), otherwise
+/// English, also for languages the app does not know.
+Locale resolveAppLocale(Locale? device, Iterable<Locale> supported) {
+  for (final locale in supported) {
+    if (locale.languageCode == device?.languageCode) {
+      return Locale(locale.languageCode);
+    }
+  }
+  return const Locale('en');
+}

@@ -29,3 +29,12 @@ final AppLocalizations enL10n = lookupAppLocalizations(enLocale);
 
 /// Date symbols for English, next to [initDateSymbols].
 Future<void> initEnglishDateSymbols() => initializeDateFormatting('en');
+
+/// French, for the tests that check a language with the hour in front.
+const frLocale = Locale('fr');
+
+/// French texts without a widget tree.
+final AppLocalizations frL10n = lookupAppLocalizations(frLocale);
+
+/// Date symbols for French.
+Future<void> initFrenchDateSymbols() => initializeDateFormatting('fr');

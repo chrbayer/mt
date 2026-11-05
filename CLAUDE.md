@@ -12,7 +12,9 @@ dort anlegen, keine Strings in Widgets** — Mehrzahl über ICU `plural`,
 Platzhalter mit Typangabe. Wo außerhalb eines Widgets Text gebraucht wird
 (Dialog-Helfer, Zustandsobjekte), kommt er an der Aufrufstelle aus dem
 Kontext und wird hineingereicht. Tests übergeben ihren `MaterialApp` die
-Konstanten aus `test/support/l10n.dart`.
+Konstanten aus `test/support/l10n.dart`; `screens_layout_locales_test` läuft
+für jede Locale außer de (ein neuer Text, der in einer Sprache überläuft, wird
+in dieser Sprache gekürzt, das Layout bleibt).
 
 **Die Domäne liefert Daten, keine Sätze.** `lib/domain/` kennt Lektionen
 nur an ihrer ID, Aufgaben nur an Zahlen und Symbolen (`+ − · :`, Emoji),
@@ -49,21 +51,27 @@ gespeicherte und erwartete Wert der Sprechweise ist der **Index** (0..10 für
 Reihenfolge von Wort und Stunde); den Aufbau darum herum beschreibt
 `domain/clock_speech.dart`: `ClockSpeech.nextHourFromIndex` (ab welcher
 Sprechweise die kommende Stunde genannt wird — Deutsch ab „5 vor halb“) und
-`hourFirst` (ob die Stunde vorn steht, Französisch „3 heures et quart“). Die
+`hourFirst` (ob die Stunde vorn steht, Französisch „3 h et quart“). Die
 zweite Antwort, die Stunde, kommt aus `Task.expectedSecondIn(speech)`; der
 `PracticeController` bekommt die `ClockSpeech` hereingereicht (Vorgabe
 `ClockSpeech.de`), der Übungsbildschirm bestimmt sie aus der aktiven Locale.
 `hourFirst` dreht die Reihenfolge der beiden Felder im Controller und im
 `TaskDisplay` um — innerhalb einer Sprache immer gleich.
 
-**Sprachen: Deutsch und Englisch.** `app_de.arb` ist die Vorlage, `app_en.arb`
-hat genau dieselben Schlüssel (`test/l10n/arb_completeness_test.dart` prüft
-Schlüssel und Platzhalter je Sprachdatei — gen-l10n selbst warnt nur, und ein
-Kind läse dann deutschen Text in der englischen App). **Neue Texte immer in
-`app_de.arb` anlegen und in `app_en.arb` nachziehen.** Gewählt wird die Sprache
-des Geräts (`resolveAppLocale` in `app.dart`): Deutsch für Deutsch, **alles
-andere Englisch** — wer weder Deutsch noch Englisch liest, kommt mit Englisch
-am ehesten zurecht. Eine Sprachwahl in der App gibt es nicht.
+**Sprachen: Deutsch, Englisch, Französisch, Spanisch, Italienisch.**
+`app_de.arb` ist die Vorlage, jede andere Datei hat genau dieselben Schlüssel
+(`test/l10n/arb_completeness_test.dart` prüft Schlüssel und Platzhalter je
+Sprachdatei — gen-l10n selbst warnt nur, und ein Kind läse dann deutschen Text
+in der fremden App). **Neue Texte immer in `app_de.arb` anlegen und in allen
+anderen Dateien nachziehen.** Gewählt wird die Sprache des Geräts
+(`resolveAppLocale` in `app.dart`): de, fr, es, it je auf sich selbst (in jeder
+Region, fr-CA → fr), **alles andere Englisch** — wer keine dieser Sprachen
+liest, kommt mit Englisch am ehesten zurecht. `supportedLocales` kommt aus
+`AppLocalizations.supportedLocales`: gen-l10n nimmt jede ARB im Ordner auf,
+eine weitere Sprache braucht also nur die Datei, ihre `ClockSpeech` und einen
+Fall in `forLanguage`. Eine Sprachwahl in der App gibt es nicht. Fr/es/it sind
+neue Übersetzungen ohne Muttersprachler im Projekt; README und Store sagen das
+und bitten um Verbesserungen (Werkzeug: `tool/translation_review.py`).
 
 Fachbegriffe im Englischen, einheitlich: Durchgang = *round*, Rechnung/Aufgabe
 im Sinn von Rechenaufgabe = *problem*, Aufgabe im Sinn von Zuweisung =
@@ -82,6 +90,25 @@ Die `ClockSpeech` wird aus der **aufgelösten** Locale
 (`Localizations.localeOf`) bestimmt, nie aus der Gerätesprache: die Antwort
 muss zu den Wörtern passen, die auf dem Bildschirm stehen. Unbekannter Code →
 Englisch, wie bei den Texten.
+
+**Uhrzeit sagen in fr/es/it** stellt die **Stunde voran** (`hourFirst: true`)
+und nennt wie Englisch ab :35 die nächste Stunde (`nextHourFromIndex: 6`):
+3:45 ist „4 h moins le quart“ / „4 menos cuarto“ / „4 meno un quarto“.
+`clockSpokenTime` heißt dort `{hour} {phrase}`, der Stundenkasten steht vorn,
+dann kommt die gewählte Wendung — der Eingabeweg ist erst die Stunde auf der
+Ziffern-, dann die Wendung auf der Wahltastatur, und die Erklärung der Lektion
+nennt ihn in dieser Reihenfolge. **Das Wort am Stundenkasten darf die Antwort
+nicht verraten**: kein Artikel und kein Numerus, die von der Stunde abhängen
+(nicht „la una/las tres“, „l’una/le tre“, „heure/heures“), deshalb fr „h et
+quart“ nach dem Kasten, es „y cuarto“, it „e un quarto“. Ein Test mit der
+echten fr-Fassung (`clock_phrase_french_test.dart`) fährt den Weg über den
+Übungsbildschirm.
+
+Fachbegriffe im Französischen: Durchgang = *série*, Rechenaufgabe = *calcul*,
+Aufgabe (Zuweisung) = *mission*, Blitz = *éclair*, Elternbereich = *espace
+parents*, Bestenliste = *classement*, Bereich = *domaine*, Zehnerübergang =
+*passer la dizaine* (darüber *retenue*), Verliebte Zahlen = *compléments à 10*,
+Einmaleins = *table de n*. Geld „2,50 €“ und „50 c“, Uhr 24 Stunden.
 
 ## Schichten
 

@@ -19,17 +19,26 @@ import 'package:mathe_trainer/l10n/lesson_texts.dart';
 import 'package:mathe_trainer/providers.dart';
 import 'package:mathe_trainer/theme/app_theme.dart';
 
-import '../support/l10n.dart';
 import '../support/layout_screens.dart';
 import '../support/real_font.dart';
 import 'screens_layout_test.dart' show tabletSizes;
 
-/// The same screens as `screens_layout_test`, in English. English is
-/// usually shorter than German, but not everywhere (the compact header, the
-/// column heads of the tables), and an overflow in the second language would
-/// otherwise only show on a child's tablet. When a text overflows here, the
-/// fix is a shorter text, not a different layout.
+/// The same screens as `screens_layout_test`, in every other language the
+/// app has. English is usually shorter than German, French and the Romance
+/// languages often longer, and an overflow in a translation would otherwise
+/// only show on a child's tablet. When a text overflows here, the fix is a
+/// shorter text, not a different layout. A new ARB file is picked up by
+/// `AppLocalizations.supportedLocales` without a change here.
 void main() {
+  for (final locale in AppLocalizations.supportedLocales) {
+    if (locale.languageCode == 'de') continue; // screens_layout_test
+    group(locale.languageCode, () => _suite(locale));
+  }
+}
+
+void _suite(Locale locale) {
+  final l10n = lookupAppLocalizations(locale);
+
   setUpAll(loadRealFont);
 
   late AppDatabase db;
@@ -59,8 +68,8 @@ void main() {
         container: container,
         child: MaterialApp(
           localizationsDelegates: AppLocalizations.localizationsDelegates,
-          locale: enLocale,
-          supportedLocales: const [enLocale],
+          locale: locale,
+          supportedLocales: [locale],
           debugShowCheckedModeBanner: false,
           theme: buildAppTheme(),
           home: screen,
@@ -80,17 +89,18 @@ void main() {
 
   for (final size in tabletSizes.entries) {
     for (final screen in screens.entries) {
-      testWidgets('${screen.key} fits on ${size.key} in English', (
-        tester,
-      ) async {
-        await pumpScreen(tester, screen.value(), size.value);
-        expect(tester.takeException(), isNull);
-      });
+      testWidgets(
+        '${screen.key} fits on ${size.key} in ${locale.languageCode}',
+        (tester) async {
+          await pumpScreen(tester, screen.value(), size.value);
+          expect(tester.takeException(), isNull);
+        },
+      );
     }
 
     testWidgets('management tab fits on ${size.key}', (tester) async {
       await pumpScreen(tester, const AdminScreen(), size.value);
-      await tester.tap(find.text('Manage'));
+      await tester.tap(find.text(l10n.adminTabManagement));
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
       // The whole row is the way in.
@@ -98,7 +108,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
       for (final group in LessonGroup.values) {
-        expect(find.text(groupTitle(enL10n, group)), findsOneWidget);
+        expect(find.text(groupTitle(l10n, group)), findsOneWidget);
       }
     });
 
@@ -109,12 +119,12 @@ void main() {
       await tester.tap(
         find.descendant(
           of: find.byType(TabBar),
-          matching: find.text('Assignments'),
+          matching: find.text(l10n.adminTabAssignments),
         ),
       );
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
-      await tester.tap(find.text('New assignment'));
+      await tester.tap(find.text(l10n.assignmentsNew));
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
       await tester.drag(
@@ -123,12 +133,12 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
-      expect(find.text('Create'), findsOneWidget);
+      expect(find.text(l10n.editorCreate), findsOneWidget);
     });
 
     testWidgets('leaderboards overview fits on ${size.key}', (tester) async {
       await pumpScreen(tester, const GlobalStatsScreen(), size.value);
-      await tester.tap(find.text('Leaderboards'));
+      await tester.tap(find.text(l10n.globalStatsTabLeaderboards));
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
     });
@@ -136,7 +146,7 @@ void main() {
     testWidgets('own settings fit on ${size.key}', (tester) async {
       await pumpScreen(tester, const SettingsScreen(), size.value);
       expect(tester.takeException(), isNull);
-      expect(find.text('Problems per round'), findsOneWidget);
+      expect(find.text(l10n.settingsTaskCountHeading), findsOneWidget);
     });
 
     testWidgets('profile settings fit on ${size.key}', (tester) async {
@@ -151,7 +161,7 @@ void main() {
       await tester.drag(find.byType(ListView).first, const Offset(0, -2000));
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
-      expect(find.text('Save'), findsOneWidget);
+      expect(find.text(l10n.profileSettingsSave), findsOneWidget);
     });
 
     testWidgets('give-back-stars dialog fits on ${size.key}', (tester) async {
@@ -169,7 +179,7 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
-      expect(find.text('Done'), findsOneWidget);
+      expect(find.text(l10n.resetStarsDone), findsOneWidget);
     });
 
     testWidgets('global settings fit on ${size.key}', (tester) async {
@@ -179,20 +189,20 @@ void main() {
         size.value,
       );
       expect(tester.takeException(), isNull);
-      expect(find.text('Show clock during practice'), findsOneWidget);
+      expect(find.text(l10n.globalSettingsClock), findsOneWidget);
     });
 
     testWidgets('PIN dialog fits on ${size.key}', (tester) async {
       await pumpScreen(tester, const ProfileSelectScreen(), size.value);
-      await tester.tap(find.text('Parents'));
+      await tester.tap(find.text(l10n.profilesParents));
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
-      expect(find.text('Cancel'), findsOneWidget);
+      expect(find.text(l10n.commonCancel), findsOneWidget);
     });
 
     testWidgets('start dialog fits on ${size.key}', (tester) async {
       await pumpScreen(tester, const LessonHomeScreen(), size.value);
-      final lesson = find.text(lessonTitle(enL10n, lessonById('add_20_carry')));
+      final lesson = find.text(lessonTitle(l10n, lessonById('add_20_carry')));
       for (var i = 0; i < 15 && lesson.evaluate().isEmpty; i++) {
         await tester.drag(find.byType(ListView), const Offset(0, -400));
         await tester.pumpAndSettle();
@@ -203,11 +213,11 @@ void main() {
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
 
-      await tester.tap(find.byTooltip('What does that mean?'));
+      await tester.tap(find.byTooltip(l10n.startWhatDoesItMean));
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
 
-      final go = find.text("Let's go");
+      final go = find.text(l10n.startGo);
       expect(go, findsOneWidget);
       final before = tester.getRect(go);
       expect(before.bottom, lessThanOrEqualTo(size.value.height));
@@ -245,9 +255,9 @@ void main() {
         await tester.pumpAndSettle();
         expect(tester.takeException(), isNull, reason: count);
       }
-      await tester.ensureVisible(find.text("Let's go"));
+      await tester.ensureVisible(find.text(l10n.startGo));
       await tester.pumpAndSettle();
-      final box = tester.getRect(find.text("Let's go"));
+      final box = tester.getRect(find.text(l10n.startGo));
       expect(box.right, lessThanOrEqualTo(size.value.width));
     });
   }
@@ -256,16 +266,16 @@ void main() {
     tester,
   ) async {
     await pumpScreen(tester, const LessonHomeScreen(), const Size(820, 420));
-    expect(find.text('Stats'), findsNothing);
-    expect(find.text('Switch'), findsNothing);
-    expect(find.byTooltip('Stats'), findsOneWidget);
-    expect(find.byTooltip('Switch'), findsOneWidget);
+    expect(find.text(l10n.lessonsStatsLabel), findsNothing);
+    expect(find.text(l10n.lessonsSwitchLabel), findsNothing);
+    expect(find.byTooltip(l10n.lessonsStatsLabel), findsOneWidget);
+    expect(find.byTooltip(l10n.lessonsSwitchLabel), findsOneWidget);
     expect(find.byType(StarTotal), findsNWidgets(2));
   });
 
   testWidgets('a wide device keeps the words', (tester) async {
     await pumpScreen(tester, const LessonHomeScreen(), const Size(1280, 800));
-    expect(find.text('Stats'), findsOneWidget);
-    expect(find.text('Switch'), findsOneWidget);
+    expect(find.text(l10n.lessonsStatsLabel), findsOneWidget);
+    expect(find.text(l10n.lessonsSwitchLabel), findsOneWidget);
   });
 }

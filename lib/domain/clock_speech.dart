@@ -28,7 +28,7 @@ class ClockSpeech {
   /// therefore entered first. German and English put it last.
   ///
   /// The practice controller and the task display follow this, so a language
-  /// that sets it (French will) needs no further code: the two boxes swap
+  /// that sets it (French, Spanish and Italian do) needs no further code: the two boxes swap
   /// places, the word pad appears in the second step.
   final bool hourFirst;
 
@@ -53,12 +53,40 @@ class ClockSpeech {
     hourFirst: false,
   );
 
+  /// French "4 h moins le quart" (3:45), Spanish "4 menos cuarto" and
+  /// Italian "4 meno un quarto": the hour comes first, and from `:35` on the
+  /// coming hour is named - `:30` is still "3 h et demie", `:35` already
+  /// "4 h moins vingt-cinq".
+  ///
+  /// The texts next to the hour box must not give the answer away, so they
+  /// carry no article or plural that depends on the hour ("3 h", not
+  /// "trois heures"/"las tres").
+  static const ClockSpeech fr = ClockSpeech(
+    nextHourFromIndex: 6,
+    hourFirst: true,
+  );
+
+  /// Spanish: see [fr].
+  static const ClockSpeech es = ClockSpeech(
+    nextHourFromIndex: 6,
+    hourFirst: true,
+  );
+
+  /// Italian: see [fr].
+  static const ClockSpeech it = ClockSpeech(
+    nextHourFromIndex: 6,
+    hourFirst: true,
+  );
+
   /// The rules for a language code. Pass the language of the **resolved**
   /// locale (`Localizations.localeOf`), not of the device: the words on the
   /// screen are in that language, and the right answer must match them.
   /// A code the app does not know falls back to English, like the texts do.
   static ClockSpeech forLanguage(String code) => switch (code) {
         'de' => de,
+        'fr' => fr,
+        'es' => es,
+        'it' => it,
         _ => en,
       };
 

@@ -1,0 +1,23 @@
+Entraînement au calcul mental sur tablette, pour les enfants dès la première année d’école. L’application mesure le temps jusqu’à la bonne réponse et en tire une courbe de progrès et des classements, où plusieurs enfants d’un même appareil se mesurent entre eux.
+
+<b>Allemand, anglais, français, espagnol et italien.</b> L’interface suit la langue de l’appareil ; toute autre langue affiche l’anglais. La traduction française est récente : les améliorations sont les bienvenues sur GitHub (https://github.com/chrbayer/mt).
+
+Elle fonctionne entièrement hors ligne. Pas de compte, pas de publicité, pas d’analyse et aucune autorisation Internet – l’application ne peut rien envoyer nulle part.
+
+<b>83 leçons en dix domaines</b>
+
+Compter et comparer des images pour les plus petits, puis addition et soustraction jusqu’à 10, 20, 100 et 1000 – avec et sans retenue –, milliers et centaines entiers en dessous de dix mille, les tables de multiplication à l’endroit et à l’envers, la division avec et sans reste, la priorité des opérations, l’heure et l’argent.
+
+<b>Des étoiles pour le soin, des éclairs pour la vitesse</b>
+
+Deux axes distincts, exprès. Les étoiles suivent le taux d’erreurs, les éclairs le temps par calcul. Un enfant qui travaille soigneusement gagne ses étoiles, même lentement.
+
+<b>Ce que les parents peuvent régler</b>
+
+Derrière un code PIN : quels domaines un enfant voit, combien de temps il peut s’entraîner d’affilée et par jour, combien de séries d’une même leçon comptent encore pour les records dans la journée, et si les calculs difficiles sont repris.
+
+Il y a aussi les missions : donner une leçon à un enfant, chaque jour ou chaque semaine, ou comme plan pour un jour précis, avec un minimum d’étoiles et d’éclairs à atteindre.
+
+<b>Vos données restent chez vous</b>
+
+Tout est dans une base de données sur l’appareil. Une sauvegarde n’est créée que sur demande et remise à la feuille de partage d’Android – vous décidez où elle va.

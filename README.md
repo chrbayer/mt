@@ -371,7 +371,9 @@ der Adaptive-Icon-Vordergrund und die Monochrom-Ebene für Android 13.
 ## Übersetzungen gegenlesen
 
 Muttersprachler ohne Programmierkenntnisse lesen eine Übersetzung in einer
-Tabelle gegen (Python 3 und `openpyxl`):
+Tabelle gegen (Python 3 und `openpyxl`). Das gilt für jede Sprache außer
+Deutsch - zuerst für Französisch, Spanisch und Italienisch, die ohne
+Muttersprachler entstanden sind (`export fr`, `export es`, `export it`):
 
 ```bash
 python3 tool/translation_review.py export fr      # build/translation_review/review_fr.xlsx
@@ -430,15 +432,20 @@ rsvg-convert -w 512 -h 512 assets/icon/icon.svg \
 ```
 
 Die englische Fassung trägt dieselben Bilder, auch wenn die Screenshots
-deutsch sind: die Beschreibung sagt, dass die App Deutsch und Englisch kann.
+deutsch sind: die Beschreibung sagt, dass die App in fünf Sprachen spricht.
+Französisch, Spanisch und Italienisch tragen ebenfalls Kopien (`fr-FR`, `es-ES`,
+`it-IT`); ihre Änderungshinweise legt erst das Release an.
 
 ## Übersetzen
 
-Die App spricht Deutsch und Englisch und folgt der Sprache des Geräts. Eine
-weitere Sprache (oder bessere Formulierungen) braucht keine Programmierkenntnisse:
+Die App spricht Deutsch, Englisch, Französisch, Spanisch und Italienisch und
+folgt der Sprache des Geräts; jede andere Sprache zeigt Englisch. Französisch,
+Spanisch und Italienisch sind **neue Übersetzungen** und für Verbesserungen
+dankbar - gerade von Muttersprachlern. Eine weitere Sprache (oder bessere
+Formulierungen) braucht keine Programmierkenntnisse:
 
 * Alle Texte stehen in **einer Datei je Sprache**: `lib/l10n/app_<sprache>.arb`,
-  zum Beispiel `app_en.arb`. Die deutsche `app_de.arb` ist die Vorlage; jede
+  zum Beispiel `app_fr.arb`. Die deutsche `app_de.arb` ist die Vorlage; jede
   andere Datei hat dieselben Schlüssel, nur andere Texte.
 * Übersetzt wird der Text rechts vom Doppelpunkt. Der Schlüssel links bleibt
   unverändert.
@@ -458,8 +465,8 @@ Schicken kann man das auf zwei Wegen: als Pull Request, oder man legt die Datei
 als Anhang in einem GitHub-Issue ab — der Rest ist Sache des Entwicklers.
 
 **Das kann der Entwickler nicht dem Übersetzer überlassen:** wie man die Uhrzeit
-sagt. „Viertel vor 4“ (de), „quarter to 4“ (en) und „4 heures moins le quart“
-(fr) unterscheiden sich nicht nur im Wort, sondern darin, *welche Stunde*
+sagt. „Viertel vor 4“ (de), „quarter to 4“ (en), „4 h moins le quart“ (fr),
+„4 menos cuarto“ (es) und „4 meno un quarto“ (it) unterscheiden sich nicht nur im Wort, sondern darin, *welche Stunde*
 genannt wird und ob sie vorn oder hinten steht. Das steht als Regel in
 `lib/domain/clock_speech.dart` und wird für eine neue Sprache dort
 hinterlegt; die Wörter (`clockPhrase05` … `clockPhrase55`) kommen dagegen aus
