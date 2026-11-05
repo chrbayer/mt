@@ -4745,7 +4745,12 @@ class $$UsersTableTableManager
                   getPrefetchedDataCallback: (items) async {
                     return [
                       if (sessionsRefs)
-                        await $_getPrefetchedData<User, $UsersTable, Session>(
+                        await $_getPrefetchedDataByColumns<
+                          User,
+                          $UsersTable,
+                          Session,
+                          $SessionsTable
+                        >(
                           currentTable: table,
                           referencedTable: $$UsersTableReferences
                               ._sessionsRefsTable(db),
@@ -4755,17 +4760,16 @@ class $$UsersTableTableManager
                                 table,
                                 p0,
                               ).sessionsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.userId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'user_id',
                           typedResults: items,
                         ),
                       if (lessonPreferencesRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           User,
                           $UsersTable,
-                          LessonPreference
+                          LessonPreference,
+                          $LessonPreferencesTable
                         >(
                           currentTable: table,
                           referencedTable: $$UsersTableReferences
@@ -4776,17 +4780,16 @@ class $$UsersTableTableManager
                                 table,
                                 p0,
                               ).lessonPreferencesRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.userId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'user_id',
                           typedResults: items,
                         ),
                       if (lessonStarsRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           User,
                           $UsersTable,
-                          LessonStar
+                          LessonStar,
+                          $LessonStarsTable
                         >(
                           currentTable: table,
                           referencedTable: $$UsersTableReferences
@@ -4797,17 +4800,16 @@ class $$UsersTableTableManager
                                 table,
                                 p0,
                               ).lessonStarsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.userId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'user_id',
                           typedResults: items,
                         ),
                       if (assignmentsRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           User,
                           $UsersTable,
-                          AssignmentRow
+                          AssignmentRow,
+                          $AssignmentsTable
                         >(
                           currentTable: table,
                           referencedTable: $$UsersTableReferences
@@ -4818,10 +4820,8 @@ class $$UsersTableTableManager
                                 table,
                                 p0,
                               ).assignmentsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.userId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'user_id',
                           typedResults: items,
                         ),
                     ];
@@ -5347,14 +5347,19 @@ class $$SessionsTableTableManager
               getPrefetchedDataCallback: (items) async {
                 return [
                   if (attemptsRefs)
-                    await $_getPrefetchedData<Session, $SessionsTable, Attempt>(
+                    await $_getPrefetchedDataByColumns<
+                      Session,
+                      $SessionsTable,
+                      Attempt,
+                      $AttemptsTable
+                    >(
                       currentTable: table,
                       referencedTable: $$SessionsTableReferences
                           ._attemptsRefsTable(db),
                       managerFromTypedResult: (p0) =>
                           $$SessionsTableReferences(db, table, p0).attemptsRefs,
-                      referencedItemsForCurrentItem: (item, referencedItems) =>
-                          referencedItems.where((e) => e.sessionId == item.id),
+                      currentColumn: 'id',
+                      referencedColumn: 'session_id',
                       typedResults: items,
                     ),
                 ];
