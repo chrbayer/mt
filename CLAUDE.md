@@ -5,6 +5,10 @@
 Oberfläche und Dokumentation auf Deutsch, Code-Bezeichner und Kommentare auf
 Englisch.
 
+**Commit- und Tag-Nachrichten auf Englisch**, seit 2.16.0. Seit die App fünf
+Sprachen spricht, lesen auch Übersetzer und Melder ohne Deutsch die Historie
+mit; ältere Commits bleiben, wie sie sind.
+
 Die Texte der Oberfläche stehen in `lib/l10n/app_de.arb` (Vorlage für
 `flutter gen-l10n`, Konfiguration in `l10n.yaml`, erzeugter Code ebenfalls in
 `lib/l10n/`) und werden im Widget über `context.l10n` geholt. **Neue Texte
