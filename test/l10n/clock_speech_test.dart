@@ -148,18 +148,34 @@ void main() {
       expect(spokenTime(fr, at(3, 45)), '4 h moins le quart');
     });
 
-    test('the word at the hour box never names the answer', () {
-      // No article or plural that depends on the hour: the phrases of two
-      // different hours differ only in the hour box.
-      final fr = lookupAppLocalizations(const Locale('fr'));
-      for (final minute in [5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55]) {
-        final one = spokenTime(fr, at(1, minute), speech: ClockSpeech.fr);
-        final three = spokenTime(fr, at(3, minute), speech: ClockSpeech.fr);
-        expect(one.substring(one.indexOf(' ')),
-            three.substring(three.indexOf(' ')),
-            reason: ':$minute');
-      }
+    test('Spanish and Italian put the hour in front of the phrase', () {
+      final es = lookupAppLocalizations(const Locale('es'));
+      final it = lookupAppLocalizations(const Locale('it'));
+      expect(spokenTime(es, at(3, 15)), '3 y cuarto');
+      expect(spokenTime(es, at(3, 30)), '3 y media');
+      expect(spokenTime(es, at(3, 35)), '4 menos veinticinco');
+      expect(spokenTime(es, at(12, 45)), '1 menos cuarto');
+      expect(spokenTime(it, at(3, 15)), '3 e un quarto');
+      expect(spokenTime(it, at(3, 30)), '3 e mezza');
+      expect(spokenTime(it, at(3, 35)), '4 meno venticinque');
+      expect(spokenTime(it, at(12, 45)), '1 meno un quarto');
     });
+
+    for (final code in ['fr', 'es', 'it']) {
+      test('$code: the word at the hour box never names the answer', () {
+        // No article or plural that depends on the hour ("la una" / "las
+        // tres", "l'una" / "le tre"): the phrases of two different hours
+        // differ only in the hour box.
+        final l10n = lookupAppLocalizations(Locale(code));
+        for (final minute in [5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55]) {
+          final one = spokenTime(l10n, at(1, minute));
+          final three = spokenTime(l10n, at(3, minute));
+          expect(one.substring(one.indexOf(' ')),
+              three.substring(three.indexOf(' ')),
+              reason: '$code :$minute');
+        }
+      });
+    }
   });
 
   group('a language that says the hour first', () {
