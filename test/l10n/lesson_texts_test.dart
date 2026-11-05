@@ -38,6 +38,32 @@ void main() {
     });
   }
 
+  test('English is not German with an English accent', () {
+    final de = lookupAppLocalizations(const Locale('de'));
+    final en = lookupAppLocalizations(const Locale('en'));
+    // The texts most easily left untranslated by a copy and paste.
+    for (final id in [
+      'add_10',
+      'partners_of_ten',
+      'times_7',
+      'div_remainder',
+      'clock_words',
+      'money_change',
+    ]) {
+      final lesson = lessonById(id);
+      expect(lessonTitle(en, lesson), isNot(lessonTitle(de, lesson)),
+          reason: id);
+      expect(lessonDescription(en, lesson),
+          isNot(lessonDescription(de, lesson)),
+          reason: id);
+    }
+    expect(lessonTitle(en, lessonById('add_10')), 'Plus up to 10');
+    expect(
+        lessonTitle(en, lessonById('partners_of_ten')), 'Number bonds to 10');
+    expect(lessonTitle(en, lessonById('times_7')), '7 times table');
+    expect(groupTitle(en, LessonGroup.timesTables), 'Times Tables');
+  });
+
   test('an unknown stored id is shown as it is', () {
     final l10n = lookupAppLocalizations(const Locale('de'));
     expect(lessonTitleById(l10n, 'from_the_future'), 'from_the_future');

@@ -36,9 +36,58 @@ void main() {
       expect(at(3, 25).expectedSecond, 4);
     });
 
-    test('is what an unknown language falls back to', () {
+    test('is chosen by its language code', () {
       expect(identical(ClockSpeech.forLanguage('de'), ClockSpeech.de), isTrue);
-      expect(identical(ClockSpeech.forLanguage('xx'), ClockSpeech.de), isTrue);
+    });
+  });
+
+  group('English', () {
+    const speech = ClockSpeech.en;
+    final en = enL10n;
+
+    test('says the hour behind the phrase, and from :35 the next one', () {
+      expect(speech.hourFirst, isFalse);
+      expect(speech.nextHourFromIndex, 6);
+      expect(spokenTime(en, at(3, 15), speech: speech), 'quarter past 3');
+      expect(spokenTime(en, at(3, 25), speech: speech), 'twenty-five past 3');
+      expect(spokenTime(en, at(3, 30), speech: speech), 'half past 3');
+      expect(spokenTime(en, at(3, 35), speech: speech), 'twenty-five to 4');
+      expect(spokenTime(en, at(3, 45), speech: speech), 'quarter to 4');
+      expect(spokenTime(en, at(3, 55), speech: speech), 'five to 4');
+    });
+
+    test('differs from German exactly at :25', () {
+      expect(at(3, 25).expectedSecondIn(ClockSpeech.de), 4);
+      expect(at(3, 25).expectedSecondIn(speech), 3);
+      expect(at(3, 30).expectedSecondIn(speech), 3);
+      expect(at(3, 35).expectedSecondIn(speech), 4);
+    });
+
+    test('a tile sample follows the language of the texts', () {
+      expect(spokenTime(en, at(3, 25)), 'twenty-five past 3');
+      expect(spokenTime(deL10n, at(3, 25)), '5 vor halb 4');
+    });
+
+    test('the hour after twelve is one', () {
+      expect(at(12, 45).expectedSecondIn(speech), 1);
+      expect(at(12, 15).expectedSecondIn(speech), 12);
+    });
+
+    test('is graded with the English hour', () {
+      final controller = PracticeController(
+        lesson: lessonById('clock_words'),
+        tasks: [at(3, 25)],
+        speech: speech,
+      );
+      controller.pressPhrase(at(3, 25).expected);
+      controller.submit();
+      controller.pressDigit(3);
+      expect(controller.submit(), AnswerFeedback.correct);
+    });
+
+    test('is what the language code en and every unknown one resolves to', () {
+      expect(identical(ClockSpeech.forLanguage('en'), ClockSpeech.en), isTrue);
+      expect(identical(ClockSpeech.forLanguage('xx'), ClockSpeech.en), isTrue);
     });
   });
 

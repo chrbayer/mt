@@ -20,3 +20,12 @@ final AppLocalizations deL10n = lookupAppLocalizations(testLocale);
 /// `DateFormat` needs the locale's symbols. In the app the Material
 /// delegate loads them; a plain unit test has to ask (`setUpAll`).
 Future<void> initDateSymbols() => initializeDateFormatting('de');
+
+/// English, for the tests that check a second language.
+const enLocale = Locale('en');
+
+/// English texts without a widget tree.
+final AppLocalizations enL10n = lookupAppLocalizations(enLocale);
+
+/// Date symbols for English, next to [initDateSymbols].
+Future<void> initEnglishDateSymbols() => initializeDateFormatting('en');

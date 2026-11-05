@@ -51,24 +51,24 @@ String formatTotalTime(AppLocalizations l10n, int milliseconds) {
   return l10n.formatHoursMinutes(minutes ~/ 60, minutes % 60);
 }
 
-/// `5.9.` - the day and month, in the order the language writes them.
+/// `5.9.` / `9/5` - the day and month, in the order the language writes them.
 String formatShortDate(AppLocalizations l10n, DateTime at) =>
     DateFormat.Md(l10n.localeName).format(at);
 
-/// `Mi, 16.9.` - short enough for a card's footer or a button.
+/// `Mi, 16.9.` / `Wed, 9/16` - short enough for a card's footer or a button.
 String formatShortDay(AppLocalizations l10n, DateTime at) =>
     '${DateFormat.E(l10n.localeName).format(at)}, ${formatShortDate(l10n, at)}';
 
-/// `14:32` - hours without a leading zero where the language writes none.
+/// `14:32` or `2:32 PM` - the pattern is the language's (`formatClockPattern`).
 String formatClockTime(AppLocalizations l10n, DateTime at) =>
-    DateFormat('H:mm', l10n.localeName).format(at);
+    DateFormat(l10n.formatClockPattern, l10n.localeName).format(at);
 
 /// `5.9. · 14:32` - short enough for a list, unambiguous within a school
 /// year.
 String formatDayAndTime(AppLocalizations l10n, DateTime at) =>
     l10n.formatDayAndTime(
       formatShortDate(l10n, at),
-      DateFormat.Hm(l10n.localeName).format(at),
+      DateFormat(l10n.formatLogTimePattern, l10n.localeName).format(at),
     );
 
 /// `heute`, `gestern`, `vor 3 Tagen`, otherwise the date. Used for "last

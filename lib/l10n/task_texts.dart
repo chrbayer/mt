@@ -107,18 +107,19 @@ List<String> clockPhraseLabels(AppLocalizations l10n) => [
       l10n.clockPhrase55,
     ];
 
-/// The whole spoken form, for the review list and the lesson tile.
-String spokenTime(AppLocalizations l10n, Task task,
-        {ClockSpeech speech = ClockSpeech.de}) =>
+/// The whole spoken form, for the review list and the lesson tile. Without
+/// an explicit [speech] it follows the language of [l10n], so a sample on a
+/// tile is as right in English as in German.
+String spokenTime(AppLocalizations l10n, Task task, {ClockSpeech? speech}) =>
     l10n.clockSpokenTime(
       clockPhraseLabels(l10n)[task.expected],
-      task.namedHourIn(speech),
+      task.namedHourIn(speech ?? ClockSpeech.forLanguage(l10n.localeName)),
     );
 
 /// One-line rendering of [task] with [answer] placed in the box, and
 /// [secondAnswer] in the second one where there is one.
 String renderTask(AppLocalizations l10n, Task task, String answer,
-    [String secondAnswer = '?', ClockSpeech speech = ClockSpeech.de]) {
+    [String secondAnswer = '?', ClockSpeech? speech]) {
   final prefix = taskPrefix(l10n, task);
   final suffix = task.suffix;
   final (a, b) = (task.a, task.b);

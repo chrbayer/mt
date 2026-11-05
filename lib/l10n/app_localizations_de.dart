@@ -1983,4 +1983,10 @@ class AppLocalizationsDe extends AppLocalizations {
   String commonPercent(int n) {
     return '$n %';
   }
+
+  @override
+  String get formatClockPattern => 'H:mm';
+
+  @override
+  String get formatLogTimePattern => 'HH:mm';
 }

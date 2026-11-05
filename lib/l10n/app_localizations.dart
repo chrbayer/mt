@@ -6,6 +6,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/intl.dart' as intl;
 
 import 'app_localizations_de.dart';
+import 'app_localizations_en.dart';
 
 // ignore_for_file: type=lint
 
@@ -92,7 +93,10 @@ abstract class AppLocalizations {
       ];
 
   /// A list of this localizations delegate's supported locales.
-  static const List<Locale> supportedLocales = <Locale>[Locale('de')];
+  static const List<Locale> supportedLocales = <Locale>[
+    Locale('de'),
+    Locale('en'),
+  ];
 
   /// No description provided for @appTitle.
   ///
@@ -3243,6 +3247,18 @@ abstract class AppLocalizations {
   /// In de, this message translates to:
   /// **'{n} %'**
   String commonPercent(int n);
+
+  /// ICU/intl date pattern for a time of day shown on its own, e.g. the end of a break. German writes the 24-hour clock without a leading zero on the hour; English uses 12 hours with AM/PM.
+  ///
+  /// In de, this message translates to:
+  /// **'H:mm'**
+  String get formatClockPattern;
+
+  /// ICU/intl date pattern for the time in a list of rounds, next to the date. Stays aligned in a column, so German keeps the leading zero.
+  ///
+  /// In de, this message translates to:
+  /// **'HH:mm'**
+  String get formatLogTimePattern;
 }
 
 class _AppLocalizationsDelegate
@@ -3256,7 +3272,7 @@ class _AppLocalizationsDelegate
 
   @override
   bool isSupported(Locale locale) =>
-      <String>['de'].contains(locale.languageCode);
+      <String>['de', 'en'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
@@ -3267,6 +3283,8 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
   switch (locale.languageCode) {
     case 'de':
       return AppLocalizationsDe();
+    case 'en':
+      return AppLocalizationsEn();
   }
 
   throw FlutterError(

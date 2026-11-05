@@ -56,6 +56,33 @@ zweite Antwort, die Stunde, kommt aus `Task.expectedSecondIn(speech)`; der
 `hourFirst` dreht die Reihenfolge der beiden Felder im Controller und im
 `TaskDisplay` um — innerhalb einer Sprache immer gleich.
 
+**Sprachen: Deutsch und Englisch.** `app_de.arb` ist die Vorlage, `app_en.arb`
+hat genau dieselben Schlüssel (`test/l10n/arb_completeness_test.dart` prüft
+Schlüssel und Platzhalter je Sprachdatei — gen-l10n selbst warnt nur, und ein
+Kind läse dann deutschen Text in der englischen App). **Neue Texte immer in
+`app_de.arb` anlegen und in `app_en.arb` nachziehen.** Gewählt wird die Sprache
+des Geräts (`resolveAppLocale` in `app.dart`): Deutsch für Deutsch, **alles
+andere Englisch** — wer weder Deutsch noch Englisch liest, kommt mit Englisch
+am ehesten zurecht. Eine Sprachwahl in der App gibt es nicht.
+
+Fachbegriffe im Englischen, einheitlich: Durchgang = *round*, Rechnung/Aufgabe
+im Sinn von Rechenaufgabe = *problem*, Aufgabe im Sinn von Zuweisung =
+*assignment*, Blitz = *bolt*, Elternbereich = *parent area*, Zehnerübergang bis
+20 = *crossing ten*, darüber *regrouping*, Platzhalter = *missing number*,
+Verliebte Zahlen = *number bonds to 10*, n-er-Reihe = *n times table*. US-
+Schreibweise (*color*, *practice*). Zeitangaben: `formatClockPattern` und
+`formatLogTimePattern` sind Muster in der ARB (de 24 Stunden, en 12 Stunden mit
+AM/PM); Geld im Englischen „€2.50“ und „50c“.
+
+**Uhrzeit sagen auf Englisch** zählt erst ab „twenty-five to“ (Index 6, :35) zur
+kommenden Stunde: 2:30 ist „half past 2“, 2:35 „twenty-five to 3“ — Deutsch
+kippt schon bei :25 („5 vor halb 3“), Englisch nennt :25 noch „twenty-five
+past 2“. `ClockSpeech.en` hat deshalb `nextHourFromIndex: 6`, `hourFirst: false`.
+Die `ClockSpeech` wird aus der **aufgelösten** Locale
+(`Localizations.localeOf`) bestimmt, nie aus der Gerätesprache: die Antwort
+muss zu den Wörtern passen, die auf dem Bildschirm stehen. Unbekannter Code →
+Englisch, wie bei den Texten.
+
 ## Schichten
 
 `lib/domain/` darf **keinen** Flutter-Import enthalten. Dort liegt die

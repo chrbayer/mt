@@ -44,10 +44,22 @@ class ClockSpeech {
     hourFirst: false,
   );
 
-  /// The rules for a language code. Every language the app does not know
-  /// yet falls back to German, which is the only one there is for now.
+  /// English: "half past 2" is 2:30 as well, but the coming hour is named
+  /// only from "twenty-five to" (index 6, `:35`) on: 2:35 is "twenty-five to
+  /// 3". Where German already says "5 vor halb 3" at `:25`, English still
+  /// says "twenty-five past 2".
+  static const ClockSpeech en = ClockSpeech(
+    nextHourFromIndex: 6,
+    hourFirst: false,
+  );
+
+  /// The rules for a language code. Pass the language of the **resolved**
+  /// locale (`Localizations.localeOf`), not of the device: the words on the
+  /// screen are in that language, and the right answer must match them.
+  /// A code the app does not know falls back to English, like the texts do.
   static ClockSpeech forLanguage(String code) => switch (code) {
-        _ => de,
+        'de' => de,
+        _ => en,
       };
 
   /// The hour a spoken form names for a clock showing [hour] o'clock and

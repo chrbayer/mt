@@ -404,8 +404,45 @@ rsvg-convert -w 512 -h 512 assets/icon/icon.svg \
   -o fastlane/metadata/android/de-DE/images/icon.png
 ```
 
-Die englische Fassung trägt dieselben Bilder: die Oberfläche gibt es nur auf
-Deutsch, und das steht auch in der englischen Beschreibung.
+Die englische Fassung trägt dieselben Bilder, auch wenn die Screenshots
+deutsch sind: die Beschreibung sagt, dass die App Deutsch und Englisch kann.
+
+## Übersetzen
+
+Die App spricht Deutsch und Englisch und folgt der Sprache des Geräts. Eine
+weitere Sprache (oder bessere Formulierungen) braucht keine Programmierkenntnisse:
+
+* Alle Texte stehen in **einer Datei je Sprache**: `lib/l10n/app_<sprache>.arb`,
+  zum Beispiel `app_en.arb`. Die deutsche `app_de.arb` ist die Vorlage; jede
+  andere Datei hat dieselben Schlüssel, nur andere Texte.
+* Übersetzt wird der Text rechts vom Doppelpunkt. Der Schlüssel links bleibt
+  unverändert.
+* Was in **geschweiften Klammern** steht, ist ein Platzhalter (`{name}`,
+  `{count}`, `{time}`) und muss unverändert stehen bleiben. Die App setzt dort
+  Namen, Zahlen und Zeiten ein. Er darf an eine andere Stelle im Satz wandern.
+* Wo „plural“ steht (`{count, plural, =1{1 Tag} other{{count} Tage}}`), gibt es
+  für Einzahl und Mehrzahl je einen Text; übersetzt wird nur, was in den
+  inneren Klammern steht.
+* Was gemeint ist, erklären die `@`-Einträge in `app_de.arb`
+  (`"@schlüssel": { "description": … }`), auf Englisch: wo der Text steht und
+  was in einem Platzhalter landet.
+* Die Texte sind für Kinder von 6 bis 10 und ihre Eltern: kurze Sätze, keine
+  Fachwörter.
+
+Schicken kann man das auf zwei Wegen: als Pull Request, oder man legt die Datei
+als Anhang in einem GitHub-Issue ab — der Rest ist Sache des Entwicklers.
+
+**Das kann der Entwickler nicht dem Übersetzer überlassen:** wie man die Uhrzeit
+sagt. „Viertel vor 4“ (de), „quarter to 4“ (en) und „4 heures moins le quart“
+(fr) unterscheiden sich nicht nur im Wort, sondern darin, *welche Stunde*
+genannt wird und ob sie vorn oder hinten steht. Das steht als Regel in
+`lib/domain/clock_speech.dart` und wird für eine neue Sprache dort
+hinterlegt; die Wörter (`clockPhrase05` … `clockPhrase55`) kommen dagegen aus
+der Datei. Wer eine neue Sprache übersetzt, sagt bitte dazu, wie dort die Uhr
+gesprochen wird.
+
+Prüfen lässt sich die Datei mit `flutter gen-l10n` und `flutter test
+test/l10n` — fehlt ein Schlüssel oder ein Platzhalter, sagt der Test welcher.
 
 ## Veröffentlichen
 

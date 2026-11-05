@@ -3,7 +3,8 @@ year. The app measures the time to the correct answer and turns it into a
 learning curve and leaderboards, where several children on the same device
 compete with each other.
 
-<b>The interface is in German only.</b>
+<b>German and English.</b> The interface follows the language of the device;
+any other language shows English.
 
 It runs entirely offline. No account, no ads, no analytics and no internet
 permission - the app cannot send anything anywhere.

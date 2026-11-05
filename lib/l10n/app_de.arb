@@ -1804,5 +1804,13 @@
         "type": "int"
       }
     }
+  },
+  "formatClockPattern": "H:mm",
+  "@formatClockPattern": {
+    "description": "ICU/intl date pattern for a time of day shown on its own, e.g. the end of a break. German writes the 24-hour clock without a leading zero on the hour; English uses 12 hours with AM/PM."
+  },
+  "formatLogTimePattern": "HH:mm",
+  "@formatLogTimePattern": {
+    "description": "ICU/intl date pattern for the time in a list of rounds, next to the date. Stays aligned in a column, so German keeps the leading zero."
   }
 }

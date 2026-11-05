@@ -50,4 +50,5 @@ Alles steht in einer Datenbank auf dem Gerät. Eine Sicherung erzeugt die App
 nur auf ausdrücklichen Wunsch und übergibt sie dem Teilen-Dialog von Android;
 wohin sie geht, entscheidest du.
 
-Die Oberfläche ist auf Deutsch.
+Die Oberfläche gibt es auf Deutsch und Englisch; sie folgt der Sprache des
+Geräts, jede andere Sprache zeigt Englisch.
