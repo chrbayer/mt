@@ -1,0 +1,6 @@
+L’app ora parla cinque lingue: tedesco, inglese, francese, spagnolo e
+italiano. Segue la lingua del dispositivo. Anche le lezioni sull’ora dicono
+l’ora come si fa in ciascuna lingua.
+
+Le traduzioni sono nuove. I suggerimenti per migliorarle sono benvenuti su
+GitHub.

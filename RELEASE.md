@@ -40,6 +40,7 @@ fastlane/metadata/android/de-DE/changelogs/214001.txt
 fastlane/metadata/android/de-DE/changelogs/214002.txt
 fastlane/metadata/android/de-DE/changelogs/214003.txt
 fastlane/metadata/android/en-US/changelogs/214001.txt   (und …2, …3)
+… ebenso fr-FR, es-ES, it-IT — jede Sprache unter fastlane/metadata/android
 ```
 
 F-Droid hängt einen Änderungshinweis nur an, wenn sein Name einer der

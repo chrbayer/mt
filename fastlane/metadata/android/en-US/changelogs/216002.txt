@@ -1,0 +1,5 @@
+The app now speaks five languages: German, English, French, Spanish and
+Italian. It follows the language of the device. The clock lessons, too, tell
+the time the way each language does.
+
+The translations are new. Suggestions for improvement are welcome on GitHub.

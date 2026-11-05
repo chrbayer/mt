@@ -1,0 +1,6 @@
+Die App spricht jetzt fünf Sprachen: Deutsch, Englisch, Französisch,
+Spanisch und Italienisch. Sie folgt der Sprache des Geräts. Auch die
+Uhrzeit-Lektionen sagen die Zeit so, wie man es in der jeweiligen Sprache tut.
+
+Die Übersetzungen sind neu. Verbesserungsvorschläge sind auf GitHub
+willkommen.

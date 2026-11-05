@@ -1,0 +1,6 @@
+La aplicación ahora habla cinco idiomas: alemán, inglés, francés, español
+e italiano. Sigue el idioma del dispositivo. Las lecciones de la hora también
+dicen la hora como se hace en cada idioma.
+
+Las traducciones son nuevas. Las sugerencias de mejora son bienvenidas en
+GitHub.

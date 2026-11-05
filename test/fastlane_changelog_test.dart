@@ -20,7 +20,10 @@ void main() {
         .firstWhere((l) => l.startsWith('version:'));
     final code = RegExp(r'\+(\d+)\s*$').firstMatch(line)!.group(1)!;
 
-    for (final lang in ['de-DE', 'en-US']) {
+    for (final lang in Directory('fastlane/metadata/android')
+        .listSync()
+        .whereType<Directory>()
+        .map((d) => d.uri.pathSegments.lastWhere((s) => s.isNotEmpty))) {
       final texts = [
         for (final abi in [1, 2, 3])
           File('fastlane/metadata/android/$lang/changelogs/$code$abi.txt'),

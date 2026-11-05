@@ -1,0 +1,6 @@
+L’application parle désormais cinq langues : allemand, anglais, français,
+espagnol et italien. Elle suit la langue de l’appareil. Les leçons sur l’heure
+disent aussi l’heure comme on le fait dans chaque langue.
+
+Les traductions sont nouvelles. Les suggestions d’amélioration sont les
+bienvenues sur GitHub.
