@@ -12,6 +12,7 @@ import '../common/run_hints.dart';
 import '../leaderboard/leaderboard_screen.dart';
 import '../lessons/pause_notice.dart';
 import '../practice/practice_screen.dart';
+import '../../l10n/l10n.dart';
 
 /// Shown after a completed run: what was achieved, and whether it was faster
 /// than last time.
@@ -126,7 +127,7 @@ class ResultScreen extends ConsumerWidget {
                   // otherwise the only exit is a button further down, and the
                   // system gesture nobody sees in immersive mode.
                   IconButton(
-                    tooltip: 'Zurück zu den Lektionen',
+                    tooltip: context.l10n.commonBackToLessons,
                     iconSize: 34,
                     icon: const Icon(Icons.arrow_back),
                     onPressed: () => Navigator.of(context).pop(),
@@ -149,8 +150,8 @@ class ResultScreen extends ConsumerWidget {
                             Flexible(
                               child: Text(
                                 user == null
-                                    ? 'Geschafft!'
-                                    : 'Geschafft, ${user.name}!',
+                                    ? context.l10n.resultDone
+                                    : context.l10n.resultDoneName(user.name),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style:
@@ -188,8 +189,7 @@ class ResultScreen extends ConsumerWidget {
                 Padding(
                   padding: const EdgeInsets.only(top: 6),
                   child: Text(
-                    '${bolts + 1}. Blitz ab ${formatPerTask(nextBolt)} '
-                    'pro Aufgabe',
+context.l10n.resultNextBolt(bolts + 1, formatPerTask(nextBolt)),
                     textAlign: TextAlign.center,
                     style: const TextStyle(
                       fontSize: 18,
@@ -223,9 +223,9 @@ class ResultScreen extends ConsumerWidget {
                         ),
                       ],
                       const SizedBox(width: 8),
-                      const Text(
-                        'für diese Lektion',
-                        style: TextStyle(
+                      Text(
+                        context.l10n.resultForThisLesson,
+                        style: const TextStyle(
                             fontSize: 18, color: AppColors.textMuted),
                       ),
                       const SizedBox(width: 24),
@@ -235,9 +235,9 @@ class ResultScreen extends ConsumerWidget {
                         size: 20,
                       ),
                       const SizedBox(width: 8),
-                      const Text(
-                        'insgesamt',
-                        style: TextStyle(
+                      Text(
+                        context.l10n.resultInTotal,
+                        style: const TextStyle(
                             fontSize: 18, color: AppColors.textMuted),
                       ),
                     ],
@@ -290,21 +290,21 @@ class ResultScreen extends ConsumerWidget {
                 const SizedBox(height: 16),
               Row(
                 children: [
-                  _Metric(label: 'Aufgaben', value: '$taskCount'),
+                  _Metric(label: context.l10n.resultMetricTasks, value: '$taskCount'),
                   // A lesson that is not scored shows no times at all - not
                   // even a quiet one. Counting apples is not a race.
                   if (lesson.scored) ...[
                     _Metric(
-                      label: 'Gesamtzeit',
+                      label: context.l10n.resultMetricTotalTime,
                       value: formatDuration(scoredTotal),
                     ),
                     _Metric(
-                      label: 'Pro Aufgabe',
+                      label: context.l10n.resultMetricPerTask,
                       value: formatPerTask(perTask),
                       highlight: true,
                     ),
                   ],
-                  _Metric(label: 'Fehler', value: '$wrongAttempts'),
+                  _Metric(label: context.l10n.resultMetricErrors, value: '$wrongAttempts'),
                 ],
               ),
               // Where the extra seconds came from. Without this the total
@@ -314,9 +314,7 @@ class ResultScreen extends ConsumerWidget {
                 Padding(
                   padding: const EdgeInsets.only(top: 14),
                   child: Text(
-                    'Darin sind ${formatDuration(penalty)} Zeitstrafe für '
-                    '$wrongAttempts ${wrongAttempts == 1 ? 'Fehlversuch' : 'Fehlversuche'} '
-                    'enthalten - 3 Sekunden für jeden.',
+context.l10n.resultPenalty(formatDuration(penalty), wrongAttempts),
                     textAlign: TextAlign.center,
                     style: const TextStyle(
                       fontSize: 19,
@@ -335,7 +333,7 @@ class ResultScreen extends ConsumerWidget {
                           size: 30, color: AppColors.profile1),
                       const SizedBox(width: 10),
                       Text(
-                        '$streak Tage in Folge geübt!',
+                        context.l10n.resultStreak(streak),
                         style: const TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.w600,
@@ -369,7 +367,7 @@ class ResultScreen extends ConsumerWidget {
                   Expanded(
                     child: FilledButton.icon(
                       icon: const Icon(Icons.refresh, size: 30),
-                      label: const Text('Nochmal'),
+                      label: Text(context.l10n.resultAgain),
                       onPressed: !gate.mayStart
                           ? null
                           : () => Navigator.of(context).pushReplacement(
@@ -387,7 +385,7 @@ class ResultScreen extends ConsumerWidget {
                     Expanded(
                     child: OutlinedButton.icon(
                       icon: const Icon(Icons.leaderboard_outlined, size: 30),
-                      label: const Text('Bestenliste'),
+                      label: Text(context.l10n.resultLeaderboard),
                       onPressed: () => Navigator.of(context).push(
                         MaterialPageRoute<void>(
                           builder: (_) => LeaderboardScreen(lesson: lesson),
@@ -399,7 +397,7 @@ class ResultScreen extends ConsumerWidget {
                   Expanded(
                     child: OutlinedButton.icon(
                       icon: const Icon(Icons.grid_view_rounded, size: 30),
-                      label: const Text('Andere Lektion'),
+                      label: Text(context.l10n.resultOtherLesson),
                       onPressed: () => Navigator.of(context).pop(),
                     ),
                   ),
@@ -439,11 +437,11 @@ class _ComparisonToLastRun extends ConsumerWidget {
       builder: (context, snapshot) {
         final previous = snapshot.data;
         if (previous == null) {
-          return const Center(
+          return Center(
             child: Text(
-              'Das war dein erster Durchgang hier -\ndie Zeit ist ab jetzt dein Rekord.',
+              context.l10n.resultFirstRun,
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 24, color: AppColors.textMuted),
+              style: const TextStyle(fontSize: 24, color: AppColors.textMuted),
             ),
           );
         }
@@ -456,10 +454,10 @@ class _ComparisonToLastRun extends ConsumerWidget {
         final delta = before - msPerTask;
         final faster = delta > 0;
         final text = delta.abs() < 100
-            ? 'Genau so schnell wie beim letzten Mal.'
+            ? context.l10n.resultSameSpeed
             : faster
-                ? '${formatPerTask(delta)} schneller pro Aufgabe als beim letzten Mal!'
-                : '${formatPerTask(-delta)} langsamer pro Aufgabe als beim letzten Mal.';
+                ? context.l10n.resultFaster(formatPerTask(delta))
+                : context.l10n.resultSlower(formatPerTask(-delta));
 
         return Center(
           child: Row(

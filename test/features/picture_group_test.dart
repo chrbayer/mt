@@ -1,3 +1,4 @@
+import '../support/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mathe_trainer/domain/lesson.dart';
@@ -19,7 +20,7 @@ void main() {
     required int seed,
   }) async {
     await tester.pumpWidget(
-      MaterialApp(
+      MaterialApp(localizationsDelegates: testLocalizationsDelegates, locale: testLocale, supportedLocales: testSupportedLocales, 
         home: Scaffold(
           body: Center(
             child: PictureGroup(
@@ -113,7 +114,7 @@ void main() {
     for (var count = 1; count <= 5; count++) {
       for (var seed = 0; seed < 20; seed++) {
         await tester.pumpWidget(
-          MaterialApp(
+          MaterialApp(localizationsDelegates: testLocalizationsDelegates, locale: testLocale, supportedLocales: testSupportedLocales, 
             home: Scaffold(
               body: Center(
                 child: PictureGroup(
@@ -148,7 +149,7 @@ void main() {
     // The count moved to CountedPair, so that two heaps can share one line
     // of numbers instead of hanging them at two different heights.
     await tester.pumpWidget(
-      const MaterialApp(
+      const MaterialApp(localizationsDelegates: testLocalizationsDelegates, locale: testLocale, supportedLocales: testSupportedLocales, 
         home: Scaffold(
           body: Center(
             child: PictureGroup(
@@ -166,7 +167,7 @@ void main() {
 
   testWidgets('a row is a row', (tester) async {
     await tester.pumpWidget(
-      const MaterialApp(
+      const MaterialApp(localizationsDelegates: testLocalizationsDelegates, locale: testLocale, supportedLocales: testSupportedLocales, 
         home: Scaffold(
           body: Center(
             child: PictureGroup(

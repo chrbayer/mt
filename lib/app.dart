@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'features/profiles/profile_select_screen.dart';
+import 'l10n/l10n.dart';
 import 'providers.dart';
 import 'theme/app_theme.dart';
 
@@ -43,7 +44,9 @@ class _MatheTrainerAppState extends ConsumerState<MatheTrainerApp>
     ref.watch(preferencesProvider);
 
     return MaterialApp(
-      title: 'Mathe-Trainer',
+      onGenerateTitle: (context) => context.l10n.appTitle,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: const [Locale('de')],
       debugShowCheckedModeBanner: false,
       theme: buildAppTheme(),
       home: const ProfileSelectScreen(),

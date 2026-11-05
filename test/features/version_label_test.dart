@@ -1,3 +1,4 @@
+import '../support/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mathe_trainer/features/common/version_label.dart';
@@ -11,7 +12,7 @@ import 'package:mathe_trainer/theme/app_theme.dart';
 /// matter - a stale or blank "Version" line would be worse than none.
 void main() {
   Future<void> pump(WidgetTester tester) => tester.pumpWidget(
-        MaterialApp(
+        MaterialApp(localizationsDelegates: testLocalizationsDelegates, locale: testLocale, supportedLocales: testSupportedLocales, 
           theme: buildAppTheme(),
           home: const Scaffold(body: Center(child: VersionLabel())),
         ),

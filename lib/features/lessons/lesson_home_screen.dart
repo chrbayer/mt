@@ -20,6 +20,7 @@ import 'lesson_example.dart';
 import 'pause_notice.dart';
 import 'recommendation.dart';
 import 'start_lesson_sheet.dart';
+import '../../l10n/l10n.dart';
 
 /// Below this width the two labelled buttons in the app bar give up their
 /// labels. "Statistik" and "Wechseln" cost about 180 dp of text between
@@ -107,7 +108,7 @@ class LessonHomeScreen extends ConsumerWidget {
           // carries the assignment toggle below, and `onSelected` tells the
           // two apart by type.
           PopupMenuButton<Object>(
-            tooltip: 'Fertiges ausblenden',
+            tooltip: context.l10n.lessonsFilterTooltip,
             icon: Icon(
               user.filter == LessonFilter.all && !user.hideDoneAssignments
                   ? Icons.filter_list_off
@@ -173,9 +174,9 @@ class LessonHomeScreen extends ConsumerWidget {
                             : AppColors.textMuted,
                       ),
                       const SizedBox(width: 12),
-                      const Flexible(
-                        child: Text('Erledigte Aufgaben ausblenden',
-                            style: TextStyle(fontSize: 19)),
+                      Flexible(
+                        child: Text(context.l10n.lessonsHideDoneAssignments,
+                            style: const TextStyle(fontSize: 19)),
                       ),
                     ],
                   ),
@@ -188,7 +189,7 @@ class LessonHomeScreen extends ConsumerWidget {
           // button: a child has to be able to reach both of these.
           if (compactBar)
             IconButton(
-              tooltip: 'Statistik',
+              tooltip: context.l10n.lessonsStatsLabel,
               icon: const Icon(Icons.insights_outlined, size: 28),
               onPressed: () => Navigator.of(context).push(
                 MaterialPageRoute<void>(builder: (_) => const StatsScreen()),
@@ -197,14 +198,15 @@ class LessonHomeScreen extends ConsumerWidget {
           else
             TextButton.icon(
               icon: const Icon(Icons.insights_outlined, size: 28),
-              label: const Text('Statistik', style: TextStyle(fontSize: 20)),
+              label: Text(context.l10n.lessonsStatsLabel,
+                  style: const TextStyle(fontSize: 20)),
               onPressed: () => Navigator.of(context).push(
                 MaterialPageRoute<void>(builder: (_) => const StatsScreen()),
               ),
             ),
           const SizedBox(width: 8),
           IconButton(
-            tooltip: 'Einstellungen',
+            tooltip: context.l10n.lessonsSettingsTooltip,
             icon: const Icon(Icons.settings_outlined),
             onPressed: () => Navigator.of(context).push(
               MaterialPageRoute<void>(builder: (_) => const SettingsScreen()),
@@ -213,7 +215,7 @@ class LessonHomeScreen extends ConsumerWidget {
           const SizedBox(width: 4),
           if (compactBar)
             IconButton(
-              tooltip: 'Wechseln',
+              tooltip: context.l10n.lessonsSwitchLabel,
               icon: const Icon(Icons.logout, size: 26),
               onPressed: () {
                 ref.read(activeUserProvider.notifier).logout();
@@ -223,7 +225,8 @@ class LessonHomeScreen extends ConsumerWidget {
           else
             TextButton.icon(
               icon: const Icon(Icons.logout, size: 26),
-              label: const Text('Wechseln', style: TextStyle(fontSize: 20)),
+              label: Text(context.l10n.lessonsSwitchLabel,
+                  style: const TextStyle(fontSize: 20)),
               onPressed: () {
                 ref.read(activeUserProvider.notifier).logout();
                 Navigator.of(context).pop();
@@ -233,14 +236,14 @@ class LessonHomeScreen extends ConsumerWidget {
         ],
       ),
       body: user.visibleGroups.isEmpty
-          ? const Center(
+          ? Center(
               child: Padding(
-                padding: EdgeInsets.all(40),
+                padding: const EdgeInsets.all(40),
                 child: Text(
-                  'Für dieses Profil ist noch kein Bereich freigeschaltet.\n'
-                  'Das lässt sich im Elternbereich ändern.',
+                  context.l10n.lessonsNoGroup,
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 24, color: AppColors.textMuted),
+                  style: const TextStyle(
+                      fontSize: 24, color: AppColors.textMuted),
                 ),
               ),
             )
@@ -318,18 +321,17 @@ class _NothingLeft extends StatelessWidget {
                 size: 64, color: AppColors.correct),
             const SizedBox(height: 12),
             Text(
-              'Alles geschafft!',
+              context.l10n.lessonsNothingLeftTitle,
               style: Theme.of(context)
                   .textTheme
                   .headlineMedium
                   ?.copyWith(color: AppColors.correct),
             ),
             const SizedBox(height: 6),
-            const Text(
-              'Was du kannst, ist gerade ausgeblendet. Über den Filter oben '
-              'kommt der ganze Katalog zurück.',
+            Text(
+              context.l10n.lessonsNothingLeftText,
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 19, color: AppColors.text),
+              style: const TextStyle(fontSize: 19, color: AppColors.text),
             ),
           ],
         ),
@@ -435,15 +437,17 @@ class _RecommendationCard extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        suggestion.headline,
+                        suggestion.headline(context.l10n),
                         style: const TextStyle(
                           fontSize: 17,
                           color: AppColors.textMuted,
                         ),
                       ),
                       Text(
-                        '${suggestion.lesson.title} · '
-                        '${groupTitle(suggestion.lesson.group)}',
+                        context.l10n.lessonsRecommendTitle(
+                          suggestion.lesson.title,
+                          groupTitle(suggestion.lesson.group),
+                        ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
@@ -459,7 +463,7 @@ class _RecommendationCard extends ConsumerWidget {
                 const SizedBox(width: 16),
                 FilledButton.icon(
                   icon: const Icon(Icons.play_arrow_rounded, size: 30),
-                  label: const Text('Los'),
+                  label: Text(context.l10n.lessonsRecommendGo),
                   onPressed: !ready
                       ? null
                       : () => Navigator.of(context).push(
@@ -554,21 +558,23 @@ class _AssignmentGroup extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Deine Aufgaben',
+          Text(context.l10n.lessonsAssignmentsHeading,
               style: Theme.of(context).textTheme.headlineLarge),
           const SizedBox(height: 12),
           if (visible.isEmpty)
             // Everything was met and the child chose to hide it. Not a blank
             // stretch under the heading either: the point of the setting is
             // to tidy up, not to make the work invisible.
-            const Row(
+            Row(
               children: [
-                Icon(Icons.check_circle, color: AppColors.correct, size: 28),
-                SizedBox(width: 10),
+                const Icon(Icons.check_circle,
+                    color: AppColors.correct, size: 28),
+                const SizedBox(width: 10),
                 Expanded(
                   child: Text(
-                    'Alles erledigt! Die fertigen Aufgaben sind ausgeblendet.',
-                    style: TextStyle(fontSize: 22, color: AppColors.textMuted),
+                    context.l10n.lessonsAssignmentsAllDone,
+                    style: const TextStyle(
+                        fontSize: 22, color: AppColors.textMuted),
                   ),
                 ),
               ],
@@ -726,10 +732,10 @@ class _LessonTile extends StatelessWidget {
                   Expanded(
                     child: Text(
                       stat == null
-                          ? 'noch nicht geübt'
+                          ? context.l10n.lessonsNotPractised
                           : lesson.scored
                               ? formatPerTask(stat!.bestScoreMs)
-                              : '${stat!.runs}× geübt',
+                              : context.l10n.lessonsPractisedTimes(stat!.runs),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(

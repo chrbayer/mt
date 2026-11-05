@@ -13,6 +13,7 @@ import '../duel/duel_screen.dart';
 import '../lessons/lesson_home_screen.dart';
 import '../stats/global_stats_screen.dart';
 import 'profile_editor.dart';
+import '../../l10n/l10n.dart';
 
 /// Start screen: a tap on a tile is the whole login.
 class ProfileSelectScreen extends ConsumerWidget {
@@ -34,20 +35,19 @@ class ProfileSelectScreen extends ConsumerWidget {
   /// A locked tile still answers. Silence would read as a broken app, and a
   /// child needs to know that nothing of theirs is gone.
   void _sayItIsLocked(BuildContext context, User user) {
+    final l10n = context.l10n;
     showDialog<void>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: Text('${user.name} macht gerade Pause'),
-        content: const Text(
-          'Dieses Profil ist vorübergehend gesperrt. Alle Sterne, Blitze und '
-          'Bestzeiten bleiben erhalten - sie sind wieder da, sobald die '
-          'Eltern es freigeben.',
-          style: TextStyle(fontSize: 20),
+        title: Text(l10n.profilesLockedTitle(user.name)),
+        content: Text(
+          l10n.profilesLockedText,
+          style: const TextStyle(fontSize: 20),
         ),
         actions: [
           FilledButton(
             onPressed: () => Navigator.of(dialogContext).pop(),
-            child: const Text('Alles klar'),
+            child: Text(l10n.profilesLockedOk),
           ),
         ],
       ),
@@ -67,12 +67,12 @@ class ProfileSelectScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Wer rechnet?'),
+        title: Text(context.l10n.profilesTitle),
         actions: [
           TextButton.icon(
             icon: const Icon(Icons.groups_outlined, size: 28),
-            label: const Text('Alle Ergebnisse',
-                style: TextStyle(fontSize: 20)),
+            label: Text(context.l10n.profilesAllResults,
+                style: const TextStyle(fontSize: 20)),
             onPressed: () => Navigator.of(context).push(
               MaterialPageRoute<void>(
                   builder: (_) => const GlobalStatsScreen()),
@@ -81,7 +81,8 @@ class ProfileSelectScreen extends ConsumerWidget {
           const SizedBox(width: 8),
           TextButton.icon(
             icon: const Icon(Icons.sports_score, size: 28),
-            label: const Text('Duell', style: TextStyle(fontSize: 20)),
+            label: Text(context.l10n.profilesDuel,
+                style: const TextStyle(fontSize: 20)),
             onPressed: () => Navigator.of(context).push(
               MaterialPageRoute<void>(builder: (_) => const DuelSetupScreen()),
             ),
@@ -89,7 +90,8 @@ class ProfileSelectScreen extends ConsumerWidget {
           const SizedBox(width: 8),
           TextButton.icon(
             icon: const Icon(Icons.lock_outline, size: 26),
-            label: const Text('Eltern', style: TextStyle(fontSize: 20)),
+            label: Text(context.l10n.profilesParents,
+                style: const TextStyle(fontSize: 20)),
             onPressed: () => AdminScreen.open(context),
           ),
           // No settings button here any more: what used to sit behind it is
@@ -107,11 +109,11 @@ class ProfileSelectScreen extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               if (list.isEmpty)
-                const Padding(
-                  padding: EdgeInsets.only(bottom: 16),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 16),
                   child: Text(
-                    'Noch kein Profil. Tippe auf „Neu", um anzufangen.',
-                    style: TextStyle(fontSize: 22),
+                    context.l10n.profilesNone,
+                    style: const TextStyle(fontSize: 22),
                   ),
                 ),
               // A family or a small group has a handful of profiles, so the
@@ -247,10 +249,8 @@ class _ProfileTile extends ConsumerWidget {
                         const SizedBox(height: 4),
                         Text(
                           allDone
-                              ? 'alles geschafft'
-                              : todo == 1
-                                  ? '1 Aufgabe'
-                                  : '$todo Aufgaben',
+                              ? context.l10n.profilesAllDone
+                              : context.l10n.profilesTodo(todo),
                           style: TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w600,
@@ -272,7 +272,7 @@ class _ProfileTile extends ConsumerWidget {
                 // cannot open is a door that leads nowhere.
                 ? Icon(Icons.lock_outline, color: color, size: 28)
                 : IconButton(
-                    tooltip: 'Bild und Farbe ändern',
+                    tooltip: context.l10n.profilesEditLook,
                     icon: Icon(Icons.palette_outlined, color: color, size: 28),
                     onPressed: onEditLook,
                   ),
@@ -304,14 +304,14 @@ class _NewProfileTile extends StatelessWidget {
               border: Border.all(color: AppColors.divider, width: 3),
               borderRadius: BorderRadius.circular(24),
             ),
-            child: const Column(
+            child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.add, size: 72, color: AppColors.textMuted),
-                SizedBox(height: 8),
+                const Icon(Icons.add, size: 72, color: AppColors.textMuted),
+                const SizedBox(height: 8),
                 Text(
-                  'Neu',
-                  style: TextStyle(
+                  context.l10n.profilesNew,
+                  style: const TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.w600,
                     color: AppColors.textMuted,

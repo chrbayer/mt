@@ -1,3 +1,4 @@
+import '../support/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mathe_trainer/domain/lesson.dart';
@@ -40,7 +41,7 @@ void main() {
       addTearDown(tester.view.reset);
 
       await tester.pumpWidget(
-        MaterialApp(
+        MaterialApp(localizationsDelegates: testLocalizationsDelegates, locale: testLocale, supportedLocales: testSupportedLocales, 
           theme: buildAppTheme(),
           home: Scaffold(
             body: Center(
@@ -81,7 +82,7 @@ void main() {
     addTearDown(tester.view.reset);
 
     await tester.pumpWidget(
-      const MaterialApp(
+      const MaterialApp(localizationsDelegates: testLocalizationsDelegates, locale: testLocale, supportedLocales: testSupportedLocales, 
         home: Scaffold(
           body: Center(
             child: TaskDisplay(

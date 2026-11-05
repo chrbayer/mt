@@ -7,6 +7,7 @@ import '../../domain/lesson.dart';
 import '../../providers.dart';
 import '../../theme/app_theme.dart';
 import 'assignment_editor.dart';
+import '../../l10n/l10n.dart';
 
 /// What a parent set up for each child: which lesson, on what rhythm, to
 /// what minimum - and, underneath, how often the goal was actually held.
@@ -67,7 +68,8 @@ class _AssignmentsTabState extends ConsumerState<AssignmentsTab> {
                   runSpacing: 8,
                   children: [
                     ChoiceChip(
-                      label: const Text('Alle', style: TextStyle(fontSize: 19)),
+                      label: Text(context.l10n.assignmentsAll,
+                          style: const TextStyle(fontSize: 19)),
                       padding: const EdgeInsets.symmetric(
                           horizontal: 14, vertical: 10),
                       selected: _filter == null,
@@ -89,7 +91,7 @@ class _AssignmentsTabState extends ConsumerState<AssignmentsTab> {
               ),
               FilledButton.icon(
                 icon: const Icon(Icons.add_task, size: 26),
-                label: const Text('Neue Aufgabe'),
+                label: Text(context.l10n.assignmentsNew),
                 onPressed: () => AssignmentEditor.show(context),
               ),
             ],
@@ -103,8 +105,8 @@ class _AssignmentsTabState extends ConsumerState<AssignmentsTab> {
           child: Row(
             children: [
               FilterChip(
-                label: const Text('Erledigte ausblenden',
-                    style: TextStyle(fontSize: 19)),
+                label: Text(context.l10n.assignmentsHideFinished,
+                    style: const TextStyle(fontSize: 19)),
                 padding: const EdgeInsets.symmetric(
                     horizontal: 14, vertical: 10),
                 selected: hideFinished,
@@ -118,9 +120,7 @@ class _AssignmentsTabState extends ConsumerState<AssignmentsTab> {
               if (hideFinished && hiddenCount > 0) ...[
                 const SizedBox(width: 12),
                 Text(
-                  hiddenCount == 1
-                      ? '1 ausgeblendet'
-                      : '$hiddenCount ausgeblendet',
+context.l10n.assignmentsHiddenCount(hiddenCount),
                   style: const TextStyle(
                       fontSize: 16, color: AppColors.textMuted),
                 ),
@@ -130,17 +130,18 @@ class _AssignmentsTabState extends ConsumerState<AssignmentsTab> {
         ),
         Expanded(
           child: all.isEmpty
-              ? const Center(
+              ? Center(
                   child: Text(
-                    'Noch keine Aufgaben.',
-                    style: TextStyle(fontSize: 22, color: AppColors.textMuted),
+                    context.l10n.assignmentsEmpty,
+                    style: const TextStyle(
+                        fontSize: 22, color: AppColors.textMuted),
                   ),
                 )
               : assignments.isEmpty
-                  ? const Center(
+                  ? Center(
                       child: Text(
-                        'Keine offenen Aufgaben. Erledigte sind ausgeblendet.',
-                        style: TextStyle(
+                        context.l10n.assignmentsNoneOpen,
+                        style: const TextStyle(
                             fontSize: 22, color: AppColors.textMuted),
                       ),
                     )
@@ -184,13 +185,15 @@ class _AssignmentRow extends ConsumerWidget {
     // The rhythm shows up twice in this row, once as its own word and once
     // as the unit the statistic counts in.
     final daily = assignment.rhythm == AssignmentRhythm.daily;
-    final periodWord = daily ? 'Tagen' : 'Wochen';
+    final l10n = context.l10n;
+    final periodWord =
+        daily ? l10n.assignmentsPeriodDays : l10n.assignmentsPeriodWeeks;
     // A repeating one says how often; a single one says when, because that
     // is what makes a row of them read as a plan.
     final rhythmWord = assignment.repeats
-        ? (daily ? 'täglich' : 'wöchentlich')
+        ? (daily ? l10n.assignmentsDaily : l10n.assignmentsWeekly)
         : '${formatDeadline(assignment, now: now)}'
-            '${assignment.carryOver ? ' · zieht nach' : ''}';
+            '${assignment.carryOver ? l10n.assignmentsCarriesOver : ''}';
 
     return Opacity(
       opacity: finished ? 0.6 : 1,
@@ -226,7 +229,7 @@ class _AssignmentRow extends ConsumerWidget {
                         : lessons.length == 1
                             ? '${lessons.single.title} · '
                                 '${groupTitle(lessons.single.group)}'
-                            : '${lessons.length} Übungen',
+                            : l10n.assignmentsLessonCount(lessons.length),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
@@ -236,13 +239,13 @@ class _AssignmentRow extends ConsumerWidget {
                 if (!finished) ...[
                   TextButton.icon(
                     icon: const Icon(Icons.edit_outlined, size: 22),
-                    label: const Text('Ändern'),
+                    label: Text(l10n.assignmentsEdit),
                     onPressed: () =>
                         AssignmentEditor.show(context, existing: assignment),
                   ),
                   TextButton.icon(
                     icon: const Icon(Icons.stop_circle_outlined, size: 22),
-                    label: const Text('Beenden'),
+                    label: Text(l10n.assignmentsEnd),
                     onPressed: () => ref
                         .read(assignmentRepositoryProvider)
                         .endAssignment(
@@ -257,12 +260,12 @@ class _AssignmentRow extends ConsumerWidget {
                   // both instead of joining them.
                   TextButton.icon(
                     icon: const Icon(Icons.replay, size: 22),
-                    label: const Text('Erneut stellen'),
+                    label: Text(l10n.assignmentsRepeat),
                     onPressed: () =>
                         AssignmentEditor.show(context, template: assignment),
                   ),
                 IconButton(
-                  tooltip: 'Aufgabe löschen',
+                  tooltip: l10n.assignmentsDelete,
                   icon: const Icon(Icons.delete_outline,
                       color: AppColors.textMuted),
                   onPressed: () => ref
@@ -273,10 +276,15 @@ class _AssignmentRow extends ConsumerWidget {
             ),
             const SizedBox(height: 6),
             Text(
-              '$rhythmWord '
-              '· ${assignment.runs}× ${assignment.taskCount} Rechnungen'
-              '${assignment.minStars > 0 ? " · mind. ${assignment.minStars} ★" : ""}'
-              '${assignment.minBolts > 0 ? " · mind. ${assignment.minBolts} ⚡" : ""}',
+              [
+                rhythmWord,
+                l10n.assignmentsRunsOfTasks(
+                    assignment.runs, assignment.taskCount),
+                if (assignment.minStars > 0)
+                  l10n.assignmentsMinStars(assignment.minStars),
+                if (assignment.minBolts > 0)
+                  l10n.assignmentsMinBolts(assignment.minBolts),
+              ].join(' · '),
               style: const TextStyle(fontSize: 16, color: AppColors.textMuted),
             ),
             if (stats != null) ...[
@@ -307,9 +315,9 @@ class _AssignmentRow extends ConsumerWidget {
                   children: [
                     Text(
                       stats.closed.isEmpty
-                          ? 'Noch kein abgeschlossener Zeitraum'
-                          : 'Geschafft an ${stats.closedMet} von '
-                              '${stats.closed.length} $periodWord',
+                          ? l10n.assignmentsNoClosedPeriod
+                          : l10n.assignmentsMetOf(stats.closedMet,
+                              stats.closed.length, periodWord),
                       style: const TextStyle(
                           fontSize: 15, color: AppColors.textMuted),
                     ),
@@ -332,7 +340,7 @@ class _AssignmentRow extends ConsumerWidget {
                 // was made up afterwards, because that is the only thing a
                 // carried-over assignment adds.
                 Text(
-                  _singleVerdict(assignment, stats),
+                  _singleVerdict(l10n, assignment, stats),
                   style: TextStyle(
                     fontSize: 15,
                     color: stats.closed.isEmpty || stats.closed.single
@@ -409,7 +417,7 @@ class _LessonLine extends StatelessWidget {
           if (closedTotal > 0) ...[
             const SizedBox(width: 10),
             Text(
-              '· davor $closedMet von $closedTotal $periodWord',
+              context.l10n.assignmentsBefore(closedMet, closedTotal, periodWord),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
@@ -432,10 +440,13 @@ class _LessonLine extends StatelessWidget {
 ///
 /// The dot strip and "an X von Y Tagen" belong to a repeating one. Here
 /// there is exactly one period, so there is exactly one thing to say.
-String _singleVerdict(Assignment a, AssignmentStats stats) {
+String _singleVerdict(
+    AppLocalizations l10n, Assignment a, AssignmentStats stats) {
   if (stats.closed.isEmpty) {
-    return stats.met ? 'Geschafft' : 'Steht noch aus';
+    return stats.met ? l10n.assignmentsVerdictMet : l10n.assignmentsVerdictPending;
   }
-  if (stats.closed.single) return 'Geschafft';
-  return stats.settled ? 'Verpasst, später nachgeholt' : 'Verpasst';
+  if (stats.closed.single) return l10n.assignmentsVerdictMet;
+  return stats.settled
+      ? l10n.assignmentsVerdictLate
+      : l10n.assignmentsVerdictMissed;
 }

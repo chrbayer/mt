@@ -1,3 +1,4 @@
+import '../support/l10n.dart';
 import 'package:drift/drift.dart' hide isNull, isNotNull;
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
@@ -142,7 +143,7 @@ void main() {
     await tester.pumpWidget(
       UncontrolledProviderScope(
         container: container,
-        child: MaterialApp(theme: buildAppTheme(), home: screen),
+        child: MaterialApp(localizationsDelegates: testLocalizationsDelegates, locale: testLocale, supportedLocales: testSupportedLocales, theme: buildAppTheme(), home: screen),
       ),
     );
     await tester.pump();
@@ -310,7 +311,7 @@ void main() {
     addTearDown(tester.view.reset);
     await tester.pumpWidget(UncontrolledProviderScope(
       container: container,
-      child: MaterialApp(
+      child: MaterialApp(localizationsDelegates: testLocalizationsDelegates, locale: testLocale, supportedLocales: testSupportedLocales, 
         theme: buildAppTheme(),
         home: const _Resumable(child: LessonHomeScreen()),
       ),

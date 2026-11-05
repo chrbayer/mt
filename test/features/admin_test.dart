@@ -1,3 +1,4 @@
+import '../support/l10n.dart';
 import 'dart:async';
 
 import 'package:drift/drift.dart' show Value;
@@ -107,7 +108,7 @@ void main() {
     await tester.pumpWidget(
       UncontrolledProviderScope(
         container: container,
-        child: MaterialApp(
+        child: MaterialApp(localizationsDelegates: testLocalizationsDelegates, locale: testLocale, supportedLocales: testSupportedLocales, 
           theme: buildAppTheme(),
           home: const ProfileSelectScreen(),
         ),

@@ -13,6 +13,7 @@ import '../../providers.dart';
 import '../../theme/app_theme.dart';
 import '../lessons/lesson_example.dart';
 import '../practice/practice_screen.dart';
+import '../../l10n/l10n.dart';
 
 /// Set up a duel: who is playing, which lesson, how many tasks.
 ///
@@ -51,12 +52,13 @@ class _DuelSetupScreenState extends ConsumerState<DuelSetupScreen> {
     final ready = _players.length >= 2 && _lessonId != null;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Duell')),
+      appBar: AppBar(title: Text(context.l10n.duelTitle)),
       body: users.length < 2
-          ? const Center(
+          ? Center(
               child: Text(
-                'Für ein Duell braucht es mindestens zwei Profile.',
-                style: TextStyle(fontSize: 24, color: AppColors.textMuted),
+                context.l10n.duelNeedTwoProfiles,
+                style: const TextStyle(
+                    fontSize: 24, color: AppColors.textMuted),
               ),
             )
           : Padding(
@@ -64,7 +66,7 @@ class _DuelSetupScreenState extends ConsumerState<DuelSetupScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Wer tritt an?',
+                  Text(context.l10n.duelWhoPlays,
                       style: Theme.of(context).textTheme.headlineMedium),
                   const SizedBox(height: 10),
                   Wrap(
@@ -93,10 +95,13 @@ class _DuelSetupScreenState extends ConsumerState<DuelSetupScreen> {
                                 horizontal: 16, vertical: 12),
                             label: Text(
                               user.locked
-                                  ? '${user.avatar}  ${user.name} · gesperrt'
+                                  ? context.l10n
+                                      .duelPlayerLocked(user.avatar, user.name)
                                   : onBreak
-                                      ? '${user.avatar}  ${user.name} · Pause'
-                                      : '${user.avatar}  ${user.name}',
+                                      ? context.l10n.duelPlayerOnBreak(
+                                          user.avatar, user.name)
+                                      : context.l10n
+                                          .duelPlayer(user.avatar, user.name),
                               style: const TextStyle(fontSize: 21),
                             ),
                           );
@@ -106,7 +111,7 @@ class _DuelSetupScreenState extends ConsumerState<DuelSetupScreen> {
                   const SizedBox(height: 20),
                   Row(
                     children: [
-                      Text('Welche Aufgaben?',
+                      Text(context.l10n.duelWhichTasks,
                           style: Theme.of(context).textTheme.headlineMedium),
                       const SizedBox(width: 20),
                       for (final option in selectableTaskCounts)
@@ -125,10 +130,10 @@ class _DuelSetupScreenState extends ConsumerState<DuelSetupScreen> {
                   const SizedBox(height: 10),
                   Expanded(
                     child: _players.length < 2
-                        ? const Center(
+                        ? Center(
                             child: Text(
-                              'Wähle mindestens zwei Kinder aus.',
-                              style: TextStyle(
+                              context.l10n.duelPickTwo,
+                              style: const TextStyle(
                                   fontSize: 22, color: AppColors.textMuted),
                             ),
                           )
@@ -157,8 +162,8 @@ class _DuelSetupScreenState extends ConsumerState<DuelSetupScreen> {
                                         padding: const EdgeInsets.symmetric(
                                             horizontal: 14, vertical: 10),
                                         label: Text(
-                                          '${lesson.title}  ·  '
-                                          '${exampleFor(lesson)}',
+context.l10n.duelLessonChip(
+                                              lesson.title, exampleFor(lesson)),
                                           style: const TextStyle(fontSize: 18),
                                         ),
                                       ),
@@ -179,7 +184,7 @@ class _DuelSetupScreenState extends ConsumerState<DuelSetupScreen> {
                     width: double.infinity,
                     child: FilledButton.icon(
                       icon: const Icon(Icons.sports_score, size: 32),
-                      label: const Text('Duell starten'),
+                      label: Text(context.l10n.duelStart),
                       onPressed: ready
                           ? () => _start(
                                 users
@@ -279,14 +284,14 @@ class _HandOverScreen extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('$position von $total',
+            Text(context.l10n.duelPosition(position, total),
                 style: const TextStyle(
                     fontSize: 22, color: AppColors.textMuted)),
             const SizedBox(height: 12),
             Text(player.avatar, style: const TextStyle(fontSize: 90)),
             const SizedBox(height: 8),
             Text(
-              '${player.name} ist dran',
+              context.l10n.duelYourTurn(player.name),
               style: TextStyle(
                 fontSize: 44,
                 fontWeight: FontWeight.w700,
@@ -295,20 +300,21 @@ class _HandOverScreen extends StatelessWidget {
             ),
             const SizedBox(height: 6),
             Text(
-              '${lesson.title} · ${groupTitle(lesson.group)}',
+              context.l10n
+                  .duelLessonAndGroup(lesson.title, groupTitle(lesson.group)),
               style: const TextStyle(fontSize: 22, color: AppColors.textMuted),
             ),
             const SizedBox(height: 36),
             FilledButton.icon(
               icon: const Icon(Icons.play_arrow_rounded, size: 34),
-              label: const Text('Bereit'),
+              label: Text(context.l10n.duelReady),
               onPressed: () => Navigator.of(context).pop(true),
             ),
             const SizedBox(height: 12),
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('Duell abbrechen',
-                  style: TextStyle(fontSize: 19)),
+              child: Text(context.l10n.duelAbort,
+                  style: const TextStyle(fontSize: 19)),
             ),
           ],
         ),
@@ -336,15 +342,15 @@ class DuelResultScreen extends StatelessWidget {
     final best = _score(ranked.first);
 
     return Scaffold(
-      appBar: AppBar(title: Text('Duell · ${lesson.title}')),
+      appBar: AppBar(title: Text(context.l10n.duelResultTitle(lesson.title))),
       body: Padding(
         padding: const EdgeInsets.fromLTRB(40, 12, 40, 32),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Text(
-              'Alle hatten dieselben Aufgaben.',
-              style: TextStyle(fontSize: 20, color: AppColors.textMuted),
+            Text(
+              context.l10n.duelSameTasks,
+              style: const TextStyle(fontSize: 20, color: AppColors.textMuted),
             ),
             const SizedBox(height: 16),
             Expanded(
@@ -362,7 +368,7 @@ class DuelResultScreen extends StatelessWidget {
             const SizedBox(height: 12),
             FilledButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Fertig'),
+              child: Text(context.l10n.duelDone),
             ),
           ],
         ),
@@ -437,14 +443,14 @@ class _DuelRow extends StatelessWidget {
               outcome.wrongAttempts,
               outcome.taskCount,
             )),
-            label: 'pro Aufgabe',
+            label: context.l10n.commonPerTask,
             strong: true,
           ),
-          _Cell(value: '${outcome.wrongAttempts}', label: 'Fehler'),
+          _Cell(value: '${outcome.wrongAttempts}', label: context.l10n.commonErrors),
           SizedBox(
             width: 130,
             child: Text(
-              winner ? 'Sieg!' : '+${formatPerTask(behind)}',
+              winner ? context.l10n.duelWin : '+${formatPerTask(behind)}',
               textAlign: TextAlign.right,
               style: TextStyle(
                 fontSize: 22,

@@ -8,6 +8,7 @@ import '../../domain/scoring.dart';
 import '../../providers.dart';
 import '../../theme/app_theme.dart';
 import '../common/star_row.dart';
+import '../../l10n/l10n.dart';
 
 /// Hands the stars of one group back so a child can earn them again.
 ///
@@ -29,24 +30,23 @@ class ResetStarsDialog extends ConsumerWidget {
     WidgetRef ref,
     LessonGroup group,
   ) async {
+    final l10n = context.l10n;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: Text('Sterne in „${groupTitle(group)}" zurücksetzen?'),
+        title: Text(l10n.resetStarsTitle(groupTitle(group))),
         content: Text(
-          '${user.name} kann sie danach neu verdienen. Bestzeiten, Blitze, '
-          'Lernkurve und Bestenlisten bleiben unverändert - es geht nur um '
-          'die Sterne dieser Gruppe.',
+          l10n.resetStarsText(user.name),
           style: const TextStyle(fontSize: 20),
         ),
         actions: [
           OutlinedButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('Abbrechen'),
+            child: Text(l10n.commonCancel),
           ),
           FilledButton(
             onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: const Text('Zurücksetzen'),
+            child: Text(l10n.resetStarsConfirm),
           ),
         ],
       ),
@@ -77,7 +77,7 @@ class ResetStarsDialog extends ConsumerWidget {
                   const SizedBox(width: 12),
                   Flexible(
                     child: Text(
-                      'Sterne von ${user.name}',
+                      context.l10n.resetStarsHeading(user.name),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: Theme.of(context)
@@ -89,11 +89,10 @@ class ResetStarsDialog extends ConsumerWidget {
                 ],
               ),
               const SizedBox(height: 8),
-              const Text(
-                'Zurückgesetzt werden nur die Sterne. Die Zeiten bleiben - '
-                'Bestzeiten, Blitze, Lernkurve und Bestenlisten sind danach '
-                'genau wie vorher.',
-                style: TextStyle(fontSize: 17, color: AppColors.textMuted),
+              Text(
+                context.l10n.resetStarsNote,
+                style: const TextStyle(
+                    fontSize: 17, color: AppColors.textMuted),
               ),
               const SizedBox(height: 16),
               // Only the groups this child is offered: resetting something
@@ -109,7 +108,7 @@ class ResetStarsDialog extends ConsumerWidget {
                 alignment: Alignment.centerRight,
                 child: FilledButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('Fertig'),
+                  child: Text(context.l10n.resetStarsDone),
                 ),
               ),
             ],
@@ -153,7 +152,7 @@ class _GroupRow extends StatelessWidget {
               children: [
                 Text(groupTitle(group), style: const TextStyle(fontSize: 20)),
                 Text(
-                  '$earned von $possible Sternen',
+                  context.l10n.resetStarsGroupLine(earned, possible),
                   style: const TextStyle(
                       fontSize: 16, color: AppColors.textMuted),
                 ),
@@ -166,7 +165,7 @@ class _GroupRow extends StatelessWidget {
           // Nothing to hand back when there is nothing there.
           OutlinedButton(
             onPressed: earned == 0 ? null : onReset,
-            child: const Text('Zurücksetzen'),
+            child: Text(context.l10n.resetStarsConfirm),
           ),
         ],
       ),

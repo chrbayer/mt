@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../theme/app_theme.dart';
+import '../../l10n/l10n.dart';
 
 /// The version this build was made from, or empty when it was not built by
 /// one of the two build scripts.
@@ -25,7 +26,7 @@ class VersionLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     if (appVersion.isEmpty) return const SizedBox.shrink();
     return Text(
-      'Version $appVersion',
+      context.l10n.versionLabel(appVersion),
       style: const TextStyle(fontSize: 13, color: AppColors.starEmpty),
     );
   }

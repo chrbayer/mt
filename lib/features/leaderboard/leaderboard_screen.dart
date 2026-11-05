@@ -7,6 +7,7 @@ import '../../domain/scoring.dart';
 import '../../providers.dart';
 import '../../theme/app_theme.dart';
 import '../common/load_failure.dart';
+import '../../l10n/l10n.dart';
 
 /// Ranking of all profiles in one lesson - this is how the children compete.
 class LeaderboardScreen extends ConsumerWidget {
@@ -20,17 +21,17 @@ class LeaderboardScreen extends ConsumerWidget {
     final activeUserId = ref.watch(activeUserProvider)?.id;
 
     return Scaffold(
-      appBar: AppBar(title: Text('Bestenliste · ${lesson.title}')),
+      appBar: AppBar(title: Text(context.l10n.leaderboardTitle(lesson.title))),
       body: entries.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (_, _) => const LoadFailure(),
         data: (list) => list.isEmpty
-            ? const Center(
+            ? Center(
                 child: Text(
-                  'Noch keine Ergebnisse.\nMindestens '
-                  '$minTasksForAward Aufgaben zählen für die Bestenliste.',
+                  context.l10n.leaderboardEmpty(minTasksForAward),
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 24, color: AppColors.textMuted),
+                  style: const TextStyle(
+                      fontSize: 24, color: AppColors.textMuted),
                 ),
               )
             : ListView.separated(
@@ -98,14 +99,14 @@ class _Row extends StatelessWidget {
           ),
           _Cell(
             value: formatPerTask(entry.scoreMs),
-            label: 'pro Aufgabe',
+            label: context.l10n.commonPerTask,
             strong: true,
           ),
           _Cell(
             value: '${(entry.errorRate * 100).round()} %',
-            label: 'Fehler',
+            label: context.l10n.commonErrors,
           ),
-          _Cell(value: '${entry.taskCount}', label: 'Aufgaben'),
+          _Cell(value: '${entry.taskCount}', label: context.l10n.commonTasks),
         ],
       ),
     );
@@ -149,13 +150,11 @@ class _ScoreExplanation extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Padding(
-      padding: EdgeInsets.only(top: 12),
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
       child: Text(
-        'Gewertet wird die Zeit pro Aufgabe, plus 3 Sekunden für jeden '
-        'Fehlversuch. Deshalb lohnt sich Raten nicht, und Durchgänge mit '
-        'unterschiedlich vielen Aufgaben bleiben vergleichbar.',
-        style: TextStyle(fontSize: 17, color: AppColors.textMuted),
+        context.l10n.leaderboardScoreExplanation,
+        style: const TextStyle(fontSize: 17, color: AppColors.textMuted),
       ),
     );
   }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../theme/app_theme.dart';
+import '../../l10n/l10n.dart';
 
 /// Asks before something that cannot be taken back.
 ///
@@ -13,7 +14,7 @@ Future<bool> confirmDestructive(
   BuildContext context, {
   required String title,
   required String message,
-  String confirmLabel = 'Löschen',
+  String? confirmLabel,
 }) async {
   final confirmed = await showDialog<bool>(
     context: context,
@@ -23,12 +24,12 @@ Future<bool> confirmDestructive(
       actions: [
         OutlinedButton(
           onPressed: () => Navigator.of(dialogContext).pop(false),
-          child: const Text('Abbrechen'),
+          child: Text(context.l10n.commonCancel),
         ),
         FilledButton(
           style: FilledButton.styleFrom(backgroundColor: AppColors.wrong),
           onPressed: () => Navigator.of(dialogContext).pop(true),
-          child: Text(confirmLabel),
+          child: Text(confirmLabel ?? context.l10n.commonDelete),
         ),
       ],
     ),

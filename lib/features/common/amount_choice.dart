@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../l10n/l10n.dart';
 
 /// Picks one number out of a few, with an optional "same as everyone".
 ///
@@ -26,6 +27,9 @@ class AmountChoice extends StatelessWidget {
   /// a limit of zero means there is none.
   final String? zeroLabel;
 
+  /// Whether zero reads as "no limit" when [zeroLabel] is not given.
+  final bool zeroIsNoLimit;
+
   /// How a value reads. Minutes by default, because that is what most of
   /// these rows are.
   final String Function(int)? labelFor;
@@ -37,13 +41,17 @@ class AmountChoice extends StatelessWidget {
     required this.onChanged,
     this.inherited,
     this.allowInherit = false,
-    this.zeroLabel = 'ohne Grenze',
+    this.zeroLabel,
+    this.zeroIsNoLimit = true,
     this.labelFor,
   });
 
-  String _label(int value) => value == 0
-      ? (zeroLabel ?? (labelFor?.call(0) ?? '0 min'))
-      : (labelFor?.call(value) ?? '$value min');
+  String _label(BuildContext context, int value) => value == 0
+      ? (zeroLabel ??
+          (zeroIsNoLimit
+              ? context.l10n.amountNoLimit
+              : (labelFor?.call(0) ?? context.l10n.commonMinutesShort(0))))
+      : (labelFor?.call(value) ?? context.l10n.commonMinutesShort(value));
 
   @override
   Widget build(BuildContext context) {
@@ -55,8 +63,9 @@ class AmountChoice extends StatelessWidget {
           ChoiceChip(
             label: Text(
               inherited == null
-                  ? 'wie für alle'
-                  : 'wie für alle (${_label(inherited!)})',
+                  ? context.l10n.amountSameAsAll
+                  : context.l10n
+                      .amountSameAsAllWith(_label(context, inherited!)),
               style: const TextStyle(fontSize: 18),
             ),
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
@@ -65,7 +74,7 @@ class AmountChoice extends StatelessWidget {
           ),
         for (final minutes in options)
           ChoiceChip(
-            label: Text(_label(minutes), style: const TextStyle(fontSize: 18)),
+            label: Text(_label(context, minutes), style: const TextStyle(fontSize: 18)),
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             selected: value == minutes,
             onSelected:

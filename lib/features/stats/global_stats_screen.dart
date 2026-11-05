@@ -10,6 +10,7 @@ import '../../theme/app_theme.dart';
 import '../common/load_failure.dart';
 import '../common/star_row.dart';
 import '../leaderboard/leaderboard_screen.dart';
+import '../../l10n/l10n.dart';
 
 /// Everyone at a glance: who practised how much, and how that spread over the
 /// last weeks. Reachable from the profile screen without logging in, because
@@ -25,12 +26,13 @@ class GlobalStatsScreen extends ConsumerWidget {
       length: 2,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Alle Ergebnisse'),
-          bottom: const TabBar(
-            labelStyle: TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
+          title: Text(context.l10n.globalStatsTitle),
+          bottom: TabBar(
+            labelStyle:
+                const TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
             tabs: [
-              Tab(height: 58, text: 'Übersicht'),
-              Tab(height: 58, text: 'Bestenlisten'),
+              Tab(height: 58, text: context.l10n.globalStatsTabOverview),
+              Tab(height: 58, text: context.l10n.globalStatsTabLeaderboards),
             ],
           ),
         ),
@@ -53,10 +55,11 @@ class _OverviewTab extends ConsumerWidget {
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (error, _) => LoadFailure(detail: error),
       data: (list) => list.isEmpty
-          ? const Center(
+          ? Center(
               child: Text(
-                'Noch keine Profile.',
-                style: TextStyle(fontSize: 24, color: AppColors.textMuted),
+                context.l10n.globalStatsNoProfiles,
+                style: const TextStyle(
+                    fontSize: 24, color: AppColors.textMuted),
               ),
             )
           : Padding(
@@ -76,14 +79,14 @@ class _OverviewTab extends ConsumerWidget {
                   ),
                   const SizedBox(height: 24),
                   Text(
-                    'Geübt in den letzten '
-                    '${GlobalStatsScreen.activityDays} Tagen',
+context.l10n.globalStatsActivityHeading(GlobalStatsScreen.activityDays),
                     style: Theme.of(context).textTheme.headlineMedium,
                   ),
                   const SizedBox(height: 2),
-                  const Text(
-                    'Minuten pro Tag, je Kind in seiner Farbe',
-                    style: TextStyle(fontSize: 17, color: AppColors.textMuted),
+                  Text(
+                    context.l10n.globalStatsActivitySub,
+                    style: const TextStyle(
+                        fontSize: 17, color: AppColors.textMuted),
                   ),
                   const SizedBox(height: 12),
                   Expanded(child: _ActivityChart(users: list)),
@@ -110,14 +113,14 @@ class _LeaderboardsTab extends ConsumerWidget {
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (error, _) => LoadFailure(detail: error),
       data: (list) => list.isEmpty
-          ? const Center(
+          ? Center(
               child: Padding(
-                padding: EdgeInsets.all(40),
+                padding: const EdgeInsets.all(40),
                 child: Text(
-                  'Noch keine Bestenlisten.\n'
-                  'Ein Durchgang zählt ab $minTasksForAward Aufgaben.',
+                  context.l10n.globalStatsNoLeaderboards(minTasksForAward),
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 24, color: AppColors.textMuted),
+                  style: const TextStyle(
+                      fontSize: 24, color: AppColors.textMuted),
                 ),
               ),
             )
@@ -303,16 +306,16 @@ class _SummaryCard extends ConsumerWidget {
           ),
           const SizedBox(height: 14),
           if (!played)
-            const Text(
-              'Noch nicht geübt.',
-              style: TextStyle(fontSize: 19, color: AppColors.textMuted),
+            Text(
+              context.l10n.globalStatsNotPlayed,
+              style: const TextStyle(fontSize: 19, color: AppColors.textMuted),
             )
           else ...[
             _Line(
               value: '${summary.runs}',
-              label: summary.runs == 1 ? 'Runde' : 'Runden',
+              label: context.l10n.globalStatsRounds(summary.runs),
             ),
-            _Line(value: formatTotalTime(summary.totalMs), label: 'geübt'),
+            _Line(value: formatTotalTime(summary.totalMs), label: context.l10n.globalStatsPractised),
             Padding(
               padding: const EdgeInsets.only(bottom: 4),
               child: Row(
@@ -328,12 +331,12 @@ class _SummaryCard extends ConsumerWidget {
             ),
             _Line(
               value: '${(summary.errors * 100).round()} %',
-              label: 'Fehler',
+              label: context.l10n.commonErrors,
             ),
             const Spacer(),
             if (streak >= 2)
               Text(
-                '$streak Tage in Folge',
+                context.l10n.globalStatsStreak(streak),
                 style: const TextStyle(
                   fontSize: 17,
                   fontWeight: FontWeight.w600,
@@ -342,7 +345,8 @@ class _SummaryCard extends ConsumerWidget {
               )
             else
               Text(
-                'zuletzt ${formatRelativeDay(summary.lastPlayed!)}',
+                context.l10n
+                    .globalStatsLastPlayed(formatRelativeDay(summary.lastPlayed!)),
                 style:
                     const TextStyle(fontSize: 17, color: AppColors.textMuted),
               ),
@@ -400,10 +404,10 @@ class _ActivityChart extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final activity = ref.watch(activityProvider).value ?? const [];
     if (activity.isEmpty) {
-      return const Center(
+      return Center(
         child: Text(
-          'In den letzten Wochen wurde noch nicht geübt.',
-          style: TextStyle(fontSize: 20, color: AppColors.textMuted),
+          context.l10n.globalStatsNoActivity,
+          style: const TextStyle(fontSize: 20, color: AppColors.textMuted),
         ),
       );
     }

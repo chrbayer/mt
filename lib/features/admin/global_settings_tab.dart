@@ -7,6 +7,7 @@ import '../../theme/app_theme.dart';
 import '../common/amount_choice.dart';
 import 'sound_test_button.dart';
 import '../common/task_count_choice.dart';
+import '../../l10n/l10n.dart';
 
 /// Everything that holds for the whole app rather than for one child.
 ///
@@ -30,35 +31,33 @@ class GlobalSettingsTab extends ConsumerWidget {
         SwitchListTile(
           value: preferences?.showClock ?? false,
           onChanged: preferences == null ? null : repository.setShowClock,
-          title: const Text('Uhr während der Übung zeigen',
-              style: TextStyle(fontSize: 24)),
-          subtitle: const Text(
-            'Die Zeit wird immer gemessen. Sichtbar macht sie manche Kinder '
-            'aber nervös - deshalb ist sie standardmäßig aus.',
-            style: TextStyle(fontSize: 18),
+          title: Text(context.l10n.globalSettingsClock,
+              style: const TextStyle(fontSize: 24)),
+          subtitle: Text(
+            context.l10n.globalSettingsClockNote,
+            style: const TextStyle(fontSize: 18),
           ),
         ),
         const Divider(height: 40),
         SwitchListTile(
           value: preferences?.haptics ?? true,
           onChanged: preferences == null ? null : repository.setHaptics,
-          title: const Text('Tasten vibrieren lassen',
-              style: TextStyle(fontSize: 24)),
-          subtitle: const Text(
-            'Kurzes Feedback bei jedem Tastendruck.',
-            style: TextStyle(fontSize: 18),
+          title: Text(context.l10n.globalSettingsHaptics,
+              style: const TextStyle(fontSize: 24)),
+          subtitle: Text(
+            context.l10n.globalSettingsHapticsNote,
+            style: const TextStyle(fontSize: 18),
           ),
         ),
         const Divider(height: 40),
         SwitchListTile(
           value: preferences?.sounds ?? true,
           onChanged: preferences == null ? null : repository.setSounds,
-          title: const Text('Töne abspielen', style: TextStyle(fontSize: 24)),
-          subtitle: const Text(
-            'Ein kurzer Klang bei richtig, ein anderer bei falsch und ein '
-            'leiser Klick unter jeder Taste. Auf einem flach liegenden '
-            'Tablet spürt man die Vibration kaum.',
-            style: TextStyle(fontSize: 18),
+          title: Text(context.l10n.globalSettingsSounds,
+              style: const TextStyle(fontSize: 24)),
+          subtitle: Text(
+            context.l10n.globalSettingsSoundsNote,
+            style: const TextStyle(fontSize: 18),
           ),
         ),
         const Padding(
@@ -66,8 +65,8 @@ class GlobalSettingsTab extends ConsumerWidget {
           child: SoundTestButton(),
         ),
         const Divider(height: 40),
-        const Text('Aufgaben pro Durchgang für alle',
-            style: TextStyle(fontSize: 24)),
+        Text(context.l10n.globalSettingsTaskCount,
+            style: const TextStyle(fontSize: 24)),
         const SizedBox(height: 4),
         const TaskCountExplanation(),
         const SizedBox(height: 14),
@@ -78,24 +77,21 @@ class GlobalSettingsTab extends ConsumerWidget {
               : (count) => repository.setDefaultTaskCount(count!),
         ),
         const SizedBox(height: 24),
-        const Text(
-          'Für ein einzelnes Kind steht die Vorgabe unter „Verwaltung" bei '
-          'seinem Profil - und das Kind selbst kann sie in seinen eigenen '
-          'Einstellungen ändern.',
-          style: TextStyle(fontSize: 17, color: AppColors.textMuted),
+        Text(
+          context.l10n.globalSettingsTaskCountNote,
+          style: const TextStyle(fontSize: 17, color: AppColors.textMuted),
         ),
         const Divider(height: 40),
-        const Text('Übungszeit für alle', style: TextStyle(fontSize: 24)),
+        Text(context.l10n.globalSettingsLimits,
+            style: const TextStyle(fontSize: 24)),
         const SizedBox(height: 4),
-        const Text(
-          'Gilt für jedes Kind, das keine eigene Vorgabe hat. Ein laufender '
-          'Durchgang wird nie abgebrochen - erst der nächste Start ist '
-          'gesperrt.',
-          style: TextStyle(fontSize: 17, color: AppColors.textMuted),
+        Text(
+          context.l10n.globalSettingsLimitsNote,
+          style: const TextStyle(fontSize: 17, color: AppColors.textMuted),
         ),
         const SizedBox(height: 16),
-        const Text('Am Stück, dann Pause',
-            style: TextStyle(fontSize: 20, color: AppColors.text)),
+        Text(context.l10n.globalSettingsStretch,
+            style: const TextStyle(fontSize: 20, color: AppColors.text)),
         const SizedBox(height: 8),
         AmountChoice(
           value: limits?.stretchMinutes,
@@ -112,13 +108,13 @@ class GlobalSettingsTab extends ConsumerWidget {
         ),
         if ((limits?.stretchMinutes ?? 0) > 0) ...[
           const SizedBox(height: 16),
-          const Text('Wie lange dauert die Pause?',
-              style: TextStyle(fontSize: 20, color: AppColors.text)),
+          Text(context.l10n.globalSettingsBreakLength,
+              style: const TextStyle(fontSize: 20, color: AppColors.text)),
           const SizedBox(height: 8),
           AmountChoice(
             value: limits?.breakMinutes,
             options: breakMinuteOptions,
-            zeroLabel: null,
+            zeroIsNoLimit: false,
             onChanged: limits == null
                 ? null
                 : (minutes) => repository.setPracticeLimits(
@@ -131,8 +127,8 @@ class GlobalSettingsTab extends ConsumerWidget {
           ),
         ],
         const SizedBox(height: 16),
-        const Text('Und pro Tag insgesamt',
-            style: TextStyle(fontSize: 20, color: AppColors.text)),
+        Text(context.l10n.globalSettingsDaily,
+            style: const TextStyle(fontSize: 20, color: AppColors.text)),
         const SizedBox(height: 8),
         AmountChoice(
           value: limits?.dailyMinutes,
@@ -148,15 +144,12 @@ class GlobalSettingsTab extends ConsumerWidget {
                   ),
         ),
         const Divider(height: 40),
-        const Text('Gewertete Durchgänge je Übung und Tag',
-            style: TextStyle(fontSize: 24)),
+        Text(context.l10n.globalSettingsScoredRuns,
+            style: const TextStyle(fontSize: 24)),
         const SizedBox(height: 6),
-        const Text(
-          'Danach darf dieselbe Übung weiter gemacht werden, sie bringt nur '
-          'keine Bestzeit, keine Sterne und keine Blitze mehr. Das nimmt den '
-          'Anreiz, die leichteste Übung so lange zu wiederholen, bis die Zeit '
-          'stimmt. Geübte Zeit und Verlauf zählen weiter mit.',
-          style: TextStyle(fontSize: 17, color: AppColors.textMuted),
+        Text(
+          context.l10n.globalSettingsScoredRunsNote,
+          style: const TextStyle(fontSize: 17, color: AppColors.textMuted),
         ),
         const SizedBox(height: 12),
         AmountChoice(

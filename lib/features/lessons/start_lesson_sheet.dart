@@ -12,6 +12,7 @@ import 'pause_notice.dart';
 import '../leaderboard/leaderboard_screen.dart';
 import '../practice/practice_screen.dart';
 import 'lesson_example.dart';
+import '../../l10n/l10n.dart';
 
 /// Asks how many tasks this run should have. The app is meant for drilling as
 /// much as for testing, so longer runs are a first-class choice - the
@@ -112,7 +113,7 @@ class _StartLessonSheetState extends ConsumerState<StartLessonSheet> {
               ),
               const SizedBox(width: 8),
               IconButton(
-                tooltip: 'Was heißt das?',
+                tooltip: context.l10n.startWhatDoesItMean,
                 iconSize: 32,
                 color: _showHelp ? AppColors.primary : AppColors.textMuted,
                 icon: Icon(
@@ -123,7 +124,7 @@ class _StartLessonSheetState extends ConsumerState<StartLessonSheet> {
             ],
           ),
           Text(
-            'Zum Beispiel:  ${exampleFor(widget.lesson)}',
+            context.l10n.startExample(exampleFor(widget.lesson)),
             style: const TextStyle(
               fontSize: 24,
               color: AppColors.primary,
@@ -150,8 +151,7 @@ class _StartLessonSheetState extends ConsumerState<StartLessonSheet> {
               children: [
                 Flexible(
                   child: Text(
-                    'Für deine Aufgabe: '
-                    '${assignment.taskCount} Rechnungen',
+context.l10n.startAssignmentGoal(assignment.taskCount),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
@@ -172,7 +172,8 @@ class _StartLessonSheetState extends ConsumerState<StartLessonSheet> {
               ],
             )
           else ...[
-            const Text('Wie viele Aufgaben?', style: TextStyle(fontSize: 22)),
+            Text(context.l10n.startHowMany,
+                style: const TextStyle(fontSize: 22)),
             SizedBox(height: tight ? 8 : 12),
             Wrap(
               spacing: 14,
@@ -217,9 +218,9 @@ class _StartLessonSheetState extends ConsumerState<StartLessonSheet> {
                               const BoltRow(earned: maxBolts, size: 26),
                               const SizedBox(width: 10),
                               Text(
-                                'ab ${formatPerTask(
+                                context.l10n.startBoltsFrom(formatPerTask(
                                   widget.lesson.targetMsPerTask.toDouble(),
-                                )} pro Aufgabe',
+                                )),
                                 style: const TextStyle(
                                   fontSize: 19,
                                   color: AppColors.textMuted,
@@ -249,7 +250,7 @@ class _StartLessonSheetState extends ConsumerState<StartLessonSheet> {
             width: double.infinity,
             child: FilledButton.icon(
               icon: const Icon(Icons.play_arrow_rounded, size: 34),
-              label: const Text("Los geht's"),
+              label: Text(context.l10n.startGo),
               // Disabled for the one frame before the stored count arrives.
               onPressed: !gate.mayStart || count == null
                   ? null
@@ -287,7 +288,7 @@ class _StartLessonSheetState extends ConsumerState<StartLessonSheet> {
             width: double.infinity,
             child: OutlinedButton.icon(
               icon: const Icon(Icons.leaderboard_outlined, size: 28),
-              label: const Text('Bestenliste'),
+              label: Text(context.l10n.startLeaderboard),
               onPressed: () {
                 final navigator = Navigator.of(context);
                 navigator.pop();

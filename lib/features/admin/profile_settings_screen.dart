@@ -15,6 +15,7 @@ import '../lessons/lesson_example.dart';
 import '../profiles/profile_editor.dart';
 import 'confirm_dialog.dart';
 import 'reset_stars_dialog.dart';
+import '../../l10n/l10n.dart';
 
 /// Below this width the two columns fall back to one. A 10" tablet in
 /// landscape is far wider than this; a phone held sideways is not.
@@ -117,10 +118,9 @@ class _ProfileSettingsScreenState
     }
     final discard = await confirmDestructive(
       context,
-      title: 'Änderungen verwerfen?',
-      message: 'Die Einstellungen für ${widget.user.name} wurden geändert, '
-          'aber noch nicht gespeichert.',
-      confirmLabel: 'Verwerfen',
+      title: context.l10n.profileSettingsDiscardTitle,
+      message: context.l10n.profileSettingsDiscardText(widget.user.name),
+      confirmLabel: context.l10n.profileSettingsDiscard,
     );
     if (discard) navigator.pop();
   }
@@ -141,7 +141,7 @@ class _ProfileSettingsScreenState
       child: Scaffold(
         appBar: AppBar(
           leading: IconButton(
-            tooltip: 'Verwerfen',
+            tooltip: context.l10n.profileSettingsDiscard,
             icon: const Icon(Icons.close, size: 30),
             onPressed: _close,
           ),
@@ -167,7 +167,7 @@ class _ProfileSettingsScreenState
               padding: const EdgeInsets.only(right: 16),
               child: FilledButton.icon(
                 icon: const Icon(Icons.check, size: 28),
-                label: const Text('Speichern'),
+                label: Text(context.l10n.profileSettingsSave),
                 onPressed: _save,
               ),
             ),
@@ -212,12 +212,11 @@ class _ProfileSettingsScreenState
   Widget _practiceColumn(PracticeLimits? global) => Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const _SectionTitle('Üben'),
-          Text('Bereiche', style: Theme.of(context).textTheme.titleLarge),
-          const Text(
-            'Abgeschaltete Bereiche erscheinen nicht mehr auf dem '
-            'Übungsbildschirm. Bereits erzielte Ergebnisse bleiben erhalten.',
-            style: TextStyle(fontSize: 17, color: AppColors.textMuted),
+          _SectionTitle(context.l10n.profileSettingsSectionPractice),
+          Text(context.l10n.profileSettingsGroups, style: Theme.of(context).textTheme.titleLarge),
+          Text(
+            context.l10n.profileSettingsGroupsNote,
+            style: const TextStyle(fontSize: 17, color: AppColors.textMuted),
           ),
           const SizedBox(height: 8),
           for (final group in LessonGroup.values)
@@ -230,24 +229,20 @@ class _ProfileSettingsScreenState
               ),
             ),
           if (_visible.isEmpty)
-            const Padding(
-              padding: EdgeInsets.only(top: 8),
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
               child: Text(
-                'Ohne einen einzigen Bereich kann das Kind nicht üben.',
-                style: TextStyle(fontSize: 17, color: AppColors.wrong),
+                context.l10n.profileSettingsNoGroup,
+                style: const TextStyle(fontSize: 17, color: AppColors.wrong),
               ),
             ),
           const SizedBox(height: 24),
-          Text('Fertige Lektionen ausblenden',
+          Text(context.l10n.profileSettingsHideDoneHeading,
               style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 4),
-          const Text(
-            'Kürzt den Katalog um das, was schon sitzt. Das Kind kann es auf '
-            'dem Übungsbildschirm selbst umstellen - hier steht es, damit man '
-            'es einmal einrichten kann. Die strengere Stufe lässt die Ersten '
-            'Schritte stehen: dort wird nicht auf Zeit gerechnet, also gibt '
-            'es keine Blitze zu holen.',
-            style: TextStyle(fontSize: 17, color: AppColors.textMuted),
+          Text(
+            context.l10n.profileSettingsHideDoneNote,
+            style: const TextStyle(fontSize: 17, color: AppColors.textMuted),
           ),
           const SizedBox(height: 10),
           RadioGroup<LessonFilter>(
@@ -273,14 +268,13 @@ class _ProfileSettingsScreenState
           ),
           const SizedBox(height: 8),
           SwitchTile(
-            title: 'Erledigte Aufgaben ausblenden',
-            subtitle: 'Fertige Karten verschwinden schon vor Ende des Tages '
-                'bzw. der Woche. Sonst bleiben sie abgehakt stehen.',
+            title: context.l10n.profileSettingsHideDoneAssignments,
+            subtitle: context.l10n.profileSettingsHideDoneAssignmentsNote,
             value: _hideDoneAssignments,
             onChanged: (on) => setState(() => _hideDoneAssignments = on),
           ),
           const SizedBox(height: 24),
-          Text('Aufgaben pro Durchgang',
+          Text(context.l10n.profileSettingsTaskCount,
               style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 4),
           const TaskCountExplanation(forProfile: true),
@@ -293,9 +287,8 @@ class _ProfileSettingsScreenState
           ),
           const SizedBox(height: 16),
           SwitchTile(
-            title: 'Schwere Aufgaben wiederholen',
-            subtitle: 'Ein Viertel jedes Durchgangs besteht aus dem, was '
-                'zuletzt lange gedauert hat oder falsch war.',
+            title: context.l10n.profileSettingsReview,
+            subtitle: context.l10n.profileSettingsReviewNote,
             value: _review,
             onChanged: (on) => setState(() => _review = on),
           ),
@@ -308,16 +301,13 @@ class _ProfileSettingsScreenState
       Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const _SectionTitle('Zeit und Wertung'),
-          Text('Übungszeit am Stück',
+          _SectionTitle(context.l10n.profileSettingsSectionTime),
+          Text(context.l10n.profileSettingsStretch,
               style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 4),
-          const Text(
-            'Nach dieser Zeit gibt es eine Pause. Ein laufender Durchgang '
-            'wird nie abgebrochen - erst der nächste Start ist gesperrt. Die '
-            'Zeit zählt weiter, solange die Pause nicht vollständig '
-            'eingehalten wurde.',
-            style: TextStyle(fontSize: 17, color: AppColors.textMuted),
+          Text(
+            context.l10n.profileSettingsStretchNote,
+            style: const TextStyle(fontSize: 17, color: AppColors.textMuted),
           ),
           const SizedBox(height: 10),
           AmountChoice(
@@ -330,7 +320,7 @@ class _ProfileSettingsScreenState
           // Only worth asking once there is a limit for it to end.
           if ((_limitMinutes ?? global?.stretchMinutes ?? 0) > 0) ...[
             const SizedBox(height: 16),
-            Text('Wie lange dauert die Pause?',
+            Text(context.l10n.profileSettingsBreakLength,
                 style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 10),
             AmountChoice(
@@ -338,18 +328,17 @@ class _ProfileSettingsScreenState
               options: breakMinuteOptions,
               inherited: global?.breakMinutes,
               allowInherit: true,
-              zeroLabel: null,
+              zeroIsNoLimit: false,
               onChanged: (minutes) => setState(() => _breakMinutes = minutes),
             ),
           ],
           const SizedBox(height: 24),
-          Text('Und pro Tag insgesamt',
+          Text(context.l10n.profileSettingsDaily,
               style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 4),
-          const Text(
-            'Zählt alle Durchgänge des Tages zusammen, Pausen hin oder her. '
-            'Ist die Zeit aufgebraucht, geht es erst am nächsten Tag weiter.',
-            style: TextStyle(fontSize: 17, color: AppColors.textMuted),
+          Text(
+            context.l10n.profileSettingsDailyNote,
+            style: const TextStyle(fontSize: 17, color: AppColors.textMuted),
           ),
           const SizedBox(height: 10),
           AmountChoice(
@@ -360,14 +349,12 @@ class _ProfileSettingsScreenState
             onChanged: (minutes) => setState(() => _dailyMinutes = minutes),
           ),
           const SizedBox(height: 24),
-          Text('Gewertete Durchgänge je Übung und Tag',
+          Text(context.l10n.profileSettingsScoredRuns,
               style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 4),
-          const Text(
-            'Danach darf dieselbe Übung weiter gemacht werden, sie bringt nur '
-            'keine Bestzeit, keine Sterne und keine Blitze mehr. Geübte Zeit '
-            'und Verlauf zählen weiter mit.',
-            style: TextStyle(fontSize: 17, color: AppColors.textMuted),
+          Text(
+            context.l10n.profileSettingsScoredRunsNote,
+            style: const TextStyle(fontSize: 17, color: AppColors.textMuted),
           ),
           const SizedBox(height: 10),
           AmountChoice(
@@ -390,10 +377,10 @@ class _ProfileSettingsScreenState
   Widget _tidyUpBlock() => Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const _SectionTitle('Aufräumen'),
-          const Text(
-            'Diese Knöpfe wirken sofort - sie warten nicht auf "Speichern".',
-            style: TextStyle(fontSize: 17, color: AppColors.textMuted),
+          _SectionTitle(context.l10n.profileSettingsSectionTidy),
+          Text(
+            context.l10n.profileSettingsTidyNote,
+            style: const TextStyle(fontSize: 17, color: AppColors.textMuted),
           ),
           const SizedBox(height: 12),
           Wrap(
@@ -402,27 +389,27 @@ class _ProfileSettingsScreenState
             children: [
               OutlinedButton.icon(
                 icon: const Icon(Icons.edit_outlined, size: 24),
-                label: const Text('Umbenennen'),
+                label: Text(context.l10n.profileSettingsRename),
                 onPressed: () =>
                     ProfileEditorDialog.show(context, user: widget.user),
               ),
               OutlinedButton.icon(
                 icon: const Icon(Icons.star_outline, size: 24),
-                label: const Text('Sterne zurückgeben …'),
+                label: Text(context.l10n.profileSettingsGiveBackStars),
                 onPressed: () => ResetStarsDialog.show(context, widget.user),
               ),
               OutlinedButton.icon(
                 style:
                     OutlinedButton.styleFrom(foregroundColor: AppColors.wrong),
                 icon: const Icon(Icons.restart_alt, size: 24),
-                label: const Text('Ergebnisse löschen'),
+                label: Text(context.l10n.profileSettingsResetResults),
                 onPressed: _confirmReset,
               ),
               OutlinedButton.icon(
                 style:
                     OutlinedButton.styleFrom(foregroundColor: AppColors.wrong),
                 icon: const Icon(Icons.delete_outline, size: 24),
-                label: const Text('Profil löschen'),
+                label: Text(context.l10n.profileSettingsDeleteProfile),
                 onPressed: _confirmDelete,
               ),
             ],
@@ -433,9 +420,8 @@ class _ProfileSettingsScreenState
   Future<void> _confirmReset() async {
     final confirmed = await confirmDestructive(
       context,
-      title: 'Ergebnisse von ${widget.user.name} löschen?',
-      message: 'Bestzeiten, Lernkurve und Verlauf gehen verloren. Das Profil '
-          'selbst bleibt bestehen.',
+      title: context.l10n.profileSettingsResetTitle(widget.user.name),
+      message: context.l10n.profileSettingsResetText,
     );
     if (!confirmed) return;
     await ref.read(userRepositoryProvider).resetStatistics(widget.user.id);
@@ -445,8 +431,8 @@ class _ProfileSettingsScreenState
     final navigator = Navigator.of(context);
     final confirmed = await confirmDestructive(
       context,
-      title: '${widget.user.name} löschen?',
-      message: 'Profil und alle Ergebnisse werden entfernt.',
+      title: context.l10n.profileSettingsDeleteTitle(widget.user.name),
+      message: context.l10n.profileSettingsDeleteText,
     );
     if (!confirmed) return;
     await ref.read(userRepositoryProvider).deleteUser(widget.user.id);
@@ -460,7 +446,8 @@ class _ProfileSettingsScreenState
   /// far better than a list of lesson titles, which only gets truncated.
   String _summary(LessonGroup group) {
     final lessons = lessonsInGroup(group);
-    return '${lessons.length} Lektionen · z. B. ${exampleFor(lessons.first)}';
+    return context.l10n.profileSettingsGroupSummary(
+        lessons.length, exampleFor(lessons.first));
   }
 }
 
@@ -499,13 +486,11 @@ class _LockBlock extends StatelessWidget {
               size: 32,
               color: locked ? AppColors.wrong : AppColors.textMuted,
             ),
-            title: Text('Profil vorübergehend sperren',
+            title: Text(context.l10n.profileSettingsLockTitle,
                 style: Theme.of(context).textTheme.titleLarge),
-            subtitle: const Text(
-              'Das Profil lässt sich dann nicht öffnen und nicht zum Duell '
-              'einladen. Nichts geht verloren: Sterne, Blitze und Bestzeiten '
-              'sind nach dem Freigeben unverändert da.',
-              style: TextStyle(fontSize: 17, color: AppColors.textMuted),
+            subtitle: Text(
+              context.l10n.profileSettingsLockNote,
+              style: const TextStyle(fontSize: 17, color: AppColors.textMuted),
             ),
           ),
         ),

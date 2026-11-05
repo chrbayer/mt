@@ -1,5 +1,6 @@
 import '../../data/repositories/stats_repository.dart';
 import '../../domain/lesson.dart';
+import '../../l10n/l10n.dart';
 
 /// Why a lesson is being suggested.
 enum RecommendationReason {
@@ -19,10 +20,10 @@ class Recommendation {
 
   const Recommendation({required this.lesson, required this.reason});
 
-  String get headline => switch (reason) {
-        RecommendationReason.shaky => 'Da war es zuletzt wackelig',
-        RecommendationReason.fresh => 'Das hast du noch nie geübt',
-        RecommendationReason.stale => 'Lange nicht mehr geübt',
+  String headline(AppLocalizations l10n) => switch (reason) {
+        RecommendationReason.shaky => l10n.recommendShaky,
+        RecommendationReason.fresh => l10n.recommendFresh,
+        RecommendationReason.stale => l10n.recommendStale,
       };
 }
 

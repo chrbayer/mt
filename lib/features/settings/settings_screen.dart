@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers.dart';
 import '../../theme/app_theme.dart';
 import '../common/task_count_choice.dart';
+import '../../l10n/l10n.dart';
 
 /// The settings a child may change about their own practice.
 ///
@@ -21,11 +22,12 @@ class SettingsScreen extends ConsumerWidget {
     final user = ref.watch(activeUserProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Einstellungen')),
+      appBar: AppBar(title: Text(context.l10n.settingsTitle)),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(40, 8, 40, 32),
         children: [
-          const Text('Aufgaben pro Durchgang', style: TextStyle(fontSize: 24)),
+          Text(context.l10n.settingsTaskCountHeading,
+              style: const TextStyle(fontSize: 24)),
           const SizedBox(height: 4),
           const TaskCountExplanation(forProfile: true),
           const SizedBox(height: 14),
@@ -40,11 +42,9 @@ class SettingsScreen extends ConsumerWidget {
                     .setProfileTaskCount(user.id, count),
           ),
           const Divider(height: 48),
-          const Text(
-            'Uhr und Vibration, die Vorgabe für alle, Ergebnisse löschen, '
-            'Profile verwalten und den Übungsverlauf ansehen: das steht im '
-            'Elternbereich auf dem Startbildschirm, geschützt durch die PIN.',
-            style: TextStyle(fontSize: 18, color: AppColors.textMuted),
+          Text(
+            context.l10n.settingsParentAreaNote,
+            style: const TextStyle(fontSize: 18, color: AppColors.textMuted),
           ),
         ],
       ),

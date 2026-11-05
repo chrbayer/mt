@@ -5,6 +5,7 @@ import '../../data/repositories/settings_repository.dart';
 import '../../providers.dart';
 import '../../theme/app_theme.dart';
 import '../practice/widgets/big_keypad.dart';
+import '../../l10n/l10n.dart';
 
 /// Asks for the parent PIN and returns whether the parent area may open.
 ///
@@ -38,6 +39,8 @@ Future<bool> changeAdminPin(BuildContext context) async {
 
 enum _Step { verify, choose, repeat }
 
+enum _PinError { wrong, mismatch }
+
 class _PinDialog extends ConsumerStatefulWidget {
   /// Skips [_decideStep] and starts here instead, for [changeAdminPin]. Null
   /// means [requireAdminPin]'s usual case: ask the repository whether a PIN
@@ -54,7 +57,7 @@ class _PinDialogState extends ConsumerState<_PinDialog> {
   _Step? _step;
   String _input = '';
   String _firstEntry = '';
-  String? _error;
+  _PinError? _error;
 
   @override
   void initState() {
@@ -99,7 +102,7 @@ class _PinDialogState extends ConsumerState<_PinDialog> {
         } else {
           setState(() {
             _input = '';
-            _error = 'Falsche PIN.';
+            _error = _PinError.wrong;
           });
         }
       case _Step.choose:
@@ -117,19 +120,19 @@ class _PinDialogState extends ConsumerState<_PinDialog> {
             _input = '';
             _firstEntry = '';
             _step = _Step.choose;
-            _error = 'Die beiden Eingaben waren verschieden.';
+            _error = _PinError.mismatch;
           });
         }
     }
   }
 
-  (String, String) get _labels => switch (_step!) {
-        _Step.verify => ('Elternbereich', 'PIN eingeben'),
+  (String, String) _labels(AppLocalizations l10n) => switch (_step!) {
+        _Step.verify => (l10n.pinTitleVerify, l10n.pinHintEnter),
         _Step.choose => (
-            'Elternbereich einrichten',
-            'Wähle eine PIN aus $adminPinLength Ziffern'
+            l10n.pinTitleSetup,
+            l10n.pinHintChoose(adminPinLength)
           ),
-        _Step.repeat => ('Elternbereich einrichten', 'PIN wiederholen'),
+        _Step.repeat => (l10n.pinTitleSetup, l10n.pinHintRepeat),
       };
 
   @override
@@ -143,7 +146,7 @@ class _PinDialogState extends ConsumerState<_PinDialog> {
       );
     }
 
-    final (title, hint) = _labels;
+    final (title, hint) = _labels(context.l10n);
     final preferences =
         ref.watch(preferencesProvider).value ?? const AppPreferences();
 
@@ -195,7 +198,10 @@ class _PinDialogState extends ConsumerState<_PinDialog> {
                     : Padding(
                         padding: const EdgeInsets.only(top: 8),
                         child: Text(
-                          _error!,
+                          switch (_error!) {
+                            _PinError.wrong => context.l10n.pinWrong,
+                            _PinError.mismatch => context.l10n.pinMismatch,
+                          },
                           style: const TextStyle(
                             fontSize: 18,
                             color: AppColors.wrong,
@@ -219,9 +225,9 @@ class _PinDialogState extends ConsumerState<_PinDialog> {
               const SizedBox(height: 12),
               TextButton(
                 onPressed: () => Navigator.of(context).pop(false),
-                child: const Text(
-                  'Abbrechen',
-                  style: TextStyle(fontSize: 20),
+                child: Text(
+                  context.l10n.commonCancel,
+                  style: const TextStyle(fontSize: 20),
                 ),
               ),
             ],

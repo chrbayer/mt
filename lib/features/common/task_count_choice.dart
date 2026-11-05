@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../domain/lesson.dart';
 import '../../theme/app_theme.dart';
+import '../../l10n/l10n.dart';
 
 /// Picks how long a run should be, with an optional "same as everyone".
 ///
@@ -38,7 +39,9 @@ class TaskCountChoice extends StatelessWidget {
         if (allowInherit)
           ChoiceChip(
             label: Text(
-              inherited == null ? 'wie überall' : 'wie überall ($inherited)',
+              inherited == null
+                  ? context.l10n.taskCountSameEverywhere
+                  : context.l10n.taskCountSameEverywhereWith(inherited!),
               style: const TextStyle(fontSize: 20),
             ),
             padding:
@@ -74,12 +77,8 @@ class TaskCountExplanation extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Text(
         forProfile
-            ? 'Es gilt jeweils das Genaueste: eine offene Aufgabe zuerst, '
-                'sonst was zuletzt bei einer Lektion gewählt wurde, sonst '
-                'diese hier, sonst die Vorgabe für alle.'
-            : 'Es gilt jeweils das Genaueste: eine offene Aufgabe zuerst, '
-                'sonst was zuletzt bei einer Lektion gewählt wurde, sonst '
-                'die Vorgabe des Profils, sonst diese hier.',
+            ? context.l10n.taskCountExplanationProfile
+            : context.l10n.taskCountExplanationGlobal,
         style: const TextStyle(fontSize: 17, color: AppColors.textMuted),
       );
 }

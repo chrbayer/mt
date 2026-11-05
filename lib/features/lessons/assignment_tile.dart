@@ -8,6 +8,7 @@ import '../../theme/app_theme.dart';
 import '../common/star_row.dart';
 import 'lesson_example.dart';
 import 'start_lesson_sheet.dart';
+import '../../l10n/l10n.dart';
 
 /// A card for one lesson of one open assignment - the same catalogue tile as
 /// [LessonHomeScreen]'s `_LessonTile`, right down to the grid, the radius,
@@ -124,9 +125,9 @@ class _AssignmentFooter extends StatelessWidget {
     // the tick is the reward, and a card that vanished would not be one. So
     // this is the only thing the footer says from then on.
     if (progress.met) {
-      return const Text(
-        'geschafft',
-        style: TextStyle(fontSize: 17, color: AppColors.textMuted),
+      return Text(
+        context.l10n.assignmentTileDone,
+        style: const TextStyle(fontSize: 17, color: AppColors.textMuted),
       );
     }
 

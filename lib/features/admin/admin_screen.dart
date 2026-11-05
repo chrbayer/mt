@@ -19,6 +19,7 @@ import 'global_settings_tab.dart';
 import 'pin_gate.dart';
 import 'profile_settings_screen.dart';
 import 'today_summary.dart';
+import '../../l10n/l10n.dart';
 
 /// The parent area behind the PIN: what was practised when and how well, plus
 /// the operations a child should not be able to trigger - renaming, deleting
@@ -52,14 +53,15 @@ class AdminScreen extends ConsumerWidget {
         length: 4,
         child: Scaffold(
           appBar: AppBar(
-            title: const Text('Elternbereich'),
-            bottom: const TabBar(
-              labelStyle: TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
+            title: Text(context.l10n.adminTitle),
+            bottom: TabBar(
+              labelStyle:
+                  const TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
               tabs: [
-                Tab(height: 58, text: 'Übungsverlauf'),
-                Tab(height: 58, text: 'Verwaltung'),
-                Tab(height: 58, text: 'Aufgaben'),
-                Tab(height: 58, text: 'Einstellungen'),
+                Tab(height: 58, text: context.l10n.adminTabHistory),
+                Tab(height: 58, text: context.l10n.adminTabManagement),
+                Tab(height: 58, text: context.l10n.adminTabAssignments),
+                Tab(height: 58, text: context.l10n.adminTabSettings),
               ],
             ),
           ),
@@ -141,7 +143,8 @@ class _HistoryTabState extends ConsumerState<_HistoryTab> {
             runSpacing: 8,
             children: [
               ChoiceChip(
-                label: const Text('Alle', style: TextStyle(fontSize: 19)),
+                label: Text(context.l10n.adminFilterAll,
+                    style: const TextStyle(fontSize: 19)),
                 padding: const EdgeInsets.symmetric(
                     horizontal: 14, vertical: 10),
                 selected: _filter == null,
@@ -189,8 +192,8 @@ class _HistoryTabState extends ConsumerState<_HistoryTab> {
                   size: 20,
                   color: AppColors.textMuted,
                 ),
-                label:
-                    const Text('Gelöschte', style: TextStyle(fontSize: 19)),
+                label: Text(context.l10n.adminShowDeleted,
+                    style: const TextStyle(fontSize: 19)),
                 padding: const EdgeInsets.symmetric(
                     horizontal: 14, vertical: 10),
                 selected: _showDeleted,
@@ -203,9 +206,8 @@ class _HistoryTabState extends ConsumerState<_HistoryTab> {
           Padding(
             padding: const EdgeInsets.fromLTRB(32, 0, 32, 8),
             child: Text(
-              'Es werden die letzten $historyLimit Durchgänge angezeigt. '
-              'Ein kürzerer Zeitraum zeigt den Rest.',
-              style: TextStyle(fontSize: 16, color: AppColors.textMuted),
+              context.l10n.adminHistoryTruncated(historyLimit),
+              style: const TextStyle(fontSize: 16, color: AppColors.textMuted),
             ),
           ),
         // Only ever what the filter above shows. Tidying up the list one is
@@ -224,9 +226,9 @@ class _HistoryTabState extends ConsumerState<_HistoryTab> {
                 // the label.
                 label: Text(
                   _filter == null
-                      ? 'Abgebrochene Durchgänge aufräumen ($abandoned)'
-                      : 'Abgebrochene von ${_filterName(users)} aufräumen '
-                          '($abandoned)',
+                      ? context.l10n.adminCleanupAll(abandoned)
+                      : context.l10n
+                          .adminCleanupOne(_filterName(users), abandoned),
                   style: const TextStyle(fontSize: 18),
                 ),
                 onPressed: () => _confirmCleanup(abandoned, users),
@@ -238,11 +240,11 @@ class _HistoryTabState extends ConsumerState<_HistoryTab> {
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (error, _) => LoadFailure(detail: error),
             data: (entries) => entries.isEmpty
-                ? const Center(
+                ? Center(
                     child: Text(
-                      'Noch keine Durchgänge.',
-                      style:
-                          TextStyle(fontSize: 22, color: AppColors.textMuted),
+                      context.l10n.adminHistoryEmpty,
+                      style: const TextStyle(
+                          fontSize: 22, color: AppColors.textMuted),
                     ),
                   )
                 : ListView.separated(
@@ -264,32 +266,35 @@ class _HistoryTabState extends ConsumerState<_HistoryTab> {
   }
 
   Future<void> _confirmDelete(HistoryEntry entry) async {
+    final l10n = context.l10n;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Diesen Durchgang löschen?'),
+        title: Text(l10n.adminDeleteRunTitle),
         content: Text(
-          '${entry.userName} · '
-          '${lessonByIdOrNull(entry.lessonId)?.title ?? entry.lessonId} · '
-          '${formatDayAndTime(entry.playedAt)}',
+          l10n.adminDeleteRunText(
+            entry.userName,
+            lessonByIdOrNull(entry.lessonId)?.title ?? entry.lessonId,
+            formatDayAndTime(entry.playedAt),
+          ),
           style: const TextStyle(fontSize: 20),
         ),
         actions: [
           OutlinedButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('Abbrechen'),
+            child: Text(l10n.commonCancel),
           ),
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: AppColors.wrong),
             onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: const Text('Löschen'),
+            child: Text(l10n.commonDelete),
           ),
         ],
       ),
     );
     if (confirmed ?? false) {
       await ref.read(statsRepositoryProvider).deleteSession(entry.sessionId);
-      _offerUndo('Durchgang gelöscht.', [entry.sessionId]);
+      _offerUndo(l10n.adminRunDeleted, [entry.sessionId]);
     }
   }
 
@@ -298,6 +303,7 @@ class _HistoryTabState extends ConsumerState<_HistoryTab> {
   /// went was somebody's afternoon.
   void _offerUndo(String what, List<int> ids) {
     if (!mounted || ids.isEmpty) return;
+    final l10n = context.l10n;
     final messenger = ScaffoldMessenger.of(context)..hideCurrentSnackBar();
     final undo = messenger.showSnackBar(
       SnackBar(
@@ -307,7 +313,7 @@ class _HistoryTabState extends ConsumerState<_HistoryTab> {
         // unless told otherwise - the eight seconds above did nothing.
         persist: false,
         action: SnackBarAction(
-          label: 'Rückgängig',
+          label: l10n.adminUndo,
           onPressed: () =>
               ref.read(statsRepositoryProvider).restoreSessions(ids),
         ),
@@ -321,36 +327,33 @@ class _HistoryTabState extends ConsumerState<_HistoryTab> {
   }
 
   String _filterName(List<User> users) =>
-      users.where((u) => u.id == _filter).firstOrNull?.name ?? 'diesem Kind';
+      users.where((u) => u.id == _filter).firstOrNull?.name ??
+      context.l10n.adminThisChild;
 
   Future<void> _confirmCleanup(int count, List<User> users) async {
     // Says exactly what is about to go: whose runs, and from which stretch
     // of time. The list is filtered two ways now, and a question that named
     // neither would be asking about something else than the button removes.
-    final whose =
-        _filter == null ? 'von allen Kindern' : 'von ${_filterName(users)}';
+    final l10n = context.l10n;
+    final whose = _filter == null
+        ? l10n.adminWhoAll
+        : l10n.adminWhoOne(_filterName(users));
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: Text(
-          count == 1
-              ? 'Einen abgebrochenen Durchgang aufräumen?'
-              : '$count abgebrochene Durchgänge aufräumen?',
-        ),
+        title: Text(l10n.adminCleanupTitle(count)),
         content: Text(
-          'Es verschwinden die abgebrochenen Durchgänge $whose '
-          '${historyRangePhrase(_range)}. Sie zählten nie für Sterne, Blitze '
-          'oder eine Bestenliste - die geübte Zeit bleibt gezählt.',
+          l10n.adminCleanupText(whose, historyRangePhrase(_range)),
           style: const TextStyle(fontSize: 20),
         ),
         actions: [
           OutlinedButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('Abbrechen'),
+            child: Text(l10n.commonCancel),
           ),
           FilledButton(
             onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: const Text('Aufräumen'),
+            child: Text(l10n.adminCleanupConfirm),
           ),
         ],
       ),
@@ -363,9 +366,7 @@ class _HistoryTabState extends ConsumerState<_HistoryTab> {
                 sinceMs: historySince(_range, ref.read(clockProvider)()),
               );
       _offerUndo(
-        removed.length == 1
-            ? 'Ein abgebrochener Durchgang aufgeräumt.'
-            : '${removed.length} abgebrochene Durchgänge aufgeräumt.',
+l10n.adminCleanedUp(removed.length),
         removed,
       );
     }
@@ -430,16 +431,17 @@ class _HistoryRow extends StatelessWidget {
             child: Text(
               lesson == null
                   ? entry.lessonId
-                  : '${lesson.title}  ·  ${groupTitle(lesson.group)}',
+                  : context.l10n.adminHistoryLessonLine(
+                      lesson.title, groupTitle(lesson.group)),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(fontSize: 19),
             ),
           ),
           if (entry.completed) ...[
-            _Cell('${entry.taskCount}', 'Aufgaben'),
-            _Cell(formatPerTask(entry.msPerTask), 'pro Aufgabe'),
-            _Cell('${entry.wrongAttempts}', 'Fehler'),
+            _Cell('${entry.taskCount}', context.l10n.commonTasks),
+            _Cell(formatPerTask(entry.msPerTask), context.l10n.commonPerTask),
+            _Cell('${entry.wrongAttempts}', context.l10n.commonErrors),
             Padding(
               padding: const EdgeInsets.only(left: 12),
               child: StarRow(
@@ -452,8 +454,7 @@ class _HistoryRow extends StatelessWidget {
             SizedBox(
               width: 330,
               child: Text(
-                'abgebrochen nach ${entry.taskCount} '
-                '${entry.taskCount == 1 ? 'Aufgabe' : 'Aufgaben'}',
+context.l10n.adminAbortedAfter(entry.taskCount),
                 textAlign: TextAlign.right,
                 style: const TextStyle(
                   fontSize: 18,
@@ -464,14 +465,14 @@ class _HistoryRow extends StatelessWidget {
             ),
           if (entry.deleted)
             IconButton(
-              tooltip: 'Wiederherstellen',
+              tooltip: context.l10n.adminRestore,
               icon: const Icon(Icons.restore_from_trash_outlined,
                   color: AppColors.correct),
               onPressed: onRestore,
             )
           else
             IconButton(
-              tooltip: 'Durchgang löschen',
+              tooltip: context.l10n.adminDeleteRun,
               icon:
                   const Icon(Icons.delete_outline, color: AppColors.textMuted),
               onPressed: onDelete,
@@ -523,21 +524,19 @@ class _ManagementTab extends ConsumerWidget {
       children: [
         Row(
           children: [
-            Text('Profile', style: Theme.of(context).textTheme.headlineMedium),
+            Text(context.l10n.adminProfiles, style: Theme.of(context).textTheme.headlineMedium),
             const Spacer(),
             FilledButton.icon(
               icon: const Icon(Icons.person_add_alt, size: 28),
-              label: const Text('Neues Profil'),
+              label: Text(context.l10n.adminNewProfile),
               onPressed: () => ProfileEditorDialog.show(context),
             ),
           ],
         ),
         const SizedBox(height: 4),
-        const Text(
-          'Ein Tipp auf ein Kind öffnet alles, was zu ihm gehört: Bereiche, '
-          'Zeiten, Sperre, Umbenennen und Löschen. Bild und Farbe darf jedes '
-          'Kind selbst auf dem Startbildschirm ändern.',
-          style: TextStyle(fontSize: 17, color: AppColors.textMuted),
+        Text(
+          context.l10n.adminProfilesNote,
+          style: const TextStyle(fontSize: 17, color: AppColors.textMuted),
         ),
         const SizedBox(height: 14),
         for (final user in users)
@@ -551,18 +550,16 @@ class _ManagementTab extends ConsumerWidget {
         const Divider(height: 48),
         const BackupActions(),
         const Divider(height: 48),
-        Text('PIN', style: Theme.of(context).textTheme.headlineMedium),
+        Text(context.l10n.adminPinHeading, style: Theme.of(context).textTheme.headlineMedium),
         const SizedBox(height: 4),
-        const Text(
-          'Schützt diesen Bereich. Vergessen? Dann hilft nur, die App-Daten '
-          'in den Android-Einstellungen zu löschen - damit sind aber auch '
-          'alle Ergebnisse weg.',
-          style: TextStyle(fontSize: 17, color: AppColors.textMuted),
+        Text(
+          context.l10n.adminPinNote,
+          style: const TextStyle(fontSize: 17, color: AppColors.textMuted),
         ),
         const SizedBox(height: 14),
         OutlinedButton.icon(
           icon: const Icon(Icons.password, size: 26),
-          label: const Text('PIN ändern'),
+          label: Text(context.l10n.adminChangePin),
           onPressed: () => changeAdminPin(context),
         ),
       ],
@@ -630,7 +627,7 @@ class _ManagementRow extends StatelessWidget {
                         ],
                       ),
                       Text(
-                        _summary(user),
+                        _summary(context.l10n, user),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
@@ -653,16 +650,16 @@ class _ManagementRow extends StatelessWidget {
 
   /// What this child is offered, at a glance. Short on purpose: the full list
   /// of group names ran off the end of the row and told nobody anything.
-  static String _summary(User user) {
+  static String _summary(AppLocalizations l10n, User user) {
     final groups = switch (user.visibleGroups.length) {
-      0 => 'Kein Bereich freigeschaltet',
-      final n when n == LessonGroup.values.length => 'Alle Bereiche',
-      final n => '$n von ${LessonGroup.values.length} Bereichen',
+      0 => l10n.adminGroupsNone,
+      final n when n == LessonGroup.values.length => l10n.adminGroupsAll,
+      final n => l10n.adminGroupsSome(n, LessonGroup.values.length),
     };
     return [
-      if (user.locked) 'Gesperrt',
+      if (user.locked) l10n.adminLocked,
       groups,
-      if (!user.reviewHardTasks) 'ohne Wiederholung',
+      if (!user.reviewHardTasks) l10n.adminNoReview,
     ].join(' · ');
   }
 }

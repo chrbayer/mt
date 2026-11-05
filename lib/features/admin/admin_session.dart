@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import '../../l10n/l10n.dart';
 
 /// How long the parent area stays open without a touch before it closes
 /// itself. See "Der Elternbereich schließt sich selbst" in CLAUDE.md for why
@@ -118,7 +119,7 @@ class AdminSession with WidgetsBindingObserver {
     // Only on expiry, never on an ordinary exit - a parent who closed it
     // themselves does not need telling why the profile screen is back.
     ScaffoldMessenger.maybeOf(navigator.context)?.showSnackBar(
-      const SnackBar(content: Text('Elternbereich geschlossen.')),
+      SnackBar(content: Text(navigator.context.l10n.adminSessionClosed)),
     );
   }
 

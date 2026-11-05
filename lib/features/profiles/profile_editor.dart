@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/db/app_database.dart';
 import '../../providers.dart';
 import '../../theme/app_theme.dart';
+import '../../l10n/l10n.dart';
 
 enum _Step { name, look }
 
@@ -115,7 +116,7 @@ class _ProfileEditorDialogState extends ConsumerState<ProfileEditorDialog> {
     final compact = free < 280;
 
     final closeButton = IconButton(
-      tooltip: 'Abbrechen',
+      tooltip: context.l10n.commonCancel,
       iconSize: 30,
       icon: const Icon(Icons.close),
       onPressed: () => Navigator.of(context).pop(),
@@ -130,7 +131,9 @@ class _ProfileEditorDialogState extends ConsumerState<ProfileEditorDialog> {
             children: [
               Expanded(
                 child: Text(
-                  widget.user == null ? 'Neues Profil' : 'Name ändern',
+                  widget.user == null
+                      ? context.l10n.profileEditorNew
+                      : context.l10n.profileEditorChangeName,
                   style: Theme.of(context).textTheme.headlineMedium,
                 ),
               ),
@@ -150,13 +153,15 @@ class _ProfileEditorDialogState extends ConsumerState<ProfileEditorDialog> {
                 maxLength: 20,
                 style: const TextStyle(fontSize: 30),
                 decoration: InputDecoration(
-                  labelText: 'Name',
+                  labelText: context.l10n.profileEditorNameLabel,
                   border: const OutlineInputBorder(),
                   // The character counter costs a line the keyboard has
                   // already taken.
                   counterText: '',
                   hintText: compact
-                      ? (widget.user == null ? 'Neues Profil' : null)
+                      ? (widget.user == null
+                          ? context.l10n.profileEditorNew
+                          : null)
                       : null,
                 ),
                 // The keyboard's own key works too, so the button never has
@@ -168,7 +173,7 @@ class _ProfileEditorDialogState extends ConsumerState<ProfileEditorDialog> {
             const SizedBox(width: 12),
             FilledButton.icon(
               icon: const Icon(Icons.arrow_forward, size: 28),
-              label: const Text('Weiter'),
+              label: Text(context.l10n.profileEditorNext),
               onPressed: _name.text.trim().isEmpty ? null : _toLook,
             ),
             if (compact) closeButton,
@@ -190,7 +195,7 @@ class _ProfileEditorDialogState extends ConsumerState<ProfileEditorDialog> {
             Flexible(
               child: Text(
                 _name.text.trim().isEmpty
-                    ? 'Bild und Farbe'
+                    ? context.l10n.profileEditorLookTitle
                     : _name.text.trim(),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -203,7 +208,7 @@ class _ProfileEditorDialogState extends ConsumerState<ProfileEditorDialog> {
           ],
         ),
         const SizedBox(height: 16),
-        Text('Bild', style: Theme.of(context).textTheme.titleLarge),
+        Text(context.l10n.profileEditorPicture, style: Theme.of(context).textTheme.titleLarge),
         const SizedBox(height: 12),
         Wrap(
           spacing: 10,
@@ -218,7 +223,7 @@ class _ProfileEditorDialogState extends ConsumerState<ProfileEditorDialog> {
           ],
         ),
         const SizedBox(height: 24),
-        Text('Farbe', style: Theme.of(context).textTheme.titleLarge),
+        Text(context.l10n.profileEditorColor, style: Theme.of(context).textTheme.titleLarge),
         const SizedBox(height: 12),
         Wrap(
           spacing: 10,
@@ -246,18 +251,18 @@ class _ProfileEditorDialogState extends ConsumerState<ProfileEditorDialog> {
             if (widget.allowRename)
               TextButton.icon(
                 icon: const Icon(Icons.arrow_back, size: 26),
-                label: const Text('Name ändern'),
+                label: Text(context.l10n.profileEditorChangeName),
                 onPressed: () => setState(() => _step = _Step.name),
               )
             else
               OutlinedButton(
                 onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Abbrechen'),
+                child: Text(context.l10n.commonCancel),
               ),
             const SizedBox(width: 16),
             FilledButton(
               onPressed: _save,
-              child: const Text('Speichern'),
+              child: Text(context.l10n.profileEditorSave),
             ),
           ],
         ),

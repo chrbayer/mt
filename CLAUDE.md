@@ -5,6 +5,17 @@
 Oberfläche und Dokumentation auf Deutsch, Code-Bezeichner und Kommentare auf
 Englisch.
 
+Die Texte der Oberfläche stehen in `lib/l10n/app_de.arb` (Vorlage für
+`flutter gen-l10n`, Konfiguration in `l10n.yaml`, erzeugter Code ebenfalls in
+`lib/l10n/`) und werden im Widget über `context.l10n` geholt. **Neue Texte
+dort anlegen, keine Strings in Widgets** — Mehrzahl über ICU `plural`,
+Platzhalter mit Typangabe. Wo außerhalb eines Widgets Text gebraucht wird
+(Dialog-Helfer, Zustandsobjekte), kommt er an der Aufrufstelle aus dem
+Kontext und wird hineingereicht. Tests übergeben ihren `MaterialApp` die
+Konstanten aus `test/support/l10n.dart`. Was aus `lib/domain/` kommt
+(Lektionstitel, Aufgabenfragen, Zeit- und Geldformate), ist noch nicht
+ausgelagert; das folgt in einer eigenen Phase.
+
 ## Schichten
 
 `lib/domain/` darf **keinen** Flutter-Import enthalten. Dort liegt die

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../../data/repositories/stats_repository.dart';
 import '../../domain/scoring.dart';
 import '../../theme/app_theme.dart';
+import '../../l10n/l10n.dart';
 
 /// The learning curve: average seconds per task over the last runs of one
 /// lesson. Downwards means faster, which is the whole point of the app.
@@ -15,11 +16,11 @@ class ProgressChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (points.length < 2) {
-      return const Center(
+      return Center(
         child: Text(
-          'Ab dem zweiten Durchgang siehst du hier deine Lernkurve.',
+          context.l10n.progressChartEmpty,
           textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 20, color: AppColors.textMuted),
+          style: const TextStyle(fontSize: 20, color: AppColors.textMuted),
         ),
       );
     }

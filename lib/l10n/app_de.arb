@@ -1,0 +1,998 @@
+{
+  "@@locale": "de",
+  "appTitle": "Mathe-Trainer",
+  "commonCancel": "Abbrechen",
+  "commonDelete": "Löschen",
+  "commonMinutesShort": "{n} min",
+  "@commonMinutesShort": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "versionLabel": "Version {version}",
+  "@versionLabel": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "loadFailureMessage": "Das konnte gerade nicht geladen werden.",
+  "settingsTitle": "Einstellungen",
+  "settingsTaskCountHeading": "Aufgaben pro Durchgang",
+  "settingsParentAreaNote": "Uhr und Vibration, die Vorgabe für alle, Ergebnisse löschen, Profile verwalten und den Übungsverlauf ansehen: das steht im Elternbereich auf dem Startbildschirm, geschützt durch die PIN.",
+  "amountNoLimit": "ohne Grenze",
+  "amountSameAsAll": "wie für alle",
+  "amountSameAsAllWith": "wie für alle ({value})",
+  "@amountSameAsAllWith": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "taskCountSameEverywhere": "wie überall",
+  "taskCountSameEverywhereWith": "wie überall ({count})",
+  "@taskCountSameEverywhereWith": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "taskCountExplanationProfile": "Es gilt jeweils das Genaueste: eine offene Aufgabe zuerst, sonst was zuletzt bei einer Lektion gewählt wurde, sonst diese hier, sonst die Vorgabe für alle.",
+  "taskCountExplanationGlobal": "Es gilt jeweils das Genaueste: eine offene Aufgabe zuerst, sonst was zuletzt bei einer Lektion gewählt wurde, sonst die Vorgabe des Profils, sonst diese hier.",
+  "soundTestRunning": "Spielt …",
+  "soundTestButton": "Ton testen (10 Klicks)",
+  "soundTestAllPlayed": "{played} von {expected} Klicks haben gespielt. War nichts zu hören, liegt es an der Lautstärke des Geräts.",
+  "@soundTestAllPlayed": {
+    "placeholders": {
+      "played": {
+        "type": "int"
+      },
+      "expected": {
+        "type": "int"
+      }
+    }
+  },
+  "soundTestSomePlayed": "Nur {played} von {expected} Klicks haben gespielt - der Ton bricht auf diesem Gerät ab.",
+  "@soundTestSomePlayed": {
+    "placeholders": {
+      "played": {
+        "type": "int"
+      },
+      "expected": {
+        "type": "int"
+      }
+    }
+  },
+  "soundTestUnavailable": "Der Ton ist auf diesem Gerät nicht verfügbar:\n{error}",
+  "@soundTestUnavailable": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "recommendShaky": "Da war es zuletzt wackelig",
+  "recommendFresh": "Das hast du noch nie geübt",
+  "recommendStale": "Lange nicht mehr geübt",
+  "pauseDayDoneTitle": "Für heute reicht es!",
+  "pauseDayDoneText": "Du hast heute {minutes} Minuten gerechnet. Morgen geht es weiter.",
+  "@pauseDayDoneText": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "pauseBreakTitle": "Pause!",
+  "pauseBreakText": "Du hast {minutes} Minuten am Stück geübt. Weiter geht es um {clock} - {left}.",
+  "@pauseBreakText": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      },
+      "clock": {
+        "type": "String"
+      },
+      "left": {
+        "type": "String"
+      }
+    }
+  },
+  "pauseClock": "{time} Uhr",
+  "@pauseClock": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "runHintTooShort": "Zählt nicht: keine Sterne, keine Blitze, keine Bestenliste.",
+  "runHintUsedUpToday": "Heute schon {count}× gewertet - üben geht weiter, zählen nicht mehr.",
+  "@runHintUsedUpToday": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "runHintRemaining": "{minutes, plural, =0{Gleich ist Pause.} =1{Noch eine Minute, dann ist Pause.} other{Noch {minutes} Minuten, dann ist Pause.}}",
+  "@runHintRemaining": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "assignmentGoalDone": "Aufgabe geschafft!",
+  "assignmentGoalCounts": "Zählt für deine Aufgabe: {done} von {runs}",
+  "@assignmentGoalCounts": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "runs": {
+        "type": "int"
+      }
+    }
+  },
+  "assignmentGoalNotEnough": "Das reicht für deine Aufgabe noch nicht:",
+  "assignmentTileDone": "geschafft",
+  "todayHeading": "Heute geübt",
+  "todayNothingYet": "noch nichts",
+  "todayNothingOfLimit": "noch nichts von {limit} min",
+  "@todayNothingOfLimit": {
+    "placeholders": {
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "todayTimeOfLimit": "{time} von {limit} min",
+  "@todayTimeOfLimit": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      },
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "progressChartEmpty": "Ab dem zweiten Durchgang siehst du hier deine Lernkurve.",
+  "starRowEarnedOf": "{earned} von {possible}",
+  "@starRowEarnedOf": {
+    "placeholders": {
+      "earned": {
+        "type": "int"
+      },
+      "possible": {
+        "type": "int"
+      }
+    }
+  },
+  "adminSessionClosed": "Elternbereich geschlossen.",
+  "taskClock24Question": "Wie spät ist es? Sage es mit 24 Stunden.",
+  "backupShareSubject": "Mathe-Trainer Sicherung",
+  "backupExportFailed": "Sicherung fehlgeschlagen: {error}",
+  "@backupExportFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "backupImportConfirmTitle": "Sicherung einspielen?",
+  "backupImportConfirmText": "Alle Profile und Ergebnisse auf diesem Gerät werden durch die Sicherung ersetzt. Was jetzt hier steht, ist danach weg.",
+  "backupReplace": "Ersetzen",
+  "backupFileTypeLabel": "Sicherung",
+  "backupImported": "{users} Profile und {sessions} Durchgänge eingespielt.",
+  "@backupImported": {
+    "placeholders": {
+      "users": {
+        "type": "int"
+      },
+      "sessions": {
+        "type": "int"
+      }
+    }
+  },
+  "backupImportFailed": "Einspielen fehlgeschlagen: {error}",
+  "@backupImportFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "backupHeading": "Daten",
+  "backupIntro": "Alle Profile, Ergebnisse und Einstellungen als Datei. Bewahre sie außerhalb des Tablets auf - ein zurückgesetztes Gerät nimmt sonst alles mit.",
+  "backupCreate": "Sicherung erstellen",
+  "backupRestore": "Sicherung einspielen",
+  "backupNever": "Noch nie gesichert.",
+  "backupLast": "Zuletzt gesichert: {when}.",
+  "@backupLast": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "backupLastOverdue": "Zuletzt gesichert: {when}. Das ist eine Weile her.",
+  "@backupLastOverdue": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "pinTitleVerify": "Elternbereich",
+  "pinTitleSetup": "Elternbereich einrichten",
+  "pinHintEnter": "PIN eingeben",
+  "pinHintChoose": "Wähle eine PIN aus {length} Ziffern",
+  "@pinHintChoose": {
+    "placeholders": {
+      "length": {
+        "type": "int"
+      }
+    }
+  },
+  "pinHintRepeat": "PIN wiederholen",
+  "pinWrong": "Falsche PIN.",
+  "pinMismatch": "Die beiden Eingaben waren verschieden.",
+  "startWhatDoesItMean": "Was heißt das?",
+  "startExample": "Zum Beispiel:  {example}",
+  "@startExample": {
+    "placeholders": {
+      "example": {
+        "type": "String"
+      }
+    }
+  },
+  "startAssignmentGoal": "Für deine Aufgabe: {count} Rechnungen",
+  "@startAssignmentGoal": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "startHowMany": "Wie viele Aufgaben?",
+  "startBoltsFrom": "ab {time} pro Aufgabe",
+  "@startBoltsFrom": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "startGo": "Los geht's",
+  "startLeaderboard": "Bestenliste",
+  "commonPerTask": "pro Aufgabe",
+  "commonErrors": "Fehler",
+  "commonTasks": "Aufgaben",
+  "leaderboardTitle": "Bestenliste · {lesson}",
+  "@leaderboardTitle": {
+    "placeholders": {
+      "lesson": {
+        "type": "String"
+      }
+    }
+  },
+  "leaderboardEmpty": "Noch keine Ergebnisse.\nMindestens {min} Aufgaben zählen für die Bestenliste.",
+  "@leaderboardEmpty": {
+    "placeholders": {
+      "min": {
+        "type": "int"
+      }
+    }
+  },
+  "leaderboardScoreExplanation": "Gewertet wird die Zeit pro Aufgabe, plus 3 Sekunden für jeden Fehlversuch. Deshalb lohnt sich Raten nicht, und Durchgänge mit unterschiedlich vielen Aufgaben bleiben vergleichbar.",
+  "statsTitle": "Statistik · {name}",
+  "@statsTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "statsEmpty": "Noch keine abgeschlossenen Durchgänge.",
+  "statsLearningCurve": "Lernkurve · {lesson}",
+  "@statsLearningCurve": {
+    "placeholders": {
+      "lesson": {
+        "type": "String"
+      }
+    }
+  },
+  "statsLearningCurveSub": "Sekunden pro Aufgabe, Durchgang für Durchgang",
+  "statsHardest": "Diese Aufgaben dauern am längsten",
+  "statsHeadStars": "Sterne",
+  "statsHeadBest": "Bestzeit",
+  "statsHeadAverage": "Ø Zeit",
+  "statsHeadRuns": "Runden",
+  "statsTooFewData": "Noch zu wenige Daten.",
+  "globalStatsTitle": "Alle Ergebnisse",
+  "globalStatsTabOverview": "Übersicht",
+  "globalStatsTabLeaderboards": "Bestenlisten",
+  "globalStatsNoProfiles": "Noch keine Profile.",
+  "globalStatsActivityHeading": "Geübt in den letzten {days} Tagen",
+  "@globalStatsActivityHeading": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "globalStatsActivitySub": "Minuten pro Tag, je Kind in seiner Farbe",
+  "globalStatsNoLeaderboards": "Noch keine Bestenlisten.\nEin Durchgang zählt ab {min} Aufgaben.",
+  "@globalStatsNoLeaderboards": {
+    "placeholders": {
+      "min": {
+        "type": "int"
+      }
+    }
+  },
+  "globalStatsNotPlayed": "Noch nicht geübt.",
+  "globalStatsRounds": "{n, plural, =1{Runde} other{Runden}}",
+  "@globalStatsRounds": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "globalStatsPractised": "geübt",
+  "globalStatsStreak": "{days} Tage in Folge",
+  "@globalStatsStreak": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "globalStatsLastPlayed": "zuletzt {when}",
+  "@globalStatsLastPlayed": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "globalStatsNoActivity": "In den letzten Wochen wurde noch nicht geübt.",
+  "profilesTitle": "Wer rechnet?",
+  "profilesAllResults": "Alle Ergebnisse",
+  "profilesDuel": "Duell",
+  "profilesParents": "Eltern",
+  "profilesNone": "Noch kein Profil. Tippe auf „Neu\", um anzufangen.",
+  "profilesLockedTitle": "{name} macht gerade Pause",
+  "@profilesLockedTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "profilesLockedText": "Dieses Profil ist vorübergehend gesperrt. Alle Sterne, Blitze und Bestzeiten bleiben erhalten - sie sind wieder da, sobald die Eltern es freigeben.",
+  "profilesLockedOk": "Alles klar",
+  "profilesAllDone": "alles geschafft",
+  "profilesTodo": "{count, plural, =1{1 Aufgabe} other{{count} Aufgaben}}",
+  "@profilesTodo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "profilesEditLook": "Bild und Farbe ändern",
+  "profilesNew": "Neu",
+  "profileEditorNew": "Neues Profil",
+  "profileEditorChangeName": "Name ändern",
+  "profileEditorNameLabel": "Name",
+  "profileEditorNext": "Weiter",
+  "profileEditorLookTitle": "Bild und Farbe",
+  "profileEditorPicture": "Bild",
+  "profileEditorColor": "Farbe",
+  "profileEditorSave": "Speichern",
+  "duelTitle": "Duell",
+  "duelNeedTwoProfiles": "Für ein Duell braucht es mindestens zwei Profile.",
+  "duelWhoPlays": "Wer tritt an?",
+  "duelPlayerLocked": "{avatar}  {name} · gesperrt",
+  "@duelPlayerLocked": {
+    "placeholders": {
+      "avatar": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "duelPlayerOnBreak": "{avatar}  {name} · Pause",
+  "@duelPlayerOnBreak": {
+    "placeholders": {
+      "avatar": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "duelPlayer": "{avatar}  {name}",
+  "@duelPlayer": {
+    "placeholders": {
+      "avatar": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "duelWhichTasks": "Welche Aufgaben?",
+  "duelPickTwo": "Wähle mindestens zwei Kinder aus.",
+  "duelLessonChip": "{title}  ·  {example}",
+  "@duelLessonChip": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "example": {
+        "type": "String"
+      }
+    }
+  },
+  "duelStart": "Duell starten",
+  "duelPosition": "{position} von {total}",
+  "@duelPosition": {
+    "placeholders": {
+      "position": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "duelYourTurn": "{name} ist dran",
+  "@duelYourTurn": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "duelLessonAndGroup": "{lesson} · {group}",
+  "@duelLessonAndGroup": {
+    "placeholders": {
+      "lesson": {
+        "type": "String"
+      },
+      "group": {
+        "type": "String"
+      }
+    }
+  },
+  "duelReady": "Bereit",
+  "duelAbort": "Duell abbrechen",
+  "duelResultTitle": "Duell · {lesson}",
+  "@duelResultTitle": {
+    "placeholders": {
+      "lesson": {
+        "type": "String"
+      }
+    }
+  },
+  "duelSameTasks": "Alle hatten dieselben Aufgaben.",
+  "duelDone": "Fertig",
+  "duelWin": "Sieg!",
+  "commonBackToLessons": "Zurück zu den Lektionen",
+  "resultDone": "Geschafft!",
+  "resultDoneName": "Geschafft, {name}!",
+  "@resultDoneName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "resultNextBolt": "{n}. Blitz ab {time} pro Aufgabe",
+  "@resultNextBolt": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "resultForThisLesson": "für diese Lektion",
+  "resultInTotal": "insgesamt",
+  "resultMetricTasks": "Aufgaben",
+  "resultMetricTotalTime": "Gesamtzeit",
+  "resultMetricPerTask": "Pro Aufgabe",
+  "resultMetricErrors": "Fehler",
+  "resultPenalty": "Darin sind {penalty} Zeitstrafe für {count, plural, =1{1 Fehlversuch} other{{count} Fehlversuche}} enthalten - 3 Sekunden für jeden.",
+  "@resultPenalty": {
+    "placeholders": {
+      "penalty": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "resultStreak": "{days} Tage in Folge geübt!",
+  "@resultStreak": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "resultAgain": "Nochmal",
+  "resultLeaderboard": "Bestenliste",
+  "resultOtherLesson": "Andere Lektion",
+  "resultFirstRun": "Das war dein erster Durchgang hier -\ndie Zeit ist ab jetzt dein Rekord.",
+  "resultSameSpeed": "Genau so schnell wie beim letzten Mal.",
+  "resultFaster": "{delta} schneller pro Aufgabe als beim letzten Mal!",
+  "@resultFaster": {
+    "placeholders": {
+      "delta": {
+        "type": "String"
+      }
+    }
+  },
+  "resultSlower": "{delta} langsamer pro Aufgabe als beim letzten Mal.",
+  "@resultSlower": {
+    "placeholders": {
+      "delta": {
+        "type": "String"
+      }
+    }
+  },
+  "practiceAbortTitle": "Übung beenden?",
+  "practiceAbortText": "Dieser Durchgang zählt dann nicht für die Bestenliste.",
+  "practiceKeepGoing": "Weiter rechnen",
+  "practiceAbortConfirm": "Beenden",
+  "practiceAbortTooltip": "Übung beenden",
+  "practicePause": "Pause",
+  "practicePauseNote": "Die Zeit läuft nicht weiter.",
+  "practiceResume": "Weiter",
+  "lessonsFilterTooltip": "Fertiges ausblenden",
+  "lessonsHideDoneAssignments": "Erledigte Aufgaben ausblenden",
+  "lessonsStatsLabel": "Statistik",
+  "lessonsSettingsTooltip": "Einstellungen",
+  "lessonsSwitchLabel": "Wechseln",
+  "lessonsNoGroup": "Für dieses Profil ist noch kein Bereich freigeschaltet.\nDas lässt sich im Elternbereich ändern.",
+  "lessonsNothingLeftTitle": "Alles geschafft!",
+  "lessonsNothingLeftText": "Was du kannst, ist gerade ausgeblendet. Über den Filter oben kommt der ganze Katalog zurück.",
+  "lessonsRecommendGo": "Los",
+  "lessonsRecommendTitle": "{lesson} · {group}",
+  "@lessonsRecommendTitle": {
+    "placeholders": {
+      "lesson": {
+        "type": "String"
+      },
+      "group": {
+        "type": "String"
+      }
+    }
+  },
+  "lessonsAssignmentsHeading": "Deine Aufgaben",
+  "lessonsAssignmentsAllDone": "Alles erledigt! Die fertigen Aufgaben sind ausgeblendet.",
+  "lessonsNotPractised": "noch nicht geübt",
+  "lessonsPractisedTimes": "{count}× geübt",
+  "@lessonsPractisedTimes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "adminTitle": "Elternbereich",
+  "adminTabHistory": "Übungsverlauf",
+  "adminTabManagement": "Verwaltung",
+  "adminTabAssignments": "Aufgaben",
+  "adminTabSettings": "Einstellungen",
+  "adminFilterAll": "Alle",
+  "adminShowDeleted": "Gelöschte",
+  "adminHistoryTruncated": "Es werden die letzten {limit} Durchgänge angezeigt. Ein kürzerer Zeitraum zeigt den Rest.",
+  "@adminHistoryTruncated": {
+    "placeholders": {
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "adminCleanupAll": "Abgebrochene Durchgänge aufräumen ({count})",
+  "@adminCleanupAll": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "adminCleanupOne": "Abgebrochene von {name} aufräumen ({count})",
+  "@adminCleanupOne": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "adminHistoryEmpty": "Noch keine Durchgänge.",
+  "adminDeleteRunTitle": "Diesen Durchgang löschen?",
+  "adminDeleteRunText": "{user} · {lesson} · {when}",
+  "@adminDeleteRunText": {
+    "placeholders": {
+      "user": {
+        "type": "String"
+      },
+      "lesson": {
+        "type": "String"
+      },
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "adminRunDeleted": "Durchgang gelöscht.",
+  "adminUndo": "Rückgängig",
+  "adminThisChild": "diesem Kind",
+  "adminWhoAll": "von allen Kindern",
+  "adminWhoOne": "von {name}",
+  "@adminWhoOne": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "adminCleanupTitle": "{count, plural, =1{Einen abgebrochenen Durchgang aufräumen?} other{{count} abgebrochene Durchgänge aufräumen?}}",
+  "@adminCleanupTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "adminCleanupText": "Es verschwinden die abgebrochenen Durchgänge {whose} {range}. Sie zählten nie für Sterne, Blitze oder eine Bestenliste - die geübte Zeit bleibt gezählt.",
+  "@adminCleanupText": {
+    "placeholders": {
+      "whose": {
+        "type": "String"
+      },
+      "range": {
+        "type": "String"
+      }
+    }
+  },
+  "adminCleanupConfirm": "Aufräumen",
+  "adminCleanedUp": "{count, plural, =1{Ein abgebrochener Durchgang aufgeräumt.} other{{count} abgebrochene Durchgänge aufgeräumt.}}",
+  "@adminCleanedUp": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "adminHistoryLessonLine": "{lesson}  ·  {group}",
+  "@adminHistoryLessonLine": {
+    "placeholders": {
+      "lesson": {
+        "type": "String"
+      },
+      "group": {
+        "type": "String"
+      }
+    }
+  },
+  "adminAbortedAfter": "abgebrochen nach {count, plural, =1{1 Aufgabe} other{{count} Aufgaben}}",
+  "@adminAbortedAfter": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "adminRestore": "Wiederherstellen",
+  "adminDeleteRun": "Durchgang löschen",
+  "adminProfiles": "Profile",
+  "adminNewProfile": "Neues Profil",
+  "adminProfilesNote": "Ein Tipp auf ein Kind öffnet alles, was zu ihm gehört: Bereiche, Zeiten, Sperre, Umbenennen und Löschen. Bild und Farbe darf jedes Kind selbst auf dem Startbildschirm ändern.",
+  "adminPinHeading": "PIN",
+  "adminPinNote": "Schützt diesen Bereich. Vergessen? Dann hilft nur, die App-Daten in den Android-Einstellungen zu löschen - damit sind aber auch alle Ergebnisse weg.",
+  "adminChangePin": "PIN ändern",
+  "adminGroupsNone": "Kein Bereich freigeschaltet",
+  "adminGroupsAll": "Alle Bereiche",
+  "adminGroupsSome": "{n} von {total} Bereichen",
+  "@adminGroupsSome": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "adminLocked": "Gesperrt",
+  "adminNoReview": "ohne Wiederholung",
+  "profileSettingsDiscardTitle": "Änderungen verwerfen?",
+  "profileSettingsDiscardText": "Die Einstellungen für {name} wurden geändert, aber noch nicht gespeichert.",
+  "@profileSettingsDiscardText": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "profileSettingsDiscard": "Verwerfen",
+  "profileSettingsSave": "Speichern",
+  "profileSettingsSectionPractice": "Üben",
+  "profileSettingsGroups": "Bereiche",
+  "profileSettingsGroupsNote": "Abgeschaltete Bereiche erscheinen nicht mehr auf dem Übungsbildschirm. Bereits erzielte Ergebnisse bleiben erhalten.",
+  "profileSettingsNoGroup": "Ohne einen einzigen Bereich kann das Kind nicht üben.",
+  "profileSettingsHideDoneHeading": "Fertige Lektionen ausblenden",
+  "profileSettingsHideDoneNote": "Kürzt den Katalog um das, was schon sitzt. Das Kind kann es auf dem Übungsbildschirm selbst umstellen - hier steht es, damit man es einmal einrichten kann. Die strengere Stufe lässt die Ersten Schritte stehen: dort wird nicht auf Zeit gerechnet, also gibt es keine Blitze zu holen.",
+  "profileSettingsHideDoneAssignments": "Erledigte Aufgaben ausblenden",
+  "profileSettingsHideDoneAssignmentsNote": "Fertige Karten verschwinden schon vor Ende des Tages bzw. der Woche. Sonst bleiben sie abgehakt stehen.",
+  "profileSettingsTaskCount": "Aufgaben pro Durchgang",
+  "profileSettingsReview": "Schwere Aufgaben wiederholen",
+  "profileSettingsReviewNote": "Ein Viertel jedes Durchgangs besteht aus dem, was zuletzt lange gedauert hat oder falsch war.",
+  "profileSettingsSectionTime": "Zeit und Wertung",
+  "profileSettingsStretch": "Übungszeit am Stück",
+  "profileSettingsStretchNote": "Nach dieser Zeit gibt es eine Pause. Ein laufender Durchgang wird nie abgebrochen - erst der nächste Start ist gesperrt. Die Zeit zählt weiter, solange die Pause nicht vollständig eingehalten wurde.",
+  "profileSettingsBreakLength": "Wie lange dauert die Pause?",
+  "profileSettingsDaily": "Und pro Tag insgesamt",
+  "profileSettingsDailyNote": "Zählt alle Durchgänge des Tages zusammen, Pausen hin oder her. Ist die Zeit aufgebraucht, geht es erst am nächsten Tag weiter.",
+  "profileSettingsScoredRuns": "Gewertete Durchgänge je Übung und Tag",
+  "profileSettingsScoredRunsNote": "Danach darf dieselbe Übung weiter gemacht werden, sie bringt nur keine Bestzeit, keine Sterne und keine Blitze mehr. Geübte Zeit und Verlauf zählen weiter mit.",
+  "profileSettingsSectionTidy": "Aufräumen",
+  "profileSettingsTidyNote": "Diese Knöpfe wirken sofort - sie warten nicht auf \"Speichern\".",
+  "profileSettingsRename": "Umbenennen",
+  "profileSettingsGiveBackStars": "Sterne zurückgeben …",
+  "profileSettingsResetResults": "Ergebnisse löschen",
+  "profileSettingsDeleteProfile": "Profil löschen",
+  "profileSettingsResetTitle": "Ergebnisse von {name} löschen?",
+  "@profileSettingsResetTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "profileSettingsResetText": "Bestzeiten, Lernkurve und Verlauf gehen verloren. Das Profil selbst bleibt bestehen.",
+  "profileSettingsDeleteTitle": "{name} löschen?",
+  "@profileSettingsDeleteTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "profileSettingsDeleteText": "Profil und alle Ergebnisse werden entfernt.",
+  "profileSettingsGroupSummary": "{count} Lektionen · z. B. {example}",
+  "@profileSettingsGroupSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "example": {
+        "type": "String"
+      }
+    }
+  },
+  "profileSettingsLockTitle": "Profil vorübergehend sperren",
+  "profileSettingsLockNote": "Das Profil lässt sich dann nicht öffnen und nicht zum Duell einladen. Nichts geht verloren: Sterne, Blitze und Bestzeiten sind nach dem Freigeben unverändert da.",
+  "globalSettingsClock": "Uhr während der Übung zeigen",
+  "globalSettingsClockNote": "Die Zeit wird immer gemessen. Sichtbar macht sie manche Kinder aber nervös - deshalb ist sie standardmäßig aus.",
+  "globalSettingsHaptics": "Tasten vibrieren lassen",
+  "globalSettingsHapticsNote": "Kurzes Feedback bei jedem Tastendruck.",
+  "globalSettingsSounds": "Töne abspielen",
+  "globalSettingsSoundsNote": "Ein kurzer Klang bei richtig, ein anderer bei falsch und ein leiser Klick unter jeder Taste. Auf einem flach liegenden Tablet spürt man die Vibration kaum.",
+  "globalSettingsTaskCount": "Aufgaben pro Durchgang für alle",
+  "globalSettingsTaskCountNote": "Für ein einzelnes Kind steht die Vorgabe unter „Verwaltung\" bei seinem Profil - und das Kind selbst kann sie in seinen eigenen Einstellungen ändern.",
+  "globalSettingsLimits": "Übungszeit für alle",
+  "globalSettingsLimitsNote": "Gilt für jedes Kind, das keine eigene Vorgabe hat. Ein laufender Durchgang wird nie abgebrochen - erst der nächste Start ist gesperrt.",
+  "globalSettingsStretch": "Am Stück, dann Pause",
+  "globalSettingsBreakLength": "Wie lange dauert die Pause?",
+  "globalSettingsDaily": "Und pro Tag insgesamt",
+  "globalSettingsScoredRuns": "Gewertete Durchgänge je Übung und Tag",
+  "globalSettingsScoredRunsNote": "Danach darf dieselbe Übung weiter gemacht werden, sie bringt nur keine Bestzeit, keine Sterne und keine Blitze mehr. Das nimmt den Anreiz, die leichteste Übung so lange zu wiederholen, bis die Zeit stimmt. Geübte Zeit und Verlauf zählen weiter mit.",
+  "resetStarsTitle": "Sterne in „{group}\" zurücksetzen?",
+  "@resetStarsTitle": {
+    "placeholders": {
+      "group": {
+        "type": "String"
+      }
+    }
+  },
+  "resetStarsText": "{name} kann sie danach neu verdienen. Bestzeiten, Blitze, Lernkurve und Bestenlisten bleiben unverändert - es geht nur um die Sterne dieser Gruppe.",
+  "@resetStarsText": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "resetStarsConfirm": "Zurücksetzen",
+  "resetStarsHeading": "Sterne von {name}",
+  "@resetStarsHeading": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "resetStarsNote": "Zurückgesetzt werden nur die Sterne. Die Zeiten bleiben - Bestzeiten, Blitze, Lernkurve und Bestenlisten sind danach genau wie vorher.",
+  "resetStarsDone": "Fertig",
+  "resetStarsGroupLine": "{earned} von {possible} Sternen",
+  "@resetStarsGroupLine": {
+    "placeholders": {
+      "earned": {
+        "type": "int"
+      },
+      "possible": {
+        "type": "int"
+      }
+    }
+  },
+  "assignmentsAll": "Alle",
+  "assignmentsNew": "Neue Aufgabe",
+  "assignmentsHideFinished": "Erledigte ausblenden",
+  "assignmentsHiddenCount": "{count, plural, =1{1 ausgeblendet} other{{count} ausgeblendet}}",
+  "@assignmentsHiddenCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "assignmentsEmpty": "Noch keine Aufgaben.",
+  "assignmentsNoneOpen": "Keine offenen Aufgaben. Erledigte sind ausgeblendet.",
+  "assignmentsPeriodDays": "Tagen",
+  "assignmentsPeriodWeeks": "Wochen",
+  "assignmentsDaily": "täglich",
+  "assignmentsWeekly": "wöchentlich",
+  "assignmentsCarriesOver": " · zieht nach",
+  "assignmentsLessonCount": "{count} Übungen",
+  "@assignmentsLessonCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "assignmentsEdit": "Ändern",
+  "assignmentsEnd": "Beenden",
+  "assignmentsRepeat": "Erneut stellen",
+  "assignmentsDelete": "Aufgabe löschen",
+  "assignmentsRunsOfTasks": "{runs}× {tasks} Rechnungen",
+  "@assignmentsRunsOfTasks": {
+    "placeholders": {
+      "runs": {
+        "type": "int"
+      },
+      "tasks": {
+        "type": "int"
+      }
+    }
+  },
+  "assignmentsMinStars": "mind. {count} ★",
+  "@assignmentsMinStars": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "assignmentsMinBolts": "mind. {count} ⚡",
+  "@assignmentsMinBolts": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "assignmentsNoClosedPeriod": "Noch kein abgeschlossener Zeitraum",
+  "assignmentsMetOf": "Geschafft an {met} von {total} {period}",
+  "@assignmentsMetOf": {
+    "placeholders": {
+      "met": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "period": {
+        "type": "String"
+      }
+    }
+  },
+  "assignmentsBefore": "· davor {met} von {total} {period}",
+  "@assignmentsBefore": {
+    "placeholders": {
+      "met": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "period": {
+        "type": "String"
+      }
+    }
+  },
+  "assignmentsVerdictMet": "Geschafft",
+  "assignmentsVerdictPending": "Steht noch aus",
+  "assignmentsVerdictLate": "Verpasst, später nachgeholt",
+  "assignmentsVerdictMissed": "Verpasst",
+  "editorTitleEdit": "Aufgabe ändern",
+  "editorTitleAgain": "Aufgabe erneut stellen",
+  "editorTitleNew": "Neue Aufgabe",
+  "editorChild": "Kind",
+  "editorUnknownChild": "Unbekanntes Kind",
+  "editorLessons": "Übungen",
+  "editorLessonsNote": "Mehrere sind möglich. Jede davon muss erfüllt werden, damit die Aufgabe erledigt ist.",
+  "editorNoLesson": "Ohne eine einzige Übung gibt es nichts aufzugeben.",
+  "editorPeriod": "Zeitraum",
+  "editorOneDay": "ein Tag",
+  "editorOneWeek": "eine Woche",
+  "editorRepetition": "Wiederholung",
+  "editorEveryTime": "jedes Mal",
+  "editorOnce": "einmalig",
+  "editorDailyNote": "Jeden Tag neu, fällig am Ende des Tages.",
+  "editorWeeklyNote": "Jede Woche neu, fällig Sonntagabend.",
+  "editorOnDay": "Am {day}",
+  "@editorOnDay": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "editorInWeek": "In der Woche ab {day}",
+  "@editorInWeek": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "editorPickDay": "Tag wählen …",
+  "editorCarryOver": "Nachziehen, wenn nicht geschafft",
+  "editorCarryOverNote": "Die Aufgabe bleibt danach stehen, bis sie erledigt ist. Der Tag selbst gilt trotzdem als verpasst - die Statistik sagt, wann geübt wurde, nicht was gemeint war.",
+  "editorRuns": "Durchgänge",
+  "editorTasksPerRun": "Rechnungen je Durchgang",
+  "editorMinStars": "Mindeststerne",
+  "editorMinBolts": "Mindestblitze",
+  "editorNoRequirement": "keine Vorgabe",
+  "editorSave": "Speichern",
+  "editorCreate": "Anlegen",
+  "editorDayLabel": "{weekday, select, 1{Mo} 2{Di} 3{Mi} 4{Do} 5{Fr} 6{Sa} 7{So} other{}}, {day}.{month}.",
+  "@editorDayLabel": {
+    "placeholders": {
+      "weekday": {
+        "type": "String"
+      },
+      "day": {
+        "type": "int"
+      },
+      "month": {
+        "type": "int"
+      }
+    }
+  }
+}

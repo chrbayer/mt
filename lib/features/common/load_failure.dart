@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../theme/app_theme.dart';
+import '../../l10n/l10n.dart';
 
 /// What a screen shows when something it needed could not be read.
 ///
@@ -28,10 +29,10 @@ class LoadFailure extends StatelessWidget {
               const Icon(Icons.cloud_off_outlined,
                   size: 48, color: AppColors.textMuted),
               const SizedBox(height: 12),
-              const Text(
-                'Das konnte gerade nicht geladen werden.',
+              Text(
+                context.l10n.loadFailureMessage,
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 22, color: AppColors.textMuted),
+                style: const TextStyle(fontSize: 22, color: AppColors.textMuted),
               ),
               if (detail != null) ...[
                 const SizedBox(height: 10),

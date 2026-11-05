@@ -5,6 +5,7 @@ import '../../domain/practice_limit.dart';
 import '../../domain/scoring.dart';
 import '../../theme/app_theme.dart';
 import 'star_row.dart';
+import '../../l10n/l10n.dart';
 
 /// Says that a run this short earns nothing.
 ///
@@ -43,7 +44,7 @@ class ShortRunHint extends StatelessWidget {
         const SizedBox(width: 8),
         Expanded(
           child: Text(
-            'Zählt nicht: keine Sterne, keine Blitze, keine Bestenliste.',
+            context.l10n.runHintTooShort,
             style: TextStyle(fontSize: fontSize, color: AppColors.profile1),
           ),
         ),
@@ -80,8 +81,7 @@ class UsedUpTodayHint extends StatelessWidget {
         const SizedBox(width: 8),
         Expanded(
           child: Text(
-            'Heute schon $scoredToday× gewertet - üben geht weiter, '
-            'zählen nicht mehr.',
+context.l10n.runHintUsedUpToday(scoredToday),
             style: TextStyle(fontSize: fontSize, color: AppColors.profile1),
           ),
         ),
@@ -121,11 +121,7 @@ class RemainingTimeHint extends StatelessWidget {
         const SizedBox(width: 8),
         Expanded(
           child: Text(
-            switch (left) {
-              0 => 'Gleich ist Pause.',
-              1 => 'Noch eine Minute, dann ist Pause.',
-              _ => 'Noch $left Minuten, dann ist Pause.',
-            },
+context.l10n.runHintRemaining(left),
             style: TextStyle(
               fontSize: fontSize,
               color: color,
@@ -173,17 +169,17 @@ class AssignmentGoalHint extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final (icon, colour, words) = met
-        ? (Icons.check_circle, AppColors.correct, 'Aufgabe geschafft!')
+        ? (Icons.check_circle, AppColors.correct, context.l10n.assignmentGoalDone)
         : qualified
             ? (
                 Icons.check_circle_outline,
                 AppColors.correct,
-                'Zählt für deine Aufgabe: $done von ${assignment.runs}',
+                context.l10n.assignmentGoalCounts(done, assignment.runs),
               )
             : (
                 Icons.info_outline,
                 AppColors.profile1,
-                'Das reicht für deine Aufgabe noch nicht:',
+                context.l10n.assignmentGoalNotEnough,
               );
 
     return Row(

@@ -11,6 +11,7 @@ import '../../domain/task_count.dart';
 import '../../providers.dart';
 import '../../theme/app_theme.dart';
 import '../common/amount_choice.dart';
+import '../../l10n/l10n.dart';
 
 /// How many qualifying runs an assignment may ask for. A handful of options,
 /// not a free number - one clean run is already a real goal, and asking for
@@ -125,13 +126,14 @@ class _AssignmentEditorState extends ConsumerState<AssignmentEditor> {
             children: [
               Text(
                   _editing
-                      ? 'Aufgabe ändern'
+                      ? context.l10n.editorTitleEdit
                       : widget.template != null
-                          ? 'Aufgabe erneut stellen'
-                          : 'Neue Aufgabe',
+                          ? context.l10n.editorTitleAgain
+                          : context.l10n.editorTitleNew,
                   style: Theme.of(context).textTheme.headlineMedium),
               const SizedBox(height: 16),
-              const Text('Kind', style: TextStyle(fontSize: 20)),
+              Text(context.l10n.editorChild,
+                  style: const TextStyle(fontSize: 20)),
               const SizedBox(height: 8),
               // Fixed while editing, and shown rather than hidden: a parent
               // has to see whose assignment they are changing.
@@ -141,7 +143,7 @@ class _AssignmentEditorState extends ConsumerState<AssignmentEditor> {
                           .where((u) => u.id == _userId)
                           .map((u) => '${u.avatar}  ${u.name}')
                           .firstOrNull ??
-                      'Unbekanntes Kind',
+                      context.l10n.editorUnknownChild,
                 )
               else
                 Wrap(
@@ -160,12 +162,12 @@ class _AssignmentEditorState extends ConsumerState<AssignmentEditor> {
                   ],
                 ),
               const SizedBox(height: 20),
-              const Text('Übungen', style: TextStyle(fontSize: 20)),
+              Text(context.l10n.editorLessons,
+                  style: const TextStyle(fontSize: 20)),
               const SizedBox(height: 4),
-              const Text(
-                'Mehrere sind möglich. Jede davon muss erfüllt werden, '
-                'damit die Aufgabe erledigt ist.',
-                style: TextStyle(fontSize: 17, color: AppColors.textMuted),
+              Text(
+                context.l10n.editorLessonsNote,
+                style: const TextStyle(fontSize: 17, color: AppColors.textMuted),
               ),
               const SizedBox(height: 8),
               // Its own scroller with a fixed height: seventy-odd lessons do
@@ -211,28 +213,30 @@ class _AssignmentEditorState extends ConsumerState<AssignmentEditor> {
                 ),
               ),
               if (_lessonIds.isEmpty)
-                const Padding(
-                  padding: EdgeInsets.only(top: 6),
+                Padding(
+                  padding: const EdgeInsets.only(top: 6),
                   child: Text(
-                    'Ohne eine einzige Übung gibt es nichts aufzugeben.',
-                    style: TextStyle(fontSize: 17, color: AppColors.wrong),
+                    context.l10n.editorNoLesson,
+                    style:
+                        const TextStyle(fontSize: 17, color: AppColors.wrong),
                   ),
                 ),
               const SizedBox(height: 20),
               // Two questions, not one: what a period is, and whether it
               // comes round again. Squeezed into a single list of rhythms it
               // would have grown a value for every new idea.
-              const Text('Zeitraum', style: TextStyle(fontSize: 20)),
+              Text(context.l10n.editorPeriod,
+                  style: const TextStyle(fontSize: 20)),
               const SizedBox(height: 8),
               SegmentedButton<AssignmentRhythm>(
-                segments: const [
+                segments: [
                   ButtonSegment(
                     value: AssignmentRhythm.daily,
-                    label: Text('ein Tag'),
+                    label: Text(context.l10n.editorOneDay),
                   ),
                   ButtonSegment(
                     value: AssignmentRhythm.weekly,
-                    label: Text('eine Woche'),
+                    label: Text(context.l10n.editorOneWeek),
                   ),
                 ],
                 selected: {_rhythm},
@@ -240,12 +244,15 @@ class _AssignmentEditorState extends ConsumerState<AssignmentEditor> {
                     setState(() => _rhythm = selection.first),
               ),
               const SizedBox(height: 16),
-              const Text('Wiederholung', style: TextStyle(fontSize: 20)),
+              Text(context.l10n.editorRepetition,
+                  style: const TextStyle(fontSize: 20)),
               const SizedBox(height: 8),
               SegmentedButton<bool>(
-                segments: const [
-                  ButtonSegment(value: true, label: Text('jedes Mal')),
-                  ButtonSegment(value: false, label: Text('einmalig')),
+                segments: [
+                  ButtonSegment(
+                      value: true, label: Text(context.l10n.editorEveryTime)),
+                  ButtonSegment(
+                      value: false, label: Text(context.l10n.editorOnce)),
                 ],
                 selected: {_repeats},
                 onSelectionChanged: (selection) => setState(() {
@@ -262,8 +269,8 @@ class _AssignmentEditorState extends ConsumerState<AssignmentEditor> {
               if (_repeats)
                 Text(
                   _rhythm == AssignmentRhythm.daily
-                      ? 'Jeden Tag neu, fällig am Ende des Tages.'
-                      : 'Jede Woche neu, fällig Sonntagabend.',
+                      ? context.l10n.editorDailyNote
+                      : context.l10n.editorWeeklyNote,
                   style: const TextStyle(
                       fontSize: 17, color: AppColors.textMuted),
                 )
@@ -272,14 +279,16 @@ class _AssignmentEditorState extends ConsumerState<AssignmentEditor> {
                   children: [
                     Text(
                       _rhythm == AssignmentRhythm.daily
-                          ? 'Am ${_dayLabel(_onDay)}'
-                          : 'In der Woche ab ${_dayLabel(_monday(_onDay))}',
+                          ? context.l10n
+                              .editorOnDay(_dayLabel(context.l10n, _onDay))
+                          : context.l10n.editorInWeek(
+                              _dayLabel(context.l10n, _monday(_onDay))),
                       style: const TextStyle(fontSize: 18),
                     ),
                     const SizedBox(width: 12),
                     OutlinedButton(
                       onPressed: _pickDay,
-                      child: const Text('Tag wählen …'),
+                      child: Text(context.l10n.editorPickDay),
                     ),
                   ],
                 ),
@@ -288,36 +297,34 @@ class _AssignmentEditorState extends ConsumerState<AssignmentEditor> {
                   value: _carryOver,
                   onChanged: (on) => setState(() => _carryOver = on),
                   contentPadding: EdgeInsets.zero,
-                  title: const Text('Nachziehen, wenn nicht geschafft',
-                      style: TextStyle(fontSize: 19)),
-                  subtitle: const Text(
-                    'Die Aufgabe bleibt danach stehen, bis sie erledigt ist. '
-                    'Der Tag selbst gilt trotzdem als verpasst - die '
-                    'Statistik sagt, wann geübt wurde, nicht was gemeint '
-                    'war.',
-                    style:
-                        TextStyle(fontSize: 16, color: AppColors.textMuted),
+                  title: Text(context.l10n.editorCarryOver,
+                      style: const TextStyle(fontSize: 19)),
+                  subtitle: Text(
+                    context.l10n.editorCarryOverNote,
+                    style: const TextStyle(
+                        fontSize: 16, color: AppColors.textMuted),
                   ),
                 ),
               ],
               const Divider(height: 32),
-              const Text('Durchgänge', style: TextStyle(fontSize: 20)),
+              Text(context.l10n.editorRuns,
+                  style: const TextStyle(fontSize: 20)),
               const SizedBox(height: 8),
               AmountChoice(
                 value: _runs,
                 options: _runOptions,
-                zeroLabel: null,
+                zeroIsNoLimit: false,
                 labelFor: (v) => '$v×',
                 onChanged: (v) => setState(() => _runs = v ?? _runs),
               ),
               const SizedBox(height: 16),
-              const Text('Rechnungen je Durchgang',
-                  style: TextStyle(fontSize: 20)),
+              Text(context.l10n.editorTasksPerRun,
+                  style: const TextStyle(fontSize: 20)),
               const SizedBox(height: 8),
               AmountChoice(
                 value: _taskCount,
                 options: taskCountOptions,
-                zeroLabel: null,
+                zeroIsNoLimit: false,
                 labelFor: (v) => '$v',
                 onChanged: (v) => setState(() => _taskCount = v ?? _taskCount),
               ),
@@ -328,26 +335,26 @@ class _AssignmentEditorState extends ConsumerState<AssignmentEditor> {
               // has to be reachable for every lesson the assignment names.
               ...[
                 const SizedBox(height: 16),
-                const Text('Mindeststerne',
-                    style: TextStyle(fontSize: 20)),
+                Text(context.l10n.editorMinStars,
+                    style: const TextStyle(fontSize: 20)),
                 const SizedBox(height: 8),
                 AmountChoice(
                   value: _minStars,
                   options: const [0, 1, 2, 3],
-                  zeroLabel: 'keine Vorgabe',
+                  zeroLabel: context.l10n.editorNoRequirement,
                   labelFor: (v) => '$v ★',
                   onChanged: (v) =>
                       setState(() => _minStars = v ?? _minStars),
                 ),
                 if (!anyUnscored) ...[
                   const SizedBox(height: 16),
-                  const Text('Mindestblitze',
-                      style: TextStyle(fontSize: 20)),
+                  Text(context.l10n.editorMinBolts,
+                      style: const TextStyle(fontSize: 20)),
                   const SizedBox(height: 8),
                   AmountChoice(
                     value: _minBolts,
                     options: const [0, 1, 2, 3],
-                    zeroLabel: 'keine Vorgabe',
+                    zeroLabel: context.l10n.editorNoRequirement,
                     labelFor: (v) => '$v ⚡',
                     onChanged: (v) =>
                         setState(() => _minBolts = v ?? _minBolts),
@@ -360,7 +367,7 @@ class _AssignmentEditorState extends ConsumerState<AssignmentEditor> {
                 children: [
                   OutlinedButton(
                     onPressed: () => Navigator.of(context).pop(),
-                    child: const Text('Abbrechen'),
+                    child: Text(context.l10n.commonCancel),
                   ),
                   const SizedBox(width: 16),
                   FilledButton(
@@ -407,7 +414,9 @@ class _AssignmentEditorState extends ConsumerState<AssignmentEditor> {
                             }
                             navigator.pop();
                           },
-                    child: Text(_editing ? 'Speichern' : 'Anlegen'),
+                    child: Text(_editing
+                        ? context.l10n.editorSave
+                        : context.l10n.editorCreate),
                   ),
                 ],
               ),
@@ -421,10 +430,8 @@ class _AssignmentEditorState extends ConsumerState<AssignmentEditor> {
   static DateTime _monday(DateTime day) =>
       DateTime(day.year, day.month, day.day - (day.weekday - 1));
 
-  static String _dayLabel(DateTime day) {
-    const names = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
-    return '${names[day.weekday - 1]}, ${day.day}.${day.month}.';
-  }
+  static String _dayLabel(AppLocalizations l10n, DateTime day) =>
+      l10n.editorDayLabel('${day.weekday}', day.day, day.month);
 
   Future<void> _pickDay() async {
     final today = DateTime.now();

@@ -6,6 +6,7 @@ import '../../domain/practice_limit.dart';
 import '../../domain/scoring.dart';
 import '../../providers.dart';
 import '../../theme/app_theme.dart';
+import '../../l10n/l10n.dart';
 
 /// Who has practised how much today, at a glance.
 ///
@@ -40,7 +41,7 @@ class TodaySummary extends ConsumerWidget {
               const Icon(Icons.today_outlined,
                   size: 24, color: AppColors.textMuted),
               const SizedBox(width: 10),
-              Text('Heute geübt',
+              Text(context.l10n.todayHeading,
                   style: Theme.of(context).textTheme.titleLarge),
             ],
           ),
@@ -116,12 +117,13 @@ class _Entry extends StatelessWidget {
                 Text(
                   switch ((ms, limit)) {
                     (null, _) => '…',
-                    (final value?, 0) when value < 60000 => 'noch nichts',
+                    (final value?, 0) when value < 60000 =>
+                      context.l10n.todayNothingYet,
                     (final value?, 0) => formatTotalTime(value),
                     (final value?, _) when value < 60000 =>
-                      'noch nichts von $limit min',
-                    (final value?, _) =>
-                      '${formatTotalTime(value)} von $limit min',
+                      context.l10n.todayNothingOfLimit(limit),
+                    (final value?, _) => context.l10n
+                        .todayTimeOfLimit(formatTotalTime(value), limit),
                   },
                   style: TextStyle(
                     fontSize: 17,

@@ -1,7 +1,10 @@
+import 'dart:ui';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mathe_trainer/data/repositories/stats_repository.dart';
 import 'package:mathe_trainer/domain/lesson.dart';
 import 'package:mathe_trainer/features/lessons/recommendation.dart';
+import 'package:mathe_trainer/l10n/app_localizations.dart';
 
 LessonStat stat({
   required String id,
@@ -41,7 +44,7 @@ void main() {
 
     expect(result!.lesson.id, 'add_20_carry');
     expect(result.reason, RecommendationReason.shaky);
-    expect(result.headline, 'Da war es zuletzt wackelig');
+    expect(result.headline(lookupAppLocalizations(const Locale('de'))), 'Da war es zuletzt wackelig');
   });
 
   test('the shakiest of several is chosen', () {

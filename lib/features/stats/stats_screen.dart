@@ -10,6 +10,7 @@ import '../../theme/app_theme.dart';
 import '../common/load_failure.dart';
 import '../common/star_row.dart';
 import 'progress_chart.dart';
+import '../../l10n/l10n.dart';
 
 /// Personal statistics: where the child stands per lesson, how the times
 /// developed, and which calculations still cost the most time.
@@ -34,12 +35,13 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
         (played.isNotEmpty ? played.first.id : null);
 
     return Scaffold(
-      appBar: AppBar(title: Text('Statistik · ${user.name}')),
+      appBar: AppBar(title: Text(context.l10n.statsTitle(user.name))),
       body: played.isEmpty
-          ? const Center(
+          ? Center(
               child: Text(
-                'Noch keine abgeschlossenen Durchgänge.',
-                style: TextStyle(fontSize: 24, color: AppColors.textMuted),
+                context.l10n.statsEmpty,
+                style: const TextStyle(
+                    fontSize: 24, color: AppColors.textMuted),
               ),
             )
           : Padding(
@@ -63,13 +65,13 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Lernkurve · ${lessonById(selected!).title}',
+                          context.l10n.statsLearningCurve(lessonById(selected!).title),
                           style: Theme.of(context).textTheme.titleLarge,
                         ),
                         const SizedBox(height: 4),
-                        const Text(
-                          'Sekunden pro Aufgabe, Durchgang für Durchgang',
-                          style: TextStyle(
+                        Text(
+                          context.l10n.statsLearningCurveSub,
+                          style: const TextStyle(
                               fontSize: 16, color: AppColors.textMuted),
                         ),
                         const SizedBox(height: 12),
@@ -87,7 +89,7 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
                         ),
                         const SizedBox(height: 20),
                         Text(
-                          'Diese Aufgaben dauern am längsten',
+                          context.l10n.statsHardest,
                           style: Theme.of(context).textTheme.titleLarge,
                         ),
                         const SizedBox(height: 8),
@@ -154,11 +156,11 @@ class _LessonTable extends StatelessWidget {
             child: Row(
               children: [
                 const Expanded(child: SizedBox()),
-                _Head('Sterne', width: column),
-                _Head('Bestzeit', width: column),
-                _Head('Ø Zeit', width: column),
-                _Head('Fehler', width: column),
-                _Head('Runden', width: column),
+                _Head(context.l10n.statsHeadStars, width: column),
+                _Head(context.l10n.statsHeadBest, width: column),
+                _Head(context.l10n.statsHeadAverage, width: column),
+                _Head(context.l10n.commonErrors, width: column),
+                _Head(context.l10n.statsHeadRuns, width: column),
               ],
             ),
           );
@@ -291,9 +293,9 @@ class _HardTasks extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (tasks.isEmpty) {
-      return const Text(
-        'Noch zu wenige Daten.',
-        style: TextStyle(fontSize: 18, color: AppColors.textMuted),
+      return Text(
+        context.l10n.statsTooFewData,
+        style: const TextStyle(fontSize: 18, color: AppColors.textMuted),
       );
     }
     return SingleChildScrollView(

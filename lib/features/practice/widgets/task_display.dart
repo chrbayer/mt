@@ -8,6 +8,7 @@ import 'clock_face.dart';
 import 'counted_pair.dart';
 import 'dice_face.dart';
 import 'picture_group.dart';
+import '../../../l10n/l10n.dart';
 
 /// The task itself plus the answer box, scaled to fill the space it gets.
 class TaskDisplay extends StatelessWidget {
@@ -294,7 +295,7 @@ class TaskDisplay extends StatelessWidget {
     // morning and at 10 at night, and the word under the dial only tells
     // which of the two it is - not that the answer runs past twelve.
     final question = clock24 && task.form == TaskForm.clock
-        ? 'Wie spät ist es? Sage es mit 24 Stunden.'
+        ? context.l10n.taskClock24Question
         : task.question;
     return _WithQuestion(question: question, child: row);
   }

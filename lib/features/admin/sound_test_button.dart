@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../providers.dart';
 import '../../theme/app_theme.dart';
+import '../../l10n/l10n.dart';
 
 /// Plays the click ten times and counts how many actually ran.
 ///
@@ -53,7 +54,10 @@ class _SoundTestButtonState extends ConsumerState<SoundTestButton> {
       children: [
         OutlinedButton.icon(
           icon: const Icon(Icons.volume_up_outlined, size: 24),
-          label: Text(_running ? 'Spielt …' : 'Ton testen (10 Klicks)',
+          label: Text(
+              _running
+                  ? context.l10n.soundTestRunning
+                  : context.l10n.soundTestButton,
               style: const TextStyle(fontSize: 18)),
           onPressed: _running ? null : _test,
         ),
@@ -62,11 +66,10 @@ class _SoundTestButtonState extends ConsumerState<SoundTestButton> {
             padding: const EdgeInsets.only(top: 8),
             child: Text(
               _result!.played == _result!.expected
-                  ? '${_result!.played} von ${_result!.expected} Klicks haben '
-                      'gespielt. War nichts zu hören, liegt es an der '
-                      'Lautstärke des Geräts.'
-                  : 'Nur ${_result!.played} von ${_result!.expected} Klicks '
-                      'haben gespielt - der Ton bricht auf diesem Gerät ab.',
+                  ? context.l10n.soundTestAllPlayed(
+                      _result!.played, _result!.expected)
+                  : context.l10n.soundTestSomePlayed(
+                      _result!.played, _result!.expected),
               style: TextStyle(
                 fontSize: 17,
                 color: _result!.played == _result!.expected
@@ -79,7 +82,7 @@ class _SoundTestButtonState extends ConsumerState<SoundTestButton> {
           Padding(
             padding: const EdgeInsets.only(top: 8),
             child: Text(
-              'Der Ton ist auf diesem Gerät nicht verfügbar:\n$_error',
+              context.l10n.soundTestUnavailable(_error!),
               style: const TextStyle(fontSize: 17, color: AppColors.wrong),
             ),
           ),

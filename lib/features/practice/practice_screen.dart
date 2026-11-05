@@ -21,6 +21,7 @@ import 'widgets/big_keypad.dart';
 import 'widgets/choice_keypad.dart';
 import 'widgets/progress_dots.dart';
 import 'widgets/task_display.dart';
+import '../../l10n/l10n.dart';
 
 /// How long the green flash stays before the next task appears.
 const _correctFlash = Duration(milliseconds: 400);
@@ -361,24 +362,25 @@ class _PracticeScreenState extends ConsumerState<PracticeScreen>
 
   Future<void> _confirmAbort() async {
     if (_askingToAbort) return;
+    final l10n = context.l10n;
     setState(() => _askingToAbort = true);
     _controller?.pause();
     final leave = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Übung beenden?'),
-        content: const Text(
-          'Dieser Durchgang zählt dann nicht für die Bestenliste.',
-          style: TextStyle(fontSize: 20),
+        title: Text(l10n.practiceAbortTitle),
+        content: Text(
+          l10n.practiceAbortText,
+          style: const TextStyle(fontSize: 20),
         ),
         actions: [
           FilledButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('Weiter rechnen'),
+            child: Text(l10n.practiceKeepGoing),
           ),
           OutlinedButton(
             onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: const Text('Beenden'),
+            child: Text(l10n.practiceAbortConfirm),
           ),
         ],
       ),
@@ -435,7 +437,7 @@ class _PracticeScreenState extends ConsumerState<PracticeScreen>
                   const SizedBox(height: 28),
                   FilledButton.icon(
                     icon: const Icon(Icons.grid_view_rounded, size: 30),
-                    label: const Text('Zurück zu den Lektionen'),
+                    label: Text(context.l10n.commonBackToLessons),
                     onPressed: () => Navigator.of(context).pop(),
                   ),
                 ],
@@ -484,7 +486,7 @@ class _PracticeScreenState extends ConsumerState<PracticeScreen>
                     Row(
                       children: [
                         IconButton(
-                          tooltip: 'Übung beenden',
+                          tooltip: context.l10n.practiceAbortTooltip,
                           iconSize: 36,
                           icon: const Icon(Icons.close),
                           onPressed: _confirmAbort,
@@ -590,17 +592,19 @@ class _PauseOverlay extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text('Pause', style: TextStyle(fontSize: 56, fontWeight: FontWeight.w700)),
+              Text(context.l10n.practicePause,
+                  style: const TextStyle(
+                      fontSize: 56, fontWeight: FontWeight.w700)),
               const SizedBox(height: 12),
-              const Text(
-                'Die Zeit läuft nicht weiter.',
-                style: TextStyle(fontSize: 24, color: AppColors.textMuted),
+              Text(
+                context.l10n.practicePauseNote,
+                style: const TextStyle(fontSize: 24, color: AppColors.textMuted),
               ),
               const SizedBox(height: 32),
               FilledButton.icon(
                 onPressed: onResume,
                 icon: const Icon(Icons.play_arrow, size: 32),
-                label: const Text('Weiter'),
+                label: Text(context.l10n.practiceResume),
               ),
             ],
           ),

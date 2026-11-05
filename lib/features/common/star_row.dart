@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../domain/scoring.dart';
 import '../../theme/app_theme.dart';
+import '../../l10n/l10n.dart';
 
 /// The three stars of a lesson, filled up to [earned].
 ///
@@ -109,7 +110,7 @@ class StarTotal extends StatelessWidget {
         ),
         const SizedBox(width: 6),
         Text(
-          possible == null ? '$earned' : '$earned von $possible',
+          possible == null ? '$earned' : context.l10n.starRowEarnedOf(earned, possible!),
           style: TextStyle(
             fontSize: size,
             fontWeight: FontWeight.w700,

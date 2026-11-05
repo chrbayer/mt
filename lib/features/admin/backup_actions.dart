@@ -11,6 +11,7 @@ import '../../providers.dart';
 import '../../domain/scoring.dart';
 import '../../theme/app_theme.dart';
 import 'admin_session.dart';
+import '../../l10n/l10n.dart';
 
 /// Save and restore the whole database.
 ///
@@ -35,6 +36,7 @@ class _BackupActionsState extends ConsumerState<BackupActions> {
   }
 
   Future<void> _export() async {
+    final l10n = context.l10n;
     setState(() => _busy = true);
     try {
       final json = await ref.read(backupRepositoryProvider).export();
@@ -50,7 +52,7 @@ class _BackupActionsState extends ConsumerState<BackupActions> {
           ShareParams(
             files: [XFile(file.path, mimeType: 'application/json')],
             fileNameOverrides: [_fileName],
-            subject: 'Mathe-Trainer Sicherung',
+            subject: l10n.backupShareSubject,
           ),
         ),
       );
@@ -63,31 +65,31 @@ class _BackupActionsState extends ConsumerState<BackupActions> {
             );
       }
     } catch (error) {
-      _tell('Sicherung fehlgeschlagen: $error');
+      _tell(l10n.backupExportFailed('$error'));
     } finally {
       if (mounted) setState(() => _busy = false);
     }
   }
 
   Future<void> _import() async {
+    final l10n = context.l10n;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Sicherung einspielen?'),
-        content: const Text(
-          'Alle Profile und Ergebnisse auf diesem Gerät werden durch die '
-          'Sicherung ersetzt. Was jetzt hier steht, ist danach weg.',
-          style: TextStyle(fontSize: 20),
+        title: Text(l10n.backupImportConfirmTitle),
+        content: Text(
+          l10n.backupImportConfirmText,
+          style: const TextStyle(fontSize: 20),
         ),
         actions: [
           OutlinedButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('Abbrechen'),
+            child: Text(l10n.commonCancel),
           ),
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: AppColors.wrong),
             onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: const Text('Ersetzen'),
+            child: Text(l10n.backupReplace),
           ),
         ],
       ),
@@ -96,28 +98,25 @@ class _BackupActionsState extends ConsumerState<BackupActions> {
 
     setState(() => _busy = true);
     try {
-      const typeGroup = XTypeGroup(
-        label: 'Sicherung',
+      final typeGroup = XTypeGroup(
+        label: l10n.backupFileTypeLabel,
         extensions: ['json'],
         mimeTypes: ['application/json'],
       );
       // Held open for the same reason as in _export: picking a file also
       // sends the app to the background.
       final file = await AdminSession.holdOpen(
-        () => openFile(acceptedTypeGroups: const [typeGroup]),
+        () => openFile(acceptedTypeGroups: [typeGroup]),
       );
       if (file == null) return;
 
       final summary =
           await ref.read(backupRepositoryProvider).import(await file.readAsString());
-      _tell(
-        '${summary.users} Profile und ${summary.sessions} Durchgänge '
-        'eingespielt.',
-      );
+_tell(l10n.backupImported(summary.users, summary.sessions));
     } on BackupFormatException catch (error) {
       _tell(error.message);
     } catch (error) {
-      _tell('Einspielen fehlgeschlagen: $error');
+      _tell(l10n.backupImportFailed('$error'));
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -138,13 +137,11 @@ class _BackupActionsState extends ConsumerState<BackupActions> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Daten', style: Theme.of(context).textTheme.headlineMedium),
+        Text(context.l10n.backupHeading, style: Theme.of(context).textTheme.headlineMedium),
         const SizedBox(height: 4),
-        const Text(
-          'Alle Profile, Ergebnisse und Einstellungen als Datei. Bewahre sie '
-          'außerhalb des Tablets auf - ein zurückgesetztes Gerät nimmt sonst '
-          'alles mit.',
-          style: TextStyle(fontSize: 17, color: AppColors.textMuted),
+        Text(
+          context.l10n.backupIntro,
+          style: const TextStyle(fontSize: 17, color: AppColors.textMuted),
         ),
         const SizedBox(height: 10),
         BackupAgeNotice(
@@ -158,12 +155,12 @@ class _BackupActionsState extends ConsumerState<BackupActions> {
           children: [
             FilledButton.icon(
               icon: const Icon(Icons.save_alt, size: 26),
-              label: const Text('Sicherung erstellen'),
+              label: Text(context.l10n.backupCreate),
               onPressed: _busy ? null : _export,
             ),
             OutlinedButton.icon(
               icon: const Icon(Icons.settings_backup_restore, size: 26),
-              label: const Text('Sicherung einspielen'),
+              label: Text(context.l10n.backupRestore),
               onPressed: _busy ? null : _import,
             ),
           ],
@@ -203,6 +200,12 @@ class BackupAgeNotice extends StatelessWidget {
             .difference(DateTime.fromMillisecondsSinceEpoch(last))
             .inDays;
     final overdue = days == null || days >= nudgeAfterDays;
+    final when = last == null
+        ? ''
+        : formatRelativeDay(
+            DateTime.fromMillisecondsSinceEpoch(last),
+            now: now,
+          );
 
     return Row(
       children: [
@@ -215,12 +218,10 @@ class BackupAgeNotice extends StatelessWidget {
         Flexible(
           child: Text(
             last == null
-                ? 'Noch nie gesichert.'
-                : 'Zuletzt gesichert: '
-                    '${formatRelativeDay(
-                    DateTime.fromMillisecondsSinceEpoch(last),
-                    now: now,
-                  )}.${overdue ? ' Das ist eine Weile her.' : ''}',
+                ? context.l10n.backupNever
+                : overdue
+                    ? context.l10n.backupLastOverdue(when)
+                    : context.l10n.backupLast(when),
             style: TextStyle(
               fontSize: 17,
               color: overdue ? AppColors.profile1 : AppColors.textMuted,

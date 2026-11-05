@@ -1,3 +1,4 @@
+import '../support/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -20,7 +21,7 @@ void main() {
     addTearDown(tester.view.reset);
 
     await tester.pumpWidget(
-      MaterialApp(
+      MaterialApp(localizationsDelegates: testLocalizationsDelegates, locale: testLocale, supportedLocales: testSupportedLocales, 
         theme: buildAppTheme(),
         home: Scaffold(
           body: Center(
@@ -174,7 +175,7 @@ void main() {
   group('on a lesson tile', () {
     Future<void> pumpTile(WidgetTester tester, String lessonId) async {
       await tester.pumpWidget(
-        MaterialApp(
+        MaterialApp(localizationsDelegates: testLocalizationsDelegates, locale: testLocale, supportedLocales: testSupportedLocales, 
           theme: buildAppTheme(),
           home: Scaffold(
             body: Center(child: LessonExample(lesson: lessonById(lessonId))),
