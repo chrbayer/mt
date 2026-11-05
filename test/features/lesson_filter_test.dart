@@ -13,6 +13,8 @@ import 'package:mathe_trainer/features/common/star_row.dart';
 import 'package:mathe_trainer/features/lessons/lesson_home_screen.dart';
 import 'package:mathe_trainer/providers.dart';
 import 'package:mathe_trainer/theme/app_theme.dart';
+import 'package:mathe_trainer/l10n/lesson_texts.dart';
+import 'package:mathe_trainer/l10n/choice_texts.dart';
 
 /// Hiding what is done turns a catalogue of seventy-five into a to-do list.
 void main() {
@@ -103,7 +105,7 @@ void main() {
     await tester.drag(find.byType(ListView), const Offset(0, 12000));
     await tester.pump();
 
-    final heading = find.text(groupTitle(group));
+    final heading = find.text(groupTitle(deL10n, group));
     for (var i = 0; i < 30; i++) {
       if (heading.evaluate().isNotEmpty) return true;
       await tester.drag(find.byType(ListView), const Offset(0, -400));
@@ -221,7 +223,7 @@ void main() {
 
     await tester.tap(find.byIcon(Icons.filter_list_off));
     await tester.pumpAndSettle();
-    await tester.tap(find.text(lessonFilterTitle(LessonFilter.mastered)));
+    await tester.tap(find.text(lessonFilterTitle(deL10n, LessonFilter.mastered)));
     await tester.pumpAndSettle();
 
     expect(

@@ -13,6 +13,7 @@ import 'package:mathe_trainer/features/practice/practice_screen.dart';
 import 'package:mathe_trainer/features/practice/widgets/task_display.dart';
 import 'package:mathe_trainer/providers.dart';
 import 'package:mathe_trainer/theme/app_theme.dart';
+import 'package:mathe_trainer/l10n/lesson_texts.dart';
 
 /// The path from the lesson tile through the start sheet into a run. This was
 /// broken once: the sheet looked up its Navigator *after* popping itself, so
@@ -273,7 +274,7 @@ void main() {
     /// The lesson [openSheet] opens - taken from the catalogue rather than
     /// written down, because the title is what the tap actually finds.
     final sheetLesson = lessonCatalog
-        .firstWhere((l) => l.title == 'Plus mit Zehnerübergang')
+        .firstWhere((l) => lessonTitle(deL10n, l) == 'Plus mit Zehnerübergang')
         .id;
 
     /// One completed run of the lesson the start sheet opens.

@@ -8,6 +8,8 @@ import '../../providers.dart';
 import '../../theme/app_theme.dart';
 import '../common/load_failure.dart';
 import '../../l10n/l10n.dart';
+import '../../l10n/lesson_texts.dart';
+import '../../l10n/formatters.dart';
 
 /// Ranking of all profiles in one lesson - this is how the children compete.
 class LeaderboardScreen extends ConsumerWidget {
@@ -21,7 +23,7 @@ class LeaderboardScreen extends ConsumerWidget {
     final activeUserId = ref.watch(activeUserProvider)?.id;
 
     return Scaffold(
-      appBar: AppBar(title: Text(context.l10n.leaderboardTitle(lesson.title))),
+      appBar: AppBar(title: Text(context.l10n.leaderboardTitle(lessonTitle(context.l10n, lesson)))),
       body: entries.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (_, _) => const LoadFailure(),
@@ -98,12 +100,12 @@ class _Row extends StatelessWidget {
             ),
           ),
           _Cell(
-            value: formatPerTask(entry.scoreMs),
+            value: formatPerTask(context.l10n, entry.scoreMs),
             label: context.l10n.commonPerTask,
             strong: true,
           ),
           _Cell(
-            value: '${(entry.errorRate * 100).round()} %',
+            value: context.l10n.commonPercent((entry.errorRate * 100).round()),
             label: context.l10n.commonErrors,
           ),
           _Cell(value: '${entry.taskCount}', label: context.l10n.commonTasks),
@@ -153,7 +155,7 @@ class _ScoreExplanation extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(top: 12),
       child: Text(
-        context.l10n.leaderboardScoreExplanation,
+        context.l10n.leaderboardScoreExplanation(wrongAttemptPenaltyMs ~/ 1000),
         style: const TextStyle(fontSize: 17, color: AppColors.textMuted),
       ),
     );

@@ -112,13 +112,13 @@ abstract class AppLocalizations {
   /// **'Löschen'**
   String get commonDelete;
 
-  /// No description provided for @commonMinutesShort.
+  /// Minutes, short, e.g. "15 min".
   ///
   /// In de, this message translates to:
   /// **'{n} min'**
   String commonMinutesShort(int n);
 
-  /// No description provided for @versionLabel.
+  /// App version in a corner of the profile screen, e.g. "Version 2.16.0".
   ///
   /// In de, this message translates to:
   /// **'Version {version}'**
@@ -148,31 +148,31 @@ abstract class AppLocalizations {
   /// **'Uhr und Vibration, die Vorgabe für alle, Ergebnisse löschen, Profile verwalten und den Übungsverlauf ansehen: das steht im Elternbereich auf dem Startbildschirm, geschützt durch die PIN.'**
   String get settingsParentAreaNote;
 
-  /// No description provided for @amountNoLimit.
+  /// Value of a time limit setting: no limit.
   ///
   /// In de, this message translates to:
   /// **'ohne Grenze'**
   String get amountNoLimit;
 
-  /// No description provided for @amountSameAsAll.
+  /// Value of a setting: same as the default for all children.
   ///
   /// In de, this message translates to:
   /// **'wie für alle'**
   String get amountSameAsAll;
 
-  /// No description provided for @amountSameAsAllWith.
+  /// A setting that follows the default for all children; value is the default, e.g. "20 min".
   ///
   /// In de, this message translates to:
   /// **'wie für alle ({value})'**
   String amountSameAsAllWith(String value);
 
-  /// No description provided for @taskCountSameEverywhere.
+  /// Value of a setting: same as everywhere else.
   ///
   /// In de, this message translates to:
   /// **'wie überall'**
   String get taskCountSameEverywhere;
 
-  /// No description provided for @taskCountSameEverywhereWith.
+  /// Number of tasks per run when no special value is set; count is the value that applies.
   ///
   /// In de, this message translates to:
   /// **'wie überall ({count})'**
@@ -202,37 +202,37 @@ abstract class AppLocalizations {
   /// **'Ton testen (10 Klicks)'**
   String get soundTestButton;
 
-  /// No description provided for @soundTestAllPlayed.
+  /// Result of the sound test in the parent area: played of expected click sounds ran.
   ///
   /// In de, this message translates to:
   /// **'{played} von {expected} Klicks haben gespielt. War nichts zu hören, liegt es an der Lautstärke des Geräts.'**
   String soundTestAllPlayed(int played, int expected);
 
-  /// No description provided for @soundTestSomePlayed.
+  /// Result of the sound test when some clicks did not play.
   ///
   /// In de, this message translates to:
   /// **'Nur {played} von {expected} Klicks haben gespielt - der Ton bricht auf diesem Gerät ab.'**
   String soundTestSomePlayed(int played, int expected);
 
-  /// No description provided for @soundTestUnavailable.
+  /// Sound test failed; error is a technical message from the device.
   ///
   /// In de, this message translates to:
   /// **'Der Ton ist auf diesem Gerät nicht verfügbar:\n{error}'**
   String soundTestUnavailable(String error);
 
-  /// No description provided for @recommendShaky.
+  /// Reason given for a recommended lesson: it went badly last time.
   ///
   /// In de, this message translates to:
   /// **'Da war es zuletzt wackelig'**
   String get recommendShaky;
 
-  /// No description provided for @recommendFresh.
+  /// Reason given for a recommended lesson: never practised.
   ///
   /// In de, this message translates to:
   /// **'Das hast du noch nie geübt'**
   String get recommendFresh;
 
-  /// No description provided for @recommendStale.
+  /// Reason given for a recommended lesson: not practised for a long time.
   ///
   /// In de, this message translates to:
   /// **'Lange nicht mehr geübt'**
@@ -244,25 +244,25 @@ abstract class AppLocalizations {
   /// **'Für heute reicht es!'**
   String get pauseDayDoneTitle;
 
-  /// No description provided for @pauseDayDoneText.
+  /// Shown to a child whose daily practice time is used up; minutes is the time practised today.
   ///
   /// In de, this message translates to:
   /// **'Du hast heute {minutes} Minuten gerechnet. Morgen geht es weiter.'**
   String pauseDayDoneText(int minutes);
 
-  /// No description provided for @pauseBreakTitle.
+  /// Title when a child has practised long enough and must take a break.
   ///
   /// In de, this message translates to:
   /// **'Pause!'**
   String get pauseBreakTitle;
 
-  /// No description provided for @pauseBreakText.
+  /// Shown to a child who has to take a break; minutes practised in a row, clock is the time the break ends (see pauseClock), left says how long is left (see remainingMinutes).
   ///
   /// In de, this message translates to:
   /// **'Du hast {minutes} Minuten am Stück geübt. Weiter geht es um {clock} - {left}.'**
   String pauseBreakText(int minutes, String clock, String left);
 
-  /// No description provided for @pauseClock.
+  /// Time of day, e.g. "11:15 Uhr"; time is already formatted.
   ///
   /// In de, this message translates to:
   /// **'{time} Uhr'**
@@ -274,13 +274,13 @@ abstract class AppLocalizations {
   /// **'Zählt nicht: keine Sterne, keine Blitze, keine Bestenliste.'**
   String get runHintTooShort;
 
-  /// No description provided for @runHintUsedUpToday.
+  /// The lesson has already counted for awards count times today, so another run does not count. Keep the "×".
   ///
   /// In de, this message translates to:
   /// **'Heute schon {count}× gewertet - üben geht weiter, zählen nicht mehr.'**
   String runHintUsedUpToday(int count);
 
-  /// No description provided for @runHintRemaining.
+  /// Hint under the task-count choice: practice time left until the break; 0 means the break is imminent.
   ///
   /// In de, this message translates to:
   /// **'{minutes, plural, =0{Gleich ist Pause.} =1{Noch eine Minute, dann ist Pause.} other{Noch {minutes} Minuten, dann ist Pause.}}'**
@@ -292,7 +292,7 @@ abstract class AppLocalizations {
   /// **'Aufgabe geschafft!'**
   String get assignmentGoalDone;
 
-  /// No description provided for @assignmentGoalCounts.
+  /// Result screen: how many of the runs an assignment asks for have been done.
   ///
   /// In de, this message translates to:
   /// **'Zählt für deine Aufgabe: {done} von {runs}'**
@@ -322,13 +322,13 @@ abstract class AppLocalizations {
   /// **'noch nichts'**
   String get todayNothingYet;
 
-  /// No description provided for @todayNothingOfLimit.
+  /// Practised today: nothing yet, out of a daily limit given in minutes.
   ///
   /// In de, this message translates to:
   /// **'noch nichts von {limit} min'**
   String todayNothingOfLimit(int limit);
 
-  /// No description provided for @todayTimeOfLimit.
+  /// Practised today: time (formatted) out of a daily limit in minutes.
   ///
   /// In de, this message translates to:
   /// **'{time} von {limit} min'**
@@ -340,7 +340,7 @@ abstract class AppLocalizations {
   /// **'Ab dem zweiten Durchgang siehst du hier deine Lernkurve.'**
   String get progressChartEmpty;
 
-  /// No description provided for @starRowEarnedOf.
+  /// Accessibility/summary of stars: earned out of possible.
   ///
   /// In de, this message translates to:
   /// **'{earned} von {possible}'**
@@ -364,7 +364,7 @@ abstract class AppLocalizations {
   /// **'Mathe-Trainer Sicherung'**
   String get backupShareSubject;
 
-  /// No description provided for @backupExportFailed.
+  /// Backup could not be created; error is a technical message.
   ///
   /// In de, this message translates to:
   /// **'Sicherung fehlgeschlagen: {error}'**
@@ -394,13 +394,13 @@ abstract class AppLocalizations {
   /// **'Sicherung'**
   String get backupFileTypeLabel;
 
-  /// No description provided for @backupImported.
+  /// Backup restored: number of child profiles and practice runs.
   ///
   /// In de, this message translates to:
   /// **'{users} Profile und {sessions} Durchgänge eingespielt.'**
   String backupImported(int users, int sessions);
 
-  /// No description provided for @backupImportFailed.
+  /// Backup could not be restored; error is a technical message.
   ///
   /// In de, this message translates to:
   /// **'Einspielen fehlgeschlagen: {error}'**
@@ -436,13 +436,13 @@ abstract class AppLocalizations {
   /// **'Noch nie gesichert.'**
   String get backupNever;
 
-  /// No description provided for @backupLast.
+  /// When the last backup was made; when is a relative day such as "gestern".
   ///
   /// In de, this message translates to:
   /// **'Zuletzt gesichert: {when}.'**
   String backupLast(String when);
 
-  /// No description provided for @backupLastOverdue.
+  /// Same, but the last backup is old, so a reminder follows.
   ///
   /// In de, this message translates to:
   /// **'Zuletzt gesichert: {when}. Das ist eine Weile her.'**
@@ -466,7 +466,7 @@ abstract class AppLocalizations {
   /// **'PIN eingeben'**
   String get pinHintEnter;
 
-  /// No description provided for @pinHintChoose.
+  /// Asks to choose a PIN; length is the number of digits.
   ///
   /// In de, this message translates to:
   /// **'Wähle eine PIN aus {length} Ziffern'**
@@ -496,13 +496,13 @@ abstract class AppLocalizations {
   /// **'Was heißt das?'**
   String get startWhatDoesItMean;
 
-  /// No description provided for @startExample.
+  /// Example task shown in the start dialog of a lesson.
   ///
   /// In de, this message translates to:
   /// **'Zum Beispiel:  {example}'**
   String startExample(String example);
 
-  /// No description provided for @startAssignmentGoal.
+  /// The start dialog shows the number of tasks an assignment asks for in one run.
   ///
   /// In de, this message translates to:
   /// **'Für deine Aufgabe: {count} Rechnungen'**
@@ -514,13 +514,13 @@ abstract class AppLocalizations {
   /// **'Wie viele Aufgaben?'**
   String get startHowMany;
 
-  /// No description provided for @startBoltsFrom.
+  /// Time per task that earns the next lightning bolt; time is formatted, e.g. "6,9 s".
   ///
   /// In de, this message translates to:
   /// **'ab {time} pro Aufgabe'**
   String startBoltsFrom(String time);
 
-  /// No description provided for @startGo.
+  /// Button that starts the lesson. Means "let's go".
   ///
   /// In de, this message translates to:
   /// **'Los geht\'s'**
@@ -532,43 +532,43 @@ abstract class AppLocalizations {
   /// **'Bestenliste'**
   String get startLeaderboard;
 
-  /// No description provided for @commonPerTask.
+  /// Unit label: per task.
   ///
   /// In de, this message translates to:
   /// **'pro Aufgabe'**
   String get commonPerTask;
 
-  /// No description provided for @commonErrors.
+  /// Label: number of mistakes.
   ///
   /// In de, this message translates to:
   /// **'Fehler'**
   String get commonErrors;
 
-  /// No description provided for @commonTasks.
+  /// Label: number of tasks.
   ///
   /// In de, this message translates to:
   /// **'Aufgaben'**
   String get commonTasks;
 
-  /// No description provided for @leaderboardTitle.
+  /// Title of a leaderboard; lesson is the lesson title.
   ///
   /// In de, this message translates to:
   /// **'Bestenliste · {lesson}'**
   String leaderboardTitle(String lesson);
 
-  /// No description provided for @leaderboardEmpty.
+  /// Empty leaderboard; min is the minimum number of tasks a run needs to count.
   ///
   /// In de, this message translates to:
   /// **'Noch keine Ergebnisse.\nMindestens {min} Aufgaben zählen für die Bestenliste.'**
   String leaderboardEmpty(int min);
 
-  /// No description provided for @leaderboardScoreExplanation.
+  /// seconds is the time added to the score for every wrong attempt (a number from the code).
   ///
   /// In de, this message translates to:
-  /// **'Gewertet wird die Zeit pro Aufgabe, plus 3 Sekunden für jeden Fehlversuch. Deshalb lohnt sich Raten nicht, und Durchgänge mit unterschiedlich vielen Aufgaben bleiben vergleichbar.'**
-  String get leaderboardScoreExplanation;
+  /// **'Gewertet wird die Zeit pro Aufgabe, plus {seconds, plural, =1{1 Sekunde} other{{seconds} Sekunden}} für jeden Fehlversuch. Deshalb lohnt sich Raten nicht, und Durchgänge mit unterschiedlich vielen Aufgaben bleiben vergleichbar.'**
+  String leaderboardScoreExplanation(int seconds);
 
-  /// No description provided for @statsTitle.
+  /// Title of the statistics screen; name is the child's name.
   ///
   /// In de, this message translates to:
   /// **'Statistik · {name}'**
@@ -580,7 +580,7 @@ abstract class AppLocalizations {
   /// **'Noch keine abgeschlossenen Durchgänge.'**
   String get statsEmpty;
 
-  /// No description provided for @statsLearningCurve.
+  /// Heading of the learning-curve chart; lesson is the lesson title.
   ///
   /// In de, this message translates to:
   /// **'Lernkurve · {lesson}'**
@@ -604,19 +604,19 @@ abstract class AppLocalizations {
   /// **'Sterne'**
   String get statsHeadStars;
 
-  /// No description provided for @statsHeadBest.
+  /// Table header: best time.
   ///
   /// In de, this message translates to:
   /// **'Bestzeit'**
   String get statsHeadBest;
 
-  /// No description provided for @statsHeadAverage.
+  /// Table header: average time ("Ø" means average).
   ///
   /// In de, this message translates to:
   /// **'Ø Zeit'**
   String get statsHeadAverage;
 
-  /// No description provided for @statsHeadRuns.
+  /// Table header: number of runs.
   ///
   /// In de, this message translates to:
   /// **'Runden'**
@@ -652,7 +652,7 @@ abstract class AppLocalizations {
   /// **'Noch keine Profile.'**
   String get globalStatsNoProfiles;
 
-  /// No description provided for @globalStatsActivityHeading.
+  /// Heading of the activity chart; days is the number of days shown.
   ///
   /// In de, this message translates to:
   /// **'Geübt in den letzten {days} Tagen'**
@@ -664,7 +664,7 @@ abstract class AppLocalizations {
   /// **'Minuten pro Tag, je Kind in seiner Farbe'**
   String get globalStatsActivitySub;
 
-  /// No description provided for @globalStatsNoLeaderboards.
+  /// No leaderboards yet; min is the minimum number of tasks for a run to count.
   ///
   /// In de, this message translates to:
   /// **'Noch keine Bestenlisten.\nEin Durchgang zählt ab {min} Aufgaben.'**
@@ -676,25 +676,25 @@ abstract class AppLocalizations {
   /// **'Noch nicht geübt.'**
   String get globalStatsNotPlayed;
 
-  /// No description provided for @globalStatsRounds.
+  /// Unit "runs" next to a count; n picks singular or plural.
   ///
   /// In de, this message translates to:
   /// **'{n, plural, =1{Runde} other{Runden}}'**
   String globalStatsRounds(int n);
 
-  /// No description provided for @globalStatsPractised.
+  /// Unit text next to a practice time, e.g. "3 h 12 min geübt".
   ///
   /// In de, this message translates to:
   /// **'geübt'**
   String get globalStatsPractised;
 
-  /// No description provided for @globalStatsStreak.
+  /// Number of days in a row with practice.
   ///
   /// In de, this message translates to:
   /// **'{days} Tage in Folge'**
   String globalStatsStreak(int days);
 
-  /// No description provided for @globalStatsLastPlayed.
+  /// When a child last practised; when is a relative day such as "heute".
   ///
   /// In de, this message translates to:
   /// **'zuletzt {when}'**
@@ -718,13 +718,13 @@ abstract class AppLocalizations {
   /// **'Alle Ergebnisse'**
   String get profilesAllResults;
 
-  /// No description provided for @profilesDuel.
+  /// Button to the duel mode (two or more children play the same tasks).
   ///
   /// In de, this message translates to:
   /// **'Duell'**
   String get profilesDuel;
 
-  /// No description provided for @profilesParents.
+  /// Button to the parent area.
   ///
   /// In de, this message translates to:
   /// **'Eltern'**
@@ -736,7 +736,7 @@ abstract class AppLocalizations {
   /// **'Noch kein Profil. Tippe auf „Neu\", um anzufangen.'**
   String get profilesNone;
 
-  /// No description provided for @profilesLockedTitle.
+  /// Dialog title when a locked profile is tapped; name is the child's name.
   ///
   /// In de, this message translates to:
   /// **'{name} macht gerade Pause'**
@@ -760,7 +760,7 @@ abstract class AppLocalizations {
   /// **'alles geschafft'**
   String get profilesAllDone;
 
-  /// No description provided for @profilesTodo.
+  /// Number of open assignments shown on a profile tile.
   ///
   /// In de, this message translates to:
   /// **'{count, plural, =1{1 Aufgabe} other{{count} Aufgaben}}'**
@@ -772,7 +772,7 @@ abstract class AppLocalizations {
   /// **'Bild und Farbe ändern'**
   String get profilesEditLook;
 
-  /// No description provided for @profilesNew.
+  /// Button to create a new profile.
   ///
   /// In de, this message translates to:
   /// **'Neu'**
@@ -796,7 +796,7 @@ abstract class AppLocalizations {
   /// **'Name'**
   String get profileEditorNameLabel;
 
-  /// No description provided for @profileEditorNext.
+  /// Button to continue to the next step.
   ///
   /// In de, this message translates to:
   /// **'Weiter'**
@@ -844,19 +844,19 @@ abstract class AppLocalizations {
   /// **'Wer tritt an?'**
   String get duelWhoPlays;
 
-  /// No description provided for @duelPlayerLocked.
+  /// Child in the duel list who is locked: avatar emoji, then name.
   ///
   /// In de, this message translates to:
   /// **'{avatar}  {name} · gesperrt'**
   String duelPlayerLocked(String avatar, String name);
 
-  /// No description provided for @duelPlayerOnBreak.
+  /// Child in the duel list who is on a practice break.
   ///
   /// In de, this message translates to:
   /// **'{avatar}  {name} · Pause'**
   String duelPlayerOnBreak(String avatar, String name);
 
-  /// No description provided for @duelPlayer.
+  /// Child in the duel list: avatar emoji, then name.
   ///
   /// In de, this message translates to:
   /// **'{avatar}  {name}'**
@@ -874,7 +874,7 @@ abstract class AppLocalizations {
   /// **'Wähle mindestens zwei Kinder aus.'**
   String get duelPickTwo;
 
-  /// No description provided for @duelLessonChip.
+  /// Chip to choose a lesson for the duel: title and an example task.
   ///
   /// In de, this message translates to:
   /// **'{title}  ·  {example}'**
@@ -886,25 +886,25 @@ abstract class AppLocalizations {
   /// **'Duell starten'**
   String get duelStart;
 
-  /// No description provided for @duelPosition.
+  /// Which player is up, e.g. "2 von 3".
   ///
   /// In de, this message translates to:
   /// **'{position} von {total}'**
   String duelPosition(int position, int total);
 
-  /// No description provided for @duelYourTurn.
+  /// Announces whose turn it is in the duel.
   ///
   /// In de, this message translates to:
   /// **'{name} ist dran'**
   String duelYourTurn(String name);
 
-  /// No description provided for @duelLessonAndGroup.
+  /// Lesson title and the title of its group.
   ///
   /// In de, this message translates to:
   /// **'{lesson} · {group}'**
   String duelLessonAndGroup(String lesson, String group);
 
-  /// No description provided for @duelReady.
+  /// Button: the player is ready.
   ///
   /// In de, this message translates to:
   /// **'Bereit'**
@@ -916,7 +916,7 @@ abstract class AppLocalizations {
   /// **'Duell abbrechen'**
   String get duelAbort;
 
-  /// No description provided for @duelResultTitle.
+  /// Title of the duel result; lesson is the lesson title.
   ///
   /// In de, this message translates to:
   /// **'Duell · {lesson}'**
@@ -934,7 +934,7 @@ abstract class AppLocalizations {
   /// **'Fertig'**
   String get duelDone;
 
-  /// No description provided for @duelWin.
+  /// Shown for the winner of a duel.
   ///
   /// In de, this message translates to:
   /// **'Sieg!'**
@@ -952,13 +952,13 @@ abstract class AppLocalizations {
   /// **'Geschafft!'**
   String get resultDone;
 
-  /// No description provided for @resultDoneName.
+  /// Congratulation on the result screen with the child's name.
   ///
   /// In de, this message translates to:
   /// **'Geschafft, {name}!'**
   String resultDoneName(String name);
 
-  /// No description provided for @resultNextBolt.
+  /// What the next lightning bolt needs: n is the bolt number (1 to 3), time the time per task.
   ///
   /// In de, this message translates to:
   /// **'{n}. Blitz ab {time} pro Aufgabe'**
@@ -988,7 +988,7 @@ abstract class AppLocalizations {
   /// **'Gesamtzeit'**
   String get resultMetricTotalTime;
 
-  /// No description provided for @resultMetricPerTask.
+  /// Metric label: time per task.
   ///
   /// In de, this message translates to:
   /// **'Pro Aufgabe'**
@@ -1000,25 +1000,25 @@ abstract class AppLocalizations {
   /// **'Fehler'**
   String get resultMetricErrors;
 
-  /// No description provided for @resultPenalty.
+  /// penalty is a formatted duration, count the number of wrong attempts, seconds the penalty per wrong attempt.
   ///
   /// In de, this message translates to:
-  /// **'Darin sind {penalty} Zeitstrafe für {count, plural, =1{1 Fehlversuch} other{{count} Fehlversuche}} enthalten - 3 Sekunden für jeden.'**
-  String resultPenalty(String penalty, int count);
+  /// **'Darin sind {penalty} Zeitstrafe für {count, plural, =1{1 Fehlversuch} other{{count} Fehlversuche}} enthalten - {seconds, plural, =1{1 Sekunde} other{{seconds} Sekunden}} für jeden.'**
+  String resultPenalty(String penalty, int count, int seconds);
 
-  /// No description provided for @resultStreak.
+  /// Number of days in a row with practice.
   ///
   /// In de, this message translates to:
   /// **'{days} Tage in Folge geübt!'**
   String resultStreak(int days);
 
-  /// No description provided for @resultAgain.
+  /// Button: do the same lesson again.
   ///
   /// In de, this message translates to:
   /// **'Nochmal'**
   String get resultAgain;
 
-  /// No description provided for @resultLeaderboard.
+  /// Button that opens the leaderboard.
   ///
   /// In de, this message translates to:
   /// **'Bestenliste'**
@@ -1030,7 +1030,7 @@ abstract class AppLocalizations {
   /// **'Andere Lektion'**
   String get resultOtherLesson;
 
-  /// No description provided for @resultFirstRun.
+  /// Shown after the first run of a lesson.
   ///
   /// In de, this message translates to:
   /// **'Das war dein erster Durchgang hier -\ndie Zeit ist ab jetzt dein Rekord.'**
@@ -1042,13 +1042,13 @@ abstract class AppLocalizations {
   /// **'Genau so schnell wie beim letzten Mal.'**
   String get resultSameSpeed;
 
-  /// No description provided for @resultFaster.
+  /// delta is the formatted time difference per task, e.g. "0,4 s".
   ///
   /// In de, this message translates to:
   /// **'{delta} schneller pro Aufgabe als beim letzten Mal!'**
   String resultFaster(String delta);
 
-  /// No description provided for @resultSlower.
+  /// delta is the formatted time difference per task.
   ///
   /// In de, this message translates to:
   /// **'{delta} langsamer pro Aufgabe als beim letzten Mal.'**
@@ -1066,13 +1066,13 @@ abstract class AppLocalizations {
   /// **'Dieser Durchgang zählt dann nicht für die Bestenliste.'**
   String get practiceAbortText;
 
-  /// No description provided for @practiceKeepGoing.
+  /// Button that continues the run instead of aborting.
   ///
   /// In de, this message translates to:
   /// **'Weiter rechnen'**
   String get practiceKeepGoing;
 
-  /// No description provided for @practiceAbortConfirm.
+  /// Button that ends the run.
   ///
   /// In de, this message translates to:
   /// **'Beenden'**
@@ -1084,7 +1084,7 @@ abstract class AppLocalizations {
   /// **'Übung beenden'**
   String get practiceAbortTooltip;
 
-  /// No description provided for @practicePause.
+  /// Title of the screen shown while the practice run is paused.
   ///
   /// In de, this message translates to:
   /// **'Pause'**
@@ -1096,7 +1096,7 @@ abstract class AppLocalizations {
   /// **'Die Zeit läuft nicht weiter.'**
   String get practicePauseNote;
 
-  /// No description provided for @practiceResume.
+  /// Button that continues a paused run.
   ///
   /// In de, this message translates to:
   /// **'Weiter'**
@@ -1114,7 +1114,7 @@ abstract class AppLocalizations {
   /// **'Erledigte Aufgaben ausblenden'**
   String get lessonsHideDoneAssignments;
 
-  /// No description provided for @lessonsStatsLabel.
+  /// Button label in the app bar: statistics.
   ///
   /// In de, this message translates to:
   /// **'Statistik'**
@@ -1126,7 +1126,7 @@ abstract class AppLocalizations {
   /// **'Einstellungen'**
   String get lessonsSettingsTooltip;
 
-  /// No description provided for @lessonsSwitchLabel.
+  /// Button label in the app bar: switch to another child.
   ///
   /// In de, this message translates to:
   /// **'Wechseln'**
@@ -1150,13 +1150,13 @@ abstract class AppLocalizations {
   /// **'Was du kannst, ist gerade ausgeblendet. Über den Filter oben kommt der ganze Katalog zurück.'**
   String get lessonsNothingLeftText;
 
-  /// No description provided for @lessonsRecommendGo.
+  /// Button on the recommended lesson: start it.
   ///
   /// In de, this message translates to:
   /// **'Los'**
   String get lessonsRecommendGo;
 
-  /// No description provided for @lessonsRecommendTitle.
+  /// Recommended lesson with its group.
   ///
   /// In de, this message translates to:
   /// **'{lesson} · {group}'**
@@ -1180,7 +1180,7 @@ abstract class AppLocalizations {
   /// **'noch nicht geübt'**
   String get lessonsNotPractised;
 
-  /// No description provided for @lessonsPractisedTimes.
+  /// How often a lesson was practised, on a tile. Keep the "×".
   ///
   /// In de, this message translates to:
   /// **'{count}× geübt'**
@@ -1216,31 +1216,31 @@ abstract class AppLocalizations {
   /// **'Einstellungen'**
   String get adminTabSettings;
 
-  /// No description provided for @adminFilterAll.
+  /// Chip: show runs of all children.
   ///
   /// In de, this message translates to:
   /// **'Alle'**
   String get adminFilterAll;
 
-  /// No description provided for @adminShowDeleted.
+  /// Chip that shows deleted runs again so they can be restored.
   ///
   /// In de, this message translates to:
   /// **'Gelöschte'**
   String get adminShowDeleted;
 
-  /// No description provided for @adminHistoryTruncated.
+  /// The log shows only the last limit runs.
   ///
   /// In de, this message translates to:
   /// **'Es werden die letzten {limit} Durchgänge angezeigt. Ein kürzerer Zeitraum zeigt den Rest.'**
   String adminHistoryTruncated(int limit);
 
-  /// No description provided for @adminCleanupAll.
+  /// Button that removes aborted runs of all children; count is how many.
   ///
   /// In de, this message translates to:
   /// **'Abgebrochene Durchgänge aufräumen ({count})'**
   String adminCleanupAll(int count);
 
-  /// No description provided for @adminCleanupOne.
+  /// Button that removes aborted runs of one child.
   ///
   /// In de, this message translates to:
   /// **'Abgebrochene von {name} aufräumen ({count})'**
@@ -1258,7 +1258,7 @@ abstract class AppLocalizations {
   /// **'Diesen Durchgang löschen?'**
   String get adminDeleteRunTitle;
 
-  /// No description provided for @adminDeleteRunText.
+  /// Confirmation text: child, lesson and date of the run to delete.
   ///
   /// In de, this message translates to:
   /// **'{user} · {lesson} · {when}'**
@@ -1288,19 +1288,19 @@ abstract class AppLocalizations {
   /// **'von allen Kindern'**
   String get adminWhoAll;
 
-  /// No description provided for @adminWhoOne.
+  /// "of" plus a child's name, used inside a sentence (see adminCleanupText).
   ///
   /// In de, this message translates to:
   /// **'von {name}'**
   String adminWhoOne(String name);
 
-  /// No description provided for @adminCleanupTitle.
+  /// Question before removing aborted runs; count is how many.
   ///
   /// In de, this message translates to:
   /// **'{count, plural, =1{Einen abgebrochenen Durchgang aufräumen?} other{{count} abgebrochene Durchgänge aufräumen?}}'**
   String adminCleanupTitle(int count);
 
-  /// No description provided for @adminCleanupText.
+  /// whose is "von allen Kindern" or "von <name>", range is a phrase such as "aus den letzten 7 Tagen".
   ///
   /// In de, this message translates to:
   /// **'Es verschwinden die abgebrochenen Durchgänge {whose} {range}. Sie zählten nie für Sterne, Blitze oder eine Bestenliste - die geübte Zeit bleibt gezählt.'**
@@ -1312,19 +1312,19 @@ abstract class AppLocalizations {
   /// **'Aufräumen'**
   String get adminCleanupConfirm;
 
-  /// No description provided for @adminCleanedUp.
+  /// Confirmation after removing aborted runs.
   ///
   /// In de, this message translates to:
   /// **'{count, plural, =1{Ein abgebrochener Durchgang aufgeräumt.} other{{count} abgebrochene Durchgänge aufgeräumt.}}'**
   String adminCleanedUp(int count);
 
-  /// No description provided for @adminHistoryLessonLine.
+  /// Lesson title and group in the run log.
   ///
   /// In de, this message translates to:
   /// **'{lesson}  ·  {group}'**
   String adminHistoryLessonLine(String lesson, String group);
 
-  /// No description provided for @adminAbortedAfter.
+  /// Label of an aborted run: after how many tasks it was aborted.
   ///
   /// In de, this message translates to:
   /// **'abgebrochen nach {count, plural, =1{1 Aufgabe} other{{count} Aufgaben}}'**
@@ -1390,19 +1390,19 @@ abstract class AppLocalizations {
   /// **'Alle Bereiche'**
   String get adminGroupsAll;
 
-  /// No description provided for @adminGroupsSome.
+  /// How many of the areas (groups of lessons) are switched on for a child.
   ///
   /// In de, this message translates to:
   /// **'{n} von {total} Bereichen'**
   String adminGroupsSome(int n, int total);
 
-  /// No description provided for @adminLocked.
+  /// Label of a profile that is temporarily locked.
   ///
   /// In de, this message translates to:
   /// **'Gesperrt'**
   String get adminLocked;
 
-  /// No description provided for @adminNoReview.
+  /// Label: this child does not repeat hard tasks.
   ///
   /// In de, this message translates to:
   /// **'ohne Wiederholung'**
@@ -1414,7 +1414,7 @@ abstract class AppLocalizations {
   /// **'Änderungen verwerfen?'**
   String get profileSettingsDiscardTitle;
 
-  /// No description provided for @profileSettingsDiscardText.
+  /// Asks whether unsaved settings for the named child are to be discarded.
   ///
   /// In de, this message translates to:
   /// **'Die Einstellungen für {name} wurden geändert, aber noch nicht gespeichert.'**
@@ -1582,7 +1582,7 @@ abstract class AppLocalizations {
   /// **'Profil löschen'**
   String get profileSettingsDeleteProfile;
 
-  /// No description provided for @profileSettingsResetTitle.
+  /// Question before deleting all results of the named child.
   ///
   /// In de, this message translates to:
   /// **'Ergebnisse von {name} löschen?'**
@@ -1594,7 +1594,7 @@ abstract class AppLocalizations {
   /// **'Bestzeiten, Lernkurve und Verlauf gehen verloren. Das Profil selbst bleibt bestehen.'**
   String get profileSettingsResetText;
 
-  /// No description provided for @profileSettingsDeleteTitle.
+  /// Question before deleting the named profile.
   ///
   /// In de, this message translates to:
   /// **'{name} löschen?'**
@@ -1606,7 +1606,7 @@ abstract class AppLocalizations {
   /// **'Profil und alle Ergebnisse werden entfernt.'**
   String get profileSettingsDeleteText;
 
-  /// No description provided for @profileSettingsGroupSummary.
+  /// Number of lessons in a group and an example task. Keep "z. B." as the abbreviation for "for example".
   ///
   /// In de, this message translates to:
   /// **'{count} Lektionen · z. B. {example}'**
@@ -1714,25 +1714,25 @@ abstract class AppLocalizations {
   /// **'Danach darf dieselbe Übung weiter gemacht werden, sie bringt nur keine Bestzeit, keine Sterne und keine Blitze mehr. Das nimmt den Anreiz, die leichteste Übung so lange zu wiederholen, bis die Zeit stimmt. Geübte Zeit und Verlauf zählen weiter mit.'**
   String get globalSettingsScoredRunsNote;
 
-  /// No description provided for @resetStarsTitle.
+  /// Question before taking the stars of a group of lessons back.
   ///
   /// In de, this message translates to:
   /// **'Sterne in „{group}\" zurücksetzen?'**
   String resetStarsTitle(String group);
 
-  /// No description provided for @resetStarsText.
+  /// name is the child's name; the stars can be earned again.
   ///
   /// In de, this message translates to:
   /// **'{name} kann sie danach neu verdienen. Bestzeiten, Blitze, Lernkurve und Bestenlisten bleiben unverändert - es geht nur um die Sterne dieser Gruppe.'**
   String resetStarsText(String name);
 
-  /// No description provided for @resetStarsConfirm.
+  /// Button that confirms taking the stars back.
   ///
   /// In de, this message translates to:
   /// **'Zurücksetzen'**
   String get resetStarsConfirm;
 
-  /// No description provided for @resetStarsHeading.
+  /// Heading of the dialog to give stars back.
   ///
   /// In de, this message translates to:
   /// **'Sterne von {name}'**
@@ -1744,19 +1744,19 @@ abstract class AppLocalizations {
   /// **'Zurückgesetzt werden nur die Sterne. Die Zeiten bleiben - Bestzeiten, Blitze, Lernkurve und Bestenlisten sind danach genau wie vorher.'**
   String get resetStarsNote;
 
-  /// No description provided for @resetStarsDone.
+  /// Button that closes the dialog; means "done".
   ///
   /// In de, this message translates to:
   /// **'Fertig'**
   String get resetStarsDone;
 
-  /// No description provided for @resetStarsGroupLine.
+  /// Stars earned out of possible in one group.
   ///
   /// In de, this message translates to:
   /// **'{earned} von {possible} Sternen'**
   String resetStarsGroupLine(int earned, int possible);
 
-  /// No description provided for @assignmentsAll.
+  /// Chip: assignments of all children.
   ///
   /// In de, this message translates to:
   /// **'Alle'**
@@ -1774,7 +1774,7 @@ abstract class AppLocalizations {
   /// **'Erledigte ausblenden'**
   String get assignmentsHideFinished;
 
-  /// No description provided for @assignmentsHiddenCount.
+  /// Number of hidden (finished) assignments.
   ///
   /// In de, this message translates to:
   /// **'{count, plural, =1{1 ausgeblendet} other{{count} ausgeblendet}}'**
@@ -1792,37 +1792,25 @@ abstract class AppLocalizations {
   /// **'Keine offenen Aufgaben. Erledigte sind ausgeblendet.'**
   String get assignmentsNoneOpen;
 
-  /// No description provided for @assignmentsPeriodDays.
-  ///
-  /// In de, this message translates to:
-  /// **'Tagen'**
-  String get assignmentsPeriodDays;
-
-  /// No description provided for @assignmentsPeriodWeeks.
-  ///
-  /// In de, this message translates to:
-  /// **'Wochen'**
-  String get assignmentsPeriodWeeks;
-
-  /// No description provided for @assignmentsDaily.
+  /// Rhythm of an assignment: every day.
   ///
   /// In de, this message translates to:
   /// **'täglich'**
   String get assignmentsDaily;
 
-  /// No description provided for @assignmentsWeekly.
+  /// Rhythm of an assignment: every week.
   ///
   /// In de, this message translates to:
   /// **'wöchentlich'**
   String get assignmentsWeekly;
 
-  /// No description provided for @assignmentsCarriesOver.
+  /// Appended to the deadline of a task that stays open until it is done; the separator before it is added in code.
   ///
   /// In de, this message translates to:
-  /// **' · zieht nach'**
+  /// **'zieht nach'**
   String get assignmentsCarriesOver;
 
-  /// No description provided for @assignmentsLessonCount.
+  /// Number of lessons ("Übungen") in an assignment.
   ///
   /// In de, this message translates to:
   /// **'{count} Übungen'**
@@ -1834,13 +1822,13 @@ abstract class AppLocalizations {
   /// **'Ändern'**
   String get assignmentsEdit;
 
-  /// No description provided for @assignmentsEnd.
+  /// Button that ends an assignment by hand.
   ///
   /// In de, this message translates to:
   /// **'Beenden'**
   String get assignmentsEnd;
 
-  /// No description provided for @assignmentsRepeat.
+  /// Button that creates a new assignment from a finished one.
   ///
   /// In de, this message translates to:
   /// **'Erneut stellen'**
@@ -1852,19 +1840,19 @@ abstract class AppLocalizations {
   /// **'Aufgabe löschen'**
   String get assignmentsDelete;
 
-  /// No description provided for @assignmentsRunsOfTasks.
+  /// An assignment asks for runs runs of tasks tasks each. Keep the "×".
   ///
   /// In de, this message translates to:
   /// **'{runs}× {tasks} Rechnungen'**
   String assignmentsRunsOfTasks(int runs, int tasks);
 
-  /// No description provided for @assignmentsMinStars.
+  /// Minimum stars an assignment asks for ("mind." is short for "at least").
   ///
   /// In de, this message translates to:
   /// **'mind. {count} ★'**
   String assignmentsMinStars(int count);
 
-  /// No description provided for @assignmentsMinBolts.
+  /// Minimum lightning bolts an assignment asks for.
   ///
   /// In de, this message translates to:
   /// **'mind. {count} ⚡'**
@@ -1876,37 +1864,37 @@ abstract class AppLocalizations {
   /// **'Noch kein abgeschlossener Zeitraum'**
   String get assignmentsNoClosedPeriod;
 
-  /// No description provided for @assignmentsMetOf.
+  /// Statistic of a repeating task. period is "daily" or "weekly" and picks the unit: days or weeks.
   ///
   /// In de, this message translates to:
-  /// **'Geschafft an {met} von {total} {period}'**
+  /// **'Geschafft an {met} von {total} {period, select, daily{Tagen} weekly{Wochen} other{Wochen}}'**
   String assignmentsMetOf(int met, int total, String period);
 
-  /// No description provided for @assignmentsBefore.
+  /// Earlier statistic next to a lesson of a task; the leading separator is added in code. period is "daily" or "weekly".
   ///
   /// In de, this message translates to:
-  /// **'· davor {met} von {total} {period}'**
+  /// **'davor {met} von {total} {period, select, daily{Tagen} weekly{Wochen} other{Wochen}}'**
   String assignmentsBefore(int met, int total, String period);
 
-  /// No description provided for @assignmentsVerdictMet.
+  /// Verdict for a past period: the assignment was met.
   ///
   /// In de, this message translates to:
   /// **'Geschafft'**
   String get assignmentsVerdictMet;
 
-  /// No description provided for @assignmentsVerdictPending.
+  /// Verdict: the period is still running.
   ///
   /// In de, this message translates to:
   /// **'Steht noch aus'**
   String get assignmentsVerdictPending;
 
-  /// No description provided for @assignmentsVerdictLate.
+  /// Verdict for a past period: missed on the day, caught up later.
   ///
   /// In de, this message translates to:
   /// **'Verpasst, später nachgeholt'**
   String get assignmentsVerdictLate;
 
-  /// No description provided for @assignmentsVerdictMissed.
+  /// Verdict for a past period: missed.
   ///
   /// In de, this message translates to:
   /// **'Verpasst'**
@@ -1942,7 +1930,7 @@ abstract class AppLocalizations {
   /// **'Unbekanntes Kind'**
   String get editorUnknownChild;
 
-  /// No description provided for @editorLessons.
+  /// Heading: the lessons (exercises) of an assignment.
   ///
   /// In de, this message translates to:
   /// **'Übungen'**
@@ -1960,7 +1948,7 @@ abstract class AppLocalizations {
   /// **'Ohne eine einzige Übung gibt es nichts aufzugeben.'**
   String get editorNoLesson;
 
-  /// No description provided for @editorPeriod.
+  /// Heading: one day or one week.
   ///
   /// In de, this message translates to:
   /// **'Zeitraum'**
@@ -1984,13 +1972,13 @@ abstract class AppLocalizations {
   /// **'Wiederholung'**
   String get editorRepetition;
 
-  /// No description provided for @editorEveryTime.
+  /// Choice: the assignment comes back every period.
   ///
   /// In de, this message translates to:
   /// **'jedes Mal'**
   String get editorEveryTime;
 
-  /// No description provided for @editorOnce.
+  /// Choice: the assignment is given only once.
   ///
   /// In de, this message translates to:
   /// **'einmalig'**
@@ -2008,13 +1996,13 @@ abstract class AppLocalizations {
   /// **'Jede Woche neu, fällig Sonntagabend.'**
   String get editorWeeklyNote;
 
-  /// No description provided for @editorOnDay.
+  /// A one-time assignment on a day; day is a short date with weekday.
   ///
   /// In de, this message translates to:
   /// **'Am {day}'**
   String editorOnDay(String day);
 
-  /// No description provided for @editorInWeek.
+  /// A one-time assignment in the week starting on the given day.
   ///
   /// In de, this message translates to:
   /// **'In der Woche ab {day}'**
@@ -2074,17 +2062,1187 @@ abstract class AppLocalizations {
   /// **'Speichern'**
   String get editorSave;
 
-  /// No description provided for @editorCreate.
+  /// Button that creates the assignment.
   ///
   /// In de, this message translates to:
   /// **'Anlegen'**
   String get editorCreate;
 
-  /// No description provided for @editorDayLabel.
+  /// Heading of a group of lessons on the lesson screen.
   ///
   /// In de, this message translates to:
-  /// **'{weekday, select, 1{Mo} 2{Di} 3{Mi} 4{Do} 5{Fr} 6{Sa} 7{So} other{}}, {day}.{month}.'**
-  String editorDayLabel(String weekday, int day, int month);
+  /// **'Erste Schritte'**
+  String get groupFirstSteps;
+
+  /// No description provided for @groupUpTo10.
+  ///
+  /// In de, this message translates to:
+  /// **'Bis 10'**
+  String get groupUpTo10;
+
+  /// No description provided for @groupUpTo20.
+  ///
+  /// In de, this message translates to:
+  /// **'Bis 20'**
+  String get groupUpTo20;
+
+  /// No description provided for @groupUpTo100.
+  ///
+  /// In de, this message translates to:
+  /// **'Bis 100'**
+  String get groupUpTo100;
+
+  /// No description provided for @groupUpTo1000.
+  ///
+  /// In de, this message translates to:
+  /// **'Bis 1000'**
+  String get groupUpTo1000;
+
+  /// No description provided for @groupWithThousands.
+  ///
+  /// In de, this message translates to:
+  /// **'Mit Tausendern'**
+  String get groupWithThousands;
+
+  /// No description provided for @groupTimesTables.
+  ///
+  /// In de, this message translates to:
+  /// **'Einmaleins'**
+  String get groupTimesTables;
+
+  /// No description provided for @groupReverseTimesTables.
+  ///
+  /// In de, this message translates to:
+  /// **'Einmaleins rückwärts'**
+  String get groupReverseTimesTables;
+
+  /// No description provided for @groupTimesAndDivision.
+  ///
+  /// In de, this message translates to:
+  /// **'Mal und Geteilt'**
+  String get groupTimesAndDivision;
+
+  /// No description provided for @groupEveryday.
+  ///
+  /// In de, this message translates to:
+  /// **'Uhrzeit und Geld'**
+  String get groupEveryday;
+
+  /// Title of a lesson. "Zehnerübergang" is the German school term for crossing a multiple of ten when adding or subtracting (carrying / borrowing).
+  ///
+  /// In de, this message translates to:
+  /// **'Plus ohne Zehnerübergang'**
+  String get lessonAddPlainTitle;
+
+  /// Same lesson in the number ranges up to 1000, where a task may cross the ten or the hundred, so the title does not name the ten.
+  ///
+  /// In de, this message translates to:
+  /// **'Plus ohne Übergang'**
+  String get lessonAddPlainBigTitle;
+
+  /// No description provided for @lessonAddPlainDesc.
+  ///
+  /// In de, this message translates to:
+  /// **'Die Einer bleiben zusammen unter 10 - es muss nichts übertragen werden.'**
+  String get lessonAddPlainDesc;
+
+  /// No description provided for @lessonAddPlainBigDesc.
+  ///
+  /// In de, this message translates to:
+  /// **'Keine Stelle läuft über - weder die Einer noch die Zehner.'**
+  String get lessonAddPlainBigDesc;
+
+  /// No description provided for @lessonAddCarryTitle.
+  ///
+  /// In de, this message translates to:
+  /// **'Plus mit Zehnerübergang'**
+  String get lessonAddCarryTitle;
+
+  /// No description provided for @lessonAddCarryBigTitle.
+  ///
+  /// In de, this message translates to:
+  /// **'Plus mit Übergang'**
+  String get lessonAddCarryBigTitle;
+
+  /// No description provided for @lessonAddCarryDesc.
+  ///
+  /// In de, this message translates to:
+  /// **'Die Einer ergeben zusammen 10 oder mehr - ein Zehner wandert weiter.'**
+  String get lessonAddCarryDesc;
+
+  /// No description provided for @lessonAddCarryBigDesc.
+  ///
+  /// In de, this message translates to:
+  /// **'Einer oder Zehner laufen über - es muss übertragen werden.'**
+  String get lessonAddCarryBigDesc;
+
+  /// No description provided for @lessonSubPlainTitle.
+  ///
+  /// In de, this message translates to:
+  /// **'Minus ohne Zehnerübergang'**
+  String get lessonSubPlainTitle;
+
+  /// No description provided for @lessonSubPlainBigTitle.
+  ///
+  /// In de, this message translates to:
+  /// **'Minus ohne Übergang'**
+  String get lessonSubPlainBigTitle;
+
+  /// No description provided for @lessonSubPlainDesc.
+  ///
+  /// In de, this message translates to:
+  /// **'Jede Ziffer oben ist groß genug - es muss kein Zehner aufgelöst werden.'**
+  String get lessonSubPlainDesc;
+
+  /// No description provided for @lessonSubPlainBigDesc.
+  ///
+  /// In de, this message translates to:
+  /// **'Jede Ziffer oben ist groß genug - es muss nichts aufgelöst werden.'**
+  String get lessonSubPlainBigDesc;
+
+  /// No description provided for @lessonSubBorrowTitle.
+  ///
+  /// In de, this message translates to:
+  /// **'Minus mit Zehnerübergang'**
+  String get lessonSubBorrowTitle;
+
+  /// No description provided for @lessonSubBorrowBigTitle.
+  ///
+  /// In de, this message translates to:
+  /// **'Minus mit Übergang'**
+  String get lessonSubBorrowBigTitle;
+
+  /// No description provided for @lessonSubBorrowDesc.
+  ///
+  /// In de, this message translates to:
+  /// **'Die Einer oben reichen nicht - ein Zehner muss aufgelöst werden.'**
+  String get lessonSubBorrowDesc;
+
+  /// No description provided for @lessonSubBorrowBigDesc.
+  ///
+  /// In de, this message translates to:
+  /// **'Eine Stelle oben reicht nicht - Zehner oder Hunderter müssen aufgelöst werden.'**
+  String get lessonSubBorrowBigDesc;
+
+  /// "Platzhalter" is the empty box standing in for a missing number: 3 + ? = 10.
+  ///
+  /// In de, this message translates to:
+  /// **'Plus mit Platzhalter'**
+  String get lessonPlusGapTitle;
+
+  /// No description provided for @lessonMinusGapTitle.
+  ///
+  /// In de, this message translates to:
+  /// **'Minus mit Platzhalter'**
+  String get lessonMinusGapTitle;
+
+  /// No description provided for @lessonGapDesc.
+  ///
+  /// In de, this message translates to:
+  /// **'Gesucht ist die Zahl, die fehlt, damit die Rechnung stimmt.'**
+  String get lessonGapDesc;
+
+  /// No description provided for @lessonMixedTitle.
+  ///
+  /// In de, this message translates to:
+  /// **'Plus und Minus gemischt'**
+  String get lessonMixedTitle;
+
+  /// No description provided for @lessonMixedDesc.
+  ///
+  /// In de, this message translates to:
+  /// **'Plus und Minus wechseln sich zufällig ab, mit und ohne Übergang.'**
+  String get lessonMixedDesc;
+
+  /// Title of the lesson for one row of the times table; n is the row, e.g. 7 for the seven times table.
+  ///
+  /// In de, this message translates to:
+  /// **'{n}er-Reihe'**
+  String lessonTimesTableTitle(int n);
+
+  /// Both directions means n · 4 and 4 · n.
+  ///
+  /// In de, this message translates to:
+  /// **'Alle Aufgaben der {n}er-Reihe, in beide Richtungen: {n} · 4 genauso wie 4 · {n}.'**
+  String lessonTimesTableDesc(int n);
+
+  /// Title of the lesson that divides by n, the reverse of one row of the times table.
+  ///
+  /// In de, this message translates to:
+  /// **'{n}er-Reihe rückwärts'**
+  String lessonReverseTableTitle(int n);
+
+  /// product is n times 4.
+  ///
+  /// In de, this message translates to:
+  /// **'Geteilt durch {n}. Jede Aufgabe ist die Umkehrung einer Aufgabe der {n}er-Reihe: aus {n} · 4 = {product} wird {product} : {n} = 4.'**
+  String lessonReverseTableDesc(int n, int product);
+
+  /// No description provided for @lessonPartnersOfTenTitle.
+  ///
+  /// In de, this message translates to:
+  /// **'Verliebte Zahlen'**
+  String get lessonPartnersOfTenTitle;
+
+  /// No description provided for @lessonPartnersOfTenDesc.
+  ///
+  /// In de, this message translates to:
+  /// **'Zwei Zahlen sind verliebt, wenn sie zusammen genau 10 ergeben: 1 und 9, 2 und 8, 3 und 7. Gefragt wird in beide Richtungen - von 3 nach 7 genauso wie von 7 nach 3.'**
+  String get lessonPartnersOfTenDesc;
+
+  /// No description provided for @lessonAdd10Title.
+  ///
+  /// In de, this message translates to:
+  /// **'Plus bis 10'**
+  String get lessonAdd10Title;
+
+  /// No description provided for @lessonAdd10Desc.
+  ///
+  /// In de, this message translates to:
+  /// **'Zusammenzählen, ohne über die 10 hinauszugehen.'**
+  String get lessonAdd10Desc;
+
+  /// No description provided for @lessonSub10Title.
+  ///
+  /// In de, this message translates to:
+  /// **'Minus bis 10'**
+  String get lessonSub10Title;
+
+  /// No description provided for @lessonSub10Desc.
+  ///
+  /// In de, this message translates to:
+  /// **'Wegnehmen im Zahlenraum bis 10.'**
+  String get lessonSub10Desc;
+
+  /// No description provided for @lessonMix10Desc.
+  ///
+  /// In de, this message translates to:
+  /// **'Plus und Minus wechseln sich zufällig ab.'**
+  String get lessonMix10Desc;
+
+  /// No description provided for @lessonTimesAllTitle.
+  ///
+  /// In de, this message translates to:
+  /// **'Alle Reihen gemischt'**
+  String get lessonTimesAllTitle;
+
+  /// No description provided for @lessonTimesAllDesc.
+  ///
+  /// In de, this message translates to:
+  /// **'Das ganze kleine Einmaleins, bunt durcheinander.'**
+  String get lessonTimesAllDesc;
+
+  /// No description provided for @lessonDivPlainTitle.
+  ///
+  /// In de, this message translates to:
+  /// **'Alle Reihen rückwärts'**
+  String get lessonDivPlainTitle;
+
+  /// No description provided for @lessonDivPlainDesc.
+  ///
+  /// In de, this message translates to:
+  /// **'Geteilt durch alles, bunt durcheinander. Jede Aufgabe geht glatt auf - sie ist die Umkehrung einer Einmaleins-Aufgabe.'**
+  String get lessonDivPlainDesc;
+
+  /// No description provided for @lessonDivRemainderTitle.
+  ///
+  /// In de, this message translates to:
+  /// **'Geteilt mit Rest'**
+  String get lessonDivRemainderTitle;
+
+  /// No description provided for @lessonDivRemainderDesc.
+  ///
+  /// In de, this message translates to:
+  /// **'Es bleibt immer etwas übrig. Erst das Ergebnis eingeben, dann den Rest.'**
+  String get lessonDivRemainderDesc;
+
+  /// No description provided for @lessonTimesGapTitle.
+  ///
+  /// In de, this message translates to:
+  /// **'Mal mit Platzhalter'**
+  String get lessonTimesGapTitle;
+
+  /// No description provided for @lessonTimesGapDesc.
+  ///
+  /// In de, this message translates to:
+  /// **'Mit welcher Zahl muss man malnehmen, damit es stimmt?'**
+  String get lessonTimesGapDesc;
+
+  /// No description provided for @lessonDivGapTitle.
+  ///
+  /// In de, this message translates to:
+  /// **'Geteilt mit Platzhalter'**
+  String get lessonDivGapTitle;
+
+  /// No description provided for @lessonDivGapDesc.
+  ///
+  /// In de, this message translates to:
+  /// **'Durch welche Zahl muss man teilen, damit es stimmt?'**
+  String get lessonDivGapDesc;
+
+  /// No description provided for @lessonMulTensTitle.
+  ///
+  /// In de, this message translates to:
+  /// **'Mal mit Zehnerzahlen'**
+  String get lessonMulTensTitle;
+
+  /// No description provided for @lessonMulTensDesc.
+  ///
+  /// In de, this message translates to:
+  /// **'Das Einmaleins mit einer Null dahinter: 3 · 4 = 12, also 30 · 4 = 120.'**
+  String get lessonMulTensDesc;
+
+  /// No description provided for @lessonMulTwoDigitTitle.
+  ///
+  /// In de, this message translates to:
+  /// **'Mal über das Einmaleins hinaus'**
+  String get lessonMulTwoDigitTitle;
+
+  /// No description provided for @lessonMulTwoDigitDesc.
+  ///
+  /// In de, this message translates to:
+  /// **'Eine zweistellige Zahl malnehmen, zum Beispiel 14 · 6.'**
+  String get lessonMulTwoDigitDesc;
+
+  /// No description provided for @lessonDivTwoDigitTitle.
+  ///
+  /// In de, this message translates to:
+  /// **'Geteilt über das Einmaleins hinaus'**
+  String get lessonDivTwoDigitTitle;
+
+  /// No description provided for @lessonDivTwoDigitDesc.
+  ///
+  /// In de, this message translates to:
+  /// **'Das Ergebnis ist größer als zehn, zum Beispiel 96 : 6.'**
+  String get lessonDivTwoDigitDesc;
+
+  /// No description provided for @lessonMulDivMixedTitle.
+  ///
+  /// In de, this message translates to:
+  /// **'Mal und Geteilt gemischt'**
+  String get lessonMulDivMixedTitle;
+
+  /// No description provided for @lessonMulDivMixedDesc.
+  ///
+  /// In de, this message translates to:
+  /// **'Malnehmen und Teilen wechseln sich zufällig ab.'**
+  String get lessonMulDivMixedDesc;
+
+  /// No description provided for @lessonPunktVorStrichTitle.
+  ///
+  /// In de, this message translates to:
+  /// **'Punkt vor Strich'**
+  String get lessonPunktVorStrichTitle;
+
+  /// No description provided for @lessonPunktVorStrichDesc.
+  ///
+  /// In de, this message translates to:
+  /// **'Mal und Geteilt kommen vor Plus und Minus - auch wenn sie hinten stehen: bei 40 − 3 · 6 wird erst 3 · 6 gerechnet.'**
+  String get lessonPunktVorStrichDesc;
+
+  /// No description provided for @lessonCountPicturesTitle.
+  ///
+  /// In de, this message translates to:
+  /// **'Wie viele? (Reihe)'**
+  String get lessonCountPicturesTitle;
+
+  /// No description provided for @lessonCountPicturesDesc.
+  ///
+  /// In de, this message translates to:
+  /// **'Bilder zählen, eins bis fünf, ordentlich aufgereiht.'**
+  String get lessonCountPicturesDesc;
+
+  /// No description provided for @lessonCountPicturesCloudTitle.
+  ///
+  /// In de, this message translates to:
+  /// **'Wie viele? (Wolke)'**
+  String get lessonCountPicturesCloudTitle;
+
+  /// No description provided for @lessonCountPicturesCloudDesc.
+  ///
+  /// In de, this message translates to:
+  /// **'Dieselben Bilder, aber durcheinander - man muss sich merken, was schon gezählt ist.'**
+  String get lessonCountPicturesCloudDesc;
+
+  /// No description provided for @lessonCountDiceTitle.
+  ///
+  /// In de, this message translates to:
+  /// **'Wie viele Punkte?'**
+  String get lessonCountDiceTitle;
+
+  /// No description provided for @lessonCountDiceDesc.
+  ///
+  /// In de, this message translates to:
+  /// **'Ein Würfel. Irgendwann sieht man die Zahl, ohne zu zählen.'**
+  String get lessonCountDiceDesc;
+
+  /// No description provided for @lessonCompareMoreTitle.
+  ///
+  /// In de, this message translates to:
+  /// **'Wo sind mehr? (Reihe)'**
+  String get lessonCompareMoreTitle;
+
+  /// No description provided for @lessonCompareMoreDesc.
+  ///
+  /// In de, this message translates to:
+  /// **'Zwei Häufchen vergleichen und die größere Anzahl eingeben.'**
+  String get lessonCompareMoreDesc;
+
+  /// No description provided for @lessonCompareMoreCloudTitle.
+  ///
+  /// In de, this message translates to:
+  /// **'Wo sind mehr? (Wolke)'**
+  String get lessonCompareMoreCloudTitle;
+
+  /// No description provided for @lessonCompareMoreCloudDesc.
+  ///
+  /// In de, this message translates to:
+  /// **'Dasselbe, aber die Bilder liegen durcheinander.'**
+  String get lessonCompareMoreCloudDesc;
+
+  /// No description provided for @lessonCountNextTitle.
+  ///
+  /// In de, this message translates to:
+  /// **'Welche Zahl kommt danach?'**
+  String get lessonCountNextTitle;
+
+  /// No description provided for @lessonCountNextDesc.
+  ///
+  /// In de, this message translates to:
+  /// **'Die Zahlenreihe vorwärts und rückwärts.'**
+  String get lessonCountNextDesc;
+
+  /// No description provided for @lessonBeesAddTitle.
+  ///
+  /// In de, this message translates to:
+  /// **'Bienchen (Reihe)'**
+  String get lessonBeesAddTitle;
+
+  /// No description provided for @lessonBeesAddDesc.
+  ///
+  /// In de, this message translates to:
+  /// **'Zwei Grüppchen Bienen zusammenzählen, zusammen nie mehr als zehn.'**
+  String get lessonBeesAddDesc;
+
+  /// No description provided for @lessonBeesAddCloudTitle.
+  ///
+  /// In de, this message translates to:
+  /// **'Bienchen (Wolke)'**
+  String get lessonBeesAddCloudTitle;
+
+  /// No description provided for @lessonBeesAddCloudDesc.
+  ///
+  /// In de, this message translates to:
+  /// **'Dieselbe Aufgabe, aber die Bienen schwirren durcheinander.'**
+  String get lessonBeesAddCloudDesc;
+
+  /// No description provided for @lessonDiceAddTitle.
+  ///
+  /// In de, this message translates to:
+  /// **'Zwei Würfel zusammenzählen'**
+  String get lessonDiceAddTitle;
+
+  /// No description provided for @lessonDiceAddDesc.
+  ///
+  /// In de, this message translates to:
+  /// **'Beide Würfel zeigen bis zu fünf Punkte - wie viele sind es zusammen?'**
+  String get lessonDiceAddDesc;
+
+  /// No description provided for @lessonAddToSixTitle.
+  ///
+  /// In de, this message translates to:
+  /// **'Plus bis 6'**
+  String get lessonAddToSixTitle;
+
+  /// No description provided for @lessonAddToSixDesc.
+  ///
+  /// In de, this message translates to:
+  /// **'Zusammenzählen, nie über die Sechs hinaus.'**
+  String get lessonAddToSixDesc;
+
+  /// No description provided for @lessonSubToSixTitle.
+  ///
+  /// In de, this message translates to:
+  /// **'Minus bis 6'**
+  String get lessonSubToSixTitle;
+
+  /// No description provided for @lessonSubToSixDesc.
+  ///
+  /// In de, this message translates to:
+  /// **'Wegnehmen im Zahlenraum bis sechs.'**
+  String get lessonSubToSixDesc;
+
+  /// No description provided for @lessonCalcToSixTitle.
+  ///
+  /// In de, this message translates to:
+  /// **'Plus und Minus bis 6'**
+  String get lessonCalcToSixTitle;
+
+  /// No description provided for @lessonCalcToSixDesc.
+  ///
+  /// In de, this message translates to:
+  /// **'Beides gemischt, nie über die Sechs hinaus.'**
+  String get lessonCalcToSixDesc;
+
+  /// No description provided for @lessonClockHalfTitle.
+  ///
+  /// In de, this message translates to:
+  /// **'Volle und halbe Stunden'**
+  String get lessonClockHalfTitle;
+
+  /// No description provided for @lessonClockHalfDesc.
+  ///
+  /// In de, this message translates to:
+  /// **'Wie spät ist es? Der große Zeiger steht auf der 12 oder auf der 6.'**
+  String get lessonClockHalfDesc;
+
+  /// No description provided for @lessonClockQuarterTitle.
+  ///
+  /// In de, this message translates to:
+  /// **'Viertelstunden'**
+  String get lessonClockQuarterTitle;
+
+  /// No description provided for @lessonClockQuarterDesc.
+  ///
+  /// In de, this message translates to:
+  /// **'Viertel nach, halb, Viertel vor - der große Zeiger steht auf 12, 3, 6 oder 9.'**
+  String get lessonClockQuarterDesc;
+
+  /// No description provided for @lessonClockFiveTitle.
+  ///
+  /// In de, this message translates to:
+  /// **'Uhrzeit auf fünf Minuten'**
+  String get lessonClockFiveTitle;
+
+  /// No description provided for @lessonClockFiveDesc.
+  ///
+  /// In de, this message translates to:
+  /// **'Der große Zeiger steht auf einer der zwölf Zahlen.'**
+  String get lessonClockFiveDesc;
+
+  /// No description provided for @lessonClock24Title.
+  ///
+  /// In de, this message translates to:
+  /// **'Uhrzeit mit 24 Stunden'**
+  String get lessonClock24Title;
+
+  /// No description provided for @lessonClock24Desc.
+  ///
+  /// In de, this message translates to:
+  /// **'Nachmittags zählt man weiter: aus 3 Uhr wird 15 Uhr. Unter der Uhr steht, welche Tageszeit es ist.'**
+  String get lessonClock24Desc;
+
+  /// No description provided for @lessonClockWordsTitle.
+  ///
+  /// In de, this message translates to:
+  /// **'Uhrzeit sagen'**
+  String get lessonClockWordsTitle;
+
+  /// No description provided for @lessonClockWordsDesc.
+  ///
+  /// In de, this message translates to:
+  /// **'Wie sagt man die Uhrzeit? Erst die Sprechweise antippen, dann die Stunde, die dabei genannt wird - bei \"halb 3\" ist das die 3.'**
+  String get lessonClockWordsDesc;
+
+  /// No description provided for @lessonMoneyAddTitle.
+  ///
+  /// In de, this message translates to:
+  /// **'Geld zusammenzählen'**
+  String get lessonMoneyAddTitle;
+
+  /// No description provided for @lessonMoneyAddDesc.
+  ///
+  /// In de, this message translates to:
+  /// **'Zwei Beträge addieren. Erst die Euro eingeben, dann die Cent.'**
+  String get lessonMoneyAddDesc;
+
+  /// No description provided for @lessonMoneySubTitle.
+  ///
+  /// In de, this message translates to:
+  /// **'Geld abziehen'**
+  String get lessonMoneySubTitle;
+
+  /// No description provided for @lessonMoneySubDesc.
+  ///
+  /// In de, this message translates to:
+  /// **'Was bleibt übrig, oder was gibt es zurück?'**
+  String get lessonMoneySubDesc;
+
+  /// No description provided for @lessonMoneyComposeTitle.
+  ///
+  /// In de, this message translates to:
+  /// **'Betrag zusammenlegen'**
+  String get lessonMoneyComposeTitle;
+
+  /// No description provided for @lessonMoneyComposeDesc.
+  ///
+  /// In de, this message translates to:
+  /// **'Lege den Betrag aus Münzen und Scheinen. Es gibt viele richtige Wege - der Betrag muss am Ende genau stimmen.'**
+  String get lessonMoneyComposeDesc;
+
+  /// No description provided for @lessonMoneyChangeTitle.
+  ///
+  /// In de, this message translates to:
+  /// **'Was bekomme ich zurück?'**
+  String get lessonMoneyChangeTitle;
+
+  /// No description provided for @lessonMoneyChangeDesc.
+  ///
+  /// In de, this message translates to:
+  /// **'Etwas kostet einen krummen Betrag, bezahlt wird mit einem glatten Schein oder Stück. Gesucht ist das Rückgeld.'**
+  String get lessonMoneyChangeDesc;
+
+  /// No description provided for @lessonPlaceValue100Title.
+  ///
+  /// In de, this message translates to:
+  /// **'Einer und Zehner'**
+  String get lessonPlaceValue100Title;
+
+  /// No description provided for @lessonPlaceValue100Desc.
+  ///
+  /// In de, this message translates to:
+  /// **'Wie viele Einer und Zehner sind es? Welche Zahl ist das zusammen? Es können auch mehr als neun Einer sein.'**
+  String get lessonPlaceValue100Desc;
+
+  /// No description provided for @lessonPlaceValue1000Title.
+  ///
+  /// In de, this message translates to:
+  /// **'Einer, Zehner, Hunderter'**
+  String get lessonPlaceValue1000Title;
+
+  /// No description provided for @lessonPlaceValue1000Desc.
+  ///
+  /// In de, this message translates to:
+  /// **'Wie viele Einer, Zehner und Hunderter sind es? Welche Zahl ist das zusammen? Es können auch mehr als neun von einer Sorte sein.'**
+  String get lessonPlaceValue1000Desc;
+
+  /// No description provided for @lessonRoundThousandsTitle.
+  ///
+  /// In de, this message translates to:
+  /// **'Glatte Tausender'**
+  String get lessonRoundThousandsTitle;
+
+  /// No description provided for @lessonRoundThousandsDesc.
+  ///
+  /// In de, this message translates to:
+  /// **'3000 + 4000, 8000 − 5000: rechne mit ganzen Tausendern. Wer 3 + 4 kann, kann das auch.'**
+  String get lessonRoundThousandsDesc;
+
+  /// No description provided for @lessonRoundHundredsTitle.
+  ///
+  /// In de, this message translates to:
+  /// **'Glatte Hunderter'**
+  String get lessonRoundHundredsTitle;
+
+  /// No description provided for @lessonRoundHundredsDesc.
+  ///
+  /// In de, this message translates to:
+  /// **'2300 + 400, 5600 − 200: rechne mit ganzen Hundertern. Hier geht es auch über den Tausender.'**
+  String get lessonRoundHundredsDesc;
+
+  /// No description provided for @lessonRoundGapTitle.
+  ///
+  /// In de, this message translates to:
+  /// **'Glatte Zahlen mit Platzhalter'**
+  String get lessonRoundGapTitle;
+
+  /// No description provided for @lessonRoundGapDesc.
+  ///
+  /// In de, this message translates to:
+  /// **'3000 + ? = 7000. Was fehlt bis zur Zahl? Rückwärts gedacht.'**
+  String get lessonRoundGapDesc;
+
+  /// No description provided for @lessonPlaceValue10000Title.
+  ///
+  /// In de, this message translates to:
+  /// **'Einer, Zehner, Hunderter, Tausender'**
+  String get lessonPlaceValue10000Title;
+
+  /// No description provided for @lessonPlaceValue10000Desc.
+  ///
+  /// In de, this message translates to:
+  /// **'Wie viele Einer, Zehner, Hunderter und Tausender sind es? Welche Zahl ist das zusammen? Es können auch mehr als neun von einer Sorte sein.'**
+  String get lessonPlaceValue10000Desc;
+
+  /// No description provided for @lessonAddSub10000PlainTitle.
+  ///
+  /// In de, this message translates to:
+  /// **'Plus und Minus ohne Übergang'**
+  String get lessonAddSub10000PlainTitle;
+
+  /// No description provided for @lessonAddSub10000PlainDesc.
+  ///
+  /// In de, this message translates to:
+  /// **'4200 + 350, 6870 − 40: vierstellig rechnen, aber ohne Übergang. Jede Stelle für sich.'**
+  String get lessonAddSub10000PlainDesc;
+
+  /// Asked in the "number bonds to ten" lesson: which number together with a makes ten ("in love" is the children's name for such a pair).
+  ///
+  /// In de, this message translates to:
+  /// **'Welche Zahl ist mit {a} verliebt?'**
+  String taskQuestionPartner(int a);
+
+  /// Asked under a clock face.
+  ///
+  /// In de, this message translates to:
+  /// **'Wie spät ist es?'**
+  String get taskQuestionClock;
+
+  /// Asked under a clock face; the child picks the spoken form of the time.
+  ///
+  /// In de, this message translates to:
+  /// **'Wie sagt man das?'**
+  String get taskQuestionClockPhrase;
+
+  /// amount is a formatted price such as 3,50 €.
+  ///
+  /// In de, this message translates to:
+  /// **'Lege {amount} - tippe die Münzen und Scheine an.'**
+  String taskQuestionMoneyCompose(String amount);
+
+  /// price and paid are formatted amounts of money.
+  ///
+  /// In de, this message translates to:
+  /// **'Es kostet {price}. Du gibst {paid}. Wie viel bekommst du zurück?'**
+  String taskQuestionChange(String price, String paid);
+
+  /// Asked under a heap of pictures to count.
+  ///
+  /// In de, this message translates to:
+  /// **'Wie viele?'**
+  String get taskQuestionQuantity;
+
+  /// Asked under one die.
+  ///
+  /// In de, this message translates to:
+  /// **'Wie viele Punkte?'**
+  String get taskQuestionDiceOne;
+
+  /// Asked under two dice.
+  ///
+  /// In de, this message translates to:
+  /// **'Wie viele Punkte sind es zusammen?'**
+  String get taskQuestionDiceTwo;
+
+  /// Two heaps of pictures are shown; the child types the larger count.
+  ///
+  /// In de, this message translates to:
+  /// **'Wo sind mehr? Tippe die größere Anzahl.'**
+  String get taskQuestionCompare;
+
+  /// Asked under a row of numbers with the next one missing.
+  ///
+  /// In de, this message translates to:
+  /// **'Welche Zahl kommt danach?'**
+  String get taskQuestionSequence;
+
+  /// Asked under two small groups of bees.
+  ///
+  /// In de, this message translates to:
+  /// **'Wie viele sind es zusammen?'**
+  String get taskQuestionQuantityAdd;
+
+  /// Asked under a list such as "5 Einer, 12 Zehner, 3 Hunderter".
+  ///
+  /// In de, this message translates to:
+  /// **'Welche Zahl ist das?'**
+  String get taskQuestionPlaceValue;
+
+  /// Label of the second answer box in a division with remainder.
+  ///
+  /// In de, this message translates to:
+  /// **'Rest'**
+  String get taskLabelRemainder;
+
+  /// Label between the euro box and the cent box.
+  ///
+  /// In de, this message translates to:
+  /// **'€'**
+  String get taskLabelEuro;
+
+  /// Label between the hour box and the minute box (as in "3 Uhr 15").
+  ///
+  /// In de, this message translates to:
+  /// **'Uhr'**
+  String get taskLabelClock;
+
+  /// Unit after the cent box. Short for cents.
+  ///
+  /// In de, this message translates to:
+  /// **'ct'**
+  String get taskUnitCents;
+
+  /// A count of ones in a place-value task, e.g. "5 Einer".
+  ///
+  /// In de, this message translates to:
+  /// **'{n} Einer'**
+  String placeOnes(int n);
+
+  /// A count of tens, e.g. "12 Zehner".
+  ///
+  /// In de, this message translates to:
+  /// **'{n} Zehner'**
+  String placeTens(int n);
+
+  /// A count of hundreds.
+  ///
+  /// In de, this message translates to:
+  /// **'{n} Hunderter'**
+  String placeHundreds(int n);
+
+  /// A count of thousands.
+  ///
+  /// In de, this message translates to:
+  /// **'{n} Tausender'**
+  String placeThousands(int n);
+
+  /// One-line text of a division with remainder, e.g. "17 : 5 = 3 Rest 2".
+  ///
+  /// In de, this message translates to:
+  /// **'{prefix} {answer} Rest {second}'**
+  String taskRenderRemainder(String prefix, String answer, String second);
+
+  /// A sample time on a lesson tile; minute is two digits.
+  ///
+  /// In de, this message translates to:
+  /// **'{hour}:{minute} Uhr'**
+  String taskRenderClock(int hour, String minute);
+
+  /// Sample of a change task on a lesson tile; both are formatted amounts of money.
+  ///
+  /// In de, this message translates to:
+  /// **'{price}, bezahlt mit {paid}'**
+  String taskRenderChange(String price, String paid);
+
+  /// Sample of a die task on a tile.
+  ///
+  /// In de, this message translates to:
+  /// **'{a} Punkte'**
+  String taskRenderDiceOne(int a);
+
+  /// Sample of a two-dice task on a tile.
+  ///
+  /// In de, this message translates to:
+  /// **'{a} + {b} Punkte'**
+  String taskRenderDiceTwo(int a, int b);
+
+  /// Part of the day shown under a 24-hour clock: before noon.
+  ///
+  /// In de, this message translates to:
+  /// **'vormittags'**
+  String get dayPartMorning;
+
+  /// Part of the day: exactly twelve o'clock.
+  ///
+  /// In de, this message translates to:
+  /// **'mittags'**
+  String get dayPartNoon;
+
+  /// Part of the day: from one to five in the afternoon.
+  ///
+  /// In de, this message translates to:
+  /// **'nachmittags'**
+  String get dayPartAfternoon;
+
+  /// Part of the day: from six o'clock on.
+  ///
+  /// In de, this message translates to:
+  /// **'abends'**
+  String get dayPartEvening;
+
+  /// How the time :05 is said out loud, without the hour. Eleven such forms (:05 to :55) are keys on the pad, so keep them short. The hour comes from clockSpokenTime.
+  ///
+  /// In de, this message translates to:
+  /// **'5 nach'**
+  String get clockPhrase05;
+
+  /// No description provided for @clockPhrase10.
+  ///
+  /// In de, this message translates to:
+  /// **'10 nach'**
+  String get clockPhrase10;
+
+  /// No description provided for @clockPhrase15.
+  ///
+  /// In de, this message translates to:
+  /// **'viertel nach'**
+  String get clockPhrase15;
+
+  /// No description provided for @clockPhrase20.
+  ///
+  /// In de, this message translates to:
+  /// **'20 nach'**
+  String get clockPhrase20;
+
+  /// No description provided for @clockPhrase25.
+  ///
+  /// In de, this message translates to:
+  /// **'5 vor halb'**
+  String get clockPhrase25;
+
+  /// German "halb 3" means 2:30 (half way to three).
+  ///
+  /// In de, this message translates to:
+  /// **'halb'**
+  String get clockPhrase30;
+
+  /// No description provided for @clockPhrase35.
+  ///
+  /// In de, this message translates to:
+  /// **'5 nach halb'**
+  String get clockPhrase35;
+
+  /// No description provided for @clockPhrase40.
+  ///
+  /// In de, this message translates to:
+  /// **'20 vor'**
+  String get clockPhrase40;
+
+  /// No description provided for @clockPhrase45.
+  ///
+  /// In de, this message translates to:
+  /// **'viertel vor'**
+  String get clockPhrase45;
+
+  /// No description provided for @clockPhrase50.
+  ///
+  /// In de, this message translates to:
+  /// **'10 vor'**
+  String get clockPhrase50;
+
+  /// No description provided for @clockPhrase55.
+  ///
+  /// In de, this message translates to:
+  /// **'5 vor'**
+  String get clockPhrase55;
+
+  /// A spoken time: the phrase and the hour it names, e.g. "viertel vor 3". A language that says the hour first puts {hour} first here.
+  ///
+  /// In de, this message translates to:
+  /// **'{phrase} {hour}'**
+  String clockSpokenTime(String phrase, int hour);
+
+  /// Choice for hiding finished lessons: show everything.
+  ///
+  /// In de, this message translates to:
+  /// **'Alle zeigen'**
+  String get filterAllTitle;
+
+  /// No description provided for @filterAllText.
+  ///
+  /// In de, this message translates to:
+  /// **'Der ganze Katalog, nichts wird versteckt.'**
+  String get filterAllText;
+
+  /// No description provided for @filterMasteredTitle.
+  ///
+  /// In de, this message translates to:
+  /// **'Mit 3 Sternen ausblenden'**
+  String get filterMasteredTitle;
+
+  /// No description provided for @filterMasteredText.
+  ///
+  /// In de, this message translates to:
+  /// **'Was sicher sitzt, verschwindet aus der Liste. Übrig bleibt, was noch Fehler macht.'**
+  String get filterMasteredText;
+
+  /// Stars stand for accuracy, lightning bolts for speed.
+  ///
+  /// In de, this message translates to:
+  /// **'Erst mit 3 Sternen und 3 Blitzen'**
+  String get filterPerfectedTitle;
+
+  /// The ** marks are Markdown bold; they are removed before display where bold is not supported.
+  ///
+  /// In de, this message translates to:
+  /// **'Nur was sicher **und** schnell ist, verschwindet. Was zwar fehlerfrei, aber noch langsam ist, bleibt zum Üben stehen.'**
+  String get filterPerfectedText;
+
+  /// Chip for the log of practice runs: all time.
+  ///
+  /// In de, this message translates to:
+  /// **'Alle'**
+  String get rangeAll;
+
+  /// No description provided for @rangeToday.
+  ///
+  /// In de, this message translates to:
+  /// **'Heute'**
+  String get rangeToday;
+
+  /// Last seven calendar days including today.
+  ///
+  /// In de, this message translates to:
+  /// **'7 Tage'**
+  String get rangeWeek;
+
+  /// No description provided for @rangeMonth.
+  ///
+  /// In de, this message translates to:
+  /// **'30 Tage'**
+  String get rangeMonth;
+
+  /// Used inside a sentence: "... aufräumen {range}".
+  ///
+  /// In de, this message translates to:
+  /// **'aus dem ganzen Verlauf'**
+  String get rangeAllPhrase;
+
+  /// No description provided for @rangeTodayPhrase.
+  ///
+  /// In de, this message translates to:
+  /// **'von heute'**
+  String get rangeTodayPhrase;
+
+  /// No description provided for @rangeWeekPhrase.
+  ///
+  /// In de, this message translates to:
+  /// **'aus den letzten 7 Tagen'**
+  String get rangeWeekPhrase;
+
+  /// No description provided for @rangeMonthPhrase.
+  ///
+  /// In de, this message translates to:
+  /// **'aus den letzten 30 Tagen'**
+  String get rangeMonthPhrase;
+
+  /// No description provided for @backupErrorNotABackup.
+  ///
+  /// In de, this message translates to:
+  /// **'Die Datei ist keine gültige Sicherung.'**
+  String get backupErrorNotABackup;
+
+  /// No description provided for @backupErrorWrongApp.
+  ///
+  /// In de, this message translates to:
+  /// **'Diese Datei stammt nicht aus dem Mathe-Trainer.'**
+  String get backupErrorWrongApp;
+
+  /// No description provided for @backupErrorTooNew.
+  ///
+  /// In de, this message translates to:
+  /// **'Die Sicherung stammt aus einer neueren Version der App.'**
+  String get backupErrorTooNew;
+
+  /// A time in seconds with one decimal place, e.g. "12,5 s". value is already formatted with the decimal separator of the language.
+  ///
+  /// In de, this message translates to:
+  /// **'{value} s'**
+  String formatSeconds(String value);
+
+  /// A time of a minute or more, e.g. "1:05 min"; seconds are two digits.
+  ///
+  /// In de, this message translates to:
+  /// **'{minutes}:{seconds} min'**
+  String formatMinutesSeconds(int minutes, String seconds);
+
+  /// Summed practice time, e.g. "3 h 12 min".
+  ///
+  /// In de, this message translates to:
+  /// **'{hours} h {minutes} min'**
+  String formatHoursMinutes(int hours, int minutes);
+
+  /// Short date and time for a list, e.g. "5.9. · 14:32".
+  ///
+  /// In de, this message translates to:
+  /// **'{day} · {time}'**
+  String formatDayAndTime(String day, String time);
+
+  /// "Last active" wording: today.
+  ///
+  /// In de, this message translates to:
+  /// **'heute'**
+  String get relativeToday;
+
+  /// No description provided for @relativeYesterday.
+  ///
+  /// In de, this message translates to:
+  /// **'gestern'**
+  String get relativeYesterday;
+
+  /// Used for two to six days ago only.
+  ///
+  /// In de, this message translates to:
+  /// **'vor {days} Tagen'**
+  String relativeDaysAgo(int days);
+
+  /// Time left until the break ends, in a sentence such as "Weiter geht es um 11:15 - gleich". 0 means "in a moment".
+  ///
+  /// In de, this message translates to:
+  /// **'{minutes, plural, =0{gleich} =1{noch eine Minute} other{noch {minutes} Minuten}}'**
+  String remainingMinutes(int minutes);
+
+  /// A price; amount is already formatted with the decimal separator of the language, e.g. "3,50".
+  ///
+  /// In de, this message translates to:
+  /// **'{amount} €'**
+  String moneyAmount(String amount);
+
+  /// A coin of less than one euro as stamped on it, e.g. "50 ct".
+  ///
+  /// In de, this message translates to:
+  /// **'{n} ct'**
+  String moneyCoinCents(int n);
+
+  /// A coin or note of whole euros, e.g. "2 €".
+  ///
+  /// In de, this message translates to:
+  /// **'{n} €'**
+  String moneyCoinEuros(int n);
+
+  /// Deadline of a task on a card: due today.
+  ///
+  /// In de, this message translates to:
+  /// **'heute'**
+  String get deadlineToday;
+
+  /// Deadline of a weekly task: until the end of the week.
+  ///
+  /// In de, this message translates to:
+  /// **'bis Sonntag'**
+  String get deadlineUntilSunday;
+
+  /// Deadline of a task from an earlier day that is still to be done.
+  ///
+  /// In de, this message translates to:
+  /// **'noch offen'**
+  String get deadlineStillOpen;
+
+  /// A task whose day is over; day is a short date such as "Mi, 16.9.".
+  ///
+  /// In de, this message translates to:
+  /// **'war {day}'**
+  String deadlineWas(String day);
+
+  /// No description provided for @deadlineThisWeek.
+  ///
+  /// In de, this message translates to:
+  /// **'diese Woche'**
+  String get deadlineThisWeek;
+
+  /// A task that starts in a later week; day is a short date.
+  ///
+  /// In de, this message translates to:
+  /// **'ab {day}'**
+  String deadlineFrom(String day);
+
+  /// A task for one day; day is a short date such as "Mi, 16.9.".
+  ///
+  /// In de, this message translates to:
+  /// **'am {day}'**
+  String deadlineOn(String day);
+
+  /// Seconds, short.
+  ///
+  /// In de, this message translates to:
+  /// **'{n} s'**
+  String commonSecondsShort(int n);
+
+  /// A percentage.
+  ///
+  /// In de, this message translates to:
+  /// **'{n} %'**
+  String commonPercent(int n);
 }
 
 class _AppLocalizationsDelegate

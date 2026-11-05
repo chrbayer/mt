@@ -23,24 +23,6 @@ enum LessonFilter {
   perfected,
 }
 
-/// Label for the choice, for the catalogue and for the parent area.
-String lessonFilterTitle(LessonFilter filter) => switch (filter) {
-      LessonFilter.all => 'Alle zeigen',
-      LessonFilter.mastered => 'Mit 3 Sternen ausblenden',
-      LessonFilter.perfected => 'Erst mit 3 Sternen und 3 Blitzen',
-    };
-
-/// One sentence on what the choice does.
-String lessonFilterExplanation(LessonFilter filter) => switch (filter) {
-      LessonFilter.all => 'Der ganze Katalog, nichts wird versteckt.',
-      LessonFilter.mastered =>
-        'Was sicher sitzt, verschwindet aus der Liste. Übrig bleibt, was '
-            'noch Fehler macht.',
-      LessonFilter.perfected =>
-        'Nur was sicher **und** schnell ist, verschwindet. Was zwar '
-            'fehlerfrei, aber noch langsam ist, bleibt zum Üben stehen.',
-    };
-
 /// Whether this lesson drops out of the catalogue.
 ///
 /// The first steps are **not** exempt. They were, on the grounds that their

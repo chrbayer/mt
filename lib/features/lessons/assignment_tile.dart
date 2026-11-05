@@ -9,6 +9,8 @@ import '../common/star_row.dart';
 import 'lesson_example.dart';
 import 'start_lesson_sheet.dart';
 import '../../l10n/l10n.dart';
+import '../../l10n/lesson_texts.dart';
+import '../../l10n/formatters.dart';
 
 /// A card for one lesson of one open assignment - the same catalogue tile as
 /// [LessonHomeScreen]'s `_LessonTile`, right down to the grid, the radius,
@@ -69,7 +71,7 @@ class AssignmentTile extends ConsumerWidget {
                   children: [
                     Expanded(
                       child: Text(
-                        lesson.title,
+                        lessonTitle(context.l10n, lesson),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
@@ -149,7 +151,7 @@ class _AssignmentFooter extends StatelessWidget {
         Expanded(
           child: Text(
             '${progress.qualifyingRuns}/${a.runs} · '
-            '${formatDeadline(a, now: now)}',
+            '${formatDeadline(context.l10n, a, now: now)}',
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(fontSize: 15, color: AppColors.textMuted),

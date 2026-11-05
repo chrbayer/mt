@@ -16,6 +16,7 @@ import 'package:mathe_trainer/domain/lesson.dart';
 import 'package:mathe_trainer/features/lessons/lesson_home_screen.dart';
 import 'package:mathe_trainer/providers.dart';
 import 'package:mathe_trainer/theme/app_theme.dart';
+import 'package:mathe_trainer/l10n/lesson_texts.dart';
 
 /// A parent's assignment, as the child sees it: a card in "Deine Aufgaben",
 /// a green tick once a run qualifies, sorted by deadline, and left out of
@@ -506,7 +507,7 @@ void main() {
       expect(find.text('Aufgabe ändern'), findsOneWidget);
       // Child and lesson are shown but not offered: those two are what the
       // assignment is.
-      expect(find.text('Geld zusammenzählen · ${groupTitle(
+      expect(find.text('Geld zusammenzählen · ${groupTitle(deL10n, 
           LessonGroup.everyday)}'), findsWidgets);
       expect(find.byType(DropdownButtonFormField<String>), findsNothing);
       expect(find.text('Speichern'), findsOneWidget);
@@ -546,7 +547,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-      find.text('Geld zusammenzählen · ${groupTitle(LessonGroup.everyday)}'),
+      find.text('Geld zusammenzählen · ${groupTitle(deL10n, LessonGroup.everyday)}'),
       findsOneWidget,
     );
   });

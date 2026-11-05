@@ -1,6 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mathe_trainer/domain/lesson.dart';
 import 'package:mathe_trainer/domain/task.dart';
+import 'package:mathe_trainer/l10n/task_texts.dart';
+
+import '../support/l10n.dart';
 
 void main() {
   group('Punkt vor Strich', () {
@@ -65,8 +68,8 @@ void main() {
       );
       expect(task.expected, 22);
       expect(task.expectedSecond, isNull);
-      expect(task.question, isNull);
-      expect(task.render('22'), '40 − 3 · 6 = 22');
+      expect(taskQuestion(deL10n, task), isNull);
+      expect(renderTask(deL10n, task, '22'), '40 − 3 · 6 = 22');
     });
 
     test('key tells the two orders of the same numbers apart', () {

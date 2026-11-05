@@ -37,13 +37,6 @@ void main() {
     expect(asDate.day, 22);
   });
 
-  test('every range has a title and a phrase for the question', () {
-    for (final range in HistoryRange.values) {
-      expect(historyRangeTitle(range), isNotEmpty);
-      expect(historyRangePhrase(range), isNotEmpty);
-    }
-  });
-
   test('an unknown stored name falls back to the whole log', () {
     expect(historyRangeByName('week'), HistoryRange.week);
     // Written by a newer version, read by an older one: showing everything

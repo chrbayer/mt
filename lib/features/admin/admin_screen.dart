@@ -20,6 +20,9 @@ import 'pin_gate.dart';
 import 'profile_settings_screen.dart';
 import 'today_summary.dart';
 import '../../l10n/l10n.dart';
+import '../../l10n/lesson_texts.dart';
+import '../../l10n/formatters.dart';
+import '../../l10n/choice_texts.dart';
 
 /// The parent area behind the PIN: what was practised when and how well, plus
 /// the operations a child should not be able to trigger - renaming, deleting
@@ -175,7 +178,7 @@ class _HistoryTabState extends ConsumerState<_HistoryTab> {
             children: [
               for (final range in HistoryRange.values)
                 ChoiceChip(
-                  label: Text(historyRangeTitle(range),
+                  label: Text(historyRangeTitle(context.l10n, range),
                       style: const TextStyle(fontSize: 19)),
                   padding: const EdgeInsets.symmetric(
                       horizontal: 14, vertical: 10),
@@ -274,8 +277,8 @@ class _HistoryTabState extends ConsumerState<_HistoryTab> {
         content: Text(
           l10n.adminDeleteRunText(
             entry.userName,
-            lessonByIdOrNull(entry.lessonId)?.title ?? entry.lessonId,
-            formatDayAndTime(entry.playedAt),
+            lessonTitleById(l10n, entry.lessonId),
+            formatDayAndTime(context.l10n, entry.playedAt),
           ),
           style: const TextStyle(fontSize: 20),
         ),
@@ -343,7 +346,7 @@ class _HistoryTabState extends ConsumerState<_HistoryTab> {
       builder: (dialogContext) => AlertDialog(
         title: Text(l10n.adminCleanupTitle(count)),
         content: Text(
-          l10n.adminCleanupText(whose, historyRangePhrase(_range)),
+          l10n.adminCleanupText(whose, historyRangePhrase(context.l10n, _range)),
           style: const TextStyle(fontSize: 20),
         ),
         actions: [
@@ -408,7 +411,7 @@ class _HistoryRow extends StatelessWidget {
           SizedBox(
             width: 130,
             child: Text(
-              formatDayAndTime(entry.playedAt),
+              formatDayAndTime(context.l10n, entry.playedAt),
               style: const TextStyle(fontSize: 17, color: AppColors.textMuted),
             ),
           ),
@@ -432,7 +435,7 @@ class _HistoryRow extends StatelessWidget {
               lesson == null
                   ? entry.lessonId
                   : context.l10n.adminHistoryLessonLine(
-                      lesson.title, groupTitle(lesson.group)),
+                      lessonTitle(context.l10n, lesson), groupTitle(context.l10n, lesson.group)),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(fontSize: 19),
@@ -440,7 +443,7 @@ class _HistoryRow extends StatelessWidget {
           ),
           if (entry.completed) ...[
             _Cell('${entry.taskCount}', context.l10n.commonTasks),
-            _Cell(formatPerTask(entry.msPerTask), context.l10n.commonPerTask),
+            _Cell(formatPerTask(context.l10n, entry.msPerTask), context.l10n.commonPerTask),
             _Cell('${entry.wrongAttempts}', context.l10n.commonErrors),
             Padding(
               padding: const EdgeInsets.only(left: 12),

@@ -11,6 +11,8 @@ import '../common/load_failure.dart';
 import '../common/star_row.dart';
 import '../leaderboard/leaderboard_screen.dart';
 import '../../l10n/l10n.dart';
+import '../../l10n/lesson_texts.dart';
+import '../../l10n/formatters.dart';
 
 /// Everyone at a glance: who practised how much, and how that spread over the
 /// last weeks. Reachable from the profile screen without logging in, because
@@ -172,7 +174,7 @@ class _LeaderboardRow extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      lesson.title,
+                      lessonTitle(context.l10n, lesson),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
@@ -181,7 +183,7 @@ class _LeaderboardRow extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      groupTitle(lesson.group),
+                      groupTitle(context.l10n, lesson.group),
                       style: const TextStyle(
                         fontSize: 15,
                         color: AppColors.textMuted,
@@ -249,7 +251,7 @@ class _PodiumChip extends StatelessWidget {
           Text(entry.avatar, style: const TextStyle(fontSize: 22)),
           const SizedBox(width: 8),
           Text(
-            formatPerTask(entry.scoreMs),
+            formatPerTask(context.l10n, entry.scoreMs),
             style: TextStyle(
               fontSize: 19,
               fontWeight: leader ? FontWeight.w700 : FontWeight.w500,
@@ -315,7 +317,7 @@ class _SummaryCard extends ConsumerWidget {
               value: '${summary.runs}',
               label: context.l10n.globalStatsRounds(summary.runs),
             ),
-            _Line(value: formatTotalTime(summary.totalMs), label: context.l10n.globalStatsPractised),
+            _Line(value: formatTotalTime(context.l10n, summary.totalMs), label: context.l10n.globalStatsPractised),
             Padding(
               padding: const EdgeInsets.only(bottom: 4),
               child: Row(
@@ -330,7 +332,7 @@ class _SummaryCard extends ConsumerWidget {
               ),
             ),
             _Line(
-              value: '${(summary.errors * 100).round()} %',
+              value: context.l10n.commonPercent((summary.errors * 100).round()),
               label: context.l10n.commonErrors,
             ),
             const Spacer(),
@@ -346,7 +348,7 @@ class _SummaryCard extends ConsumerWidget {
             else
               Text(
                 context.l10n
-                    .globalStatsLastPlayed(formatRelativeDay(summary.lastPlayed!)),
+                    .globalStatsLastPlayed(formatRelativeDay(context.l10n, summary.lastPlayed!)),
                 style:
                     const TextStyle(fontSize: 17, color: AppColors.textMuted),
               ),
@@ -481,7 +483,7 @@ class _ActivityChart extends ConsumerWidget {
                 return Padding(
                   padding: const EdgeInsets.only(top: 6),
                   child: Text(
-                    '${day.day}.${day.month}.',
+                    formatShortDate(context.l10n, day),
                     style: const TextStyle(
                       fontSize: 13,
                       color: AppColors.textMuted,
@@ -497,8 +499,8 @@ class _ActivityChart extends ConsumerWidget {
             getTooltipItem: (group, groupIndex, rod, rodIndex) {
               final day = start.add(Duration(days: group.x));
               return BarTooltipItem(
-                '${day.day}.${day.month}.\n'
-                '${rod.toY.round()} min',
+                '${formatShortDate(context.l10n, day)}\n'
+                '${context.l10n.commonMinutesShort(rod.toY.round())}',
                 const TextStyle(color: Colors.white, fontSize: 15),
               );
             },

@@ -10,6 +10,7 @@ import 'package:mathe_trainer/domain/task.dart';
 import 'package:mathe_trainer/features/admin/reset_stars_dialog.dart';
 import 'package:mathe_trainer/providers.dart';
 import 'package:mathe_trainer/theme/app_theme.dart';
+import 'package:mathe_trainer/l10n/lesson_texts.dart';
 
 /// Stars are stored rather than worked out from the runs, so that a parent
 /// can hand a group back without touching the times behind it.
@@ -202,7 +203,7 @@ void main() {
     /// alone is not enough to point at one of them.
     Finder rowOf(LessonGroup group) => find
         .ancestor(
-          of: find.text(groupTitle(group)),
+          of: find.text(groupTitle(deL10n, group)),
           matching: find.byType(Row),
         )
         .first;

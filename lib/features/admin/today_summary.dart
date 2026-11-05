@@ -3,10 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/db/app_database.dart';
 import '../../domain/practice_limit.dart';
-import '../../domain/scoring.dart';
 import '../../providers.dart';
 import '../../theme/app_theme.dart';
 import '../../l10n/l10n.dart';
+import '../../l10n/formatters.dart';
 
 /// Who has practised how much today, at a glance.
 ///
@@ -119,11 +119,11 @@ class _Entry extends StatelessWidget {
                     (null, _) => '…',
                     (final value?, 0) when value < 60000 =>
                       context.l10n.todayNothingYet,
-                    (final value?, 0) => formatTotalTime(value),
+                    (final value?, 0) => formatTotalTime(context.l10n, value),
                     (final value?, _) when value < 60000 =>
                       context.l10n.todayNothingOfLimit(limit),
                     (final value?, _) => context.l10n
-                        .todayTimeOfLimit(formatTotalTime(value), limit),
+                        .todayTimeOfLimit(formatTotalTime(context.l10n, value), limit),
                   },
                   style: TextStyle(
                     fontSize: 17,

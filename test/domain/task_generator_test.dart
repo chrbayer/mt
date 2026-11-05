@@ -4,6 +4,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mathe_trainer/domain/lesson.dart';
 import 'package:mathe_trainer/domain/task.dart';
 import 'package:mathe_trainer/domain/task_generator.dart';
+import 'package:mathe_trainer/domain/clock_speech.dart';
+import 'package:mathe_trainer/l10n/formatters.dart';
+import 'package:mathe_trainer/l10n/lesson_texts.dart';
+import 'package:mathe_trainer/l10n/task_texts.dart';
+
+import '../support/l10n.dart';
 
 /// Seeds used to exercise every lesson many times over.
 const seeds = [0, 1, 2, 7, 13, 42, 99, 256, 1234, 31337, 987654];
@@ -262,8 +268,8 @@ void main() {
         count: 11,
         seed: 1,
       ).firstWhere((t) => t.a == 3);
-      expect(task.question, 'Welche Zahl ist mit 3 verliebt?');
-      expect(task.render('7'), '3 \u2665 7');
+      expect(taskQuestion(deL10n, task), 'Welche Zahl ist mit 3 verliebt?');
+      expect(renderTask(deL10n, task, '7'), '3 \u2665 7');
       expect(task.suffix, isEmpty);
     });
 
@@ -369,17 +375,17 @@ void main() {
     test('multiplication and division read the way school writes them', () {
       const product =
           Task(a: 3, b: 7, op: Operation.mul, form: TaskForm.result);
-      expect(product.render('21'), '3 · 7 = 21');
+      expect(renderTask(deL10n, product, '21'), '3 · 7 = 21');
       expect(product.expectedSecond, isNull);
 
       const quotient =
           Task(a: 17, b: 5, op: Operation.div, form: TaskForm.remainder);
-      expect(quotient.render('3', '2'), '17 : 5 = 3 Rest 2');
+      expect(renderTask(deL10n, quotient, '3', '2'), '17 : 5 = 3 Rest 2');
       expect(quotient.expected, 3);
       expect(quotient.expectedSecond, 2);
 
       const gap = Task(a: 24, b: 4, op: Operation.div, form: TaskForm.gap);
-      expect(gap.render('4'), '24 : 4 = 6');
+      expect(renderTask(deL10n, gap, '4'), '24 : 4 = 6');
       expect(gap.expected, 4);
     });
 
@@ -606,7 +612,7 @@ void main() {
               expect(task.b % lesson.minuteStep, 0, reason: '$task');
               expect(task.expected, task.a);
               expect(task.expectedSecond, task.b);
-              expect(task.question, 'Wie spät ist es?');
+              expect(taskQuestion(deL10n, task), 'Wie spät ist es?');
             }
           }
         }
@@ -656,17 +662,17 @@ void main() {
         // hour. Getting that wrong is the classic mistake.
         Task at(int hour, int minute) =>
             Task(a: hour, b: minute, op: Operation.add, form: TaskForm.clockPhrase);
-        expect(at(2, 15).spokenTime, 'viertel nach 2');
-        expect(at(2, 20).spokenTime, '20 nach 2');
-        expect(at(2, 25).spokenTime, '5 vor halb 3');
-        expect(at(2, 30).spokenTime, 'halb 3');
-        expect(at(2, 35).spokenTime, '5 nach halb 3');
-        expect(at(2, 45).spokenTime, 'viertel vor 3');
-        expect(at(2, 55).spokenTime, '5 vor 3');
+        expect(spokenTime(deL10n, at(2, 15)), 'viertel nach 2');
+        expect(spokenTime(deL10n, at(2, 20)), '20 nach 2');
+        expect(spokenTime(deL10n, at(2, 25)), '5 vor halb 3');
+        expect(spokenTime(deL10n, at(2, 30)), 'halb 3');
+        expect(spokenTime(deL10n, at(2, 35)), '5 nach halb 3');
+        expect(spokenTime(deL10n, at(2, 45)), 'viertel vor 3');
+        expect(spokenTime(deL10n, at(2, 55)), '5 vor 3');
         // After twelve it starts over at one, not at thirteen.
-        expect(at(12, 30).spokenTime, 'halb 1');
-        expect(at(12, 45).spokenTime, 'viertel vor 1');
-        expect(at(12, 15).spokenTime, 'viertel nach 12');
+        expect(spokenTime(deL10n, at(12, 30)), 'halb 1');
+        expect(spokenTime(deL10n, at(12, 45)), 'viertel vor 1');
+        expect(spokenTime(deL10n, at(12, 15)), 'viertel nach 12');
       });
 
       test('every spoken time asks for a phrase and the hour it names', () {
@@ -677,17 +683,17 @@ void main() {
             // The full hour has no key on the pad, so it must never come up.
             expect(task.b, inInclusiveRange(5, 55), reason: '$task');
             expect(task.b % 5, 0, reason: '$task');
-            expect(task.expected, inInclusiveRange(0, clockPhrases.length - 1),
+            expect(task.expected, inInclusiveRange(0, clockPhraseCount - 1),
                 reason: '$task');
             // The two answers together are exactly what is said out loud.
             expect(
-              task.spokenTime,
-              '${clockPhrases[task.expected]} ${task.expectedSecond}',
+              spokenTime(deL10n, task),
+              '${clockPhraseLabels(deL10n)[task.expected]} ${task.expectedSecond}',
               reason: '$task',
             );
             expect(task.expectedSecond, inInclusiveRange(1, 12),
                 reason: '$task');
-            expect(task.question, 'Wie sagt man das?');
+            expect(taskQuestion(deL10n, task), 'Wie sagt man das?');
           }
         }
       });
@@ -704,13 +710,13 @@ void main() {
                   .map((t) => t.expected)
                   .toList();
           // Two complete passes: each form exactly twice.
-          for (var i = 0; i < clockPhrases.length; i++) {
+          for (var i = 0; i < clockPhraseCount; i++) {
             expect(phrases.where((p) => p == i), hasLength(2),
-                reason: 'seed $seed, ${clockPhrases[i]}');
+                reason: 'seed $seed, ${clockPhraseLabels(deL10n)[i]}');
           }
           // And within one pass, each exactly once.
-          expect(phrases.take(clockPhrases.length).toSet(),
-              hasLength(clockPhrases.length),
+          expect(phrases.take(clockPhraseCount).toSet(),
+              hasLength(clockPhraseCount),
               reason: 'seed $seed');
           // Never the same form twice in a row, not even across the seam.
           for (var i = 1; i < phrases.length; i++) {
@@ -761,11 +767,11 @@ void main() {
       ];
       final phrases = generateTasks(
         lesson: lessonById('clock_words'),
-        count: clockPhrases.length,
+        count: clockPhraseCount,
         seed: 7,
         review: review,
       ).map((t) => t.expected).toSet();
-      expect(phrases, hasLength(clockPhrases.length));
+      expect(phrases, hasLength(clockPhraseCount));
     });
 
     test('a short run of spoken times still spreads over the forms', () {
@@ -798,15 +804,15 @@ void main() {
               in generateTasks(lesson: lesson, count: 20, seed: seed)) {
             expect(task.a, inInclusiveRange(6, 23), reason: '$task');
             expect(task.expected, task.a, reason: '$task');
-            expect(task.dayPart, isNotEmpty, reason: '$task');
+            expect(dayPartName(deL10n, task.dayPart), isNotEmpty, reason: '$task');
           }
         }
-        expect(dayPartOf(9), 'vormittags');
-        expect(dayPartOf(12), 'mittags');
-        expect(dayPartOf(13), 'nachmittags');
-        expect(dayPartOf(17), 'nachmittags');
-        expect(dayPartOf(18), 'abends');
-        expect(dayPartOf(23), 'abends');
+        expect(dayPartOf(9), DayPart.morning);
+        expect(dayPartOf(12), DayPart.noon);
+        expect(dayPartOf(13), DayPart.afternoon);
+        expect(dayPartOf(17), DayPart.afternoon);
+        expect(dayPartOf(18), DayPart.evening);
+        expect(dayPartOf(23), DayPart.evening);
       });
 
       test('an amount to lay out can always be laid from the pieces', () {
@@ -843,36 +849,36 @@ void main() {
             expect(task.result, greaterThanOrEqualTo(10), reason: '$task');
             expect(task.expected * 100 + task.expectedSecond!, task.result,
                 reason: '$task');
-            expect(task.question, contains('zurück'), reason: '$task');
+            expect(taskQuestion(deL10n, task), contains('zurück'), reason: '$task');
           }
         }
       });
 
       test('a coin is written the way it is stamped', () {
-        expect(formatPiece(5), '5 ct');
-        expect(formatPiece(50), '50 ct');
-        expect(formatPiece(100), '1 €');
-        expect(formatPiece(2000), '20 €');
+        expect(formatPiece(deL10n, 5), '5 ct');
+        expect(formatPiece(deL10n, 50), '50 ct');
+        expect(formatPiece(deL10n, 100), '1 €');
+        expect(formatPiece(deL10n, 2000), '20 €');
       });
 
       test('money is written the way a price tag is', () {
         const task =
             Task(a: 350, b: 120, op: Operation.add, form: TaskForm.money);
-        expect(task.prefix, '3,50 € + 1,20 € =');
+        expect(taskPrefix(deL10n, task), '3,50 € + 1,20 € =');
         expect(task.expected, 4);
         expect(task.expectedSecond, 70);
-        expect(task.secondLabel, '€');
-        expect(task.secondUnit, 'ct');
-        expect(formatEuro(5), '0,05 €');
-        expect(formatEuro(2000), '20,00 €');
+        expect(taskSecondLabel(deL10n, task), '€');
+        expect(taskSecondUnit(deL10n, task), 'ct');
+        expect(formatEuro(deL10n, 5), '0,05 €');
+        expect(formatEuro(deL10n, 2000), '20,00 €');
       });
 
       test('a clock task reads as a time, not as a sum', () {
         const task =
             Task(a: 9, b: 45, op: Operation.add, form: TaskForm.clock);
-        expect(task.toString(), '9:45 Uhr');
+        expect(taskExample(deL10n, task), '9:45 Uhr');
         expect(task.prefix, isEmpty);
-        expect(task.secondLabel, 'Uhr');
+        expect(taskSecondLabel(deL10n, task), 'Uhr');
       });
     });
 
@@ -919,10 +925,10 @@ void main() {
               in generateTasks(lesson: lesson, count: 20, seed: seed)) {
             expect(task.a, inInclusiveRange(1, 5));
             expect(task.expected, task.a);
-            expect(task.question, 'Wie viele?');
+            expect(taskQuestion(deL10n, task), 'Wie viele?');
             expect(countingPictures, contains(task.picture));
             // The rendering is the pictures themselves, one per unit.
-            expect(task.toString(), task.picture * task.a);
+            expect(taskExample(deL10n, task), task.picture * task.a);
           }
         }
       });
@@ -935,7 +941,7 @@ void main() {
           expect(task.b, inInclusiveRange(1, 5));
           expect(task.expected, task.a + task.b);
           expect(task.expected, lessThanOrEqualTo(10));
-          expect(task.question, 'Wie viele Punkte sind es zusammen?');
+          expect(taskQuestion(deL10n, task), 'Wie viele Punkte sind es zusammen?');
         }
 
         final faces = <int>{};
@@ -944,7 +950,7 @@ void main() {
               lesson: lessonById('count_dice'), count: 20, seed: seed)) {
             expect(task.b, 0);
             expect(task.expected, task.a);
-            expect(task.question, 'Wie viele Punkte?');
+            expect(taskQuestion(deL10n, task), 'Wie viele Punkte?');
             faces.add(task.a);
           }
         }
@@ -1070,7 +1076,7 @@ void main() {
             expect(task.expected, task.a + task.b);
             expect(task.expected, lessThanOrEqualTo(10), reason: '$task');
             expect(task.picture, '🐝');
-            expect(task.question, 'Wie viele sind es zusammen?');
+            expect(taskQuestion(deL10n, task), 'Wie viele sind es zusammen?');
           }
         }
       });
@@ -1078,8 +1084,8 @@ void main() {
       test('dice read as pips, not as "Würfel 2"', () {
         const one = Task(a: 2, b: 0, op: Operation.add, form: TaskForm.dice);
         const two = Task(a: 4, b: 3, op: Operation.add, form: TaskForm.dice);
-        expect(one.toString(), '2 Punkte');
-        expect(two.toString(), '4 + 3 Punkte');
+        expect(taskExample(deL10n, one), '2 Punkte');
+        expect(taskExample(deL10n, two), '4 + 3 Punkte');
       });
     });
 
@@ -1167,7 +1173,7 @@ void main() {
       expect(task.expected, 85);
       expect(task.prefix, '47 + 38 =');
       expect(task.suffix, '');
-      expect(task.render('85'), '47 + 38 = 85');
+      expect(renderTask(deL10n, task, '85'), '47 + 38 = 85');
     });
 
     test('gap form asks for the second operand', () {
@@ -1175,7 +1181,7 @@ void main() {
       expect(task.expected, 37);
       expect(task.prefix, '34 +');
       expect(task.suffix, '= 71');
-      expect(task.render('37'), '34 + 37 = 71');
+      expect(renderTask(deL10n, task, '37'), '34 + 37 = 71');
     });
 
     test('subtraction uses a real minus sign', () {
@@ -1305,22 +1311,24 @@ void main() {
     test('the up-to-10 group does not pretend there is a Zehnerübergang', () {
       for (final lesson in lessonsInGroup(LessonGroup.upTo10)) {
         expect(lesson.carry, CarryMode.any, reason: lesson.id);
-        expect(lesson.title, isNot(contains('Übergang')), reason: lesson.id);
+        expect(lessonTitle(deL10n, lesson), isNot(contains('Übergang')),
+            reason: lesson.id);
       }
     });
 
     test('the small ranges name the Zehnerübergang, the big one does not', () {
-      expect(lessonById('add_20_carry').title, 'Plus mit Zehnerübergang');
-      expect(lessonById('sub_100_plain').title, 'Minus ohne Zehnerübergang');
+      expect(lessonTitle(deL10n, lessonById('add_20_carry')), 'Plus mit Zehnerübergang');
+      expect(lessonTitle(deL10n, lessonById('sub_100_plain')), 'Minus ohne Zehnerübergang');
       // Up to 1000 a task may cross the ten or the hundred.
-      expect(lessonById('add_1000_carry').title, 'Plus mit Übergang');
+      expect(lessonTitle(deL10n, lessonById('add_1000_carry')), 'Plus mit Übergang');
     });
 
     test('every lesson explains itself in one sentence', () {
       for (final lesson in lessonCatalog) {
-        expect(lesson.description, isNotEmpty, reason: lesson.id);
+        final description = lessonDescription(deL10n, lesson);
+        expect(description, isNotEmpty, reason: lesson.id);
         expect(
-          ['.', '?', '!'].any(lesson.description.endsWith),
+          ['.', '?', '!'].any(description.endsWith),
           isTrue,
           reason: lesson.id,
         );

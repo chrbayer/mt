@@ -8,10 +8,10 @@ import 'package:share_plus/share_plus.dart';
 
 import '../../data/repositories/backup_repository.dart';
 import '../../providers.dart';
-import '../../domain/scoring.dart';
 import '../../theme/app_theme.dart';
 import 'admin_session.dart';
 import '../../l10n/l10n.dart';
+import '../../l10n/formatters.dart';
 
 /// Save and restore the whole database.
 ///
@@ -114,7 +114,11 @@ class _BackupActionsState extends ConsumerState<BackupActions> {
           await ref.read(backupRepositoryProvider).import(await file.readAsString());
 _tell(l10n.backupImported(summary.users, summary.sessions));
     } on BackupFormatException catch (error) {
-      _tell(error.message);
+      _tell(switch (error.error) {
+        BackupError.notABackup => l10n.backupErrorNotABackup,
+        BackupError.wrongApp => l10n.backupErrorWrongApp,
+        BackupError.tooNew => l10n.backupErrorTooNew,
+      });
     } catch (error) {
       _tell(l10n.backupImportFailed('$error'));
     } finally {
@@ -202,7 +206,7 @@ class BackupAgeNotice extends StatelessWidget {
     final overdue = days == null || days >= nudgeAfterDays;
     final when = last == null
         ? ''
-        : formatRelativeDay(
+        : formatRelativeDay(context.l10n, 
             DateTime.fromMillisecondsSinceEpoch(last),
             now: now,
           );

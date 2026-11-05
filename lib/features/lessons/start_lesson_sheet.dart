@@ -13,6 +13,8 @@ import '../leaderboard/leaderboard_screen.dart';
 import '../practice/practice_screen.dart';
 import 'lesson_example.dart';
 import '../../l10n/l10n.dart';
+import '../../l10n/lesson_texts.dart';
+import '../../l10n/formatters.dart';
 
 /// Asks how many tasks this run should have. The app is meant for drilling as
 /// much as for testing, so longer runs are a first-class choice - the
@@ -107,7 +109,7 @@ class _StartLessonSheetState extends ConsumerState<StartLessonSheet> {
             children: [
               Flexible(
                 child: Text(
-                  widget.lesson.title,
+                  lessonTitle(context.l10n, widget.lesson),
                   style: Theme.of(context).textTheme.headlineLarge,
                 ),
               ),
@@ -124,7 +126,7 @@ class _StartLessonSheetState extends ConsumerState<StartLessonSheet> {
             ],
           ),
           Text(
-            context.l10n.startExample(exampleFor(widget.lesson)),
+            context.l10n.startExample(exampleFor(context.l10n, widget.lesson)),
             style: const TextStyle(
               fontSize: 24,
               color: AppColors.primary,
@@ -137,7 +139,7 @@ class _StartLessonSheetState extends ConsumerState<StartLessonSheet> {
             Padding(
               padding: const EdgeInsets.only(top: 10),
               child: Text(
-                widget.lesson.description,
+                lessonDescription(context.l10n, widget.lesson),
                 style:
                     const TextStyle(fontSize: 19, color: AppColors.textMuted),
               ),
@@ -218,7 +220,7 @@ context.l10n.startAssignmentGoal(assignment.taskCount),
                               const BoltRow(earned: maxBolts, size: 26),
                               const SizedBox(width: 10),
                               Text(
-                                context.l10n.startBoltsFrom(formatPerTask(
+                                context.l10n.startBoltsFrom(formatPerTask(context.l10n, 
                                   widget.lesson.targetMsPerTask.toDouble(),
                                 )),
                                 style: const TextStyle(

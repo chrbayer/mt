@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 
+import '../../domain/clock_speech.dart';
 import '../../domain/lesson.dart';
 import '../../domain/task.dart';
 
@@ -26,10 +27,16 @@ class PracticeController extends ChangeNotifier {
   final List<Task> tasks;
   final Stopwatch _stopwatch;
 
+  /// How the language of the app tells the time. It decides which hour a
+  /// spoken time names (the second answer of a [TaskForm.clockPhrase] task)
+  /// and in which order the two boxes are filled. The screen takes it from
+  /// the active locale; German is the default.
+  final ClockSpeech speech;
+
   int _index = 0;
   String _input = '';
   String _secondInput = '';
-  AnswerField _field = AnswerField.primary;
+  late AnswerField _field = _firstField;
   /// The coins and notes tapped so far, newest last. Only a
   /// [TaskForm.moneyCompose] task collects any.
   final List<int> _pieces = [];
@@ -44,12 +51,29 @@ class PracticeController extends ChangeNotifier {
     required this.lesson,
     required this.tasks,
     Stopwatch? stopwatch,
+    this.speech = ClockSpeech.de,
   })  : assert(tasks.isNotEmpty, 'a run needs at least one task'),
         _stopwatch = stopwatch ?? Stopwatch() {
     _stopwatch.start();
   }
 
   Task get currentTask => tasks[_index];
+
+  /// The box a task starts in. Always the primary one - except for a spoken
+  /// time in a language that says the hour first ([ClockSpeech.hourFirst],
+  /// French "3 heures et quart"): there the hour is entered first and the
+  /// word second. The stored answers do not move; only the order of entry.
+  AnswerField get _firstField =>
+      currentTask.form == TaskForm.clockPhrase && speech.hourFirst
+          ? AnswerField.second
+          : AnswerField.primary;
+
+  /// The box that comes after [_firstField].
+  AnswerField get _lastField => _firstField == AnswerField.primary
+      ? AnswerField.second
+      : AnswerField.primary;
+
+  int? get _expectedSecond => currentTask.expectedSecondIn(speech);
   int get index => _index;
   int get taskCount => tasks.length;
   String get input => _input;
@@ -64,7 +88,7 @@ class PracticeController extends ChangeNotifier {
   List<int> get pieces => List.unmodifiable(_pieces);
 
   /// Whether this task asks for two numbers.
-  bool get hasSecondField => currentTask.expectedSecond != null;
+  bool get hasSecondField => _expectedSecond != null;
 
   AnswerFeedback get feedback => _feedback;
   bool get isPaused => _paused;
@@ -129,6 +153,7 @@ class PracticeController extends ChangeNotifier {
   bool pressPhrase(int index) {
     if (!_acceptsInput) return false;
     if (_feedback == AnswerFeedback.wrong) _feedback = AnswerFeedback.none;
+    // Choosing a word is the primary answer whichever box was active.
     _field = AnswerField.primary;
     _input = '$index';
     notifyListeners();
@@ -175,10 +200,10 @@ class PracticeController extends ChangeNotifier {
     }
     var changed = wasRed;
     if (_active.isEmpty) {
-      // Backing out of the empty remainder box returns to the quotient, so a
+      // Backing out of the empty second box returns to the first, so a
       // mistyped first number can still be corrected.
-      if (_field == AnswerField.second) {
-        _field = AnswerField.primary;
+      if (_field == _lastField) {
+        _field = _firstField;
         changed = true;
       }
     } else {
@@ -196,15 +221,15 @@ class PracticeController extends ChangeNotifier {
 
     // First of two boxes: move on rather than judge. The answer is only half
     // given, and saying now which half is wrong would hand over the other.
-    if (hasSecondField && _field == AnswerField.primary) {
-      _field = AnswerField.second;
+    if (hasSecondField && _field == _firstField) {
+      _field = _lastField;
       notifyListeners();
       return AnswerFeedback.none;
     }
 
     final answer = int.parse(_input);
     final secondMatches = !hasSecondField ||
-        int.parse(_secondInput) == currentTask.expectedSecond;
+        int.parse(_secondInput) == _expectedSecond;
     if (answer == currentTask.expected && secondMatches) {
       _results.add(
         TaskResult(
@@ -221,7 +246,7 @@ class PracticeController extends ChangeNotifier {
       _input = '';
       _secondInput = '';
       _pieces.clear();
-      _field = AnswerField.primary;
+      _field = _firstField;
       _feedback = AnswerFeedback.wrong;
     }
     notifyListeners();
@@ -236,7 +261,6 @@ class PracticeController extends ChangeNotifier {
     _input = '';
     _secondInput = '';
     _pieces.clear();
-    _field = AnswerField.primary;
     _wrongForCurrentTask = 0;
 
     if (_index + 1 >= tasks.length) {
@@ -247,6 +271,7 @@ class PracticeController extends ChangeNotifier {
       _stopwatch
         ..reset()
         ..start();
+      _field = _firstField;
     }
     notifyListeners();
   }

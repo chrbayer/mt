@@ -5,6 +5,7 @@ import '../../domain/practice_limit.dart';
 import '../../providers.dart';
 import '../../theme/app_theme.dart';
 import '../../l10n/l10n.dart';
+import '../../l10n/formatters.dart';
 
 /// Says that the practice cap has been reached, and until when.
 ///
@@ -31,11 +32,10 @@ class PauseNotice extends ConsumerWidget {
     final until = allowance.breakUntil;
     final clock = until == null
         ? ''
-        : context.l10n.pauseClock(
-            '${until.hour}:${until.minute.toString().padLeft(2, '0')}');
+        : context.l10n.pauseClock(formatClockTime(context.l10n, until));
     final left = until == null
         ? ''
-        : formatRemaining(until.difference(now));
+        : formatRemaining(context.l10n, until.difference(now));
 
     // A break can be waited out; a day cannot. Naming an hour when the day's
     // time is used up would be a promise the app is not going to keep.

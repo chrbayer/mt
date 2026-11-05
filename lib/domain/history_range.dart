@@ -9,22 +9,6 @@ library;
 /// it, whole days each.
 enum HistoryRange { all, today, week, month }
 
-String historyRangeTitle(HistoryRange range) => switch (range) {
-      HistoryRange.all => 'Alle',
-      HistoryRange.today => 'Heute',
-      HistoryRange.week => '7 Tage',
-      HistoryRange.month => '30 Tage',
-    };
-
-/// The same, in the middle of a sentence - for the question asked before
-/// anything is tidied away.
-String historyRangePhrase(HistoryRange range) => switch (range) {
-      HistoryRange.all => 'aus dem ganzen Verlauf',
-      HistoryRange.today => 'von heute',
-      HistoryRange.week => 'aus den letzten 7 Tagen',
-      HistoryRange.month => 'aus den letzten 30 Tagen',
-    };
-
 /// The earliest moment [range] still shows, or null for no limit.
 ///
 /// Built by counting days on a [DateTime] rather than subtracting

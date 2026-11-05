@@ -16,6 +16,8 @@ import '../profiles/profile_editor.dart';
 import 'confirm_dialog.dart';
 import 'reset_stars_dialog.dart';
 import '../../l10n/l10n.dart';
+import '../../l10n/lesson_texts.dart';
+import '../../l10n/choice_texts.dart';
 
 /// Below this width the two columns fall back to one. A 10" tablet in
 /// landscape is far wider than this; a phone held sideways is not.
@@ -221,7 +223,7 @@ class _ProfileSettingsScreenState
           const SizedBox(height: 8),
           for (final group in LessonGroup.values)
             SwitchTile(
-              title: groupTitle(group),
+              title: groupTitle(context.l10n, group),
               subtitle: _summary(group),
               value: _visible.contains(group),
               onChanged: (on) => setState(
@@ -255,10 +257,10 @@ class _ProfileSettingsScreenState
                   RadioListTile<LessonFilter>(
                     value: filter,
                     contentPadding: EdgeInsets.zero,
-                    title: Text(lessonFilterTitle(filter),
+                    title: Text(lessonFilterTitle(context.l10n, filter),
                         style: const TextStyle(fontSize: 20)),
                     subtitle: Text(
-                      lessonFilterExplanation(filter).replaceAll('**', ''),
+                      lessonFilterExplanation(context.l10n, filter).replaceAll('**', ''),
                       style: const TextStyle(
                           fontSize: 16, color: AppColors.textMuted),
                     ),
@@ -447,7 +449,7 @@ class _ProfileSettingsScreenState
   String _summary(LessonGroup group) {
     final lessons = lessonsInGroup(group);
     return context.l10n.profileSettingsGroupSummary(
-        lessons.length, exampleFor(lessons.first));
+        lessons.length, exampleFor(context.l10n, lessons.first));
   }
 }
 

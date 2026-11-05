@@ -1,4 +1,5 @@
-/// Scoring and formatting of finished sessions. No Flutter dependency.
+/// Scoring of finished sessions. Showing a time is the l10n layer's job
+/// (`formatters.dart`): the decimal separator is a matter of language. No Flutter dependency.
 library;
 
 /// Time added to the score for every wrong attempt. Without a penalty a child
@@ -101,50 +102,5 @@ double? nextBoltTargetMs(int targetMs, int bolts) {
     2 => targetMs.toDouble(),
     1 => targetMs * twoBoltFactor,
     _ => targetMs * oneBoltFactor,
-  };
-}
-
-/// `m:ss` for a minute or more, otherwise `s,d s` - short and readable for
-/// children.
-String formatDuration(int milliseconds) {
-  final totalSeconds = milliseconds / 1000;
-  if (totalSeconds < 60) {
-    return '${totalSeconds.toStringAsFixed(1).replaceAll('.', ',')} s';
-  }
-  final minutes = milliseconds ~/ 60000;
-  final seconds = (milliseconds % 60000) ~/ 1000;
-  return '$minutes:${seconds.toString().padLeft(2, '0')} min';
-}
-
-/// Compact per-task time, always in seconds with one decimal.
-String formatPerTask(double milliseconds) =>
-    '${(milliseconds / 1000).toStringAsFixed(1).replaceAll('.', ',')} s';
-
-/// Summed practice time over many runs: `3 h 12 min`, `42 min`, `0 min`.
-String formatTotalTime(int milliseconds) {
-  final minutes = milliseconds ~/ 60000;
-  if (minutes < 60) return '$minutes min';
-  return '${minutes ~/ 60} h ${minutes % 60} min';
-}
-
-/// `5.9. · 14:32` - short enough for a list, unambiguous within a school year.
-String formatDayAndTime(DateTime at) {
-  final hour = at.hour.toString().padLeft(2, '0');
-  final minute = at.minute.toString().padLeft(2, '0');
-  return '${at.day}.${at.month}. · $hour:$minute';
-}
-
-/// `heute`, `gestern`, `vor 3 Tagen`, otherwise the date. Used for "last
-/// active", where the exact minute does not matter.
-String formatRelativeDay(DateTime at, {DateTime? now}) {
-  final today = now ?? DateTime.now();
-  final days = DateTime(today.year, today.month, today.day)
-      .difference(DateTime(at.year, at.month, at.day))
-      .inDays;
-  return switch (days) {
-    0 => 'heute',
-    1 => 'gestern',
-    < 7 => 'vor $days Tagen',
-    _ => '${at.day}.${at.month}.${at.year}',
   };
 }

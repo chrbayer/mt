@@ -1,6 +1,7 @@
 /// A single arithmetic task. No Flutter dependency.
 library;
 
+import 'clock_speech.dart';
 import 'lesson.dart';
 
 /// The concrete operation of a generated task ([ArithmeticOp.mixed] is
@@ -32,50 +33,25 @@ const countingPictures = ['🍎', '🐟', '⭐', '🚗', '🐝', '🎈'];
 String pictureFor(int a, int b) =>
     countingPictures[(a * 5 + b) % countingPictures.length];
 
-/// How a time is said out loud, in five-minute steps. The index is the
-/// answer to a [TaskForm.clockPhrase] task: minute 5 is index 0.
-///
-/// The full hour is deliberately missing. "3 Uhr" puts the hour first and
-/// every other reading puts it last, and a box that swaps places with its
-/// neighbour depending on the answer would be a puzzle of its own. Full hours
-/// are practised in the three lessons that ask for the digits.
-const clockPhrases = [
-  '5 nach', // :05
-  '10 nach', // :10
-  'viertel nach', // :15
-  '20 nach', // :20
-  '5 vor halb', // :25
-  'halb', // :30
-  '5 nach halb', // :35
-  '20 vor', // :40
-  'viertel vor', // :45
-  '10 vor', // :50
-  '5 vor', // :55
-];
-
 /// Coins and notes a child actually handles, in cents. One and two cent
 /// pieces are left out: every amount asked for lands on five cents, and two
 /// more keys would only make the pad harder to aim at.
 const moneyPieces = [5, 10, 20, 50, 100, 200, 500, 1000, 2000];
 
-/// The word for the part of the day, so a clock face can be read as a
-/// 24-hour time at all: the hands look the same at 3 and at 15 o'clock.
-String dayPartOf(int hour) => switch (hour) {
-      < 12 => 'vormittags',
+/// The part of the day, so a clock face can be read as a 24-hour time at
+/// all: the hands look the same at 3 and at 15 o'clock. The word for it is
+/// text and lives in the l10n layer.
+enum DayPart { morning, noon, afternoon, evening }
+
+/// Which part of the day an hour of a 24-hour clock falls in.
+DayPart dayPartOf(int hour) => switch (hour) {
+      < 12 => DayPart.morning,
       // Twelve is its own word, and it is the hour where the counting starts
       // to differ from the dial - the one worth naming exactly.
-      12 => 'mittags',
-      < 18 => 'nachmittags',
-      _ => 'abends',
+      12 => DayPart.noon,
+      < 18 => DayPart.afternoon,
+      _ => DayPart.evening,
     };
-
-/// A single coin or note, the way it is stamped on it: `50 ct`, `2 €`.
-String formatPiece(int cents) =>
-    cents < 100 ? '$cents ct' : '${cents ~/ 100} €';
-
-/// Cents as they are written on a price tag: `350` becomes `3,50 €`.
-String formatEuro(int cents) =>
-    '${cents ~/ 100},${(cents % 100).toString().padLeft(2, '0')} €';
 
 /// One generated exercise.
 ///
@@ -173,15 +149,12 @@ class Task {
   /// What a division leaves over. Zero for every other operation.
   int get remainder => op == Operation.div ? a % b : 0;
 
-  /// The hour a spoken time names. From half past onwards German counts
-  /// towards the coming hour: 2:30 is "halb 3", 2:45 is "viertel vor 3".
-  int get namedHour => b >= 25 ? a % 12 + 1 : a;
-
-  /// The whole spoken form, for the review list and the lesson tile.
-  String get spokenTime => '${clockPhrases[expected]} $namedHour';
+  /// The hour a spoken time names, in the way [speech] counts: German counts
+  /// towards the coming hour from half past on (2:30 is "halb 3").
+  int namedHourIn(ClockSpeech speech) => speech.namedHour(expected, a);
 
   /// Which part of the day a 24-hour clock task falls in.
-  String get dayPart => dayPartOf(a);
+  DayPart get dayPart => dayPartOf(a);
 
   /// The number the child has to type in - the first of two where a task
   /// asks for two.
@@ -216,12 +189,20 @@ class Task {
 
   /// The second number to enter, for the forms that ask for two. Null for the
   /// ones that ask for one.
-  int? get expectedSecond => switch (form) {
+  ///
+  /// Only a spoken time depends on the language - the hour it names is
+  /// counted differently - so this answers for German; [expectedSecondIn]
+  /// takes the language.
+  int? get expectedSecond => expectedSecondIn(ClockSpeech.de);
+
+  /// Same, for the language the time is spoken in.
+  int? expectedSecondIn(ClockSpeech speech) => switch (form) {
         TaskForm.remainder => remainder,
         TaskForm.money || TaskForm.change => result % 100,
         TaskForm.clock => b,
-        // "halb 3" names the hour that is coming, not the one gone by.
-        TaskForm.clockPhrase => namedHour,
+        // "halb 3" names the hour that is coming, not the one gone by - in
+        // German; the language decides.
+        TaskForm.clockPhrase => namedHourIn(speech),
         TaskForm.moneyCompose => null,
         TaskForm.result ||
         TaskForm.gap ||
@@ -235,52 +216,6 @@ class Task {
         TaskForm.chain =>
           null,
       };
-
-  /// Label between the two boxes, for the forms that have two.
-  String get secondLabel => switch (form) {
-        TaskForm.remainder => 'Rest',
-        TaskForm.money || TaskForm.change => '€',
-        TaskForm.clock => 'Uhr',
-        _ => '',
-      };
-
-  /// Unit after the second box, where there is one.
-  String get secondUnit =>
-      form == TaskForm.money || form == TaskForm.change ? 'ct' : '';
-
-  /// Spoken form of the task, shown above it for the forms that are not
-  /// written as an equation. Null when the task speaks for itself.
-  String? get question => switch (form) {
-        TaskForm.partner => 'Welche Zahl ist mit $a verliebt?',
-        TaskForm.clock => 'Wie spät ist es?',
-        TaskForm.clockPhrase => 'Wie sagt man das?',
-        TaskForm.moneyCompose =>
-          'Lege ${formatEuro(a)} - tippe die Münzen und Scheine an.',
-        // The price and what is handed over are both in the question, so
-        // nothing is written as an equation: at the till nobody writes one.
-        TaskForm.change => 'Es kostet ${formatEuro(b)}. '
-            'Du gibst ${formatEuro(a)}. Wie viel bekommst du zurück?',
-        TaskForm.quantity => 'Wie viele?',
-        TaskForm.dice =>
-          b == 0 ? 'Wie viele Punkte?' : 'Wie viele Punkte sind es zusammen?',
-        // With a keypad the answer is a number, so the question has to say
-        // which number - "wo sind mehr" alone would ask for a pointing finger.
-        TaskForm.compare => 'Wo sind mehr? Tippe die größere Anzahl.',
-        TaskForm.sequence => 'Welche Zahl kommt danach?',
-        TaskForm.quantityAdd => 'Wie viele sind es zusammen?',
-        TaskForm.placeValue => 'Welche Zahl ist das?',
-        _ => null,
-      };
-
-  /// The named places as text, smallest first: "5 Einer", "12 Zehner", …
-  ///
-  /// One per line on screen. Written as a single line they run off the edge
-  /// at the size the practice screen uses, and German spells these the same
-  /// in the singular, so a count of one needs no special case.
-  List<String> get placeParts => [
-        for (final (index, count) in places.indexed)
-          if (count > 0) '$count ${_placeNames[index]}'
-      ];
 
   /// How many digits the answer can have.
   ///
@@ -299,7 +234,6 @@ class Task {
         TaskForm.gap => '$a $opSymbol',
         // The heart between the two numbers replaces the operator.
         TaskForm.partner => '$a',
-        TaskForm.money => '${formatEuro(a)} $opSymbol ${formatEuro(b)} =',
         // The row so far, and the box takes the place of the next number.
         // This one used to sit in the list below and showed nothing at all:
         // a question, an empty box and no numbers to continue.
@@ -308,9 +242,11 @@ class Task {
         // else says which one binds first, so the term has to stand there
         // and speak for itself.
         TaskForm.chain => '$a $opSymbol $b ${symbolOf(op2!)} $c =',
-        // The parts themselves, smallest first, as they were dictated.
-        TaskForm.placeValue => placeParts.join(', '),
+        // Amounts and place-value parts are written with words and a money
+        // format, which belong to the language: see `taskPrefix` in l10n.
         // These all draw their own picture; there is nothing to write.
+        TaskForm.money ||
+        TaskForm.placeValue ||
         TaskForm.clock ||
         TaskForm.clockPhrase ||
         TaskForm.moneyCompose ||
@@ -325,31 +261,6 @@ class Task {
   /// Text shown right of the input box, empty when the box comes last. The
   /// remainder form has its own second box instead, drawn by the display.
   String get suffix => form == TaskForm.gap ? '= $result' : '';
-
-  /// One-line rendering with [answer] placed in the box, and
-  /// [remainderAnswer] in the second one where there is one.
-  String render(String answer, [String secondAnswer = '?']) => switch (form) {
-        TaskForm.result => '$prefix $answer',
-        TaskForm.placeValue => '$prefix = $answer',
-        TaskForm.gap => '$prefix $answer $suffix',
-        TaskForm.partner => '$a \u2665 $answer',
-        TaskForm.remainder => '$prefix $answer Rest $secondAnswer',
-        TaskForm.money => '$prefix $answer',
-        // A sample time says more about the lesson than a placeholder.
-        TaskForm.clock => '$a:${b.toString().padLeft(2, '0')} Uhr',
-        TaskForm.clockPhrase => spokenTime,
-        TaskForm.moneyCompose => formatEuro(a),
-        TaskForm.change => '${formatEuro(b)}, bezahlt mit ${formatEuro(a)}',
-        TaskForm.quantity => pictureFor(a, b) * a,
-        // "Würfel 2" told nobody anything; the pips are what is on screen.
-        TaskForm.dice => b == 0 ? '$a Punkte' : '$a + $b Punkte',
-        TaskForm.compare =>
-          '${pictureFor(a, b) * a}  ·  ${pictureFor(a, b) * b}',
-        TaskForm.sequence => '${sequenceNumbers.join(' ')} ?',
-        TaskForm.quantityAdd =>
-          '${picture * a} + ${picture * b}',
-        TaskForm.chain => '$prefix $answer',
-      };
 
   /// The picture a counting or comparing task shows.
   ///
@@ -398,11 +309,8 @@ class Task {
   int get hashCode => Object.hash(a, b, op, form, c, op2);
 
   @override
-  String toString() => render('?');
+  String toString() => 'Task($form, $a, $b, $op)';
 }
-
-/// What the four places are called, smallest first.
-const _placeNames = ['Einer', 'Zehner', 'Hunderter', 'Tausender'];
 
 /// A finished task together with how it went. Collected in memory during a
 /// run and written to the database when the session ends.

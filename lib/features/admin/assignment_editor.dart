@@ -12,6 +12,8 @@ import '../../providers.dart';
 import '../../theme/app_theme.dart';
 import '../common/amount_choice.dart';
 import '../../l10n/l10n.dart';
+import '../../l10n/lesson_texts.dart';
+import '../../l10n/formatters.dart';
 
 /// How many qualifying runs an assignment may ask for. A handful of options,
 /// not a free number - one clean run is already a real goal, and asking for
@@ -187,7 +189,7 @@ class _AssignmentEditorState extends ConsumerState<AssignmentEditor> {
                         Padding(
                           padding: const EdgeInsets.fromLTRB(16, 10, 16, 2),
                           child: Text(
-                            groupTitle(group),
+                            groupTitle(context.l10n, group),
                             style: const TextStyle(
                               fontWeight: FontWeight.w700,
                               color: AppColors.textMuted,
@@ -431,7 +433,7 @@ class _AssignmentEditorState extends ConsumerState<AssignmentEditor> {
       DateTime(day.year, day.month, day.day - (day.weekday - 1));
 
   static String _dayLabel(AppLocalizations l10n, DateTime day) =>
-      l10n.editorDayLabel('${day.weekday}', day.day, day.month);
+      formatShortDay(l10n, day);
 
   Future<void> _pickDay() async {
     final today = DateTime.now();
@@ -493,7 +495,7 @@ class _LessonChoice extends StatelessWidget {
             children: [
               Flexible(
                 child: Text(
-                  lesson.title,
+                  lessonTitle(context.l10n, lesson),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(fontSize: 17),

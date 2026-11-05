@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../domain/clock_speech.dart';
 import '../../../domain/lesson.dart';
 import '../../../domain/task.dart';
 import '../../../theme/app_theme.dart';
@@ -9,6 +10,8 @@ import 'counted_pair.dart';
 import 'dice_face.dart';
 import 'picture_group.dart';
 import '../../../l10n/l10n.dart';
+import '../../../l10n/task_texts.dart';
+import '../../../l10n/formatters.dart';
 
 /// The task itself plus the answer box, scaled to fill the space it gets.
 class TaskDisplay extends StatelessWidget {
@@ -69,145 +72,126 @@ class TaskDisplay extends StatelessWidget {
       // A single heap to count: never a number, or the answer would be
       // standing right there.
       TaskForm.quantity => PictureGroup(
+        count: task.a,
+        picture: task.picture,
+        arrangement: arrangement,
+        seed: task.a * 31 + task.b,
+      ),
+      TaskForm.dice =>
+        task.b == 0
+            ? DiceFace(pips: task.a)
+            : CountedPair(
+                left: DiceFace(pips: task.a),
+                right: DiceFace(pips: task.b),
+                separator: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 26),
+                  child: Text('+', style: style.copyWith(fontSize: 72)),
+                ),
+                countSeparator: const Text('+'),
+                leftCount: showCounts ? task.a : null,
+                rightCount: showCounts ? task.b : null,
+                countSize: 68,
+              ),
+      TaskForm.quantityAdd => CountedPair(
+        left: PictureGroup(
           count: task.a,
           picture: task.picture,
           arrangement: arrangement,
           seed: task.a * 31 + task.b,
         ),
-      TaskForm.dice => task.b == 0
-          ? DiceFace(pips: task.a)
-          : CountedPair(
-              left: DiceFace(pips: task.a),
-              right: DiceFace(pips: task.b),
-              separator: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 26),
-                child: Text('+', style: style.copyWith(fontSize: 72)),
-              ),
-              countSeparator: const Text('+'),
-              leftCount: showCounts ? task.a : null,
-              rightCount: showCounts ? task.b : null,
-              countSize: 68,
-            ),
-      TaskForm.quantityAdd => CountedPair(
-          left: PictureGroup(
-            count: task.a,
-            picture: task.picture,
-            arrangement: arrangement,
-            seed: task.a * 31 + task.b,
-          ),
-          right: PictureGroup(
-            count: task.b,
-            picture: task.picture,
-            arrangement: arrangement,
-            seed: task.b * 31 + task.a,
-          ),
-          separator: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 28),
-            child: Text('+', style: style.copyWith(fontSize: 72)),
-          ),
-          countSeparator: const Text('+'),
-          leftCount: showCounts ? task.a : null,
-          rightCount: showCounts ? task.b : null,
-          countSize: 68,
+        right: PictureGroup(
+          count: task.b,
+          picture: task.picture,
+          arrangement: arrangement,
+          seed: task.b * 31 + task.a,
         ),
+        separator: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 28),
+          child: Text('+', style: style.copyWith(fontSize: 72)),
+        ),
+        countSeparator: const Text('+'),
+        leftCount: showCounts ? task.a : null,
+        rightCount: showCounts ? task.b : null,
+        countSize: 68,
+      ),
       // The divider is what makes two heaps read as two heaps, so it grows
       // with them - a cloud is far taller than a row, and a stub of a line
       // between two tall clouds separates nothing.
       // No plus between these counts: the heaps are compared, not added, and
       // a plus underneath would teach the wrong sum.
       TaskForm.compare => CountedPair(
-          left: PictureGroup(
-            count: task.a,
-            picture: task.picture,
-            arrangement: arrangement,
-            seed: task.a * 31 + task.b,
-          ),
-          right: PictureGroup(
-            count: task.b,
-            picture: task.picture,
-            arrangement: arrangement,
-            seed: task.b * 31 + task.a,
-          ),
-          stretchSeparator: true,
-          separator: Container(
-            width: 8,
-            margin: const EdgeInsets.symmetric(horizontal: 36),
-            decoration: BoxDecoration(
-              color: AppColors.textMuted,
-              borderRadius: BorderRadius.circular(4),
-            ),
-          ),
-          leftCount: showCounts ? task.a : null,
-          rightCount: showCounts ? task.b : null,
-          countSize: 68,
+        left: PictureGroup(
+          count: task.a,
+          picture: task.picture,
+          arrangement: arrangement,
+          seed: task.a * 31 + task.b,
         ),
+        right: PictureGroup(
+          count: task.b,
+          picture: task.picture,
+          arrangement: arrangement,
+          seed: task.b * 31 + task.a,
+        ),
+        stretchSeparator: true,
+        separator: Container(
+          width: 8,
+          margin: const EdgeInsets.symmetric(horizontal: 36),
+          decoration: BoxDecoration(
+            color: AppColors.textMuted,
+            borderRadius: BorderRadius.circular(4),
+          ),
+        ),
+        leftCount: showCounts ? task.a : null,
+        rightCount: showCounts ? task.b : null,
+        countSize: 68,
+      ),
       // Two answers, and the first of them is a word. The pad swaps to
       // words while that box is active, so both are typed the same way.
-      TaskForm.clockPhrase => Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ClockFace(hour: task.a, minute: task.b),
-            const SizedBox(width: 44),
-            _AnswerBox(
-              input: input.isEmpty ? '' : clockPhrases[int.parse(input)],
-              feedback: feedback,
-              active: activeField == AnswerField.primary,
-              width: 400,
-            ),
-            const SizedBox(width: 24),
-            _AnswerBox(
-              input: secondInput,
-              feedback: feedback,
-              active: activeField == AnswerField.second,
-              width: 190,
-            ),
-          ],
-        ),
+      TaskForm.clockPhrase => _clockPhraseRow(context),
       // The pile itself is the answer, so it is drawn: a running total alone
       // would not show which coins are already down.
       TaskForm.moneyCompose => Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _AnswerBox(
-              input: input.isEmpty ? '' : formatEuro(int.parse(input)),
-              feedback: feedback,
-              width: 400,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _AnswerBox(
+            input: input.isEmpty
+                ? ''
+                : formatEuro(context.l10n, int.parse(input)),
+            feedback: feedback,
+            width: 400,
+          ),
+          const SizedBox(height: 18),
+          SizedBox(
+            height: 54,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                for (final piece in pieces)
+                  Padding(
+                    padding: const EdgeInsets.only(right: 10),
+                    child: _PieceChip(cents: piece),
+                  ),
+              ],
             ),
-            const SizedBox(height: 18),
-            SizedBox(
-              height: 54,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  for (final piece in pieces)
-                    Padding(
-                      padding: const EdgeInsets.only(right: 10),
-                      child: _PieceChip(cents: piece),
-                    ),
-                ],
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
+      ),
       _ => null,
     };
 
     if (illustration != null) {
       // These two bring their own answer boxes; everything else gets one
       // placed beside the picture.
-      final bringsItsOwnBox = task.form == TaskForm.clockPhrase ||
+      final bringsItsOwnBox =
+          task.form == TaskForm.clockPhrase ||
           task.form == TaskForm.moneyCompose;
       return _WithQuestion(
-        question: task.question,
+        question: taskQuestion(context.l10n, task),
         child: bringsItsOwnBox
             ? illustration
             : Row(
                 mainAxisSize: MainAxisSize.min,
-                children: [
-                  illustration,
-                  const SizedBox(width: 36),
-                  box,
-                ],
+                children: [illustration, const SizedBox(width: 36), box],
               ),
       );
     }
@@ -237,7 +221,7 @@ class TaskDisplay extends StatelessWidget {
                     if (clock24) ...[
                       const SizedBox(height: 12),
                       Text(
-                        task.dayPart,
+                        dayPartName(context.l10n, task.dayPart),
                         style: const TextStyle(
                           fontSize: 32,
                           fontWeight: FontWeight.w600,
@@ -257,12 +241,12 @@ class TaskDisplay extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    for (final part in task.placeParts)
+                    for (final part in placeParts(context.l10n, task))
                       Text(part, style: style.copyWith(fontSize: 54)),
                   ],
                 )
               else
-                Text(task.prefix, style: style),
+                Text(taskPrefix(context.l10n, task), style: style),
               // The box is the next number in the row, so it stands at the
               // same distance as the numbers before it - a tighter gap made
               // it look stuck to the last one.
@@ -274,7 +258,10 @@ class TaskDisplay extends StatelessWidget {
               ],
               if (twoBoxes) ...[
                 const SizedBox(width: 22),
-                Text(task.secondLabel, style: style.copyWith(fontSize: 60)),
+                Text(
+                  taskSecondLabel(context.l10n, task),
+                  style: style.copyWith(fontSize: 60),
+                ),
                 const SizedBox(width: 22),
                 _AnswerBox(
                   input: secondInput,
@@ -282,10 +269,12 @@ class TaskDisplay extends StatelessWidget {
                   active: activeField == AnswerField.second,
                   width: task.form == TaskForm.remainder ? 190 : 200,
                 ),
-                if (task.secondUnit.isNotEmpty) ...[
+                if (taskSecondUnit(context.l10n, task).isNotEmpty) ...[
                   const SizedBox(width: 16),
-                  Text(task.secondUnit,
-                      style: style.copyWith(fontSize: 60)),
+                  Text(
+                    taskSecondUnit(context.l10n, task),
+                    style: style.copyWith(fontSize: 60),
+                  ),
                 ],
               ],
             ],
@@ -296,8 +285,49 @@ class TaskDisplay extends StatelessWidget {
     // which of the two it is - not that the answer runs past twelve.
     final question = clock24 && task.form == TaskForm.clock
         ? context.l10n.taskClock24Question
-        : task.question;
+        : taskQuestion(context.l10n, task);
     return _WithQuestion(question: question, child: row);
+  }
+
+  /// The clock and the two boxes of a spoken time. The word box holds the
+  /// primary answer and the hour box the second one; which of them stands
+  /// first follows the language ([ClockSpeech.hourFirst]) - French says the
+  /// hour in front of the phrase, German and English behind it. The
+  /// controller fills them in the same order.
+  Widget _clockPhraseRow(BuildContext context) {
+    final speech = ClockSpeech.forLanguage(
+      Localizations.localeOf(context).languageCode,
+    );
+    final phraseBox = _AnswerBox(
+      input: input.isEmpty
+          ? ''
+          : clockPhraseLabels(context.l10n)[int.parse(input)],
+      feedback: feedback,
+      active: activeField == AnswerField.primary,
+      width: 400,
+    );
+    final hourBox = _AnswerBox(
+      input: secondInput,
+      feedback: feedback,
+      active: activeField == AnswerField.second,
+      width: 190,
+    );
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        ClockFace(hour: task.a, minute: task.b),
+        const SizedBox(width: 44),
+        if (speech.hourFirst) ...[
+          hourBox,
+          const SizedBox(width: 24),
+          phraseBox,
+        ] else ...[
+          phraseBox,
+          const SizedBox(width: 24),
+          hourBox,
+        ],
+      ],
+    );
   }
 }
 
@@ -323,7 +353,9 @@ class _WithQuestion extends StatelessWidget {
           style: const TextStyle(fontSize: 30, color: AppColors.textMuted),
         ),
         const SizedBox(height: 24),
-        Flexible(child: FittedBox(fit: BoxFit.scaleDown, child: child)),
+        Flexible(
+          child: FittedBox(fit: BoxFit.scaleDown, child: child),
+        ),
       ],
     );
   }
@@ -348,7 +380,7 @@ class _PieceChip extends StatelessWidget {
         borderRadius: BorderRadius.circular(isNote ? 8 : 24),
       ),
       child: Text(
-        formatPiece(cents),
+        formatPiece(context.l10n, cents),
         style: const TextStyle(
           fontSize: 26,
           fontWeight: FontWeight.w600,
@@ -378,20 +410,20 @@ class _AnswerBox extends StatelessWidget {
   Widget build(BuildContext context) {
     final (border, fill, text) = switch (feedback) {
       AnswerFeedback.correct => (
-          AppColors.correct,
-          AppColors.correctSoft,
-          AppColors.correct
-        ),
+        AppColors.correct,
+        AppColors.correctSoft,
+        AppColors.correct,
+      ),
       AnswerFeedback.wrong => (
-          AppColors.wrong,
-          AppColors.wrongSoft,
-          AppColors.wrong
-        ),
+        AppColors.wrong,
+        AppColors.wrongSoft,
+        AppColors.wrong,
+      ),
       AnswerFeedback.none => (
-          active ? AppColors.primary : AppColors.divider,
-          AppColors.surface,
-          AppColors.text
-        ),
+        active ? AppColors.primary : AppColors.divider,
+        AppColors.surface,
+        AppColors.text,
+      ),
     };
 
     return AnimatedContainer(
@@ -412,9 +444,7 @@ class _AnswerBox extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 18),
           child: Text(
             input,
-            style: Theme.of(context)
-                .textTheme
-                .displayLarge!
+            style: Theme.of(context).textTheme.displayLarge!
                 .copyWith(color: text, height: 1),
           ),
         ),

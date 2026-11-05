@@ -313,8 +313,15 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
-  String get leaderboardScoreExplanation =>
-      'Gewertet wird die Zeit pro Aufgabe, plus 3 Sekunden für jeden Fehlversuch. Deshalb lohnt sich Raten nicht, und Durchgänge mit unterschiedlich vielen Aufgaben bleiben vergleichbar.';
+  String leaderboardScoreExplanation(int seconds) {
+    String _temp0 = intl.Intl.pluralLogic(
+      seconds,
+      locale: localeName,
+      other: '$seconds Sekunden',
+      one: '1 Sekunde',
+    );
+    return 'Gewertet wird die Zeit pro Aufgabe, plus $_temp0 für jeden Fehlversuch. Deshalb lohnt sich Raten nicht, und Durchgänge mit unterschiedlich vielen Aufgaben bleiben vergleichbar.';
+  }
 
   @override
   String statsTitle(String name) {
@@ -589,14 +596,20 @@ class AppLocalizationsDe extends AppLocalizations {
   String get resultMetricErrors => 'Fehler';
 
   @override
-  String resultPenalty(String penalty, int count) {
+  String resultPenalty(String penalty, int count, int seconds) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
       other: '$count Fehlversuche',
       one: '1 Fehlversuch',
     );
-    return 'Darin sind $penalty Zeitstrafe für $_temp0 enthalten - 3 Sekunden für jeden.';
+    String _temp1 = intl.Intl.pluralLogic(
+      seconds,
+      locale: localeName,
+      other: '$seconds Sekunden',
+      one: '1 Sekunde',
+    );
+    return 'Darin sind $penalty Zeitstrafe für $_temp0 enthalten - $_temp1 für jeden.';
   }
 
   @override
@@ -1097,19 +1110,13 @@ class AppLocalizationsDe extends AppLocalizations {
       'Keine offenen Aufgaben. Erledigte sind ausgeblendet.';
 
   @override
-  String get assignmentsPeriodDays => 'Tagen';
-
-  @override
-  String get assignmentsPeriodWeeks => 'Wochen';
-
-  @override
   String get assignmentsDaily => 'täglich';
 
   @override
   String get assignmentsWeekly => 'wöchentlich';
 
   @override
-  String get assignmentsCarriesOver => ' · zieht nach';
+  String get assignmentsCarriesOver => 'zieht nach';
 
   @override
   String assignmentsLessonCount(int count) {
@@ -1148,12 +1155,22 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String assignmentsMetOf(int met, int total, String period) {
-    return 'Geschafft an $met von $total $period';
+    String _temp0 = intl.Intl.selectLogic(period, {
+      'daily': 'Tagen',
+      'weekly': 'Wochen',
+      'other': 'Wochen',
+    });
+    return 'Geschafft an $met von $total $_temp0';
   }
 
   @override
   String assignmentsBefore(int met, int total, String period) {
-    return '· davor $met von $total $period';
+    String _temp0 = intl.Intl.selectLogic(period, {
+      'daily': 'Tagen',
+      'weekly': 'Wochen',
+      'other': 'Wochen',
+    });
+    return 'davor $met von $total $_temp0';
   }
 
   @override
@@ -1260,17 +1277,710 @@ class AppLocalizationsDe extends AppLocalizations {
   String get editorCreate => 'Anlegen';
 
   @override
-  String editorDayLabel(String weekday, int day, int month) {
-    String _temp0 = intl.Intl.selectLogic(weekday, {
-      '1': 'Mo',
-      '2': 'Di',
-      '3': 'Mi',
-      '4': 'Do',
-      '5': 'Fr',
-      '6': 'Sa',
-      '7': 'So',
-      'other': '',
-    });
-    return '$_temp0, $day.$month.';
+  String get groupFirstSteps => 'Erste Schritte';
+
+  @override
+  String get groupUpTo10 => 'Bis 10';
+
+  @override
+  String get groupUpTo20 => 'Bis 20';
+
+  @override
+  String get groupUpTo100 => 'Bis 100';
+
+  @override
+  String get groupUpTo1000 => 'Bis 1000';
+
+  @override
+  String get groupWithThousands => 'Mit Tausendern';
+
+  @override
+  String get groupTimesTables => 'Einmaleins';
+
+  @override
+  String get groupReverseTimesTables => 'Einmaleins rückwärts';
+
+  @override
+  String get groupTimesAndDivision => 'Mal und Geteilt';
+
+  @override
+  String get groupEveryday => 'Uhrzeit und Geld';
+
+  @override
+  String get lessonAddPlainTitle => 'Plus ohne Zehnerübergang';
+
+  @override
+  String get lessonAddPlainBigTitle => 'Plus ohne Übergang';
+
+  @override
+  String get lessonAddPlainDesc =>
+      'Die Einer bleiben zusammen unter 10 - es muss nichts übertragen werden.';
+
+  @override
+  String get lessonAddPlainBigDesc =>
+      'Keine Stelle läuft über - weder die Einer noch die Zehner.';
+
+  @override
+  String get lessonAddCarryTitle => 'Plus mit Zehnerübergang';
+
+  @override
+  String get lessonAddCarryBigTitle => 'Plus mit Übergang';
+
+  @override
+  String get lessonAddCarryDesc =>
+      'Die Einer ergeben zusammen 10 oder mehr - ein Zehner wandert weiter.';
+
+  @override
+  String get lessonAddCarryBigDesc =>
+      'Einer oder Zehner laufen über - es muss übertragen werden.';
+
+  @override
+  String get lessonSubPlainTitle => 'Minus ohne Zehnerübergang';
+
+  @override
+  String get lessonSubPlainBigTitle => 'Minus ohne Übergang';
+
+  @override
+  String get lessonSubPlainDesc =>
+      'Jede Ziffer oben ist groß genug - es muss kein Zehner aufgelöst werden.';
+
+  @override
+  String get lessonSubPlainBigDesc =>
+      'Jede Ziffer oben ist groß genug - es muss nichts aufgelöst werden.';
+
+  @override
+  String get lessonSubBorrowTitle => 'Minus mit Zehnerübergang';
+
+  @override
+  String get lessonSubBorrowBigTitle => 'Minus mit Übergang';
+
+  @override
+  String get lessonSubBorrowDesc =>
+      'Die Einer oben reichen nicht - ein Zehner muss aufgelöst werden.';
+
+  @override
+  String get lessonSubBorrowBigDesc =>
+      'Eine Stelle oben reicht nicht - Zehner oder Hunderter müssen aufgelöst werden.';
+
+  @override
+  String get lessonPlusGapTitle => 'Plus mit Platzhalter';
+
+  @override
+  String get lessonMinusGapTitle => 'Minus mit Platzhalter';
+
+  @override
+  String get lessonGapDesc =>
+      'Gesucht ist die Zahl, die fehlt, damit die Rechnung stimmt.';
+
+  @override
+  String get lessonMixedTitle => 'Plus und Minus gemischt';
+
+  @override
+  String get lessonMixedDesc =>
+      'Plus und Minus wechseln sich zufällig ab, mit und ohne Übergang.';
+
+  @override
+  String lessonTimesTableTitle(int n) {
+    return '${n}er-Reihe';
+  }
+
+  @override
+  String lessonTimesTableDesc(int n) {
+    return 'Alle Aufgaben der ${n}er-Reihe, in beide Richtungen: $n · 4 genauso wie 4 · $n.';
+  }
+
+  @override
+  String lessonReverseTableTitle(int n) {
+    return '${n}er-Reihe rückwärts';
+  }
+
+  @override
+  String lessonReverseTableDesc(int n, int product) {
+    return 'Geteilt durch $n. Jede Aufgabe ist die Umkehrung einer Aufgabe der ${n}er-Reihe: aus $n · 4 = $product wird $product : $n = 4.';
+  }
+
+  @override
+  String get lessonPartnersOfTenTitle => 'Verliebte Zahlen';
+
+  @override
+  String get lessonPartnersOfTenDesc =>
+      'Zwei Zahlen sind verliebt, wenn sie zusammen genau 10 ergeben: 1 und 9, 2 und 8, 3 und 7. Gefragt wird in beide Richtungen - von 3 nach 7 genauso wie von 7 nach 3.';
+
+  @override
+  String get lessonAdd10Title => 'Plus bis 10';
+
+  @override
+  String get lessonAdd10Desc =>
+      'Zusammenzählen, ohne über die 10 hinauszugehen.';
+
+  @override
+  String get lessonSub10Title => 'Minus bis 10';
+
+  @override
+  String get lessonSub10Desc => 'Wegnehmen im Zahlenraum bis 10.';
+
+  @override
+  String get lessonMix10Desc => 'Plus und Minus wechseln sich zufällig ab.';
+
+  @override
+  String get lessonTimesAllTitle => 'Alle Reihen gemischt';
+
+  @override
+  String get lessonTimesAllDesc =>
+      'Das ganze kleine Einmaleins, bunt durcheinander.';
+
+  @override
+  String get lessonDivPlainTitle => 'Alle Reihen rückwärts';
+
+  @override
+  String get lessonDivPlainDesc =>
+      'Geteilt durch alles, bunt durcheinander. Jede Aufgabe geht glatt auf - sie ist die Umkehrung einer Einmaleins-Aufgabe.';
+
+  @override
+  String get lessonDivRemainderTitle => 'Geteilt mit Rest';
+
+  @override
+  String get lessonDivRemainderDesc =>
+      'Es bleibt immer etwas übrig. Erst das Ergebnis eingeben, dann den Rest.';
+
+  @override
+  String get lessonTimesGapTitle => 'Mal mit Platzhalter';
+
+  @override
+  String get lessonTimesGapDesc =>
+      'Mit welcher Zahl muss man malnehmen, damit es stimmt?';
+
+  @override
+  String get lessonDivGapTitle => 'Geteilt mit Platzhalter';
+
+  @override
+  String get lessonDivGapDesc =>
+      'Durch welche Zahl muss man teilen, damit es stimmt?';
+
+  @override
+  String get lessonMulTensTitle => 'Mal mit Zehnerzahlen';
+
+  @override
+  String get lessonMulTensDesc =>
+      'Das Einmaleins mit einer Null dahinter: 3 · 4 = 12, also 30 · 4 = 120.';
+
+  @override
+  String get lessonMulTwoDigitTitle => 'Mal über das Einmaleins hinaus';
+
+  @override
+  String get lessonMulTwoDigitDesc =>
+      'Eine zweistellige Zahl malnehmen, zum Beispiel 14 · 6.';
+
+  @override
+  String get lessonDivTwoDigitTitle => 'Geteilt über das Einmaleins hinaus';
+
+  @override
+  String get lessonDivTwoDigitDesc =>
+      'Das Ergebnis ist größer als zehn, zum Beispiel 96 : 6.';
+
+  @override
+  String get lessonMulDivMixedTitle => 'Mal und Geteilt gemischt';
+
+  @override
+  String get lessonMulDivMixedDesc =>
+      'Malnehmen und Teilen wechseln sich zufällig ab.';
+
+  @override
+  String get lessonPunktVorStrichTitle => 'Punkt vor Strich';
+
+  @override
+  String get lessonPunktVorStrichDesc =>
+      'Mal und Geteilt kommen vor Plus und Minus - auch wenn sie hinten stehen: bei 40 − 3 · 6 wird erst 3 · 6 gerechnet.';
+
+  @override
+  String get lessonCountPicturesTitle => 'Wie viele? (Reihe)';
+
+  @override
+  String get lessonCountPicturesDesc =>
+      'Bilder zählen, eins bis fünf, ordentlich aufgereiht.';
+
+  @override
+  String get lessonCountPicturesCloudTitle => 'Wie viele? (Wolke)';
+
+  @override
+  String get lessonCountPicturesCloudDesc =>
+      'Dieselben Bilder, aber durcheinander - man muss sich merken, was schon gezählt ist.';
+
+  @override
+  String get lessonCountDiceTitle => 'Wie viele Punkte?';
+
+  @override
+  String get lessonCountDiceDesc =>
+      'Ein Würfel. Irgendwann sieht man die Zahl, ohne zu zählen.';
+
+  @override
+  String get lessonCompareMoreTitle => 'Wo sind mehr? (Reihe)';
+
+  @override
+  String get lessonCompareMoreDesc =>
+      'Zwei Häufchen vergleichen und die größere Anzahl eingeben.';
+
+  @override
+  String get lessonCompareMoreCloudTitle => 'Wo sind mehr? (Wolke)';
+
+  @override
+  String get lessonCompareMoreCloudDesc =>
+      'Dasselbe, aber die Bilder liegen durcheinander.';
+
+  @override
+  String get lessonCountNextTitle => 'Welche Zahl kommt danach?';
+
+  @override
+  String get lessonCountNextDesc => 'Die Zahlenreihe vorwärts und rückwärts.';
+
+  @override
+  String get lessonBeesAddTitle => 'Bienchen (Reihe)';
+
+  @override
+  String get lessonBeesAddDesc =>
+      'Zwei Grüppchen Bienen zusammenzählen, zusammen nie mehr als zehn.';
+
+  @override
+  String get lessonBeesAddCloudTitle => 'Bienchen (Wolke)';
+
+  @override
+  String get lessonBeesAddCloudDesc =>
+      'Dieselbe Aufgabe, aber die Bienen schwirren durcheinander.';
+
+  @override
+  String get lessonDiceAddTitle => 'Zwei Würfel zusammenzählen';
+
+  @override
+  String get lessonDiceAddDesc =>
+      'Beide Würfel zeigen bis zu fünf Punkte - wie viele sind es zusammen?';
+
+  @override
+  String get lessonAddToSixTitle => 'Plus bis 6';
+
+  @override
+  String get lessonAddToSixDesc => 'Zusammenzählen, nie über die Sechs hinaus.';
+
+  @override
+  String get lessonSubToSixTitle => 'Minus bis 6';
+
+  @override
+  String get lessonSubToSixDesc => 'Wegnehmen im Zahlenraum bis sechs.';
+
+  @override
+  String get lessonCalcToSixTitle => 'Plus und Minus bis 6';
+
+  @override
+  String get lessonCalcToSixDesc =>
+      'Beides gemischt, nie über die Sechs hinaus.';
+
+  @override
+  String get lessonClockHalfTitle => 'Volle und halbe Stunden';
+
+  @override
+  String get lessonClockHalfDesc =>
+      'Wie spät ist es? Der große Zeiger steht auf der 12 oder auf der 6.';
+
+  @override
+  String get lessonClockQuarterTitle => 'Viertelstunden';
+
+  @override
+  String get lessonClockQuarterDesc =>
+      'Viertel nach, halb, Viertel vor - der große Zeiger steht auf 12, 3, 6 oder 9.';
+
+  @override
+  String get lessonClockFiveTitle => 'Uhrzeit auf fünf Minuten';
+
+  @override
+  String get lessonClockFiveDesc =>
+      'Der große Zeiger steht auf einer der zwölf Zahlen.';
+
+  @override
+  String get lessonClock24Title => 'Uhrzeit mit 24 Stunden';
+
+  @override
+  String get lessonClock24Desc =>
+      'Nachmittags zählt man weiter: aus 3 Uhr wird 15 Uhr. Unter der Uhr steht, welche Tageszeit es ist.';
+
+  @override
+  String get lessonClockWordsTitle => 'Uhrzeit sagen';
+
+  @override
+  String get lessonClockWordsDesc =>
+      'Wie sagt man die Uhrzeit? Erst die Sprechweise antippen, dann die Stunde, die dabei genannt wird - bei \"halb 3\" ist das die 3.';
+
+  @override
+  String get lessonMoneyAddTitle => 'Geld zusammenzählen';
+
+  @override
+  String get lessonMoneyAddDesc =>
+      'Zwei Beträge addieren. Erst die Euro eingeben, dann die Cent.';
+
+  @override
+  String get lessonMoneySubTitle => 'Geld abziehen';
+
+  @override
+  String get lessonMoneySubDesc => 'Was bleibt übrig, oder was gibt es zurück?';
+
+  @override
+  String get lessonMoneyComposeTitle => 'Betrag zusammenlegen';
+
+  @override
+  String get lessonMoneyComposeDesc =>
+      'Lege den Betrag aus Münzen und Scheinen. Es gibt viele richtige Wege - der Betrag muss am Ende genau stimmen.';
+
+  @override
+  String get lessonMoneyChangeTitle => 'Was bekomme ich zurück?';
+
+  @override
+  String get lessonMoneyChangeDesc =>
+      'Etwas kostet einen krummen Betrag, bezahlt wird mit einem glatten Schein oder Stück. Gesucht ist das Rückgeld.';
+
+  @override
+  String get lessonPlaceValue100Title => 'Einer und Zehner';
+
+  @override
+  String get lessonPlaceValue100Desc =>
+      'Wie viele Einer und Zehner sind es? Welche Zahl ist das zusammen? Es können auch mehr als neun Einer sein.';
+
+  @override
+  String get lessonPlaceValue1000Title => 'Einer, Zehner, Hunderter';
+
+  @override
+  String get lessonPlaceValue1000Desc =>
+      'Wie viele Einer, Zehner und Hunderter sind es? Welche Zahl ist das zusammen? Es können auch mehr als neun von einer Sorte sein.';
+
+  @override
+  String get lessonRoundThousandsTitle => 'Glatte Tausender';
+
+  @override
+  String get lessonRoundThousandsDesc =>
+      '3000 + 4000, 8000 − 5000: rechne mit ganzen Tausendern. Wer 3 + 4 kann, kann das auch.';
+
+  @override
+  String get lessonRoundHundredsTitle => 'Glatte Hunderter';
+
+  @override
+  String get lessonRoundHundredsDesc =>
+      '2300 + 400, 5600 − 200: rechne mit ganzen Hundertern. Hier geht es auch über den Tausender.';
+
+  @override
+  String get lessonRoundGapTitle => 'Glatte Zahlen mit Platzhalter';
+
+  @override
+  String get lessonRoundGapDesc =>
+      '3000 + ? = 7000. Was fehlt bis zur Zahl? Rückwärts gedacht.';
+
+  @override
+  String get lessonPlaceValue10000Title =>
+      'Einer, Zehner, Hunderter, Tausender';
+
+  @override
+  String get lessonPlaceValue10000Desc =>
+      'Wie viele Einer, Zehner, Hunderter und Tausender sind es? Welche Zahl ist das zusammen? Es können auch mehr als neun von einer Sorte sein.';
+
+  @override
+  String get lessonAddSub10000PlainTitle => 'Plus und Minus ohne Übergang';
+
+  @override
+  String get lessonAddSub10000PlainDesc =>
+      '4200 + 350, 6870 − 40: vierstellig rechnen, aber ohne Übergang. Jede Stelle für sich.';
+
+  @override
+  String taskQuestionPartner(int a) {
+    return 'Welche Zahl ist mit $a verliebt?';
+  }
+
+  @override
+  String get taskQuestionClock => 'Wie spät ist es?';
+
+  @override
+  String get taskQuestionClockPhrase => 'Wie sagt man das?';
+
+  @override
+  String taskQuestionMoneyCompose(String amount) {
+    return 'Lege $amount - tippe die Münzen und Scheine an.';
+  }
+
+  @override
+  String taskQuestionChange(String price, String paid) {
+    return 'Es kostet $price. Du gibst $paid. Wie viel bekommst du zurück?';
+  }
+
+  @override
+  String get taskQuestionQuantity => 'Wie viele?';
+
+  @override
+  String get taskQuestionDiceOne => 'Wie viele Punkte?';
+
+  @override
+  String get taskQuestionDiceTwo => 'Wie viele Punkte sind es zusammen?';
+
+  @override
+  String get taskQuestionCompare => 'Wo sind mehr? Tippe die größere Anzahl.';
+
+  @override
+  String get taskQuestionSequence => 'Welche Zahl kommt danach?';
+
+  @override
+  String get taskQuestionQuantityAdd => 'Wie viele sind es zusammen?';
+
+  @override
+  String get taskQuestionPlaceValue => 'Welche Zahl ist das?';
+
+  @override
+  String get taskLabelRemainder => 'Rest';
+
+  @override
+  String get taskLabelEuro => '€';
+
+  @override
+  String get taskLabelClock => 'Uhr';
+
+  @override
+  String get taskUnitCents => 'ct';
+
+  @override
+  String placeOnes(int n) {
+    return '$n Einer';
+  }
+
+  @override
+  String placeTens(int n) {
+    return '$n Zehner';
+  }
+
+  @override
+  String placeHundreds(int n) {
+    return '$n Hunderter';
+  }
+
+  @override
+  String placeThousands(int n) {
+    return '$n Tausender';
+  }
+
+  @override
+  String taskRenderRemainder(String prefix, String answer, String second) {
+    return '$prefix $answer Rest $second';
+  }
+
+  @override
+  String taskRenderClock(int hour, String minute) {
+    return '$hour:$minute Uhr';
+  }
+
+  @override
+  String taskRenderChange(String price, String paid) {
+    return '$price, bezahlt mit $paid';
+  }
+
+  @override
+  String taskRenderDiceOne(int a) {
+    return '$a Punkte';
+  }
+
+  @override
+  String taskRenderDiceTwo(int a, int b) {
+    return '$a + $b Punkte';
+  }
+
+  @override
+  String get dayPartMorning => 'vormittags';
+
+  @override
+  String get dayPartNoon => 'mittags';
+
+  @override
+  String get dayPartAfternoon => 'nachmittags';
+
+  @override
+  String get dayPartEvening => 'abends';
+
+  @override
+  String get clockPhrase05 => '5 nach';
+
+  @override
+  String get clockPhrase10 => '10 nach';
+
+  @override
+  String get clockPhrase15 => 'viertel nach';
+
+  @override
+  String get clockPhrase20 => '20 nach';
+
+  @override
+  String get clockPhrase25 => '5 vor halb';
+
+  @override
+  String get clockPhrase30 => 'halb';
+
+  @override
+  String get clockPhrase35 => '5 nach halb';
+
+  @override
+  String get clockPhrase40 => '20 vor';
+
+  @override
+  String get clockPhrase45 => 'viertel vor';
+
+  @override
+  String get clockPhrase50 => '10 vor';
+
+  @override
+  String get clockPhrase55 => '5 vor';
+
+  @override
+  String clockSpokenTime(String phrase, int hour) {
+    return '$phrase $hour';
+  }
+
+  @override
+  String get filterAllTitle => 'Alle zeigen';
+
+  @override
+  String get filterAllText => 'Der ganze Katalog, nichts wird versteckt.';
+
+  @override
+  String get filterMasteredTitle => 'Mit 3 Sternen ausblenden';
+
+  @override
+  String get filterMasteredText =>
+      'Was sicher sitzt, verschwindet aus der Liste. Übrig bleibt, was noch Fehler macht.';
+
+  @override
+  String get filterPerfectedTitle => 'Erst mit 3 Sternen und 3 Blitzen';
+
+  @override
+  String get filterPerfectedText =>
+      'Nur was sicher **und** schnell ist, verschwindet. Was zwar fehlerfrei, aber noch langsam ist, bleibt zum Üben stehen.';
+
+  @override
+  String get rangeAll => 'Alle';
+
+  @override
+  String get rangeToday => 'Heute';
+
+  @override
+  String get rangeWeek => '7 Tage';
+
+  @override
+  String get rangeMonth => '30 Tage';
+
+  @override
+  String get rangeAllPhrase => 'aus dem ganzen Verlauf';
+
+  @override
+  String get rangeTodayPhrase => 'von heute';
+
+  @override
+  String get rangeWeekPhrase => 'aus den letzten 7 Tagen';
+
+  @override
+  String get rangeMonthPhrase => 'aus den letzten 30 Tagen';
+
+  @override
+  String get backupErrorNotABackup => 'Die Datei ist keine gültige Sicherung.';
+
+  @override
+  String get backupErrorWrongApp =>
+      'Diese Datei stammt nicht aus dem Mathe-Trainer.';
+
+  @override
+  String get backupErrorTooNew =>
+      'Die Sicherung stammt aus einer neueren Version der App.';
+
+  @override
+  String formatSeconds(String value) {
+    return '$value s';
+  }
+
+  @override
+  String formatMinutesSeconds(int minutes, String seconds) {
+    return '$minutes:$seconds min';
+  }
+
+  @override
+  String formatHoursMinutes(int hours, int minutes) {
+    return '$hours h $minutes min';
+  }
+
+  @override
+  String formatDayAndTime(String day, String time) {
+    return '$day · $time';
+  }
+
+  @override
+  String get relativeToday => 'heute';
+
+  @override
+  String get relativeYesterday => 'gestern';
+
+  @override
+  String relativeDaysAgo(int days) {
+    return 'vor $days Tagen';
+  }
+
+  @override
+  String remainingMinutes(int minutes) {
+    String _temp0 = intl.Intl.pluralLogic(
+      minutes,
+      locale: localeName,
+      other: 'noch $minutes Minuten',
+      one: 'noch eine Minute',
+      zero: 'gleich',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String moneyAmount(String amount) {
+    return '$amount €';
+  }
+
+  @override
+  String moneyCoinCents(int n) {
+    return '$n ct';
+  }
+
+  @override
+  String moneyCoinEuros(int n) {
+    return '$n €';
+  }
+
+  @override
+  String get deadlineToday => 'heute';
+
+  @override
+  String get deadlineUntilSunday => 'bis Sonntag';
+
+  @override
+  String get deadlineStillOpen => 'noch offen';
+
+  @override
+  String deadlineWas(String day) {
+    return 'war $day';
+  }
+
+  @override
+  String get deadlineThisWeek => 'diese Woche';
+
+  @override
+  String deadlineFrom(String day) {
+    return 'ab $day';
+  }
+
+  @override
+  String deadlineOn(String day) {
+    return 'am $day';
+  }
+
+  @override
+  String commonSecondsShort(int n) {
+    return '$n s';
+  }
+
+  @override
+  String commonPercent(int n) {
+    return '$n %';
   }
 }

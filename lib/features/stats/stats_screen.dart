@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/repositories/stats_repository.dart';
 import '../../domain/lesson.dart';
-import '../../domain/scoring.dart';
 import '../../domain/task.dart';
 import '../../providers.dart';
 import '../../theme/app_theme.dart';
@@ -11,6 +10,8 @@ import '../common/load_failure.dart';
 import '../common/star_row.dart';
 import 'progress_chart.dart';
 import '../../l10n/l10n.dart';
+import '../../l10n/lesson_texts.dart';
+import '../../l10n/formatters.dart';
 
 /// Personal statistics: where the child stands per lesson, how the times
 /// developed, and which calculations still cost the most time.
@@ -65,7 +66,7 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          context.l10n.statsLearningCurve(lessonById(selected!).title),
+                          context.l10n.statsLearningCurve(lessonTitle(context.l10n, lessonById(selected!))),
                           style: Theme.of(context).textTheme.titleLarge,
                         ),
                         const SizedBox(height: 4),
@@ -193,14 +194,14 @@ class _LessonTable extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          lesson.title,
+                          lessonTitle(context.l10n, lesson),
                           style: const TextStyle(
                             fontSize: 19,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
                         Text(
-                          groupTitle(lesson.group),
+                          groupTitle(context.l10n, lesson.group),
                           style: const TextStyle(
                             fontSize: 15,
                             color: AppColors.textMuted,
@@ -225,13 +226,13 @@ class _LessonTable extends StatelessWidget {
                     ),
                   ),
                   _Value(
-                    lesson.scored ? formatPerTask(stat.bestScoreMs) : '–',
+                    lesson.scored ? formatPerTask(context.l10n, stat.bestScoreMs) : '–',
                     width: column,
                     strong: true,
                   ),
-                  _Value(lesson.scored ? formatPerTask(stat.averageMs) : '–',
+                  _Value(lesson.scored ? formatPerTask(context.l10n, stat.averageMs) : '–',
                       width: column),
-                  _Value('${(stat.errorRate * 100).round()} %',
+                  _Value(context.l10n.commonPercent((stat.errorRate * 100).round()),
                       width: column),
                   _Value('${stat.runs}', width: column),
                 ],
@@ -324,7 +325,7 @@ class _HardTasks extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    formatPerTask(hard.averageMs),
+                    formatPerTask(context.l10n, hard.averageMs),
                     style: const TextStyle(
                       fontSize: 16,
                       color: AppColors.textMuted,

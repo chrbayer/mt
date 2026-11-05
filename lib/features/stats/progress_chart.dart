@@ -2,9 +2,9 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
 import '../../data/repositories/stats_repository.dart';
-import '../../domain/scoring.dart';
 import '../../theme/app_theme.dart';
 import '../../l10n/l10n.dart';
+import '../../l10n/formatters.dart';
 
 /// The learning curve: average seconds per task over the last runs of one
 /// lesson. Downwards means faster, which is the whole point of the app.
@@ -72,7 +72,7 @@ class ProgressChart extends StatelessWidget {
               reservedSize: 52,
               interval: step,
               getTitlesWidget: (value, meta) => Text(
-                '${value.toStringAsFixed(0)} s',
+                context.l10n.commonSecondsShort(value.round()),
                 style: const TextStyle(
                   fontSize: 15,
                   color: AppColors.textMuted,
@@ -86,7 +86,7 @@ class ProgressChart extends StatelessWidget {
             getTooltipItems: (spots) => [
               for (final spot in spots)
                 LineTooltipItem(
-                  formatPerTask(spot.y * 1000),
+                  formatPerTask(context.l10n, spot.y * 1000),
                   const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.w600,

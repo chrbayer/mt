@@ -12,6 +12,8 @@ import 'package:mathe_trainer/features/practice/widgets/choice_keypad.dart';
 import 'package:mathe_trainer/features/practice/widgets/task_display.dart';
 import 'package:mathe_trainer/providers.dart';
 import 'package:mathe_trainer/theme/app_theme.dart';
+import 'package:mathe_trainer/l10n/task_texts.dart';
+import 'package:mathe_trainer/l10n/formatters.dart';
 
 /// Two lessons answer with something other than digits: a spoken time is
 /// tapped as words, an amount is laid out from coins. Both are driven here
@@ -84,7 +86,7 @@ void main() {
       // Every spoken form is on the pad, and no digit is.
       expect(find.byType(ChoiceKeypad), findsOneWidget);
       expect(find.byType(BigKeypad), findsNothing);
-      for (final phrase in clockPhrases) {
+      for (final phrase in clockPhraseLabels(deL10n)) {
         expect(find.text(phrase), findsOneWidget, reason: phrase);
       }
 
@@ -96,7 +98,7 @@ void main() {
         tester.widget<TaskDisplay>(find.byType(TaskDisplay)).input,
         '${task.expected}',
       );
-      expect(find.text(clockPhrases[task.expected]), findsWidgets);
+      expect(find.text(clockPhraseLabels(deL10n)[task.expected]), findsWidgets);
 
       // Moving on to the hour swaps the pad back to digits.
       await tapKey(tester, const Key('submit'));
@@ -141,7 +143,7 @@ void main() {
       // A coin for every piece, and no digits to type.
       expect(find.byType(BigKeypad), findsNothing);
       for (final piece in moneyPieces) {
-        expect(find.text(formatPiece(piece)), findsWidgets, reason: '$piece');
+        expect(find.text(formatPiece(deL10n, piece)), findsWidgets, reason: '$piece');
       }
 
       // 1 € is at index 4, 50 ct at index 3.

@@ -39,33 +39,6 @@ void main() {
     expect(errorRate(1, 0), 0);
   });
 
-  test('total practice time is formatted in hours and minutes', () {
-    expect(formatTotalTime(0), '0 min');
-    expect(formatTotalTime(42 * 60000), '42 min');
-    expect(formatTotalTime(60 * 60000), '1 h 0 min');
-    expect(formatTotalTime((3 * 60 + 12) * 60000), '3 h 12 min');
-  });
-
-  test('history timestamps are short', () {
-    expect(formatDayAndTime(DateTime(2026, 9, 5, 14, 32)), '5.9. · 14:32');
-    expect(formatDayAndTime(DateTime(2026, 12, 24, 9, 5)), '24.12. · 09:05');
-  });
-
-  test('last activity is expressed relative to today', () {
-    final now = DateTime(2026, 9, 5, 18);
-    expect(formatRelativeDay(DateTime(2026, 9, 5, 7), now: now), 'heute');
-    expect(formatRelativeDay(DateTime(2026, 9, 4, 23), now: now), 'gestern');
-    expect(formatRelativeDay(DateTime(2026, 9, 2), now: now), 'vor 3 Tagen');
-    expect(formatRelativeDay(DateTime(2026, 8, 20), now: now), '20.8.2026');
-  });
-
-  test('durations are formatted for children', () {
-    expect(formatDuration(4300), '4,3 s');
-    expect(formatDuration(59900), '59,9 s');
-    expect(formatDuration(65000), '1:05 min');
-    expect(formatPerTask(4321), '4,3 s');
-  });
-
   group('lightning bolts', () {
     test('three at the target, then one fewer per step', () {
       const target = 6000;

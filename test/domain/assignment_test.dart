@@ -369,15 +369,21 @@ void main() {
 
     test('says which day it belongs to, and when that is behind us', () {
       final a = once(on: DateTime(2026, 9, 16));
-      expect(formatDeadline(a, now: DateTime(2026, 9, 16, 9)), 'heute');
-      expect(formatDeadline(a, now: DateTime(2026, 9, 14)), 'am Mi, 16.9.');
+      expect(deadlineOf(a, now: DateTime(2026, 9, 16, 9)).kind,
+          DeadlineKind.today);
+      final ahead = deadlineOf(a, now: DateTime(2026, 9, 14));
+      expect(ahead.kind, DeadlineKind.onDay);
+      expect(ahead.day, DateTime(2026, 9, 16));
       // Over and not carried over: it is past, not pending. A parent
-      // cannot act on "noch offen" here, and a child never sees it.
-      expect(formatDeadline(a, now: DateTime(2026, 9, 18)), 'war Mi, 16.9.');
+      // cannot act on "still open" here, and a child never sees it.
+      final over = deadlineOf(a, now: DateTime(2026, 9, 18));
+      expect(over.kind, DeadlineKind.wasOn);
+      expect(over.day, DateTime(2026, 9, 16));
       expect(
-        formatDeadline(once(on: DateTime(2026, 9, 16), carryOver: true),
-            now: DateTime(2026, 9, 18)),
-        'noch offen',
+        deadlineOf(once(on: DateTime(2026, 9, 16), carryOver: true),
+                now: DateTime(2026, 9, 18))
+            .kind,
+        DeadlineKind.stillOpen,
       );
     });
 
@@ -420,13 +426,14 @@ void main() {
     });
   });
 
-  group('formatDeadline', () {
+  group('deadlineOf', () {
     test('a daily assignment is due today', () {
-      expect(formatDeadline(daily(createdAtMs: 0)), 'heute');
+      expect(deadlineOf(daily(createdAtMs: 0)).kind, DeadlineKind.today);
     });
 
     test('a weekly assignment is due on Sunday', () {
-      expect(formatDeadline(weekly(createdAtMs: 0)), 'bis Sonntag');
+      expect(deadlineOf(weekly(createdAtMs: 0)).kind,
+          DeadlineKind.untilSunday);
     });
   });
 

@@ -13,6 +13,8 @@ import '../leaderboard/leaderboard_screen.dart';
 import '../lessons/pause_notice.dart';
 import '../practice/practice_screen.dart';
 import '../../l10n/l10n.dart';
+import '../../l10n/lesson_texts.dart';
+import '../../l10n/formatters.dart';
 
 /// Shown after a completed run: what was achieved, and whether it was faster
 /// than last time.
@@ -162,7 +164,7 @@ class ResultScreen extends ConsumerWidget {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          lesson.title,
+                          lessonTitle(context.l10n, lesson),
                           style: Theme.of(context).textTheme.bodyLarge,
                         ),
                       ],
@@ -189,7 +191,7 @@ class ResultScreen extends ConsumerWidget {
                 Padding(
                   padding: const EdgeInsets.only(top: 6),
                   child: Text(
-context.l10n.resultNextBolt(bolts + 1, formatPerTask(nextBolt)),
+context.l10n.resultNextBolt(bolts + 1, formatPerTask(context.l10n, nextBolt)),
                     textAlign: TextAlign.center,
                     style: const TextStyle(
                       fontSize: 18,
@@ -296,11 +298,11 @@ context.l10n.resultNextBolt(bolts + 1, formatPerTask(nextBolt)),
                   if (lesson.scored) ...[
                     _Metric(
                       label: context.l10n.resultMetricTotalTime,
-                      value: formatDuration(scoredTotal),
+                      value: formatDuration(context.l10n, scoredTotal),
                     ),
                     _Metric(
                       label: context.l10n.resultMetricPerTask,
-                      value: formatPerTask(perTask),
+                      value: formatPerTask(context.l10n, perTask),
                       highlight: true,
                     ),
                   ],
@@ -314,7 +316,8 @@ context.l10n.resultNextBolt(bolts + 1, formatPerTask(nextBolt)),
                 Padding(
                   padding: const EdgeInsets.only(top: 14),
                   child: Text(
-context.l10n.resultPenalty(formatDuration(penalty), wrongAttempts),
+context.l10n.resultPenalty(formatDuration(context.l10n, penalty), wrongAttempts,
+                        wrongAttemptPenaltyMs ~/ 1000),
                     textAlign: TextAlign.center,
                     style: const TextStyle(
                       fontSize: 19,
@@ -456,8 +459,8 @@ class _ComparisonToLastRun extends ConsumerWidget {
         final text = delta.abs() < 100
             ? context.l10n.resultSameSpeed
             : faster
-                ? context.l10n.resultFaster(formatPerTask(delta))
-                : context.l10n.resultSlower(formatPerTask(-delta));
+                ? context.l10n.resultFaster(formatPerTask(context.l10n, delta))
+                : context.l10n.resultSlower(formatPerTask(context.l10n, -delta));
 
         return Center(
           child: Row(

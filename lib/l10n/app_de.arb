@@ -5,6 +5,7 @@
   "commonDelete": "Löschen",
   "commonMinutesShort": "{n} min",
   "@commonMinutesShort": {
+    "description": "Minutes, short, e.g. \"15 min\".",
     "placeholders": {
       "n": {
         "type": "int"
@@ -13,6 +14,7 @@
   },
   "versionLabel": "Version {version}",
   "@versionLabel": {
+    "description": "App version in a corner of the profile screen, e.g. \"Version 2.16.0\".",
     "placeholders": {
       "version": {
         "type": "String"
@@ -24,9 +26,16 @@
   "settingsTaskCountHeading": "Aufgaben pro Durchgang",
   "settingsParentAreaNote": "Uhr und Vibration, die Vorgabe für alle, Ergebnisse löschen, Profile verwalten und den Übungsverlauf ansehen: das steht im Elternbereich auf dem Startbildschirm, geschützt durch die PIN.",
   "amountNoLimit": "ohne Grenze",
+  "@amountNoLimit": {
+    "description": "Value of a time limit setting: no limit."
+  },
   "amountSameAsAll": "wie für alle",
+  "@amountSameAsAll": {
+    "description": "Value of a setting: same as the default for all children."
+  },
   "amountSameAsAllWith": "wie für alle ({value})",
   "@amountSameAsAllWith": {
+    "description": "A setting that follows the default for all children; value is the default, e.g. \"20 min\".",
     "placeholders": {
       "value": {
         "type": "String"
@@ -34,8 +43,12 @@
     }
   },
   "taskCountSameEverywhere": "wie überall",
+  "@taskCountSameEverywhere": {
+    "description": "Value of a setting: same as everywhere else."
+  },
   "taskCountSameEverywhereWith": "wie überall ({count})",
   "@taskCountSameEverywhereWith": {
+    "description": "Number of tasks per run when no special value is set; count is the value that applies.",
     "placeholders": {
       "count": {
         "type": "int"
@@ -48,6 +61,7 @@
   "soundTestButton": "Ton testen (10 Klicks)",
   "soundTestAllPlayed": "{played} von {expected} Klicks haben gespielt. War nichts zu hören, liegt es an der Lautstärke des Geräts.",
   "@soundTestAllPlayed": {
+    "description": "Result of the sound test in the parent area: played of expected click sounds ran.",
     "placeholders": {
       "played": {
         "type": "int"
@@ -59,6 +73,7 @@
   },
   "soundTestSomePlayed": "Nur {played} von {expected} Klicks haben gespielt - der Ton bricht auf diesem Gerät ab.",
   "@soundTestSomePlayed": {
+    "description": "Result of the sound test when some clicks did not play.",
     "placeholders": {
       "played": {
         "type": "int"
@@ -70,6 +85,7 @@
   },
   "soundTestUnavailable": "Der Ton ist auf diesem Gerät nicht verfügbar:\n{error}",
   "@soundTestUnavailable": {
+    "description": "Sound test failed; error is a technical message from the device.",
     "placeholders": {
       "error": {
         "type": "String"
@@ -77,11 +93,21 @@
     }
   },
   "recommendShaky": "Da war es zuletzt wackelig",
+  "@recommendShaky": {
+    "description": "Reason given for a recommended lesson: it went badly last time."
+  },
   "recommendFresh": "Das hast du noch nie geübt",
+  "@recommendFresh": {
+    "description": "Reason given for a recommended lesson: never practised."
+  },
   "recommendStale": "Lange nicht mehr geübt",
+  "@recommendStale": {
+    "description": "Reason given for a recommended lesson: not practised for a long time."
+  },
   "pauseDayDoneTitle": "Für heute reicht es!",
   "pauseDayDoneText": "Du hast heute {minutes} Minuten gerechnet. Morgen geht es weiter.",
   "@pauseDayDoneText": {
+    "description": "Shown to a child whose daily practice time is used up; minutes is the time practised today.",
     "placeholders": {
       "minutes": {
         "type": "int"
@@ -89,8 +115,12 @@
     }
   },
   "pauseBreakTitle": "Pause!",
+  "@pauseBreakTitle": {
+    "description": "Title when a child has practised long enough and must take a break."
+  },
   "pauseBreakText": "Du hast {minutes} Minuten am Stück geübt. Weiter geht es um {clock} - {left}.",
   "@pauseBreakText": {
+    "description": "Shown to a child who has to take a break; minutes practised in a row, clock is the time the break ends (see pauseClock), left says how long is left (see remainingMinutes).",
     "placeholders": {
       "minutes": {
         "type": "int"
@@ -105,6 +135,7 @@
   },
   "pauseClock": "{time} Uhr",
   "@pauseClock": {
+    "description": "Time of day, e.g. \"11:15 Uhr\"; time is already formatted.",
     "placeholders": {
       "time": {
         "type": "String"
@@ -114,6 +145,7 @@
   "runHintTooShort": "Zählt nicht: keine Sterne, keine Blitze, keine Bestenliste.",
   "runHintUsedUpToday": "Heute schon {count}× gewertet - üben geht weiter, zählen nicht mehr.",
   "@runHintUsedUpToday": {
+    "description": "The lesson has already counted for awards count times today, so another run does not count. Keep the \"×\".",
     "placeholders": {
       "count": {
         "type": "int"
@@ -122,6 +154,7 @@
   },
   "runHintRemaining": "{minutes, plural, =0{Gleich ist Pause.} =1{Noch eine Minute, dann ist Pause.} other{Noch {minutes} Minuten, dann ist Pause.}}",
   "@runHintRemaining": {
+    "description": "Hint under the task-count choice: practice time left until the break; 0 means the break is imminent.",
     "placeholders": {
       "minutes": {
         "type": "int"
@@ -131,6 +164,7 @@
   "assignmentGoalDone": "Aufgabe geschafft!",
   "assignmentGoalCounts": "Zählt für deine Aufgabe: {done} von {runs}",
   "@assignmentGoalCounts": {
+    "description": "Result screen: how many of the runs an assignment asks for have been done.",
     "placeholders": {
       "done": {
         "type": "int"
@@ -146,6 +180,7 @@
   "todayNothingYet": "noch nichts",
   "todayNothingOfLimit": "noch nichts von {limit} min",
   "@todayNothingOfLimit": {
+    "description": "Practised today: nothing yet, out of a daily limit given in minutes.",
     "placeholders": {
       "limit": {
         "type": "int"
@@ -154,6 +189,7 @@
   },
   "todayTimeOfLimit": "{time} von {limit} min",
   "@todayTimeOfLimit": {
+    "description": "Practised today: time (formatted) out of a daily limit in minutes.",
     "placeholders": {
       "time": {
         "type": "String"
@@ -166,6 +202,7 @@
   "progressChartEmpty": "Ab dem zweiten Durchgang siehst du hier deine Lernkurve.",
   "starRowEarnedOf": "{earned} von {possible}",
   "@starRowEarnedOf": {
+    "description": "Accessibility/summary of stars: earned out of possible.",
     "placeholders": {
       "earned": {
         "type": "int"
@@ -180,6 +217,7 @@
   "backupShareSubject": "Mathe-Trainer Sicherung",
   "backupExportFailed": "Sicherung fehlgeschlagen: {error}",
   "@backupExportFailed": {
+    "description": "Backup could not be created; error is a technical message.",
     "placeholders": {
       "error": {
         "type": "String"
@@ -192,6 +230,7 @@
   "backupFileTypeLabel": "Sicherung",
   "backupImported": "{users} Profile und {sessions} Durchgänge eingespielt.",
   "@backupImported": {
+    "description": "Backup restored: number of child profiles and practice runs.",
     "placeholders": {
       "users": {
         "type": "int"
@@ -203,6 +242,7 @@
   },
   "backupImportFailed": "Einspielen fehlgeschlagen: {error}",
   "@backupImportFailed": {
+    "description": "Backup could not be restored; error is a technical message.",
     "placeholders": {
       "error": {
         "type": "String"
@@ -216,6 +256,7 @@
   "backupNever": "Noch nie gesichert.",
   "backupLast": "Zuletzt gesichert: {when}.",
   "@backupLast": {
+    "description": "When the last backup was made; when is a relative day such as \"gestern\".",
     "placeholders": {
       "when": {
         "type": "String"
@@ -224,6 +265,7 @@
   },
   "backupLastOverdue": "Zuletzt gesichert: {when}. Das ist eine Weile her.",
   "@backupLastOverdue": {
+    "description": "Same, but the last backup is old, so a reminder follows.",
     "placeholders": {
       "when": {
         "type": "String"
@@ -235,6 +277,7 @@
   "pinHintEnter": "PIN eingeben",
   "pinHintChoose": "Wähle eine PIN aus {length} Ziffern",
   "@pinHintChoose": {
+    "description": "Asks to choose a PIN; length is the number of digits.",
     "placeholders": {
       "length": {
         "type": "int"
@@ -247,6 +290,7 @@
   "startWhatDoesItMean": "Was heißt das?",
   "startExample": "Zum Beispiel:  {example}",
   "@startExample": {
+    "description": "Example task shown in the start dialog of a lesson.",
     "placeholders": {
       "example": {
         "type": "String"
@@ -255,6 +299,7 @@
   },
   "startAssignmentGoal": "Für deine Aufgabe: {count} Rechnungen",
   "@startAssignmentGoal": {
+    "description": "The start dialog shows the number of tasks an assignment asks for in one run.",
     "placeholders": {
       "count": {
         "type": "int"
@@ -264,6 +309,7 @@
   "startHowMany": "Wie viele Aufgaben?",
   "startBoltsFrom": "ab {time} pro Aufgabe",
   "@startBoltsFrom": {
+    "description": "Time per task that earns the next lightning bolt; time is formatted, e.g. \"6,9 s\".",
     "placeholders": {
       "time": {
         "type": "String"
@@ -271,12 +317,25 @@
     }
   },
   "startGo": "Los geht's",
+  "@startGo": {
+    "description": "Button that starts the lesson. Means \"let's go\"."
+  },
   "startLeaderboard": "Bestenliste",
   "commonPerTask": "pro Aufgabe",
+  "@commonPerTask": {
+    "description": "Unit label: per task."
+  },
   "commonErrors": "Fehler",
+  "@commonErrors": {
+    "description": "Label: number of mistakes."
+  },
   "commonTasks": "Aufgaben",
+  "@commonTasks": {
+    "description": "Label: number of tasks."
+  },
   "leaderboardTitle": "Bestenliste · {lesson}",
   "@leaderboardTitle": {
+    "description": "Title of a leaderboard; lesson is the lesson title.",
     "placeholders": {
       "lesson": {
         "type": "String"
@@ -285,15 +344,25 @@
   },
   "leaderboardEmpty": "Noch keine Ergebnisse.\nMindestens {min} Aufgaben zählen für die Bestenliste.",
   "@leaderboardEmpty": {
+    "description": "Empty leaderboard; min is the minimum number of tasks a run needs to count.",
     "placeholders": {
       "min": {
         "type": "int"
       }
     }
   },
-  "leaderboardScoreExplanation": "Gewertet wird die Zeit pro Aufgabe, plus 3 Sekunden für jeden Fehlversuch. Deshalb lohnt sich Raten nicht, und Durchgänge mit unterschiedlich vielen Aufgaben bleiben vergleichbar.",
+  "leaderboardScoreExplanation": "Gewertet wird die Zeit pro Aufgabe, plus {seconds, plural, =1{1 Sekunde} other{{seconds} Sekunden}} für jeden Fehlversuch. Deshalb lohnt sich Raten nicht, und Durchgänge mit unterschiedlich vielen Aufgaben bleiben vergleichbar.",
+  "@leaderboardScoreExplanation": {
+    "description": "seconds is the time added to the score for every wrong attempt (a number from the code).",
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
   "statsTitle": "Statistik · {name}",
   "@statsTitle": {
+    "description": "Title of the statistics screen; name is the child's name.",
     "placeholders": {
       "name": {
         "type": "String"
@@ -303,6 +372,7 @@
   "statsEmpty": "Noch keine abgeschlossenen Durchgänge.",
   "statsLearningCurve": "Lernkurve · {lesson}",
   "@statsLearningCurve": {
+    "description": "Heading of the learning-curve chart; lesson is the lesson title.",
     "placeholders": {
       "lesson": {
         "type": "String"
@@ -313,8 +383,17 @@
   "statsHardest": "Diese Aufgaben dauern am längsten",
   "statsHeadStars": "Sterne",
   "statsHeadBest": "Bestzeit",
+  "@statsHeadBest": {
+    "description": "Table header: best time."
+  },
   "statsHeadAverage": "Ø Zeit",
+  "@statsHeadAverage": {
+    "description": "Table header: average time (\"Ø\" means average)."
+  },
   "statsHeadRuns": "Runden",
+  "@statsHeadRuns": {
+    "description": "Table header: number of runs."
+  },
   "statsTooFewData": "Noch zu wenige Daten.",
   "globalStatsTitle": "Alle Ergebnisse",
   "globalStatsTabOverview": "Übersicht",
@@ -322,6 +401,7 @@
   "globalStatsNoProfiles": "Noch keine Profile.",
   "globalStatsActivityHeading": "Geübt in den letzten {days} Tagen",
   "@globalStatsActivityHeading": {
+    "description": "Heading of the activity chart; days is the number of days shown.",
     "placeholders": {
       "days": {
         "type": "int"
@@ -331,6 +411,7 @@
   "globalStatsActivitySub": "Minuten pro Tag, je Kind in seiner Farbe",
   "globalStatsNoLeaderboards": "Noch keine Bestenlisten.\nEin Durchgang zählt ab {min} Aufgaben.",
   "@globalStatsNoLeaderboards": {
+    "description": "No leaderboards yet; min is the minimum number of tasks for a run to count.",
     "placeholders": {
       "min": {
         "type": "int"
@@ -340,6 +421,7 @@
   "globalStatsNotPlayed": "Noch nicht geübt.",
   "globalStatsRounds": "{n, plural, =1{Runde} other{Runden}}",
   "@globalStatsRounds": {
+    "description": "Unit \"runs\" next to a count; n picks singular or plural.",
     "placeholders": {
       "n": {
         "type": "int"
@@ -347,8 +429,12 @@
     }
   },
   "globalStatsPractised": "geübt",
+  "@globalStatsPractised": {
+    "description": "Unit text next to a practice time, e.g. \"3 h 12 min geübt\"."
+  },
   "globalStatsStreak": "{days} Tage in Folge",
   "@globalStatsStreak": {
+    "description": "Number of days in a row with practice.",
     "placeholders": {
       "days": {
         "type": "int"
@@ -357,6 +443,7 @@
   },
   "globalStatsLastPlayed": "zuletzt {when}",
   "@globalStatsLastPlayed": {
+    "description": "When a child last practised; when is a relative day such as \"heute\".",
     "placeholders": {
       "when": {
         "type": "String"
@@ -367,10 +454,17 @@
   "profilesTitle": "Wer rechnet?",
   "profilesAllResults": "Alle Ergebnisse",
   "profilesDuel": "Duell",
+  "@profilesDuel": {
+    "description": "Button to the duel mode (two or more children play the same tasks)."
+  },
   "profilesParents": "Eltern",
+  "@profilesParents": {
+    "description": "Button to the parent area."
+  },
   "profilesNone": "Noch kein Profil. Tippe auf „Neu\", um anzufangen.",
   "profilesLockedTitle": "{name} macht gerade Pause",
   "@profilesLockedTitle": {
+    "description": "Dialog title when a locked profile is tapped; name is the child's name.",
     "placeholders": {
       "name": {
         "type": "String"
@@ -382,6 +476,7 @@
   "profilesAllDone": "alles geschafft",
   "profilesTodo": "{count, plural, =1{1 Aufgabe} other{{count} Aufgaben}}",
   "@profilesTodo": {
+    "description": "Number of open assignments shown on a profile tile.",
     "placeholders": {
       "count": {
         "type": "int"
@@ -390,10 +485,16 @@
   },
   "profilesEditLook": "Bild und Farbe ändern",
   "profilesNew": "Neu",
+  "@profilesNew": {
+    "description": "Button to create a new profile."
+  },
   "profileEditorNew": "Neues Profil",
   "profileEditorChangeName": "Name ändern",
   "profileEditorNameLabel": "Name",
   "profileEditorNext": "Weiter",
+  "@profileEditorNext": {
+    "description": "Button to continue to the next step."
+  },
   "profileEditorLookTitle": "Bild und Farbe",
   "profileEditorPicture": "Bild",
   "profileEditorColor": "Farbe",
@@ -403,6 +504,7 @@
   "duelWhoPlays": "Wer tritt an?",
   "duelPlayerLocked": "{avatar}  {name} · gesperrt",
   "@duelPlayerLocked": {
+    "description": "Child in the duel list who is locked: avatar emoji, then name.",
     "placeholders": {
       "avatar": {
         "type": "String"
@@ -414,6 +516,7 @@
   },
   "duelPlayerOnBreak": "{avatar}  {name} · Pause",
   "@duelPlayerOnBreak": {
+    "description": "Child in the duel list who is on a practice break.",
     "placeholders": {
       "avatar": {
         "type": "String"
@@ -425,6 +528,7 @@
   },
   "duelPlayer": "{avatar}  {name}",
   "@duelPlayer": {
+    "description": "Child in the duel list: avatar emoji, then name.",
     "placeholders": {
       "avatar": {
         "type": "String"
@@ -438,6 +542,7 @@
   "duelPickTwo": "Wähle mindestens zwei Kinder aus.",
   "duelLessonChip": "{title}  ·  {example}",
   "@duelLessonChip": {
+    "description": "Chip to choose a lesson for the duel: title and an example task.",
     "placeholders": {
       "title": {
         "type": "String"
@@ -450,6 +555,7 @@
   "duelStart": "Duell starten",
   "duelPosition": "{position} von {total}",
   "@duelPosition": {
+    "description": "Which player is up, e.g. \"2 von 3\".",
     "placeholders": {
       "position": {
         "type": "int"
@@ -461,6 +567,7 @@
   },
   "duelYourTurn": "{name} ist dran",
   "@duelYourTurn": {
+    "description": "Announces whose turn it is in the duel.",
     "placeholders": {
       "name": {
         "type": "String"
@@ -469,6 +576,7 @@
   },
   "duelLessonAndGroup": "{lesson} · {group}",
   "@duelLessonAndGroup": {
+    "description": "Lesson title and the title of its group.",
     "placeholders": {
       "lesson": {
         "type": "String"
@@ -479,9 +587,13 @@
     }
   },
   "duelReady": "Bereit",
+  "@duelReady": {
+    "description": "Button: the player is ready."
+  },
   "duelAbort": "Duell abbrechen",
   "duelResultTitle": "Duell · {lesson}",
   "@duelResultTitle": {
+    "description": "Title of the duel result; lesson is the lesson title.",
     "placeholders": {
       "lesson": {
         "type": "String"
@@ -491,10 +603,14 @@
   "duelSameTasks": "Alle hatten dieselben Aufgaben.",
   "duelDone": "Fertig",
   "duelWin": "Sieg!",
+  "@duelWin": {
+    "description": "Shown for the winner of a duel."
+  },
   "commonBackToLessons": "Zurück zu den Lektionen",
   "resultDone": "Geschafft!",
   "resultDoneName": "Geschafft, {name}!",
   "@resultDoneName": {
+    "description": "Congratulation on the result screen with the child's name.",
     "placeholders": {
       "name": {
         "type": "String"
@@ -503,6 +619,7 @@
   },
   "resultNextBolt": "{n}. Blitz ab {time} pro Aufgabe",
   "@resultNextBolt": {
+    "description": "What the next lightning bolt needs: n is the bolt number (1 to 3), time the time per task.",
     "placeholders": {
       "n": {
         "type": "int"
@@ -517,20 +634,28 @@
   "resultMetricTasks": "Aufgaben",
   "resultMetricTotalTime": "Gesamtzeit",
   "resultMetricPerTask": "Pro Aufgabe",
+  "@resultMetricPerTask": {
+    "description": "Metric label: time per task."
+  },
   "resultMetricErrors": "Fehler",
-  "resultPenalty": "Darin sind {penalty} Zeitstrafe für {count, plural, =1{1 Fehlversuch} other{{count} Fehlversuche}} enthalten - 3 Sekunden für jeden.",
+  "resultPenalty": "Darin sind {penalty} Zeitstrafe für {count, plural, =1{1 Fehlversuch} other{{count} Fehlversuche}} enthalten - {seconds, plural, =1{1 Sekunde} other{{seconds} Sekunden}} für jeden.",
   "@resultPenalty": {
+    "description": "penalty is a formatted duration, count the number of wrong attempts, seconds the penalty per wrong attempt.",
     "placeholders": {
       "penalty": {
         "type": "String"
       },
       "count": {
         "type": "int"
+      },
+      "seconds": {
+        "type": "int"
       }
     }
   },
   "resultStreak": "{days} Tage in Folge geübt!",
   "@resultStreak": {
+    "description": "Number of days in a row with practice.",
     "placeholders": {
       "days": {
         "type": "int"
@@ -538,12 +663,22 @@
     }
   },
   "resultAgain": "Nochmal",
+  "@resultAgain": {
+    "description": "Button: do the same lesson again."
+  },
   "resultLeaderboard": "Bestenliste",
+  "@resultLeaderboard": {
+    "description": "Button that opens the leaderboard."
+  },
   "resultOtherLesson": "Andere Lektion",
   "resultFirstRun": "Das war dein erster Durchgang hier -\ndie Zeit ist ab jetzt dein Rekord.",
+  "@resultFirstRun": {
+    "description": "Shown after the first run of a lesson."
+  },
   "resultSameSpeed": "Genau so schnell wie beim letzten Mal.",
   "resultFaster": "{delta} schneller pro Aufgabe als beim letzten Mal!",
   "@resultFaster": {
+    "description": "delta is the formatted time difference per task, e.g. \"0,4 s\".",
     "placeholders": {
       "delta": {
         "type": "String"
@@ -552,6 +687,7 @@
   },
   "resultSlower": "{delta} langsamer pro Aufgabe als beim letzten Mal.",
   "@resultSlower": {
+    "description": "delta is the formatted time difference per task.",
     "placeholders": {
       "delta": {
         "type": "String"
@@ -561,22 +697,44 @@
   "practiceAbortTitle": "Übung beenden?",
   "practiceAbortText": "Dieser Durchgang zählt dann nicht für die Bestenliste.",
   "practiceKeepGoing": "Weiter rechnen",
+  "@practiceKeepGoing": {
+    "description": "Button that continues the run instead of aborting."
+  },
   "practiceAbortConfirm": "Beenden",
+  "@practiceAbortConfirm": {
+    "description": "Button that ends the run."
+  },
   "practiceAbortTooltip": "Übung beenden",
   "practicePause": "Pause",
+  "@practicePause": {
+    "description": "Title of the screen shown while the practice run is paused."
+  },
   "practicePauseNote": "Die Zeit läuft nicht weiter.",
   "practiceResume": "Weiter",
+  "@practiceResume": {
+    "description": "Button that continues a paused run."
+  },
   "lessonsFilterTooltip": "Fertiges ausblenden",
   "lessonsHideDoneAssignments": "Erledigte Aufgaben ausblenden",
   "lessonsStatsLabel": "Statistik",
+  "@lessonsStatsLabel": {
+    "description": "Button label in the app bar: statistics."
+  },
   "lessonsSettingsTooltip": "Einstellungen",
   "lessonsSwitchLabel": "Wechseln",
+  "@lessonsSwitchLabel": {
+    "description": "Button label in the app bar: switch to another child."
+  },
   "lessonsNoGroup": "Für dieses Profil ist noch kein Bereich freigeschaltet.\nDas lässt sich im Elternbereich ändern.",
   "lessonsNothingLeftTitle": "Alles geschafft!",
   "lessonsNothingLeftText": "Was du kannst, ist gerade ausgeblendet. Über den Filter oben kommt der ganze Katalog zurück.",
   "lessonsRecommendGo": "Los",
+  "@lessonsRecommendGo": {
+    "description": "Button on the recommended lesson: start it."
+  },
   "lessonsRecommendTitle": "{lesson} · {group}",
   "@lessonsRecommendTitle": {
+    "description": "Recommended lesson with its group.",
     "placeholders": {
       "lesson": {
         "type": "String"
@@ -591,6 +749,7 @@
   "lessonsNotPractised": "noch nicht geübt",
   "lessonsPractisedTimes": "{count}× geübt",
   "@lessonsPractisedTimes": {
+    "description": "How often a lesson was practised, on a tile. Keep the \"×\".",
     "placeholders": {
       "count": {
         "type": "int"
@@ -603,9 +762,16 @@
   "adminTabAssignments": "Aufgaben",
   "adminTabSettings": "Einstellungen",
   "adminFilterAll": "Alle",
+  "@adminFilterAll": {
+    "description": "Chip: show runs of all children."
+  },
   "adminShowDeleted": "Gelöschte",
+  "@adminShowDeleted": {
+    "description": "Chip that shows deleted runs again so they can be restored."
+  },
   "adminHistoryTruncated": "Es werden die letzten {limit} Durchgänge angezeigt. Ein kürzerer Zeitraum zeigt den Rest.",
   "@adminHistoryTruncated": {
+    "description": "The log shows only the last limit runs.",
     "placeholders": {
       "limit": {
         "type": "int"
@@ -614,6 +780,7 @@
   },
   "adminCleanupAll": "Abgebrochene Durchgänge aufräumen ({count})",
   "@adminCleanupAll": {
+    "description": "Button that removes aborted runs of all children; count is how many.",
     "placeholders": {
       "count": {
         "type": "int"
@@ -622,6 +789,7 @@
   },
   "adminCleanupOne": "Abgebrochene von {name} aufräumen ({count})",
   "@adminCleanupOne": {
+    "description": "Button that removes aborted runs of one child.",
     "placeholders": {
       "name": {
         "type": "String"
@@ -635,6 +803,7 @@
   "adminDeleteRunTitle": "Diesen Durchgang löschen?",
   "adminDeleteRunText": "{user} · {lesson} · {when}",
   "@adminDeleteRunText": {
+    "description": "Confirmation text: child, lesson and date of the run to delete.",
     "placeholders": {
       "user": {
         "type": "String"
@@ -653,6 +822,7 @@
   "adminWhoAll": "von allen Kindern",
   "adminWhoOne": "von {name}",
   "@adminWhoOne": {
+    "description": "\"of\" plus a child's name, used inside a sentence (see adminCleanupText).",
     "placeholders": {
       "name": {
         "type": "String"
@@ -661,6 +831,7 @@
   },
   "adminCleanupTitle": "{count, plural, =1{Einen abgebrochenen Durchgang aufräumen?} other{{count} abgebrochene Durchgänge aufräumen?}}",
   "@adminCleanupTitle": {
+    "description": "Question before removing aborted runs; count is how many.",
     "placeholders": {
       "count": {
         "type": "int"
@@ -669,6 +840,7 @@
   },
   "adminCleanupText": "Es verschwinden die abgebrochenen Durchgänge {whose} {range}. Sie zählten nie für Sterne, Blitze oder eine Bestenliste - die geübte Zeit bleibt gezählt.",
   "@adminCleanupText": {
+    "description": "whose is \"von allen Kindern\" or \"von <name>\", range is a phrase such as \"aus den letzten 7 Tagen\".",
     "placeholders": {
       "whose": {
         "type": "String"
@@ -681,6 +853,7 @@
   "adminCleanupConfirm": "Aufräumen",
   "adminCleanedUp": "{count, plural, =1{Ein abgebrochener Durchgang aufgeräumt.} other{{count} abgebrochene Durchgänge aufgeräumt.}}",
   "@adminCleanedUp": {
+    "description": "Confirmation after removing aborted runs.",
     "placeholders": {
       "count": {
         "type": "int"
@@ -689,6 +862,7 @@
   },
   "adminHistoryLessonLine": "{lesson}  ·  {group}",
   "@adminHistoryLessonLine": {
+    "description": "Lesson title and group in the run log.",
     "placeholders": {
       "lesson": {
         "type": "String"
@@ -700,6 +874,7 @@
   },
   "adminAbortedAfter": "abgebrochen nach {count, plural, =1{1 Aufgabe} other{{count} Aufgaben}}",
   "@adminAbortedAfter": {
+    "description": "Label of an aborted run: after how many tasks it was aborted.",
     "placeholders": {
       "count": {
         "type": "int"
@@ -718,6 +893,7 @@
   "adminGroupsAll": "Alle Bereiche",
   "adminGroupsSome": "{n} von {total} Bereichen",
   "@adminGroupsSome": {
+    "description": "How many of the areas (groups of lessons) are switched on for a child.",
     "placeholders": {
       "n": {
         "type": "int"
@@ -728,10 +904,17 @@
     }
   },
   "adminLocked": "Gesperrt",
+  "@adminLocked": {
+    "description": "Label of a profile that is temporarily locked."
+  },
   "adminNoReview": "ohne Wiederholung",
+  "@adminNoReview": {
+    "description": "Label: this child does not repeat hard tasks."
+  },
   "profileSettingsDiscardTitle": "Änderungen verwerfen?",
   "profileSettingsDiscardText": "Die Einstellungen für {name} wurden geändert, aber noch nicht gespeichert.",
   "@profileSettingsDiscardText": {
+    "description": "Asks whether unsaved settings for the named child are to be discarded.",
     "placeholders": {
       "name": {
         "type": "String"
@@ -767,6 +950,7 @@
   "profileSettingsDeleteProfile": "Profil löschen",
   "profileSettingsResetTitle": "Ergebnisse von {name} löschen?",
   "@profileSettingsResetTitle": {
+    "description": "Question before deleting all results of the named child.",
     "placeholders": {
       "name": {
         "type": "String"
@@ -776,6 +960,7 @@
   "profileSettingsResetText": "Bestzeiten, Lernkurve und Verlauf gehen verloren. Das Profil selbst bleibt bestehen.",
   "profileSettingsDeleteTitle": "{name} löschen?",
   "@profileSettingsDeleteTitle": {
+    "description": "Question before deleting the named profile.",
     "placeholders": {
       "name": {
         "type": "String"
@@ -785,6 +970,7 @@
   "profileSettingsDeleteText": "Profil und alle Ergebnisse werden entfernt.",
   "profileSettingsGroupSummary": "{count} Lektionen · z. B. {example}",
   "@profileSettingsGroupSummary": {
+    "description": "Number of lessons in a group and an example task. Keep \"z. B.\" as the abbreviation for \"for example\".",
     "placeholders": {
       "count": {
         "type": "int"
@@ -813,6 +999,7 @@
   "globalSettingsScoredRunsNote": "Danach darf dieselbe Übung weiter gemacht werden, sie bringt nur keine Bestzeit, keine Sterne und keine Blitze mehr. Das nimmt den Anreiz, die leichteste Übung so lange zu wiederholen, bis die Zeit stimmt. Geübte Zeit und Verlauf zählen weiter mit.",
   "resetStarsTitle": "Sterne in „{group}\" zurücksetzen?",
   "@resetStarsTitle": {
+    "description": "Question before taking the stars of a group of lessons back.",
     "placeholders": {
       "group": {
         "type": "String"
@@ -821,6 +1008,7 @@
   },
   "resetStarsText": "{name} kann sie danach neu verdienen. Bestzeiten, Blitze, Lernkurve und Bestenlisten bleiben unverändert - es geht nur um die Sterne dieser Gruppe.",
   "@resetStarsText": {
+    "description": "name is the child's name; the stars can be earned again.",
     "placeholders": {
       "name": {
         "type": "String"
@@ -828,8 +1016,12 @@
     }
   },
   "resetStarsConfirm": "Zurücksetzen",
+  "@resetStarsConfirm": {
+    "description": "Button that confirms taking the stars back."
+  },
   "resetStarsHeading": "Sterne von {name}",
   "@resetStarsHeading": {
+    "description": "Heading of the dialog to give stars back.",
     "placeholders": {
       "name": {
         "type": "String"
@@ -838,8 +1030,12 @@
   },
   "resetStarsNote": "Zurückgesetzt werden nur die Sterne. Die Zeiten bleiben - Bestzeiten, Blitze, Lernkurve und Bestenlisten sind danach genau wie vorher.",
   "resetStarsDone": "Fertig",
+  "@resetStarsDone": {
+    "description": "Button that closes the dialog; means \"done\"."
+  },
   "resetStarsGroupLine": "{earned} von {possible} Sternen",
   "@resetStarsGroupLine": {
+    "description": "Stars earned out of possible in one group.",
     "placeholders": {
       "earned": {
         "type": "int"
@@ -850,10 +1046,14 @@
     }
   },
   "assignmentsAll": "Alle",
+  "@assignmentsAll": {
+    "description": "Chip: assignments of all children."
+  },
   "assignmentsNew": "Neue Aufgabe",
   "assignmentsHideFinished": "Erledigte ausblenden",
   "assignmentsHiddenCount": "{count, plural, =1{1 ausgeblendet} other{{count} ausgeblendet}}",
   "@assignmentsHiddenCount": {
+    "description": "Number of hidden (finished) assignments.",
     "placeholders": {
       "count": {
         "type": "int"
@@ -862,13 +1062,21 @@
   },
   "assignmentsEmpty": "Noch keine Aufgaben.",
   "assignmentsNoneOpen": "Keine offenen Aufgaben. Erledigte sind ausgeblendet.",
-  "assignmentsPeriodDays": "Tagen",
-  "assignmentsPeriodWeeks": "Wochen",
   "assignmentsDaily": "täglich",
+  "@assignmentsDaily": {
+    "description": "Rhythm of an assignment: every day."
+  },
   "assignmentsWeekly": "wöchentlich",
-  "assignmentsCarriesOver": " · zieht nach",
+  "@assignmentsWeekly": {
+    "description": "Rhythm of an assignment: every week."
+  },
+  "assignmentsCarriesOver": "zieht nach",
+  "@assignmentsCarriesOver": {
+    "description": "Appended to the deadline of a task that stays open until it is done; the separator before it is added in code."
+  },
   "assignmentsLessonCount": "{count} Übungen",
   "@assignmentsLessonCount": {
+    "description": "Number of lessons (\"Übungen\") in an assignment.",
     "placeholders": {
       "count": {
         "type": "int"
@@ -877,10 +1085,17 @@
   },
   "assignmentsEdit": "Ändern",
   "assignmentsEnd": "Beenden",
+  "@assignmentsEnd": {
+    "description": "Button that ends an assignment by hand."
+  },
   "assignmentsRepeat": "Erneut stellen",
+  "@assignmentsRepeat": {
+    "description": "Button that creates a new assignment from a finished one."
+  },
   "assignmentsDelete": "Aufgabe löschen",
   "assignmentsRunsOfTasks": "{runs}× {tasks} Rechnungen",
   "@assignmentsRunsOfTasks": {
+    "description": "An assignment asks for runs runs of tasks tasks each. Keep the \"×\".",
     "placeholders": {
       "runs": {
         "type": "int"
@@ -892,6 +1107,7 @@
   },
   "assignmentsMinStars": "mind. {count} ★",
   "@assignmentsMinStars": {
+    "description": "Minimum stars an assignment asks for (\"mind.\" is short for \"at least\").",
     "placeholders": {
       "count": {
         "type": "int"
@@ -900,6 +1116,7 @@
   },
   "assignmentsMinBolts": "mind. {count} ⚡",
   "@assignmentsMinBolts": {
+    "description": "Minimum lightning bolts an assignment asks for.",
     "placeholders": {
       "count": {
         "type": "int"
@@ -907,8 +1124,9 @@
     }
   },
   "assignmentsNoClosedPeriod": "Noch kein abgeschlossener Zeitraum",
-  "assignmentsMetOf": "Geschafft an {met} von {total} {period}",
+  "assignmentsMetOf": "Geschafft an {met} von {total} {period, select, daily{Tagen} weekly{Wochen} other{Wochen}}",
   "@assignmentsMetOf": {
+    "description": "Statistic of a repeating task. period is \"daily\" or \"weekly\" and picks the unit: days or weeks.",
     "placeholders": {
       "met": {
         "type": "int"
@@ -921,8 +1139,9 @@
       }
     }
   },
-  "assignmentsBefore": "· davor {met} von {total} {period}",
+  "assignmentsBefore": "davor {met} von {total} {period, select, daily{Tagen} weekly{Wochen} other{Wochen}}",
   "@assignmentsBefore": {
+    "description": "Earlier statistic next to a lesson of a task; the leading separator is added in code. period is \"daily\" or \"weekly\".",
     "placeholders": {
       "met": {
         "type": "int"
@@ -936,27 +1155,52 @@
     }
   },
   "assignmentsVerdictMet": "Geschafft",
+  "@assignmentsVerdictMet": {
+    "description": "Verdict for a past period: the assignment was met."
+  },
   "assignmentsVerdictPending": "Steht noch aus",
+  "@assignmentsVerdictPending": {
+    "description": "Verdict: the period is still running."
+  },
   "assignmentsVerdictLate": "Verpasst, später nachgeholt",
+  "@assignmentsVerdictLate": {
+    "description": "Verdict for a past period: missed on the day, caught up later."
+  },
   "assignmentsVerdictMissed": "Verpasst",
+  "@assignmentsVerdictMissed": {
+    "description": "Verdict for a past period: missed."
+  },
   "editorTitleEdit": "Aufgabe ändern",
   "editorTitleAgain": "Aufgabe erneut stellen",
   "editorTitleNew": "Neue Aufgabe",
   "editorChild": "Kind",
   "editorUnknownChild": "Unbekanntes Kind",
   "editorLessons": "Übungen",
+  "@editorLessons": {
+    "description": "Heading: the lessons (exercises) of an assignment."
+  },
   "editorLessonsNote": "Mehrere sind möglich. Jede davon muss erfüllt werden, damit die Aufgabe erledigt ist.",
   "editorNoLesson": "Ohne eine einzige Übung gibt es nichts aufzugeben.",
   "editorPeriod": "Zeitraum",
+  "@editorPeriod": {
+    "description": "Heading: one day or one week."
+  },
   "editorOneDay": "ein Tag",
   "editorOneWeek": "eine Woche",
   "editorRepetition": "Wiederholung",
   "editorEveryTime": "jedes Mal",
+  "@editorEveryTime": {
+    "description": "Choice: the assignment comes back every period."
+  },
   "editorOnce": "einmalig",
+  "@editorOnce": {
+    "description": "Choice: the assignment is given only once."
+  },
   "editorDailyNote": "Jeden Tag neu, fällig am Ende des Tages.",
   "editorWeeklyNote": "Jede Woche neu, fällig Sonntagabend.",
   "editorOnDay": "Am {day}",
   "@editorOnDay": {
+    "description": "A one-time assignment on a day; day is a short date with weekday.",
     "placeholders": {
       "day": {
         "type": "String"
@@ -965,6 +1209,7 @@
   },
   "editorInWeek": "In der Woche ab {day}",
   "@editorInWeek": {
+    "description": "A one-time assignment in the week starting on the given day.",
     "placeholders": {
       "day": {
         "type": "String"
@@ -981,16 +1226,581 @@
   "editorNoRequirement": "keine Vorgabe",
   "editorSave": "Speichern",
   "editorCreate": "Anlegen",
-  "editorDayLabel": "{weekday, select, 1{Mo} 2{Di} 3{Mi} 4{Do} 5{Fr} 6{Sa} 7{So} other{}}, {day}.{month}.",
-  "@editorDayLabel": {
+  "@editorCreate": {
+    "description": "Button that creates the assignment."
+  },
+  "groupFirstSteps": "Erste Schritte",
+  "@groupFirstSteps": {
+    "description": "Heading of a group of lessons on the lesson screen."
+  },
+  "groupUpTo10": "Bis 10",
+  "groupUpTo20": "Bis 20",
+  "groupUpTo100": "Bis 100",
+  "groupUpTo1000": "Bis 1000",
+  "groupWithThousands": "Mit Tausendern",
+  "groupTimesTables": "Einmaleins",
+  "groupReverseTimesTables": "Einmaleins rückwärts",
+  "groupTimesAndDivision": "Mal und Geteilt",
+  "groupEveryday": "Uhrzeit und Geld",
+  "lessonAddPlainTitle": "Plus ohne Zehnerübergang",
+  "@lessonAddPlainTitle": {
+    "description": "Title of a lesson. \"Zehnerübergang\" is the German school term for crossing a multiple of ten when adding or subtracting (carrying / borrowing)."
+  },
+  "lessonAddPlainBigTitle": "Plus ohne Übergang",
+  "@lessonAddPlainBigTitle": {
+    "description": "Same lesson in the number ranges up to 1000, where a task may cross the ten or the hundred, so the title does not name the ten."
+  },
+  "lessonAddPlainDesc": "Die Einer bleiben zusammen unter 10 - es muss nichts übertragen werden.",
+  "lessonAddPlainBigDesc": "Keine Stelle läuft über - weder die Einer noch die Zehner.",
+  "lessonAddCarryTitle": "Plus mit Zehnerübergang",
+  "lessonAddCarryBigTitle": "Plus mit Übergang",
+  "lessonAddCarryDesc": "Die Einer ergeben zusammen 10 oder mehr - ein Zehner wandert weiter.",
+  "lessonAddCarryBigDesc": "Einer oder Zehner laufen über - es muss übertragen werden.",
+  "lessonSubPlainTitle": "Minus ohne Zehnerübergang",
+  "lessonSubPlainBigTitle": "Minus ohne Übergang",
+  "lessonSubPlainDesc": "Jede Ziffer oben ist groß genug - es muss kein Zehner aufgelöst werden.",
+  "lessonSubPlainBigDesc": "Jede Ziffer oben ist groß genug - es muss nichts aufgelöst werden.",
+  "lessonSubBorrowTitle": "Minus mit Zehnerübergang",
+  "lessonSubBorrowBigTitle": "Minus mit Übergang",
+  "lessonSubBorrowDesc": "Die Einer oben reichen nicht - ein Zehner muss aufgelöst werden.",
+  "lessonSubBorrowBigDesc": "Eine Stelle oben reicht nicht - Zehner oder Hunderter müssen aufgelöst werden.",
+  "lessonPlusGapTitle": "Plus mit Platzhalter",
+  "@lessonPlusGapTitle": {
+    "description": "\"Platzhalter\" is the empty box standing in for a missing number: 3 + ? = 10."
+  },
+  "lessonMinusGapTitle": "Minus mit Platzhalter",
+  "lessonGapDesc": "Gesucht ist die Zahl, die fehlt, damit die Rechnung stimmt.",
+  "lessonMixedTitle": "Plus und Minus gemischt",
+  "lessonMixedDesc": "Plus und Minus wechseln sich zufällig ab, mit und ohne Übergang.",
+  "lessonTimesTableTitle": "{n}er-Reihe",
+  "@lessonTimesTableTitle": {
+    "description": "Title of the lesson for one row of the times table; n is the row, e.g. 7 for the seven times table.",
     "placeholders": {
-      "weekday": {
-        "type": "String"
-      },
-      "day": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "lessonTimesTableDesc": "Alle Aufgaben der {n}er-Reihe, in beide Richtungen: {n} · 4 genauso wie 4 · {n}.",
+  "@lessonTimesTableDesc": {
+    "description": "Both directions means n · 4 and 4 · n.",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "lessonReverseTableTitle": "{n}er-Reihe rückwärts",
+  "@lessonReverseTableTitle": {
+    "description": "Title of the lesson that divides by n, the reverse of one row of the times table.",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "lessonReverseTableDesc": "Geteilt durch {n}. Jede Aufgabe ist die Umkehrung einer Aufgabe der {n}er-Reihe: aus {n} · 4 = {product} wird {product} : {n} = 4.",
+  "@lessonReverseTableDesc": {
+    "description": "product is n times 4.",
+    "placeholders": {
+      "n": {
         "type": "int"
       },
-      "month": {
+      "product": {
+        "type": "int"
+      }
+    }
+  },
+  "lessonPartnersOfTenTitle": "Verliebte Zahlen",
+  "lessonPartnersOfTenDesc": "Zwei Zahlen sind verliebt, wenn sie zusammen genau 10 ergeben: 1 und 9, 2 und 8, 3 und 7. Gefragt wird in beide Richtungen - von 3 nach 7 genauso wie von 7 nach 3.",
+  "lessonAdd10Title": "Plus bis 10",
+  "lessonAdd10Desc": "Zusammenzählen, ohne über die 10 hinauszugehen.",
+  "lessonSub10Title": "Minus bis 10",
+  "lessonSub10Desc": "Wegnehmen im Zahlenraum bis 10.",
+  "lessonMix10Desc": "Plus und Minus wechseln sich zufällig ab.",
+  "lessonTimesAllTitle": "Alle Reihen gemischt",
+  "lessonTimesAllDesc": "Das ganze kleine Einmaleins, bunt durcheinander.",
+  "lessonDivPlainTitle": "Alle Reihen rückwärts",
+  "lessonDivPlainDesc": "Geteilt durch alles, bunt durcheinander. Jede Aufgabe geht glatt auf - sie ist die Umkehrung einer Einmaleins-Aufgabe.",
+  "lessonDivRemainderTitle": "Geteilt mit Rest",
+  "lessonDivRemainderDesc": "Es bleibt immer etwas übrig. Erst das Ergebnis eingeben, dann den Rest.",
+  "lessonTimesGapTitle": "Mal mit Platzhalter",
+  "lessonTimesGapDesc": "Mit welcher Zahl muss man malnehmen, damit es stimmt?",
+  "lessonDivGapTitle": "Geteilt mit Platzhalter",
+  "lessonDivGapDesc": "Durch welche Zahl muss man teilen, damit es stimmt?",
+  "lessonMulTensTitle": "Mal mit Zehnerzahlen",
+  "lessonMulTensDesc": "Das Einmaleins mit einer Null dahinter: 3 · 4 = 12, also 30 · 4 = 120.",
+  "lessonMulTwoDigitTitle": "Mal über das Einmaleins hinaus",
+  "lessonMulTwoDigitDesc": "Eine zweistellige Zahl malnehmen, zum Beispiel 14 · 6.",
+  "lessonDivTwoDigitTitle": "Geteilt über das Einmaleins hinaus",
+  "lessonDivTwoDigitDesc": "Das Ergebnis ist größer als zehn, zum Beispiel 96 : 6.",
+  "lessonMulDivMixedTitle": "Mal und Geteilt gemischt",
+  "lessonMulDivMixedDesc": "Malnehmen und Teilen wechseln sich zufällig ab.",
+  "lessonPunktVorStrichTitle": "Punkt vor Strich",
+  "lessonPunktVorStrichDesc": "Mal und Geteilt kommen vor Plus und Minus - auch wenn sie hinten stehen: bei 40 − 3 · 6 wird erst 3 · 6 gerechnet.",
+  "lessonCountPicturesTitle": "Wie viele? (Reihe)",
+  "lessonCountPicturesDesc": "Bilder zählen, eins bis fünf, ordentlich aufgereiht.",
+  "lessonCountPicturesCloudTitle": "Wie viele? (Wolke)",
+  "lessonCountPicturesCloudDesc": "Dieselben Bilder, aber durcheinander - man muss sich merken, was schon gezählt ist.",
+  "lessonCountDiceTitle": "Wie viele Punkte?",
+  "lessonCountDiceDesc": "Ein Würfel. Irgendwann sieht man die Zahl, ohne zu zählen.",
+  "lessonCompareMoreTitle": "Wo sind mehr? (Reihe)",
+  "lessonCompareMoreDesc": "Zwei Häufchen vergleichen und die größere Anzahl eingeben.",
+  "lessonCompareMoreCloudTitle": "Wo sind mehr? (Wolke)",
+  "lessonCompareMoreCloudDesc": "Dasselbe, aber die Bilder liegen durcheinander.",
+  "lessonCountNextTitle": "Welche Zahl kommt danach?",
+  "lessonCountNextDesc": "Die Zahlenreihe vorwärts und rückwärts.",
+  "lessonBeesAddTitle": "Bienchen (Reihe)",
+  "lessonBeesAddDesc": "Zwei Grüppchen Bienen zusammenzählen, zusammen nie mehr als zehn.",
+  "lessonBeesAddCloudTitle": "Bienchen (Wolke)",
+  "lessonBeesAddCloudDesc": "Dieselbe Aufgabe, aber die Bienen schwirren durcheinander.",
+  "lessonDiceAddTitle": "Zwei Würfel zusammenzählen",
+  "lessonDiceAddDesc": "Beide Würfel zeigen bis zu fünf Punkte - wie viele sind es zusammen?",
+  "lessonAddToSixTitle": "Plus bis 6",
+  "lessonAddToSixDesc": "Zusammenzählen, nie über die Sechs hinaus.",
+  "lessonSubToSixTitle": "Minus bis 6",
+  "lessonSubToSixDesc": "Wegnehmen im Zahlenraum bis sechs.",
+  "lessonCalcToSixTitle": "Plus und Minus bis 6",
+  "lessonCalcToSixDesc": "Beides gemischt, nie über die Sechs hinaus.",
+  "lessonClockHalfTitle": "Volle und halbe Stunden",
+  "lessonClockHalfDesc": "Wie spät ist es? Der große Zeiger steht auf der 12 oder auf der 6.",
+  "lessonClockQuarterTitle": "Viertelstunden",
+  "lessonClockQuarterDesc": "Viertel nach, halb, Viertel vor - der große Zeiger steht auf 12, 3, 6 oder 9.",
+  "lessonClockFiveTitle": "Uhrzeit auf fünf Minuten",
+  "lessonClockFiveDesc": "Der große Zeiger steht auf einer der zwölf Zahlen.",
+  "lessonClock24Title": "Uhrzeit mit 24 Stunden",
+  "lessonClock24Desc": "Nachmittags zählt man weiter: aus 3 Uhr wird 15 Uhr. Unter der Uhr steht, welche Tageszeit es ist.",
+  "lessonClockWordsTitle": "Uhrzeit sagen",
+  "lessonClockWordsDesc": "Wie sagt man die Uhrzeit? Erst die Sprechweise antippen, dann die Stunde, die dabei genannt wird - bei \"halb 3\" ist das die 3.",
+  "lessonMoneyAddTitle": "Geld zusammenzählen",
+  "lessonMoneyAddDesc": "Zwei Beträge addieren. Erst die Euro eingeben, dann die Cent.",
+  "lessonMoneySubTitle": "Geld abziehen",
+  "lessonMoneySubDesc": "Was bleibt übrig, oder was gibt es zurück?",
+  "lessonMoneyComposeTitle": "Betrag zusammenlegen",
+  "lessonMoneyComposeDesc": "Lege den Betrag aus Münzen und Scheinen. Es gibt viele richtige Wege - der Betrag muss am Ende genau stimmen.",
+  "lessonMoneyChangeTitle": "Was bekomme ich zurück?",
+  "lessonMoneyChangeDesc": "Etwas kostet einen krummen Betrag, bezahlt wird mit einem glatten Schein oder Stück. Gesucht ist das Rückgeld.",
+  "lessonPlaceValue100Title": "Einer und Zehner",
+  "lessonPlaceValue100Desc": "Wie viele Einer und Zehner sind es? Welche Zahl ist das zusammen? Es können auch mehr als neun Einer sein.",
+  "lessonPlaceValue1000Title": "Einer, Zehner, Hunderter",
+  "lessonPlaceValue1000Desc": "Wie viele Einer, Zehner und Hunderter sind es? Welche Zahl ist das zusammen? Es können auch mehr als neun von einer Sorte sein.",
+  "lessonRoundThousandsTitle": "Glatte Tausender",
+  "lessonRoundThousandsDesc": "3000 + 4000, 8000 − 5000: rechne mit ganzen Tausendern. Wer 3 + 4 kann, kann das auch.",
+  "lessonRoundHundredsTitle": "Glatte Hunderter",
+  "lessonRoundHundredsDesc": "2300 + 400, 5600 − 200: rechne mit ganzen Hundertern. Hier geht es auch über den Tausender.",
+  "lessonRoundGapTitle": "Glatte Zahlen mit Platzhalter",
+  "lessonRoundGapDesc": "3000 + ? = 7000. Was fehlt bis zur Zahl? Rückwärts gedacht.",
+  "lessonPlaceValue10000Title": "Einer, Zehner, Hunderter, Tausender",
+  "lessonPlaceValue10000Desc": "Wie viele Einer, Zehner, Hunderter und Tausender sind es? Welche Zahl ist das zusammen? Es können auch mehr als neun von einer Sorte sein.",
+  "lessonAddSub10000PlainTitle": "Plus und Minus ohne Übergang",
+  "lessonAddSub10000PlainDesc": "4200 + 350, 6870 − 40: vierstellig rechnen, aber ohne Übergang. Jede Stelle für sich.",
+  "taskQuestionPartner": "Welche Zahl ist mit {a} verliebt?",
+  "@taskQuestionPartner": {
+    "description": "Asked in the \"number bonds to ten\" lesson: which number together with a makes ten (\"in love\" is the children's name for such a pair).",
+    "placeholders": {
+      "a": {
+        "type": "int"
+      }
+    }
+  },
+  "taskQuestionClock": "Wie spät ist es?",
+  "@taskQuestionClock": {
+    "description": "Asked under a clock face."
+  },
+  "taskQuestionClockPhrase": "Wie sagt man das?",
+  "@taskQuestionClockPhrase": {
+    "description": "Asked under a clock face; the child picks the spoken form of the time."
+  },
+  "taskQuestionMoneyCompose": "Lege {amount} - tippe die Münzen und Scheine an.",
+  "@taskQuestionMoneyCompose": {
+    "description": "amount is a formatted price such as 3,50 €.",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "taskQuestionChange": "Es kostet {price}. Du gibst {paid}. Wie viel bekommst du zurück?",
+  "@taskQuestionChange": {
+    "description": "price and paid are formatted amounts of money.",
+    "placeholders": {
+      "price": {
+        "type": "String"
+      },
+      "paid": {
+        "type": "String"
+      }
+    }
+  },
+  "taskQuestionQuantity": "Wie viele?",
+  "@taskQuestionQuantity": {
+    "description": "Asked under a heap of pictures to count."
+  },
+  "taskQuestionDiceOne": "Wie viele Punkte?",
+  "@taskQuestionDiceOne": {
+    "description": "Asked under one die."
+  },
+  "taskQuestionDiceTwo": "Wie viele Punkte sind es zusammen?",
+  "@taskQuestionDiceTwo": {
+    "description": "Asked under two dice."
+  },
+  "taskQuestionCompare": "Wo sind mehr? Tippe die größere Anzahl.",
+  "@taskQuestionCompare": {
+    "description": "Two heaps of pictures are shown; the child types the larger count."
+  },
+  "taskQuestionSequence": "Welche Zahl kommt danach?",
+  "@taskQuestionSequence": {
+    "description": "Asked under a row of numbers with the next one missing."
+  },
+  "taskQuestionQuantityAdd": "Wie viele sind es zusammen?",
+  "@taskQuestionQuantityAdd": {
+    "description": "Asked under two small groups of bees."
+  },
+  "taskQuestionPlaceValue": "Welche Zahl ist das?",
+  "@taskQuestionPlaceValue": {
+    "description": "Asked under a list such as \"5 Einer, 12 Zehner, 3 Hunderter\"."
+  },
+  "taskLabelRemainder": "Rest",
+  "@taskLabelRemainder": {
+    "description": "Label of the second answer box in a division with remainder."
+  },
+  "taskLabelEuro": "€",
+  "@taskLabelEuro": {
+    "description": "Label between the euro box and the cent box."
+  },
+  "taskLabelClock": "Uhr",
+  "@taskLabelClock": {
+    "description": "Label between the hour box and the minute box (as in \"3 Uhr 15\")."
+  },
+  "taskUnitCents": "ct",
+  "@taskUnitCents": {
+    "description": "Unit after the cent box. Short for cents."
+  },
+  "placeOnes": "{n} Einer",
+  "@placeOnes": {
+    "description": "A count of ones in a place-value task, e.g. \"5 Einer\".",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "placeTens": "{n} Zehner",
+  "@placeTens": {
+    "description": "A count of tens, e.g. \"12 Zehner\".",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "placeHundreds": "{n} Hunderter",
+  "@placeHundreds": {
+    "description": "A count of hundreds.",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "placeThousands": "{n} Tausender",
+  "@placeThousands": {
+    "description": "A count of thousands.",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "taskRenderRemainder": "{prefix} {answer} Rest {second}",
+  "@taskRenderRemainder": {
+    "description": "One-line text of a division with remainder, e.g. \"17 : 5 = 3 Rest 2\".",
+    "placeholders": {
+      "prefix": {
+        "type": "String"
+      },
+      "answer": {
+        "type": "String"
+      },
+      "second": {
+        "type": "String"
+      }
+    }
+  },
+  "taskRenderClock": "{hour}:{minute} Uhr",
+  "@taskRenderClock": {
+    "description": "A sample time on a lesson tile; minute is two digits.",
+    "placeholders": {
+      "hour": {
+        "type": "int"
+      },
+      "minute": {
+        "type": "String"
+      }
+    }
+  },
+  "taskRenderChange": "{price}, bezahlt mit {paid}",
+  "@taskRenderChange": {
+    "description": "Sample of a change task on a lesson tile; both are formatted amounts of money.",
+    "placeholders": {
+      "price": {
+        "type": "String"
+      },
+      "paid": {
+        "type": "String"
+      }
+    }
+  },
+  "taskRenderDiceOne": "{a} Punkte",
+  "@taskRenderDiceOne": {
+    "description": "Sample of a die task on a tile.",
+    "placeholders": {
+      "a": {
+        "type": "int"
+      }
+    }
+  },
+  "taskRenderDiceTwo": "{a} + {b} Punkte",
+  "@taskRenderDiceTwo": {
+    "description": "Sample of a two-dice task on a tile.",
+    "placeholders": {
+      "a": {
+        "type": "int"
+      },
+      "b": {
+        "type": "int"
+      }
+    }
+  },
+  "dayPartMorning": "vormittags",
+  "@dayPartMorning": {
+    "description": "Part of the day shown under a 24-hour clock: before noon."
+  },
+  "dayPartNoon": "mittags",
+  "@dayPartNoon": {
+    "description": "Part of the day: exactly twelve o'clock."
+  },
+  "dayPartAfternoon": "nachmittags",
+  "@dayPartAfternoon": {
+    "description": "Part of the day: from one to five in the afternoon."
+  },
+  "dayPartEvening": "abends",
+  "@dayPartEvening": {
+    "description": "Part of the day: from six o'clock on."
+  },
+  "clockPhrase05": "5 nach",
+  "@clockPhrase05": {
+    "description": "How the time :05 is said out loud, without the hour. Eleven such forms (:05 to :55) are keys on the pad, so keep them short. The hour comes from clockSpokenTime."
+  },
+  "clockPhrase10": "10 nach",
+  "clockPhrase15": "viertel nach",
+  "clockPhrase20": "20 nach",
+  "clockPhrase25": "5 vor halb",
+  "clockPhrase30": "halb",
+  "@clockPhrase30": {
+    "description": "German \"halb 3\" means 2:30 (half way to three)."
+  },
+  "clockPhrase35": "5 nach halb",
+  "clockPhrase40": "20 vor",
+  "clockPhrase45": "viertel vor",
+  "clockPhrase50": "10 vor",
+  "clockPhrase55": "5 vor",
+  "clockSpokenTime": "{phrase} {hour}",
+  "@clockSpokenTime": {
+    "description": "A spoken time: the phrase and the hour it names, e.g. \"viertel vor 3\". A language that says the hour first puts {hour} first here.",
+    "placeholders": {
+      "phrase": {
+        "type": "String"
+      },
+      "hour": {
+        "type": "int"
+      }
+    }
+  },
+  "filterAllTitle": "Alle zeigen",
+  "@filterAllTitle": {
+    "description": "Choice for hiding finished lessons: show everything."
+  },
+  "filterAllText": "Der ganze Katalog, nichts wird versteckt.",
+  "filterMasteredTitle": "Mit 3 Sternen ausblenden",
+  "filterMasteredText": "Was sicher sitzt, verschwindet aus der Liste. Übrig bleibt, was noch Fehler macht.",
+  "filterPerfectedTitle": "Erst mit 3 Sternen und 3 Blitzen",
+  "@filterPerfectedTitle": {
+    "description": "Stars stand for accuracy, lightning bolts for speed."
+  },
+  "filterPerfectedText": "Nur was sicher **und** schnell ist, verschwindet. Was zwar fehlerfrei, aber noch langsam ist, bleibt zum Üben stehen.",
+  "@filterPerfectedText": {
+    "description": "The ** marks are Markdown bold; they are removed before display where bold is not supported."
+  },
+  "rangeAll": "Alle",
+  "@rangeAll": {
+    "description": "Chip for the log of practice runs: all time."
+  },
+  "rangeToday": "Heute",
+  "rangeWeek": "7 Tage",
+  "@rangeWeek": {
+    "description": "Last seven calendar days including today."
+  },
+  "rangeMonth": "30 Tage",
+  "rangeAllPhrase": "aus dem ganzen Verlauf",
+  "@rangeAllPhrase": {
+    "description": "Used inside a sentence: \"... aufräumen {range}\"."
+  },
+  "rangeTodayPhrase": "von heute",
+  "rangeWeekPhrase": "aus den letzten 7 Tagen",
+  "rangeMonthPhrase": "aus den letzten 30 Tagen",
+  "backupErrorNotABackup": "Die Datei ist keine gültige Sicherung.",
+  "backupErrorWrongApp": "Diese Datei stammt nicht aus dem Mathe-Trainer.",
+  "backupErrorTooNew": "Die Sicherung stammt aus einer neueren Version der App.",
+  "formatSeconds": "{value} s",
+  "@formatSeconds": {
+    "description": "A time in seconds with one decimal place, e.g. \"12,5 s\". value is already formatted with the decimal separator of the language.",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "formatMinutesSeconds": "{minutes}:{seconds} min",
+  "@formatMinutesSeconds": {
+    "description": "A time of a minute or more, e.g. \"1:05 min\"; seconds are two digits.",
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      },
+      "seconds": {
+        "type": "String"
+      }
+    }
+  },
+  "formatHoursMinutes": "{hours} h {minutes} min",
+  "@formatHoursMinutes": {
+    "description": "Summed practice time, e.g. \"3 h 12 min\".",
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "formatDayAndTime": "{day} · {time}",
+  "@formatDayAndTime": {
+    "description": "Short date and time for a list, e.g. \"5.9. · 14:32\".",
+    "placeholders": {
+      "day": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "relativeToday": "heute",
+  "@relativeToday": {
+    "description": "\"Last active\" wording: today."
+  },
+  "relativeYesterday": "gestern",
+  "relativeDaysAgo": "vor {days} Tagen",
+  "@relativeDaysAgo": {
+    "description": "Used for two to six days ago only.",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "remainingMinutes": "{minutes, plural, =0{gleich} =1{noch eine Minute} other{noch {minutes} Minuten}}",
+  "@remainingMinutes": {
+    "description": "Time left until the break ends, in a sentence such as \"Weiter geht es um 11:15 - gleich\". 0 means \"in a moment\".",
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "moneyAmount": "{amount} €",
+  "@moneyAmount": {
+    "description": "A price; amount is already formatted with the decimal separator of the language, e.g. \"3,50\".",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "moneyCoinCents": "{n} ct",
+  "@moneyCoinCents": {
+    "description": "A coin of less than one euro as stamped on it, e.g. \"50 ct\".",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "moneyCoinEuros": "{n} €",
+  "@moneyCoinEuros": {
+    "description": "A coin or note of whole euros, e.g. \"2 €\".",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "deadlineToday": "heute",
+  "@deadlineToday": {
+    "description": "Deadline of a task on a card: due today."
+  },
+  "deadlineUntilSunday": "bis Sonntag",
+  "@deadlineUntilSunday": {
+    "description": "Deadline of a weekly task: until the end of the week."
+  },
+  "deadlineStillOpen": "noch offen",
+  "@deadlineStillOpen": {
+    "description": "Deadline of a task from an earlier day that is still to be done."
+  },
+  "deadlineWas": "war {day}",
+  "@deadlineWas": {
+    "description": "A task whose day is over; day is a short date such as \"Mi, 16.9.\".",
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "deadlineThisWeek": "diese Woche",
+  "deadlineFrom": "ab {day}",
+  "@deadlineFrom": {
+    "description": "A task that starts in a later week; day is a short date.",
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "deadlineOn": "am {day}",
+  "@deadlineOn": {
+    "description": "A task for one day; day is a short date such as \"Mi, 16.9.\".",
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "commonSecondsShort": "{n} s",
+  "@commonSecondsShort": {
+    "description": "Seconds, short.",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "commonPercent": "{n} %",
+  "@commonPercent": {
+    "description": "A percentage.",
+    "placeholders": {
+      "n": {
         "type": "int"
       }
     }

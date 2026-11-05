@@ -2,6 +2,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mathe_trainer/domain/lesson.dart';
 import 'package:mathe_trainer/domain/task.dart';
 import 'package:mathe_trainer/domain/task_generator.dart';
+import 'package:mathe_trainer/l10n/task_texts.dart';
+
+import '../support/l10n.dart';
 
 /// Draws a good number of tasks from a place-value lesson.
 List<Task> _draw(String id, {int runs = 60, int count = 20}) => [
@@ -95,10 +98,10 @@ void main() {
   test('the text names the parts from the ones upwards', () {
     const task =
         Task(a: 5, b: 12, c: 3, op: Operation.add, form: TaskForm.placeValue);
-    expect(task.prefix, '5 Einer, 12 Zehner, 3 Hunderter');
-    expect(task.placeParts, ['5 Einer', '12 Zehner', '3 Hunderter']);
+    expect(taskPrefix(deL10n, task), '5 Einer, 12 Zehner, 3 Hunderter');
+    expect(placeParts(deL10n, task), ['5 Einer', '12 Zehner', '3 Hunderter']);
     expect(task.expected, 5 + 120 + 300);
-    expect(task.question, 'Welche Zahl ist das?');
+    expect(taskQuestion(deL10n, task), 'Welche Zahl ist das?');
     // Three digits are enough for this one; the box grows with the answer.
     expect(task.maxAnswerDigits, 3);
   });
@@ -106,7 +109,7 @@ void main() {
   test('a place that is not named is left out of the text', () {
     const task =
         Task(a: 0, b: 4, c: 200, op: Operation.add, form: TaskForm.placeValue);
-    expect(task.prefix, '4 Zehner, 2 Tausender');
+    expect(taskPrefix(deL10n, task), '4 Zehner, 2 Tausender');
     expect(task.expected, 2040);
     expect(task.maxAnswerDigits, 4);
   });

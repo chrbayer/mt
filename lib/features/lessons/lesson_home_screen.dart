@@ -21,6 +21,9 @@ import 'pause_notice.dart';
 import 'recommendation.dart';
 import 'start_lesson_sheet.dart';
 import '../../l10n/l10n.dart';
+import '../../l10n/lesson_texts.dart';
+import '../../l10n/formatters.dart';
+import '../../l10n/choice_texts.dart';
 
 /// Below this width the two labelled buttons in the app bar give up their
 /// labels. "Statistik" and "Wechseln" cost about 180 dp of text between
@@ -150,7 +153,7 @@ class LessonHomeScreen extends ConsumerWidget {
                       // whole sentence, and the menu is only as wide as the
                       // button it hangs under.
                       Flexible(
-                        child: Text(lessonFilterTitle(filter),
+                        child: Text(lessonFilterTitle(context.l10n, filter),
                             style: const TextStyle(fontSize: 19)),
                       ),
                     ],
@@ -287,7 +290,7 @@ class LessonHomeScreen extends ConsumerWidget {
                     Padding(
                       padding: const EdgeInsets.only(bottom: 28),
                       child: _LessonGroup(
-                        title: groupTitle(group),
+                        title: groupTitle(context.l10n, group),
                         lessons: offered(group),
                         stats: stats,
                       ),
@@ -445,8 +448,8 @@ class _RecommendationCard extends ConsumerWidget {
                       ),
                       Text(
                         context.l10n.lessonsRecommendTitle(
-                          suggestion.lesson.title,
-                          groupTitle(suggestion.lesson.group),
+                          lessonTitle(context.l10n, suggestion.lesson),
+                          groupTitle(context.l10n, suggestion.lesson.group),
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -692,7 +695,7 @@ class _LessonTile extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                lesson.title,
+                lessonTitle(context.l10n, lesson),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
@@ -734,7 +737,7 @@ class _LessonTile extends StatelessWidget {
                       stat == null
                           ? context.l10n.lessonsNotPractised
                           : lesson.scored
-                              ? formatPerTask(stat!.bestScoreMs)
+                              ? formatPerTask(context.l10n, stat!.bestScoreMs)
                               : context.l10n.lessonsPractisedTimes(stat!.runs),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,

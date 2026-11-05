@@ -12,15 +12,57 @@ dort anlegen, keine Strings in Widgets** — Mehrzahl über ICU `plural`,
 Platzhalter mit Typangabe. Wo außerhalb eines Widgets Text gebraucht wird
 (Dialog-Helfer, Zustandsobjekte), kommt er an der Aufrufstelle aus dem
 Kontext und wird hineingereicht. Tests übergeben ihren `MaterialApp` die
-Konstanten aus `test/support/l10n.dart`. Was aus `lib/domain/` kommt
-(Lektionstitel, Aufgabenfragen, Zeit- und Geldformate), ist noch nicht
-ausgelagert; das folgt in einer eigenen Phase.
+Konstanten aus `test/support/l10n.dart`.
+
+**Die Domäne liefert Daten, keine Sätze.** `lib/domain/` kennt Lektionen
+nur an ihrer ID, Aufgaben nur an Zahlen und Symbolen (`+ − · :`, Emoji),
+Tageszeiten als `DayPart`, Fristen als `Deadline`. Was daraus gesprochener
+Text wird, steht in `lib/l10n/`:
+
+* `lesson_texts.dart` — `lessonTitle`/`lessonDescription`/`groupTitle`.
+  **Eine** `switch` über `lesson.id`; die Reihen des Einmaleins sind je eine
+  parametrisierte Nachricht (`lessonTimesTableTitle(n)`). Eine neue Lektion
+  braucht ihre ARB-Einträge und einen Fall dort — `test/l10n/lesson_texts_test.dart`
+  läuft über den ganzen Katalog und alle Sprachen und schlägt fehl, statt dass
+  ein Kind die ID liest.
+* `task_texts.dart` — Frage, Feldbeschriftungen, Stellenwert-Teile,
+  Tageszeit, gesprochene Uhrzeit, und `taskPrefix`/`renderTask` für die
+  Formen, in denen Wörter oder ein Preis stecken (Geld, Stellenwerte).
+  `Task.prefix` bleibt für das, was nur Zahlen und Symbole sind.
+* `formatters.dart` — Zeit („12,5 s“), Dauer, Geld, Datum, Restzeit, Frist,
+  jeweils mit `AppLocalizations` als erstem Argument. Dezimaltrenner und Euro-
+  Zeichen kommen von der Sprache; **keine** Literale wie `' s'` oder `'€'` in
+  Widgets oder Domäne. `DateFormat` braucht geladene Symbole: in der App lädt
+  sie das Material-Delegate, ein reiner Unit-Test ruft `initDateSymbols()`.
+* `choice_texts.dart` — Namen für `LessonFilter` und `HistoryRange`.
+
+Jede Nachricht mit Platzhaltern bekommt eine `@schlüssel.description` (englisch,
+kurz): das ist, was ein Übersetzer sieht. `test/l10n/arb_test.dart` hält es fest.
+Sätze werden nicht aus eingesetzten Wörtern gebaut (`… {period}` mit „Tagen“
+oder „Wochen“ geht nicht in jeder Sprache) — dafür ICU `select`/`plural` oder
+getrennte Nachrichten.
+
+**Uhrzeit sagen** ist sprachabhängiger Inhalt, nicht bloß Text. Der
+gespeicherte und erwartete Wert der Sprechweise ist der **Index** (0..10 für
+:05..:55), in jeder Sprache gleich. Die Wörter stehen in der ARB
+(`clockPhrase05` … `clockPhrase55`, dazu `clockSpokenTime` für die
+Reihenfolge von Wort und Stunde); den Aufbau darum herum beschreibt
+`domain/clock_speech.dart`: `ClockSpeech.nextHourFromIndex` (ab welcher
+Sprechweise die kommende Stunde genannt wird — Deutsch ab „5 vor halb“) und
+`hourFirst` (ob die Stunde vorn steht, Französisch „3 heures et quart“). Die
+zweite Antwort, die Stunde, kommt aus `Task.expectedSecondIn(speech)`; der
+`PracticeController` bekommt die `ClockSpeech` hereingereicht (Vorgabe
+`ClockSpeech.de`), der Übungsbildschirm bestimmt sie aus der aktiven Locale.
+`hourFirst` dreht die Reihenfolge der beiden Felder im Controller und im
+`TaskDisplay` um — innerhalb einer Sprache immer gleich.
 
 ## Schichten
 
 `lib/domain/` darf **keinen** Flutter-Import enthalten. Dort liegt die
 Fachlogik (Lektionen, Aufgabengenerator, Wertung), und genau deshalb ist sie
 vollständig unit-testbar. Neue Rechenregeln gehören dorthin, nicht in Widgets.
+Texte gehören **nicht** dorthin: die Domäne liefert Daten (IDs, Zahlen, Enums),
+die Oberfläche macht in `lib/l10n/` Sprache daraus (siehe „Sprache“).
 
 Aggregation passiert in SQL (`lib/data/repositories/stats_repository.dart`),
 nicht in Dart. Der Wertungsausdruck steht dort einmal als `_score` und bezieht
@@ -43,7 +85,7 @@ die Sichtbarkeit einer neu ergänzten Gruppe hängt; siehe „Sichtbare
 Bereiche".
 
 `div_plain` hat beim Umzug in die neue Gruppe **seine ID behalten** und nur
-Titel und Beschreibung gewechselt — Gruppe und Titel sind frei, die ID nicht.
+Titel und Beschreibung (in der ARB, nicht im Katalog) gewechselt — Gruppe und Titel sind frei, die ID nicht.
 
 `_sampleQuotient` teilt durch `lesson.timesTable`, wenn eine gesetzt ist, und
 zieht sonst einen freien Divisor. Damit ist eine Rückwärts-Reihe dieselbe
@@ -56,7 +98,8 @@ Reihe für Reihe gelernt, nicht nach Größe der Zahlen.
 Lektionen sind Code-Konstanten in `domain/lesson.dart` mit stabiler String-ID.
 Die ID landet in der Datenbank, der Rest nicht. **IDs nie umbenennen** — sonst
 verlieren bestehende Bestenlisten ihren Bezug. Titel und Erklärtexte dürfen
-sich dagegen jederzeit ändern.
+sich dagegen jederzeit ändern; sie stehen nicht im Katalog, sondern in
+`app_<sprache>.arb` und werden in `lesson_texts.dart` der ID zugeordnet.
 
 Ab 20 bieten alle Zahlenräume dieselben sieben Lektionen; sie entstehen in
 `_group()`, damit die Gruppen nicht auseinanderlaufen. **Bis 10 nicht**: dort
@@ -617,7 +660,7 @@ Zwei Lektionen werden nicht auf der Zifferntastatur beantwortet, und beide
 lösen das über **dieselbe** Mechanik: `ChoiceKeypad` hat das Raster von
 `BigKeypad` (drei Spalten, vier Zeilen, grüne Taste unten rechts) und die
 gemeinsame Taste `KeypadKey`. Der Controller bleibt bei zwei Ganzzahlfeldern —
-das Wort ist der **Index** in `clockPhrases`, der Münzhaufen die **Summe** in
+das Wort ist der **Index** der Sprechweise (`clockPhraseLabels`), der Münzhaufen die **Summe** in
 Cent. So gilt der ganze Rest der Maschinerie unverändert: Wertung, Zeitmalus,
 Bestenliste, Wiedervorlage.
 
@@ -630,7 +673,7 @@ Bei „Uhrzeit sagen" wechselt die Tastatur mitten in der Aufgabe: Wörter fürs
 erste Feld, Ziffern fürs zweite. Das entscheidet `_keypadFor` im
 Übungsbildschirm anhand von Form **und** aktivem Feld.
 
-Die volle Stunde fehlt in `clockPhrases` mit Absicht: „3 Uhr" stellt die
+Die volle Stunde fehlt unter den Sprechweisen mit Absicht: „3 Uhr" stellt die
 Stunde voran, jede andere Lesart stellt sie hinten an, und ein Feld, das je
 nach Antwort den Platz mit seinem Nachbarn tauscht, wäre ein Rätsel für sich.
 Volle Stunden üben die drei Lektionen, die nach Ziffern fragen.
@@ -824,8 +867,8 @@ hintereinander; das gilt für jede Lektion und wird für alle geprüft.
 
 `TaskForm.remainder`, `.money` und `.clock` fragen zwei Zahlen ab. Ob eine Form
 das tut, sagt `Task.expectedSecond != null` — **nicht** ein Vergleich mit einer
-bestimmten Form. Beschriftung und Einheit liefern `secondLabel` und
-`secondUnit`, damit der Übungsbildschirm nichts über die einzelnen Formen
+bestimmten Form. Beschriftung und Einheit liefern `taskSecondLabel` und
+`taskSecondUnit` (in `task_texts.dart`), damit der Übungsbildschirm nichts über die einzelnen Formen
 wissen muss.
 
 Geld wird durchgehend in **Cent** gerechnet und nur beim Anzeigen formatiert.

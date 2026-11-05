@@ -380,37 +380,59 @@ Map<String, AssignmentProgress> progressByLesson({
 bool allLessonsMet(Map<String, AssignmentProgress> byLesson) =>
     byLesson.isNotEmpty && byLesson.values.every((p) => p.met);
 
-/// The deadline as a child reads it.
+/// What a deadline says, without the words.
 ///
-/// A repeating one says "heute" or "bis Sonntag". A single one says which
+/// A repeating one says "today" or "until Sunday". A single one says which
 /// day or week it belongs to, and says so plainly when that is behind us -
-/// a card that still claimed "heute" the morning after would be a lie.
+/// a card that still claimed "today" the morning after would be a lie.
 ///
 /// This is also what tells the two rhythms apart on a card, so it is the one
-/// place the wording lives - the card and the parent tab must never say it
-/// two different ways.
-String formatDeadline(Assignment a, {DateTime? now}) {
+/// place the *decision* lives - the card and the parent tab must never say
+/// it two different ways. Turning it into a sentence is `formatDeadline` in
+/// the l10n layer.
+enum DeadlineKind {
+  today,
+  untilSunday,
+  stillOpen,
+  wasOn,
+  thisWeek,
+  fromDay,
+  onDay,
+}
+
+/// A [DeadlineKind] plus the day it names, for the kinds that name one.
+class Deadline {
+  final DeadlineKind kind;
+  final DateTime? day;
+
+  const Deadline(this.kind, [this.day]);
+}
+
+/// The deadline of [a] as a child reads it, as data.
+Deadline deadlineOf(Assignment a, {DateTime? now}) {
   if (a.repeats) {
-    return a.rhythm == AssignmentRhythm.daily ? 'heute' : 'bis Sonntag';
+    return Deadline(a.rhythm == AssignmentRhythm.daily
+        ? DeadlineKind.today
+        : DeadlineKind.untilSunday);
   }
   final today = now ?? DateTime.now();
   final period = periodAt(a, today);
   final day = DateTime.fromMillisecondsSinceEpoch(period.startMs);
   if (today.millisecondsSinceEpoch > period.dueMs) {
-    // "Noch offen" only where it really is: a carried-over one is still to
+    // "Still open" only where it really is: a carried-over one is still to
     // be done, one without is simply over, and saying otherwise would ask a
     // parent to act on something that cannot be acted on any more.
-    return a.carryOver ? 'noch offen' : 'war ${_short(day)}';
+    return a.carryOver
+        ? const Deadline(DeadlineKind.stillOpen)
+        : Deadline(DeadlineKind.wasOn, day);
   }
   if (a.rhythm == AssignmentRhythm.weekly) {
-    return withinPeriod(a, today) ? 'diese Woche' : 'ab ${_short(day)}';
+    return withinPeriod(a, today)
+        ? const Deadline(DeadlineKind.thisWeek)
+        : Deadline(DeadlineKind.fromDay, day);
   }
   final sameDay = DateTime(today.year, today.month, today.day) == day;
-  return sameDay ? 'heute' : 'am ${_short(day)}';
-}
-
-/// `Do, 18.9.` - short enough for a card's footer.
-String _short(DateTime day) {
-  const names = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
-  return '${names[day.weekday - 1]}, ${day.day}.${day.month}.';
+  return sameDay
+      ? const Deadline(DeadlineKind.today)
+      : Deadline(DeadlineKind.onDay, day);
 }

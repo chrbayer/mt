@@ -22,14 +22,28 @@ class BackupSummary {
   });
 }
 
+/// Why a file could not be taken for a backup. A code rather than a
+/// sentence: the repository knows what went wrong, the screen knows what
+/// language to say it in.
+enum BackupError {
+  /// The file is not JSON at all, or damaged.
+  notABackup,
+
+  /// It is JSON, but not from this app.
+  wrongApp,
+
+  /// It was written by a newer schema than this version can read.
+  tooNew,
+}
+
 /// Thrown when a file is not a backup of this app, or is damaged.
 class BackupFormatException implements Exception {
-  final String message;
+  final BackupError error;
 
-  const BackupFormatException(this.message);
+  const BackupFormatException(this.error);
 
   @override
-  String toString() => message;
+  String toString() => 'BackupFormatException(${error.name})';
 }
 
 /// Reads and writes the whole database as one JSON document.
@@ -162,19 +176,15 @@ class BackupRepository {
     try {
       data = jsonDecode(json) as Map<String, dynamic>;
     } on FormatException {
-      throw const BackupFormatException('Die Datei ist keine gültige Sicherung.');
+      throw const BackupFormatException(BackupError.notABackup);
     }
 
     if (data['format'] != _backupMarker) {
-      throw const BackupFormatException(
-        'Diese Datei stammt nicht aus dem Mathe-Trainer.',
-      );
+      throw const BackupFormatException(BackupError.wrongApp);
     }
     final version = data['schemaVersion'];
     if (version is! int || version > _db.schemaVersion) {
-      throw const BackupFormatException(
-        'Die Sicherung stammt aus einer neueren Version der App.',
-      );
+      throw const BackupFormatException(BackupError.tooNew);
     }
 
     List<Map<String, dynamic>> rows(String key) => [

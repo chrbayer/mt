@@ -14,6 +14,8 @@ import '../../theme/app_theme.dart';
 import '../lessons/lesson_example.dart';
 import '../practice/practice_screen.dart';
 import '../../l10n/l10n.dart';
+import '../../l10n/lesson_texts.dart';
+import '../../l10n/formatters.dart';
 
 /// Set up a duel: who is playing, which lesson, how many tasks.
 ///
@@ -144,7 +146,7 @@ class _DuelSetupScreenState extends ConsumerState<DuelSetupScreen> {
                                   padding:
                                       const EdgeInsets.fromLTRB(4, 12, 4, 8),
                                   child: Text(
-                                    groupTitle(group),
+                                    groupTitle(context.l10n, group),
                                     style: Theme.of(context)
                                         .textTheme
                                         .titleLarge,
@@ -163,7 +165,7 @@ class _DuelSetupScreenState extends ConsumerState<DuelSetupScreen> {
                                             horizontal: 14, vertical: 10),
                                         label: Text(
 context.l10n.duelLessonChip(
-                                              lesson.title, exampleFor(lesson)),
+                                              lessonTitle(context.l10n, lesson), exampleFor(context.l10n, lesson)),
                                           style: const TextStyle(fontSize: 18),
                                         ),
                                       ),
@@ -301,7 +303,7 @@ class _HandOverScreen extends StatelessWidget {
             const SizedBox(height: 6),
             Text(
               context.l10n
-                  .duelLessonAndGroup(lesson.title, groupTitle(lesson.group)),
+                  .duelLessonAndGroup(lessonTitle(context.l10n, lesson), groupTitle(context.l10n, lesson.group)),
               style: const TextStyle(fontSize: 22, color: AppColors.textMuted),
             ),
             const SizedBox(height: 36),
@@ -342,7 +344,7 @@ class DuelResultScreen extends StatelessWidget {
     final best = _score(ranked.first);
 
     return Scaffold(
-      appBar: AppBar(title: Text(context.l10n.duelResultTitle(lesson.title))),
+      appBar: AppBar(title: Text(context.l10n.duelResultTitle(lessonTitle(context.l10n, lesson)))),
       body: Padding(
         padding: const EdgeInsets.fromLTRB(40, 12, 40, 32),
         child: Column(
@@ -438,7 +440,7 @@ class _DuelRow extends StatelessWidget {
             ),
           ),
           _Cell(
-            value: formatPerTask(scoreMsPerTask(
+            value: formatPerTask(context.l10n, scoreMsPerTask(
               outcome.totalMs,
               outcome.wrongAttempts,
               outcome.taskCount,
@@ -450,7 +452,7 @@ class _DuelRow extends StatelessWidget {
           SizedBox(
             width: 130,
             child: Text(
-              winner ? context.l10n.duelWin : '+${formatPerTask(behind)}',
+              winner ? context.l10n.duelWin : '+${formatPerTask(context.l10n, behind)}',
               textAlign: TextAlign.right,
               style: TextStyle(
                 fontSize: 22,

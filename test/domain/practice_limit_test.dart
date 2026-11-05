@@ -67,13 +67,13 @@ void main() {
     );
   });
 
-  test('the wait is spoken in whole minutes, rounded up', () {
-    expect(formatRemaining(const Duration(seconds: 0)), 'gleich');
-    expect(formatRemaining(const Duration(seconds: -5)), 'gleich');
-    expect(formatRemaining(const Duration(seconds: 1)), 'noch eine Minute');
-    expect(formatRemaining(const Duration(seconds: 60)), 'noch eine Minute');
-    expect(formatRemaining(const Duration(seconds: 61)), 'noch 2 Minuten');
-    expect(formatRemaining(const Duration(minutes: 14)), 'noch 14 Minuten');
+  test('the wait is counted in whole minutes, rounded up', () {
+    expect(remainingMinutes(const Duration(seconds: 0)), 0);
+    expect(remainingMinutes(const Duration(seconds: -5)), 0);
+    expect(remainingMinutes(const Duration(seconds: 1)), 1);
+    expect(remainingMinutes(const Duration(seconds: 60)), 1);
+    expect(remainingMinutes(const Duration(seconds: 61)), 2);
+    expect(remainingMinutes(const Duration(minutes: 14)), 14);
   });
 
   group('the daily total', () {

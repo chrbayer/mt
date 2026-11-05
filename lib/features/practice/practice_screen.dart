@@ -4,9 +4,9 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../domain/clock_speech.dart';
 import '../../domain/lesson.dart';
 import '../../domain/practice_limit.dart';
-import '../../domain/scoring.dart';
 import '../../domain/task.dart';
 import '../../domain/task_generator.dart';
 import '../../data/repositories/settings_repository.dart';
@@ -22,6 +22,9 @@ import 'widgets/choice_keypad.dart';
 import 'widgets/progress_dots.dart';
 import 'widgets/task_display.dart';
 import '../../l10n/l10n.dart';
+import '../../l10n/lesson_texts.dart';
+import '../../l10n/formatters.dart';
+import '../../l10n/task_texts.dart';
 
 /// How long the green flash stays before the next task appears.
 const _correctFlash = Duration(milliseconds: 400);
@@ -198,6 +201,8 @@ class _PracticeScreenState extends ConsumerState<PracticeScreen>
           seed: _seed,
           review: review,
         ),
+        speech: ClockSpeech.forLanguage(
+            Localizations.localeOf(context).languageCode),
       )..addListener(_onControllerChanged);
     });
 
@@ -248,7 +253,7 @@ class _PracticeScreenState extends ConsumerState<PracticeScreen>
     final form = controller.currentTask.form;
     if (form == TaskForm.moneyCompose) {
       return ChoiceKeypad(
-        labels: [for (final cents in moneyPieces) formatPiece(cents)],
+        labels: [for (final cents in moneyPieces) formatPiece(context.l10n, cents)],
         enabled: enabled,
         haptics: haptics,
         onChoice: (index) => _key(() => controller.pressPiece(moneyPieces[index])),
@@ -260,7 +265,7 @@ class _PracticeScreenState extends ConsumerState<PracticeScreen>
     if (form == TaskForm.clockPhrase &&
         controller.activeField == AnswerField.primary) {
       return ChoiceKeypad(
-        labels: clockPhrases,
+        labels: clockPhraseLabels(context.l10n),
         selected:
             controller.input.isEmpty ? null : int.parse(controller.input),
         enabled: enabled,
@@ -424,7 +429,7 @@ class _PracticeScreenState extends ConsumerState<PracticeScreen>
     final blocked = _blocked;
     if (blocked != null) {
       return Scaffold(
-        appBar: AppBar(title: Text(widget.lesson.title)),
+        appBar: AppBar(title: Text(lessonTitle(context.l10n, widget.lesson))),
         body: Center(
           child: Padding(
             padding: const EdgeInsets.all(40),
@@ -507,7 +512,7 @@ class _PracticeScreenState extends ConsumerState<PracticeScreen>
                         ),
                         if (showClock)
                           Text(
-                            formatDuration(controller.elapsedMs),
+                            formatDuration(context.l10n, controller.elapsedMs),
                             style: const TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.w600,

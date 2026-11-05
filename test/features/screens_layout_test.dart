@@ -24,6 +24,7 @@ import 'package:mathe_trainer/providers.dart';
 import 'package:mathe_trainer/theme/app_theme.dart';
 
 import '../support/real_font.dart';
+import 'package:mathe_trainer/l10n/lesson_texts.dart';
 
 /// Every screen is rendered at real tablet sizes. A `RenderFlex overflowed`
 /// error fails the test, which is the cheap way to catch a layout that breaks
@@ -377,7 +378,7 @@ void main() {
 
       // Every group must be reachable, and so must the save button.
       for (final group in LessonGroup.values) {
-        expect(find.text(groupTitle(group)), findsOneWidget);
+        expect(find.text(groupTitle(deL10n, group)), findsOneWidget);
       }
       expect(find.text('Speichern'), findsOneWidget);
     });

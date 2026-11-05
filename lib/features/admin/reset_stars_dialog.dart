@@ -9,6 +9,7 @@ import '../../providers.dart';
 import '../../theme/app_theme.dart';
 import '../common/star_row.dart';
 import '../../l10n/l10n.dart';
+import '../../l10n/lesson_texts.dart';
 
 /// Hands the stars of one group back so a child can earn them again.
 ///
@@ -34,7 +35,7 @@ class ResetStarsDialog extends ConsumerWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: Text(l10n.resetStarsTitle(groupTitle(group))),
+        title: Text(l10n.resetStarsTitle(groupTitle(context.l10n, group))),
         content: Text(
           l10n.resetStarsText(user.name),
           style: const TextStyle(fontSize: 20),
@@ -150,7 +151,7 @@ class _GroupRow extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(groupTitle(group), style: const TextStyle(fontSize: 20)),
+                Text(groupTitle(context.l10n, group), style: const TextStyle(fontSize: 20)),
                 Text(
                   context.l10n.resetStarsGroupLine(earned, possible),
                   style: const TextStyle(

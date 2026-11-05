@@ -56,11 +56,4 @@ void main() {
     expect(lessonFilterByName(''), LessonFilter.all);
     expect(lessonFilterByName('was-auch-immer'), LessonFilter.all);
   });
-
-  test('every setting can be named and explained', () {
-    for (final filter in LessonFilter.values) {
-      expect(lessonFilterTitle(filter), isNotEmpty);
-      expect(lessonFilterExplanation(filter), isNotEmpty);
-    }
-  });
 }

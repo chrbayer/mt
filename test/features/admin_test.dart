@@ -17,6 +17,7 @@ import 'package:mathe_trainer/features/profiles/profile_select_screen.dart';
 import 'package:mathe_trainer/features/stats/global_stats_screen.dart';
 import 'package:mathe_trainer/providers.dart';
 import 'package:mathe_trainer/theme/app_theme.dart';
+import 'package:mathe_trainer/l10n/lesson_texts.dart';
 
 /// A [testWidgets] that also closes any parent-area session still open once
 /// [body] returns.
@@ -599,7 +600,7 @@ void main() {
       await tester.pumpAndSettle();
 
       for (final group in LessonGroup.values) {
-        final tile = find.widgetWithText(SwitchListTile, groupTitle(group));
+        final tile = find.widgetWithText(SwitchListTile, groupTitle(deL10n, group));
         await tester.ensureVisible(tile);
         await tester.pumpAndSettle();
         await tester.tap(tile);

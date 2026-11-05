@@ -3,6 +3,7 @@ library;
 
 import 'dart:math';
 
+import 'clock_speech.dart';
 import 'lesson.dart';
 import 'task.dart';
 
@@ -235,7 +236,7 @@ List<Task> _generateClockPhraseTasks(
   var lastPhrase = -1;
 
   while (tasks.length < count) {
-    final block = [for (var i = 0; i < clockPhrases.length; i++) i]
+    final block = [for (var i = 0; i < clockPhraseCount; i++) i]
       ..shuffle(random);
     // Ten of eleven forms fit in a ten-task run; without this the missing
     // one could be exactly the one the child keeps getting wrong.

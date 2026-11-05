@@ -7,6 +7,8 @@ import '../../theme/app_theme.dart';
 import '../practice/widgets/counted_pair.dart';
 import '../practice/widgets/dice_face.dart';
 import '../practice/widgets/picture_group.dart';
+import '../../l10n/l10n.dart';
+import '../../l10n/task_texts.dart';
 
 /// One sample task per lesson, cached because the catalogue never changes.
 final _examples = <String, Task>{};
@@ -50,7 +52,8 @@ Task exampleTaskFor(LessonSpec lesson) => _examples.putIfAbsent(lesson.id, () {
           orElse: () => candidates.first);
     });
 
-String exampleFor(LessonSpec lesson) => exampleTaskFor(lesson).toString();
+String exampleFor(AppLocalizations l10n, LessonSpec lesson) =>
+    taskExample(l10n, exampleTaskFor(lesson));
 
 /// The sample task as it should look on a tile.
 ///
@@ -120,7 +123,7 @@ class LessonExample extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          for (final part in task.placeParts)
+          for (final part in placeParts(context.l10n, task))
             Text(
               part,
               style: TextStyle(
@@ -171,7 +174,7 @@ class LessonExample extends StatelessWidget {
     }
 
     return Text(
-      task.toString(),
+      taskExample(context.l10n, task),
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
       style: TextStyle(

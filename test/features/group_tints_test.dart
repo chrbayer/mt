@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mathe_trainer/domain/lesson.dart';
 import 'package:mathe_trainer/theme/app_theme.dart';
+import '../support/l10n.dart';
+import 'package:mathe_trainer/l10n/lesson_texts.dart';
 
 /// Relative luminance, WCAG 2.1.
 double _luminance(Color c) {
@@ -42,7 +44,7 @@ void main() {
       expect(
         contrast(AppColors.textMuted, tint),
         greaterThanOrEqualTo(4.5),
-        reason: '${groupTitle(group)} / textMuted',
+        reason: '${groupTitle(deL10n, group)} / textMuted',
       );
     }
   });
@@ -52,7 +54,7 @@ void main() {
       expect(
         contrast(AppColors.text, AppColors.groupTint(group.index)),
         greaterThanOrEqualTo(7),
-        reason: groupTitle(group),
+        reason: groupTitle(deL10n, group),
       );
     }
   });
@@ -62,7 +64,7 @@ void main() {
       expect(
         contrast(AppColors.primary, AppColors.groupTint(group.index)),
         greaterThanOrEqualTo(3),
-        reason: groupTitle(group),
+        reason: groupTitle(deL10n, group),
       );
     }
   });
@@ -72,9 +74,9 @@ void main() {
       final tint = AppColors.groupTint(group.index);
       final edge = AppColors.groupEdge(group.index);
       expect(_luminance(edge), lessThan(_luminance(tint)),
-          reason: groupTitle(group));
+          reason: groupTitle(deL10n, group));
       expect(contrast(edge, tint), greaterThanOrEqualTo(1.2),
-          reason: '${groupTitle(group)}: an edge nobody sees is no edge');
+          reason: '${groupTitle(deL10n, group)}: an edge nobody sees is no edge');
     }
   });
 
@@ -92,8 +94,8 @@ void main() {
                 (before.g - after.g).abs() +
                 (before.b - after.b).abs()),
         greaterThan(0.05),
-        reason: 'zwischen ${groupTitle(LessonGroup.values[i - 1])} '
-            'und ${groupTitle(LessonGroup.values[i])}',
+        reason: 'zwischen ${groupTitle(deL10n, LessonGroup.values[i - 1])} '
+            'und ${groupTitle(deL10n, LessonGroup.values[i])}',
       );
     }
   });

@@ -201,15 +201,13 @@ PracticeAllowance practiceAllowance({
   );
 }
 
-/// `noch 7 Minuten`, `noch eine Minute`, `gleich` - for the pause notice.
-String formatRemaining(Duration left) {
-  final minutes = left.inSeconds <= 0 ? 0 : (left.inSeconds / 60).ceil();
-  return switch (minutes) {
-    0 => 'gleich',
-    1 => 'noch eine Minute',
-    _ => 'noch $minutes Minuten',
-  };
-}
+/// Whole minutes left until [left] is over, rounded **up**, and never below
+/// zero: 61 seconds are "2 minutes", and a break that has begun to end is 0.
+///
+/// The words for it - "noch 7 Minuten", "gleich" - are the l10n layer's
+/// (`runHintRemaining`, `formatRemaining`).
+int remainingMinutes(Duration left) =>
+    left.inSeconds <= 0 ? 0 : (left.inSeconds / 60).ceil();
 
 /// How many runs of one lesson may count for awards on one day.
 ///

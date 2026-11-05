@@ -27,20 +27,6 @@ enum LessonGroup {
   everyday,
 }
 
-/// Heading of a group on the lesson screen.
-String groupTitle(LessonGroup group) => switch (group) {
-      LessonGroup.firstSteps => 'Erste Schritte',
-      LessonGroup.upTo10 => 'Bis 10',
-      LessonGroup.upTo20 => 'Bis 20',
-      LessonGroup.upTo100 => 'Bis 100',
-      LessonGroup.upTo1000 => 'Bis 1000',
-      LessonGroup.withThousands => 'Mit Tausendern',
-      LessonGroup.timesTables => 'Einmaleins',
-      LessonGroup.reverseTimesTables => 'Einmaleins rückwärts',
-      LessonGroup.timesAndDivision => 'Mal und Geteilt',
-      LessonGroup.everyday => 'Uhrzeit und Geld',
-    };
-
 /// The arithmetic operation of a lesson. [mixed] means each generated task
 /// randomly picks [add] or [sub], [mulDiv] the same for [mul] and [div].
 enum ArithmeticOp { add, sub, mixed, mul, div, mulDiv }
@@ -142,11 +128,6 @@ enum TaskForm {
 /// their [id] is persisted (in sessions/leaderboard rows).
 class LessonSpec {
   final String id;
-  final String title;
-
-  /// One sentence explaining what the lesson drills, shown when a child (or a
-  /// parent) opens it. "Übergang" is not self-explanatory.
-  final String description;
   final LessonGroup group;
   final ArithmeticOp op;
   final CarryMode carry;
@@ -201,8 +182,6 @@ class LessonSpec {
 
   const LessonSpec({
     required this.id,
-    required this.title,
-    required this.description,
     required this.group,
     required this.op,
     required this.carry,
@@ -307,40 +286,17 @@ class LessonSpec {
   String toString() => 'LessonSpec($id)';
 }
 
-// Shared wording. Up to 100 the only boundary is the ten, so the lessons name
-// it; up to 1000 a task may cross the ten or the hundred, so they stay general.
-const _addPlain = 'Die Einer bleiben zusammen unter 10 - '
-    'es muss nichts übertragen werden.';
-const _addCarry = 'Die Einer ergeben zusammen 10 oder mehr - '
-    'ein Zehner wandert weiter.';
-const _subPlain = 'Jede Ziffer oben ist groß genug - '
-    'es muss kein Zehner aufgelöst werden.';
-const _subBorrow = 'Die Einer oben reichen nicht - '
-    'ein Zehner muss aufgelöst werden.';
-const _gap = 'Gesucht ist die Zahl, die fehlt, damit die Rechnung stimmt.';
-const _mixed = 'Plus und Minus wechseln sich zufällig ab, '
-    'mit und ohne Übergang.';
-
-const _addPlainBig = 'Keine Stelle läuft über - weder die Einer noch die Zehner.';
-const _addCarryBig = 'Einer oder Zehner laufen über - es muss übertragen werden.';
-const _subPlainBig = 'Jede Ziffer oben ist groß genug - '
-    'es muss nichts aufgelöst werden.';
-const _subBorrowBig = 'Eine Stelle oben reicht nicht - '
-    'Zehner oder Hunderter müssen aufgelöst werden.';
-
 /// Builds the seven lessons every number range offers, so the three groups
 /// stay in step with each other.
-List<LessonSpec> _rangeGroup(
-  LessonGroup group,
-  String suffix, {
-  required bool nameTheTen,
-}) {
-  final ueber = nameTheTen ? 'Zehnerübergang' : 'Übergang';
+///
+/// Up to 100 the only boundary is the ten and the texts name it; up to 1000
+/// a task may cross the ten or the hundred and they stay general. That is
+/// the one difference between the groups, and it lives in the texts
+/// (`lesson_texts.dart`), not here.
+List<LessonSpec> _rangeGroup(LessonGroup group, String suffix) {
   return [
     LessonSpec(
       id: 'add_${suffix}_plain',
-      title: 'Plus ohne $ueber',
-      description: nameTheTen ? _addPlain : _addPlainBig,
       group: group,
       op: ArithmeticOp.add,
       carry: CarryMode.none,
@@ -348,8 +304,6 @@ List<LessonSpec> _rangeGroup(
     ),
     LessonSpec(
       id: 'add_${suffix}_carry',
-      title: 'Plus mit $ueber',
-      description: nameTheTen ? _addCarry : _addCarryBig,
       group: group,
       op: ArithmeticOp.add,
       carry: CarryMode.required,
@@ -357,8 +311,6 @@ List<LessonSpec> _rangeGroup(
     ),
     LessonSpec(
       id: 'sub_${suffix}_plain',
-      title: 'Minus ohne $ueber',
-      description: nameTheTen ? _subPlain : _subPlainBig,
       group: group,
       op: ArithmeticOp.sub,
       carry: CarryMode.none,
@@ -366,8 +318,6 @@ List<LessonSpec> _rangeGroup(
     ),
     LessonSpec(
       id: 'sub_${suffix}_borrow',
-      title: 'Minus mit $ueber',
-      description: nameTheTen ? _subBorrow : _subBorrowBig,
       group: group,
       op: ArithmeticOp.sub,
       carry: CarryMode.required,
@@ -375,8 +325,6 @@ List<LessonSpec> _rangeGroup(
     ),
     LessonSpec(
       id: 'add_${suffix}_gap',
-      title: 'Plus mit Platzhalter',
-      description: _gap,
       group: group,
       op: ArithmeticOp.add,
       carry: CarryMode.any,
@@ -384,8 +332,6 @@ List<LessonSpec> _rangeGroup(
     ),
     LessonSpec(
       id: 'sub_${suffix}_gap',
-      title: 'Minus mit Platzhalter',
-      description: _gap,
       group: group,
       op: ArithmeticOp.sub,
       carry: CarryMode.any,
@@ -393,8 +339,6 @@ List<LessonSpec> _rangeGroup(
     ),
     LessonSpec(
       id: 'mix_$suffix',
-      title: 'Plus und Minus gemischt',
-      description: _mixed,
       group: group,
       op: ArithmeticOp.mixed,
       carry: CarryMode.any,
@@ -407,10 +351,6 @@ List<LessonSpec> _rangeGroup(
 /// follows - especially the Zehnerübergang - builds on knowing these by heart.
 const _partnersOfTen = LessonSpec(
   id: 'partners_of_ten',
-  title: 'Verliebte Zahlen',
-  description: 'Zwei Zahlen sind verliebt, wenn sie zusammen genau 10 '
-      'ergeben: 1 und 9, 2 und 8, 3 und 7. Gefragt wird in beide '
-      'Richtungen - von 3 nach 7 genauso wie von 7 nach 3.',
   group: LessonGroup.upTo10,
   op: ArithmeticOp.add,
   carry: CarryMode.any,
@@ -424,8 +364,6 @@ const _partnersOfTen = LessonSpec(
 const _upTo10Lessons = [
   LessonSpec(
     id: 'add_10',
-    title: 'Plus bis 10',
-    description: 'Zusammenzählen, ohne über die 10 hinauszugehen.',
     group: LessonGroup.upTo10,
     op: ArithmeticOp.add,
     carry: CarryMode.any,
@@ -433,8 +371,6 @@ const _upTo10Lessons = [
   ),
   LessonSpec(
     id: 'sub_10',
-    title: 'Minus bis 10',
-    description: 'Wegnehmen im Zahlenraum bis 10.',
     group: LessonGroup.upTo10,
     op: ArithmeticOp.sub,
     carry: CarryMode.any,
@@ -442,8 +378,6 @@ const _upTo10Lessons = [
   ),
   LessonSpec(
     id: 'add_10_gap',
-    title: 'Plus mit Platzhalter',
-    description: _gap,
     group: LessonGroup.upTo10,
     op: ArithmeticOp.add,
     carry: CarryMode.any,
@@ -451,8 +385,6 @@ const _upTo10Lessons = [
   ),
   LessonSpec(
     id: 'sub_10_gap',
-    title: 'Minus mit Platzhalter',
-    description: _gap,
     group: LessonGroup.upTo10,
     op: ArithmeticOp.sub,
     carry: CarryMode.any,
@@ -460,8 +392,6 @@ const _upTo10Lessons = [
   ),
   LessonSpec(
     id: 'mix_10',
-    title: 'Plus und Minus gemischt',
-    description: 'Plus und Minus wechseln sich zufällig ab.',
     group: LessonGroup.upTo10,
     op: ArithmeticOp.mixed,
     carry: CarryMode.any,
@@ -477,9 +407,6 @@ List<LessonSpec> _timesTableLessons() => [
       for (final n in _tableOrder)
         LessonSpec(
           id: 'times_$n',
-          title: '${n}er-Reihe',
-          description: 'Alle Aufgaben der ${n}er-Reihe, in beide Richtungen: '
-              '$n · 4 genauso wie 4 · $n.',
           group: LessonGroup.timesTables,
           op: ArithmeticOp.mul,
           carry: CarryMode.any,
@@ -488,8 +415,6 @@ List<LessonSpec> _timesTableLessons() => [
         ),
       const LessonSpec(
         id: 'times_all',
-        title: 'Alle Reihen gemischt',
-        description: 'Das ganze kleine Einmaleins, bunt durcheinander.',
         group: LessonGroup.timesTables,
         op: ArithmeticOp.mul,
         carry: CarryMode.any,
@@ -506,10 +431,6 @@ List<LessonSpec> _reverseTimesTableLessons() => [
       for (final n in _tableOrder)
         LessonSpec(
           id: 'div_by_$n',
-          title: '${n}er-Reihe rückwärts',
-          description: 'Geteilt durch $n. Jede Aufgabe ist die Umkehrung '
-              'einer Aufgabe der ${n}er-Reihe: aus $n · 4 = ${n * 4} '
-              'wird ${n * 4} : $n = 4.',
           group: LessonGroup.reverseTimesTables,
           op: ArithmeticOp.div,
           carry: CarryMode.any,
@@ -520,10 +441,6 @@ List<LessonSpec> _reverseTimesTableLessons() => [
       // Keeps its old id: it has leaderboards behind it.
       const LessonSpec(
         id: 'div_plain',
-        title: 'Alle Reihen rückwärts',
-        description: 'Geteilt durch alles, bunt durcheinander. Jede Aufgabe '
-            'geht glatt auf - sie ist die Umkehrung einer '
-            'Einmaleins-Aufgabe.',
         group: LessonGroup.reverseTimesTables,
         op: ArithmeticOp.div,
         carry: CarryMode.any,
@@ -534,9 +451,6 @@ List<LessonSpec> _reverseTimesTableLessons() => [
 const _timesAndDivisionLessons = [
   LessonSpec(
     id: 'div_remainder',
-    title: 'Geteilt mit Rest',
-    description: 'Es bleibt immer etwas übrig. Erst das Ergebnis eingeben, '
-        'dann den Rest.',
     group: LessonGroup.timesAndDivision,
     op: ArithmeticOp.div,
     carry: CarryMode.any,
@@ -544,8 +458,6 @@ const _timesAndDivisionLessons = [
   ),
   LessonSpec(
     id: 'times_gap',
-    title: 'Mal mit Platzhalter',
-    description: 'Mit welcher Zahl muss man malnehmen, damit es stimmt?',
     group: LessonGroup.timesAndDivision,
     op: ArithmeticOp.mul,
     carry: CarryMode.any,
@@ -553,8 +465,6 @@ const _timesAndDivisionLessons = [
   ),
   LessonSpec(
     id: 'div_gap',
-    title: 'Geteilt mit Platzhalter',
-    description: 'Durch welche Zahl muss man teilen, damit es stimmt?',
     group: LessonGroup.timesAndDivision,
     op: ArithmeticOp.div,
     carry: CarryMode.any,
@@ -562,9 +472,6 @@ const _timesAndDivisionLessons = [
   ),
   LessonSpec(
     id: 'mul_tens',
-    title: 'Mal mit Zehnerzahlen',
-    description: 'Das Einmaleins mit einer Null dahinter: 3 · 4 = 12, '
-        'also 30 · 4 = 120.',
     group: LessonGroup.timesAndDivision,
     op: ArithmeticOp.mul,
     carry: CarryMode.any,
@@ -573,8 +480,6 @@ const _timesAndDivisionLessons = [
   ),
   LessonSpec(
     id: 'mul_two_digit',
-    title: 'Mal über das Einmaleins hinaus',
-    description: 'Eine zweistellige Zahl malnehmen, zum Beispiel 14 · 6.',
     group: LessonGroup.timesAndDivision,
     op: ArithmeticOp.mul,
     carry: CarryMode.any,
@@ -583,8 +488,6 @@ const _timesAndDivisionLessons = [
   ),
   LessonSpec(
     id: 'div_two_digit',
-    title: 'Geteilt über das Einmaleins hinaus',
-    description: 'Das Ergebnis ist größer als zehn, zum Beispiel 96 : 6.',
     group: LessonGroup.timesAndDivision,
     op: ArithmeticOp.div,
     carry: CarryMode.any,
@@ -593,8 +496,6 @@ const _timesAndDivisionLessons = [
   ),
   LessonSpec(
     id: 'mul_div_mixed',
-    title: 'Mal und Geteilt gemischt',
-    description: 'Malnehmen und Teilen wechseln sich zufällig ab.',
     group: LessonGroup.timesAndDivision,
     op: ArithmeticOp.mulDiv,
     carry: CarryMode.any,
@@ -602,9 +503,6 @@ const _timesAndDivisionLessons = [
   ),
   LessonSpec(
     id: 'punkt_vor_strich',
-    title: 'Punkt vor Strich',
-    description: 'Mal und Geteilt kommen vor Plus und Minus - auch wenn sie '
-        'hinten stehen: bei 40 − 3 · 6 wird erst 3 · 6 gerechnet.',
     group: LessonGroup.timesAndDivision,
     op: ArithmeticOp.mulDiv,
     carry: CarryMode.any,
@@ -619,8 +517,6 @@ const _timesAndDivisionLessons = [
 const _firstStepsLessons = [
   LessonSpec(
     id: 'count_pictures',
-    title: 'Wie viele? (Reihe)',
-    description: 'Bilder zählen, eins bis fünf, ordentlich aufgereiht.',
     group: LessonGroup.firstSteps,
     op: ArithmeticOp.add,
     carry: CarryMode.any,
@@ -629,9 +525,6 @@ const _firstStepsLessons = [
   ),
   LessonSpec(
     id: 'count_pictures_cloud',
-    title: 'Wie viele? (Wolke)',
-    description: 'Dieselben Bilder, aber durcheinander - man muss sich '
-        'merken, was schon gezählt ist.',
     group: LessonGroup.firstSteps,
     op: ArithmeticOp.add,
     carry: CarryMode.any,
@@ -641,8 +534,6 @@ const _firstStepsLessons = [
   ),
   LessonSpec(
     id: 'count_dice',
-    title: 'Wie viele Punkte?',
-    description: 'Ein Würfel. Irgendwann sieht man die Zahl, ohne zu zählen.',
     group: LessonGroup.firstSteps,
     op: ArithmeticOp.add,
     carry: CarryMode.any,
@@ -651,8 +542,6 @@ const _firstStepsLessons = [
   ),
   LessonSpec(
     id: 'compare_more',
-    title: 'Wo sind mehr? (Reihe)',
-    description: 'Zwei Häufchen vergleichen und die größere Anzahl eingeben.',
     group: LessonGroup.firstSteps,
     op: ArithmeticOp.add,
     carry: CarryMode.any,
@@ -662,8 +551,6 @@ const _firstStepsLessons = [
   ),
   LessonSpec(
     id: 'compare_more_cloud',
-    title: 'Wo sind mehr? (Wolke)',
-    description: 'Dasselbe, aber die Bilder liegen durcheinander.',
     group: LessonGroup.firstSteps,
     op: ArithmeticOp.add,
     carry: CarryMode.any,
@@ -674,8 +561,6 @@ const _firstStepsLessons = [
   ),
   LessonSpec(
     id: 'count_next',
-    title: 'Welche Zahl kommt danach?',
-    description: 'Die Zahlenreihe vorwärts und rückwärts.',
     group: LessonGroup.firstSteps,
     op: ArithmeticOp.add,
     carry: CarryMode.any,
@@ -684,9 +569,6 @@ const _firstStepsLessons = [
   ),
   LessonSpec(
     id: 'bees_add',
-    title: 'Bienchen (Reihe)',
-    description: 'Zwei Grüppchen Bienen zusammenzählen, zusammen nie mehr '
-        'als zehn.',
     group: LessonGroup.firstSteps,
     op: ArithmeticOp.add,
     carry: CarryMode.any,
@@ -696,8 +578,6 @@ const _firstStepsLessons = [
   ),
   LessonSpec(
     id: 'bees_add_cloud',
-    title: 'Bienchen (Wolke)',
-    description: 'Dieselbe Aufgabe, aber die Bienen schwirren durcheinander.',
     group: LessonGroup.firstSteps,
     op: ArithmeticOp.add,
     carry: CarryMode.any,
@@ -708,9 +588,6 @@ const _firstStepsLessons = [
   ),
   LessonSpec(
     id: 'dice_add',
-    title: 'Zwei Würfel zusammenzählen',
-    description: 'Beide Würfel zeigen bis zu fünf Punkte - wie viele sind '
-        'es zusammen?',
     group: LessonGroup.firstSteps,
     op: ArithmeticOp.add,
     carry: CarryMode.any,
@@ -720,8 +597,6 @@ const _firstStepsLessons = [
   ),
   LessonSpec(
     id: 'add_to_six',
-    title: 'Plus bis 6',
-    description: 'Zusammenzählen, nie über die Sechs hinaus.',
     group: LessonGroup.firstSteps,
     op: ArithmeticOp.add,
     carry: CarryMode.any,
@@ -730,8 +605,6 @@ const _firstStepsLessons = [
   ),
   LessonSpec(
     id: 'sub_to_six',
-    title: 'Minus bis 6',
-    description: 'Wegnehmen im Zahlenraum bis sechs.',
     group: LessonGroup.firstSteps,
     op: ArithmeticOp.sub,
     carry: CarryMode.any,
@@ -742,8 +615,6 @@ const _firstStepsLessons = [
   // under it loose from its lesson.
   LessonSpec(
     id: 'calc_to_six',
-    title: 'Plus und Minus bis 6',
-    description: 'Beides gemischt, nie über die Sechs hinaus.',
     group: LessonGroup.firstSteps,
     op: ArithmeticOp.mixed,
     carry: CarryMode.any,
@@ -758,9 +629,6 @@ const _firstStepsLessons = [
 const _everydayLessons = [
   LessonSpec(
     id: 'clock_half',
-    title: 'Volle und halbe Stunden',
-    description: 'Wie spät ist es? Der große Zeiger steht auf der 12 '
-        'oder auf der 6.',
     group: LessonGroup.everyday,
     op: ArithmeticOp.add,
     carry: CarryMode.any,
@@ -769,9 +637,6 @@ const _everydayLessons = [
   ),
   LessonSpec(
     id: 'clock_quarter',
-    title: 'Viertelstunden',
-    description: 'Viertel nach, halb, Viertel vor - der große Zeiger steht '
-        'auf 12, 3, 6 oder 9.',
     group: LessonGroup.everyday,
     op: ArithmeticOp.add,
     carry: CarryMode.any,
@@ -780,8 +645,6 @@ const _everydayLessons = [
   ),
   LessonSpec(
     id: 'clock_five',
-    title: 'Uhrzeit auf fünf Minuten',
-    description: 'Der große Zeiger steht auf einer der zwölf Zahlen.',
     group: LessonGroup.everyday,
     op: ArithmeticOp.add,
     carry: CarryMode.any,
@@ -790,9 +653,6 @@ const _everydayLessons = [
   ),
   LessonSpec(
     id: 'clock_24',
-    title: 'Uhrzeit mit 24 Stunden',
-    description: 'Nachmittags zählt man weiter: aus 3 Uhr wird 15 Uhr. '
-        'Unter der Uhr steht, welche Tageszeit es ist.',
     group: LessonGroup.everyday,
     op: ArithmeticOp.add,
     carry: CarryMode.any,
@@ -802,9 +662,6 @@ const _everydayLessons = [
   ),
   LessonSpec(
     id: 'clock_words',
-    title: 'Uhrzeit sagen',
-    description: 'Wie sagt man die Uhrzeit? Erst die Sprechweise antippen, '
-        'dann die Stunde, die dabei genannt wird - bei "halb 3" ist das die 3.',
     group: LessonGroup.everyday,
     op: ArithmeticOp.add,
     carry: CarryMode.any,
@@ -813,9 +670,6 @@ const _everydayLessons = [
   ),
   LessonSpec(
     id: 'money_add',
-    title: 'Geld zusammenzählen',
-    description: 'Zwei Beträge addieren. Erst die Euro eingeben, dann die '
-        'Cent.',
     group: LessonGroup.everyday,
     op: ArithmeticOp.add,
     carry: CarryMode.any,
@@ -823,8 +677,6 @@ const _everydayLessons = [
   ),
   LessonSpec(
     id: 'money_sub',
-    title: 'Geld abziehen',
-    description: 'Was bleibt übrig, oder was gibt es zurück?',
     group: LessonGroup.everyday,
     op: ArithmeticOp.sub,
     carry: CarryMode.any,
@@ -832,9 +684,6 @@ const _everydayLessons = [
   ),
   LessonSpec(
     id: 'money_compose',
-    title: 'Betrag zusammenlegen',
-    description: 'Lege den Betrag aus Münzen und Scheinen. Es gibt viele '
-        'richtige Wege - der Betrag muss am Ende genau stimmen.',
     group: LessonGroup.everyday,
     op: ArithmeticOp.add,
     carry: CarryMode.any,
@@ -842,9 +691,6 @@ const _everydayLessons = [
   ),
   LessonSpec(
     id: 'money_change',
-    title: 'Was bekomme ich zurück?',
-    description: 'Etwas kostet einen krummen Betrag, bezahlt wird mit einem '
-        'glatten Schein oder Stück. Gesucht ist das Rückgeld.',
     group: LessonGroup.everyday,
     op: ArithmeticOp.sub,
     carry: CarryMode.any,
@@ -860,9 +706,6 @@ const _everydayLessons = [
 /// makes this the one to start with.
 const _placeValueTo100 = LessonSpec(
   id: 'place_value_100',
-  title: 'Einer und Zehner',
-  description: 'Wie viele Einer und Zehner sind es? Welche Zahl ist das '
-      'zusammen? Es können auch mehr als neun Einer sein.',
   group: LessonGroup.upTo100,
   op: ArithmeticOp.add,
   carry: CarryMode.any,
@@ -877,9 +720,6 @@ const _placeValueTo100 = LessonSpec(
 /// stays below 1000 - the range this group is named after.
 const _placeValueTo1000 = LessonSpec(
   id: 'place_value_1000',
-  title: 'Einer, Zehner, Hunderter',
-  description: 'Wie viele Einer, Zehner und Hunderter sind es? Welche Zahl '
-      'ist das zusammen? Es können auch mehr als neun von einer Sorte sein.',
   group: LessonGroup.upTo1000,
   op: ArithmeticOp.add,
   carry: CarryMode.any,
@@ -896,9 +736,6 @@ const _placeValueTo1000 = LessonSpec(
 const _withThousandsLessons = [
   LessonSpec(
     id: 'round_thousands',
-    title: 'Glatte Tausender',
-    description: '3000 + 4000, 8000 − 5000: rechne mit ganzen Tausendern. '
-        'Wer 3 + 4 kann, kann das auch.',
     group: LessonGroup.withThousands,
     op: ArithmeticOp.mixed,
     carry: CarryMode.any,
@@ -907,9 +744,6 @@ const _withThousandsLessons = [
   ),
   LessonSpec(
     id: 'round_hundreds',
-    title: 'Glatte Hunderter',
-    description: '2300 + 400, 5600 − 200: rechne mit ganzen Hundertern. '
-        'Hier geht es auch über den Tausender.',
     group: LessonGroup.withThousands,
     op: ArithmeticOp.mixed,
     carry: CarryMode.any,
@@ -918,8 +752,6 @@ const _withThousandsLessons = [
   ),
   LessonSpec(
     id: 'round_gap',
-    title: 'Glatte Zahlen mit Platzhalter',
-    description: '3000 + ? = 7000. Was fehlt bis zur Zahl? Rückwärts gedacht.',
     group: LessonGroup.withThousands,
     op: ArithmeticOp.mixed,
     carry: CarryMode.any,
@@ -928,10 +760,6 @@ const _withThousandsLessons = [
   ),
   LessonSpec(
     id: 'place_value_10000',
-    title: 'Einer, Zehner, Hunderter, Tausender',
-    description: 'Wie viele Einer, Zehner, Hunderter und Tausender sind es? '
-        'Welche Zahl ist das zusammen? Es können auch mehr als neun von einer '
-        'Sorte sein.',
     group: LessonGroup.withThousands,
     op: ArithmeticOp.add,
     carry: CarryMode.any,
@@ -939,9 +767,6 @@ const _withThousandsLessons = [
   ),
   LessonSpec(
     id: 'add_sub_10000_plain',
-    title: 'Plus und Minus ohne Übergang',
-    description: '4200 + 350, 6870 − 40: vierstellig rechnen, aber ohne '
-        'Übergang. Jede Stelle für sich.',
     group: LessonGroup.withThousands,
     op: ArithmeticOp.mixed,
     carry: CarryMode.none,
@@ -955,10 +780,10 @@ final List<LessonSpec> lessonCatalog = List.unmodifiable([
   ..._firstStepsLessons,
   _partnersOfTen,
   ..._upTo10Lessons,
-  ..._rangeGroup(LessonGroup.upTo20, '20', nameTheTen: true),
-  ..._rangeGroup(LessonGroup.upTo100, '100', nameTheTen: true),
+  ..._rangeGroup(LessonGroup.upTo20, '20'),
+  ..._rangeGroup(LessonGroup.upTo100, '100'),
   _placeValueTo100,
-  ..._rangeGroup(LessonGroup.upTo1000, '1000', nameTheTen: false),
+  ..._rangeGroup(LessonGroup.upTo1000, '1000'),
   _placeValueTo1000,
   ..._withThousandsLessons,
   ..._timesTableLessons(),

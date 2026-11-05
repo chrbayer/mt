@@ -8,6 +8,8 @@ import '../../providers.dart';
 import '../../theme/app_theme.dart';
 import 'assignment_editor.dart';
 import '../../l10n/l10n.dart';
+import '../../l10n/lesson_texts.dart';
+import '../../l10n/formatters.dart';
 
 /// What a parent set up for each child: which lesson, on what rhythm, to
 /// what minimum - and, underneath, how often the goal was actually held.
@@ -186,14 +188,14 @@ class _AssignmentRow extends ConsumerWidget {
     // as the unit the statistic counts in.
     final daily = assignment.rhythm == AssignmentRhythm.daily;
     final l10n = context.l10n;
-    final periodWord =
-        daily ? l10n.assignmentsPeriodDays : l10n.assignmentsPeriodWeeks;
+    // Picks the unit - days or weeks - in the statistic's sentence.
+    final periodWord = daily ? 'daily' : 'weekly';
     // A repeating one says how often; a single one says when, because that
     // is what makes a row of them read as a plan.
     final rhythmWord = assignment.repeats
         ? (daily ? l10n.assignmentsDaily : l10n.assignmentsWeekly)
-        : '${formatDeadline(assignment, now: now)}'
-            '${assignment.carryOver ? l10n.assignmentsCarriesOver : ''}';
+        : '${formatDeadline(l10n, assignment, now: now)}'
+            '${assignment.carryOver ? ' · ${l10n.assignmentsCarriesOver}' : ''}';
 
     return Opacity(
       opacity: finished ? 0.6 : 1,
@@ -227,8 +229,8 @@ class _AssignmentRow extends ConsumerWidget {
                     lessons.isEmpty
                         ? assignment.lessonIds.join(', ')
                         : lessons.length == 1
-                            ? '${lessons.single.title} · '
-                                '${groupTitle(lessons.single.group)}'
+                            ? '${lessonTitle(context.l10n, lessons.single)} · '
+                                '${groupTitle(context.l10n, lessons.single.group)}'
                             : l10n.assignmentsLessonCount(lessons.length),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -402,7 +404,7 @@ class _LessonLine extends StatelessWidget {
           if (showTitle) ...[
             Flexible(
               child: Text(
-                lesson.title,
+                lessonTitle(context.l10n, lesson),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(fontSize: 16),
@@ -417,7 +419,7 @@ class _LessonLine extends StatelessWidget {
           if (closedTotal > 0) ...[
             const SizedBox(width: 10),
             Text(
-              context.l10n.assignmentsBefore(closedMet, closedTotal, periodWord),
+              '· ${context.l10n.assignmentsBefore(closedMet, closedTotal, periodWord)}',
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
