@@ -1,0 +1,4 @@
+Android's automatic backup is now switched off for this app. Until now the
+app's database, with profile names and results, could end up in the device's
+Google backup. A backup is now made only when you create one yourself in the
+parent area.

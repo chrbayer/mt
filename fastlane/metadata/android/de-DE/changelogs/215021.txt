@@ -1,0 +1,4 @@
+Die automatische Sicherung von Android ist für diese App jetzt abgeschaltet.
+Bisher konnte die Datenbank der App mit Profilnamen und Ergebnissen in der
+Google-Sicherung des Geräts landen. Gesichert wird jetzt nur noch, wenn Sie
+im Elternbereich selbst eine Sicherung erstellen.

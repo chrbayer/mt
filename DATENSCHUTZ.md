@@ -70,6 +70,13 @@ hier.
 
 Das Einspielen einer Sicherung liest eine Datei, die Sie selbst auswählen.
 
+Die **automatische Sicherung von Android** (etwa ins Google-Konto) ist für
+diese App abgeschaltet. Bis Version 2.15.1 war sie es nicht: War auf dem
+Gerät die Google-Sicherung eingeschaltet, konnte die Datenbank der App —
+Profilnamen, Ergebnisse, der Hash der Eltern-PIN — darin landen. Seit 2.15.2
+nimmt Android sie nicht mehr in seine Sicherung auf. Wer auf ein neues Gerät
+umzieht, nimmt seine Daten mit der Sicherung aus dem Elternbereich mit.
+
 ## Was die App **nicht** tut
 
 * keine Werbung, keine Werbe-IDs, kein Tracking

@@ -1118,6 +1118,13 @@ einem Tablet. Keine Wolke, keine zweite Kopie. Der Export gab es von Anfang
 an, nur hat ihn nie jemand vorgeschlagen — zwischen einem Jahr Ergebnisse und
 einem kaputten Gerät stand allein ein Elternteil, das von selbst daran dachte.
 
+**Androids eigene Sicherung ist abgeschaltet** (`android:allowBackup="false"`
+im Manifest, seit 2.15.2, GitHub #1). Vorher galt die Vorgabe, und die
+SQLite-Datei samt Profilnamen und PIN-Hash ging mit der Google-Sicherung des
+Geräts hinaus — das Gegenteil von dem, was `DATENSCHUTZ.md` verspricht. Die
+einzige Sicherung ist die, die ein Elternteil selbst anstößt.
+`test/android_backup_test.dart` hält das Attribut fest.
+
 ## Rückgängig gibt es, weil nie etwas gelöscht wird
 
 `deleteSession` und `deleteIncompleteSessions` setzen nur die Marke
