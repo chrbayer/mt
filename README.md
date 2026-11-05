@@ -368,6 +368,31 @@ was die App übt. Das Minus ist warm eingefärbt, damit das Icon bei 48 dp nicht
 wie ein beliebiges Taschenrechner-Symbol wirkt. Aus derselben Quelle stammen
 der Adaptive-Icon-Vordergrund und die Monochrom-Ebene für Android 13.
 
+## Übersetzungen gegenlesen
+
+Muttersprachler ohne Programmierkenntnisse lesen eine Übersetzung in einer
+Tabelle gegen (Python 3 und `openpyxl`):
+
+```bash
+python3 tool/translation_review.py export fr      # build/translation_review/review_fr.xlsx
+# Datei verschicken; die Person füllt nur "Korrektur" (und "Anmerkung") aus
+python3 tool/translation_review.py import fr review_fr.xlsx --dry-run   # erst ansehen
+python3 tool/translation_review.py import fr review_fr.xlsx
+flutter gen-l10n
+flutter analyze
+flutter test
+```
+
+Jede Nachricht ist in bearbeitbare Teile zerlegt (Text vor dem Block, jede
+Plural-/Select-Variante, Text danach), die Spalten „Deutsch“ und „Englisch“
+zeigen die ganze Nachricht mit Zahlenbeispielen. Der Import prüft, dass die
+`{platzhalter}` jedes Teils erhalten bleiben und die Nachricht gültig bleibt;
+bei einem Fehler wird nichts geschrieben. Die **Anmerkungen** gibt er am Ende
+aus - bitte lesen, dort stehen die Rückfragen. Leere „Korrektur“ heißt:
+passt. `python3 tool/translation_review.py selftest` prüft den Rundweg
+(ARB bleibt ohne Korrektur byte-identisch); `--l10n-dir` zeigt auf ein anderes
+Verzeichnis als `lib/l10n`.
+
 ## Testen
 
 ```bash
