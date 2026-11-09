@@ -1,5 +1,7 @@
 # Mathe-Trainer
 
+*English: [README.en.md](README.en.md)*
+
 <https://github.com/chrbayer/mt>
 
 Kopfrechen-App für Grundschulkinder auf dem Android-Tablet. Gemessen wird die
@@ -377,7 +379,7 @@ Muttersprachler entstanden sind (`export fr`, `export es`, `export it`):
 
 ```bash
 python3 tool/translation_review.py export fr      # build/translation_review/review_fr.xlsx
-# Datei verschicken; die Person füllt nur "Korrektur" (und "Anmerkung") aus
+# Datei verschicken; die Person füllt nur "Correction" (und "Comment") aus
 python3 tool/translation_review.py import fr review_fr.xlsx --dry-run   # erst ansehen
 python3 tool/translation_review.py import fr review_fr.xlsx
 flutter gen-l10n
@@ -386,11 +388,11 @@ flutter test
 ```
 
 Jede Nachricht ist in bearbeitbare Teile zerlegt (Text vor dem Block, jede
-Plural-/Select-Variante, Text danach), die Spalten „Deutsch“ und „Englisch“
+Plural-/Select-Variante, Text danach), die Spalten „German“ und „English“
 zeigen die ganze Nachricht mit Zahlenbeispielen. Der Import prüft, dass die
 `{platzhalter}` jedes Teils erhalten bleiben und die Nachricht gültig bleibt;
 bei einem Fehler wird nichts geschrieben. Die **Anmerkungen** gibt er am Ende
-aus - bitte lesen, dort stehen die Rückfragen. Leere „Korrektur“ heißt:
+aus - bitte lesen, dort stehen die Rückfragen. Eine leere „Correction“ heißt:
 passt. `python3 tool/translation_review.py selftest` prüft den Rundweg
 (ARB bleibt ohne Korrektur byte-identisch); `--l10n-dir` zeigt auf ein anderes
 Verzeichnis als `lib/l10n`.
