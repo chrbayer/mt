@@ -34,7 +34,7 @@ antreten. Die App läuft vollständig offline, ohne Konten und ohne Netzwerk.
   auch zwischen den Häufchen steht. Beim Vergleichen steht dort keins: die
   Mengen werden verglichen, nicht addiert.
   Diese Lektionen werden **nicht gemessen und nicht gewertet**: keine Uhr,
-  keine Bestenliste, und die Sterne gibt es fürs Durchhalten statt fürs Tempo.
+  keine Bestenliste, und die Sterne gibt es für Sorgfalt wie überall, Blitze gibt es keine.
   Wer fünf Äpfel zählt, soll nicht gegen ein Geschwisterkind antreten.
 * **Bis 10** ist der Anfang der Rechenaufgaben. Dort kann nichts die Zehn überschreiten, deshalb
   hat die Gruppe keine Aufteilung in „mit" und „ohne Zehnerübergang", sondern
@@ -333,14 +333,15 @@ gstreamer-1.0" ab, bevor überhaupt etwas übersetzt wird:
 sudo dnf install gstreamer1-devel gstreamer1-plugins-base-devel
 ```
 
-Beide Skripte lesen die Version aus `pubspec.yaml`. Aktuell steht dort
-`version: 1.0.0` — das ist der **Build-Name** und landet als Android-
-`versionName` in der App. Den **`versionCode`** leiten die Skripte daraus ab
-(`2.4.1` → `20401`), falls keine Build-Nummer wie `1.0.0+7` angegeben ist. Die
-Nummer sieht niemand, aber Android entscheidet daran, ob eine APK ein Update
+Beide Skripte lesen die Version aus `pubspec.yaml`. Dort steht beides,
+z. B. `version: 2.16.0+21600`: der Teil vor dem `+` ist der **Build-Name** und
+landet als Android-`versionName` in der App, der Teil dahinter ist der
+**`versionCode`**, nach der Regel `2.4.1` → `20401` (ein Test hält beide
+beieinander; F-Droid liest den Code aus genau dieser Zeile). Die Nummer sieht
+niemand, aber Android entscheidet daran, ob eine APK ein Update
 ist. Ließe man sie wie früher bei 1 stehen, wären zwei verschiedene Builds für
 den Paketmanager dieselbe Version — eine über die andere zu installieren kann
-die App dann halb ersetzt zurücklassen, so dass sie nicht mehr startet. Umkehrt
+die App dann halb ersetzt zurücklassen, so dass sie nicht mehr startet. Umgekehrt
 heißt das: eine ältere Version lässt sich nicht über eine neuere installieren,
 ohne vorher zu deinstallieren.
 

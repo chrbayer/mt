@@ -36,7 +36,7 @@ no network.
   groups of dots. When comparing, there is no sign there: the quantities are
   compared, not added.
   These lessons are **not timed and not scored**: no clock, no leaderboard, and the
-  stars are earned for persistence rather than speed.
+  stars are earned for accuracy as everywhere else, and there are no bolts.
   A child who counts five apples should not be racing a sibling.
 * **Up to 10** is where the arithmetic problems begin. Nothing there can cross ten,
   so this group has no split into "with" and "without crossing ten." Instead it
@@ -317,11 +317,11 @@ gstreamer-1.0" before anything is compiled at all:
 sudo dnf install gstreamer1-devel gstreamer1-plugins-base-devel
 ```
 
-Both scripts read the version from `pubspec.yaml`. It currently says
-`version: 1.0.0` — that is the **build name** and ends up in the app as the Android
-`versionName`. The **`versionCode`** is derived from it by the scripts
-(`2.4.1` → `20401`), unless a build number such as `1.0.0+7` is given. Nobody sees
-this number, but Android uses it to decide whether an APK is an update. If it were
+Both scripts read the version from `pubspec.yaml`, which holds both parts, e.g.
+`version: 2.16.0+21600`: the part before the `+` is the **build name** and ends up in
+the app as the Android `versionName`; the part after it is the **`versionCode`**,
+following the rule `2.4.1` → `20401` (a test keeps the two in step, and F-Droid reads
+the code from exactly this line). Nobody sees this number, but Android uses it to decide whether an APK is an update. If it were
 left at 1, as it once was, two different builds would present the same version to the
 package manager — and installing one over the other can leave the app half replaced,
 so that it no longer starts. Conversely, this means an older version cannot be
